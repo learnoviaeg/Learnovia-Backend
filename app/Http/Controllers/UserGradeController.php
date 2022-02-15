@@ -353,7 +353,7 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $allowed_levels=Permission::where('name','report_card/fgl')->pluck('allowed_levels')->first();
+        $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         $check=(array_intersect($allowed_levels, $student_levels));

@@ -23,6 +23,7 @@ use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
+use App\Level;
 
 class ScriptsController extends Controller
 {
@@ -367,5 +368,15 @@ class ScriptsController extends Controller
         LetterDetails::where('evaluation','Passed')->update(['evaluation' => 'Fair']);
         UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
         return 'Done';
+    }
+
+    public function course_index(Request $request)
+    {
+        foreach(Level::select('id')->cursor() as $level){
+            foreach(Course::where('level_id',$level->id)->cursor() as $key => $course){
+                $course->update([ 'index' => $key+1 ]);;
+            }
+        }
+        return 'done';
     }
 }

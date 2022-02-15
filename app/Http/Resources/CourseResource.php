@@ -30,7 +30,6 @@ class CourseResource extends JsonResource
             'mandatory' => $this->courses['mandatory'] ,
             'is_template' => $this->courses['is_template'] ,
             'level' => $levels,
-            // 'teachers' => $this->SecondaryChain,
             'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->with(array('users' => function($query) {
                         $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
                     }))->get(),

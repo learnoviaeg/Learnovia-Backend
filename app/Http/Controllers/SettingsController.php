@@ -361,13 +361,14 @@ class SettingsController extends Controller
 
     public function setPermissionLevel(Request $request)
     {
+        $domain=substr(env('App_URL'),8,-18);
+        $permi=Permission::where('name','LIKE',"%$domain%")->where('name','NOT LIKE','all')->first();
         $request->validate([
-            'permission_id' => 'exists:permissions,id',
             'levels' => 'array',
             'levels.*' => 'nullable|exists:levels,id'
         ]);
 
-        $permission=Permission::whereId($request->permission_id)->update([
+        $permission=Permission::whereId($permi->id)->update([
             'allowed_levels' => json_encode($request->levels)
         ]);
 

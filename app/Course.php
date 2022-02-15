@@ -9,7 +9,7 @@ use Modules\Attendance\Entities\AttendanceSession;
 class Course extends Model
 {
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
-    'is_template','classes', 'letter_id','shared_lesson'];
+    'is_template','classes', 'letter_id','shared_lesson', 'index'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\CourseCreatedEvent::class,
