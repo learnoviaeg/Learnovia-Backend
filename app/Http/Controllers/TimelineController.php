@@ -16,6 +16,7 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignmentOverride;
 use Modules\QuestionBank\Entities\QuizOverride;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
 use App\SecondaryChain;
@@ -96,6 +97,14 @@ class TimelineController extends Controller
                 $ids_ordered = implode(',', $course_sort->toArray());
                 $timeline->orderByRaw("FIELD(id, $ids_ordered)");
             }
+        }
+        foreach($timeline->where('type','quiz')->cursor() as $line)
+        {
+            $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
+            $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)->count();
+            $line->max_attemp=$quizLesson->max_attemp;
+            $line->token_attempts=$user_quiz;
+            // return ($line);
         }
 
         return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()], 200);
