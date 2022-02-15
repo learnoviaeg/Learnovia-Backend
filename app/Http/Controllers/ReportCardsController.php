@@ -19,7 +19,7 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
         $this->middleware(['permission:report_card/haramain/all'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
-        $this->middleware(['permission:report_card/fgl/all'],   ['only' => ['fglsReportAll']]);
+        $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll']]);
     }
 
     public function haramainReport(Request $request)
