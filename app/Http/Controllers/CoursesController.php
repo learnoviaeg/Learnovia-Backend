@@ -379,6 +379,7 @@ class CoursesController extends Controller
             }
         }
         $given_course->update(['index' => $request->index]);
+        return response()->json(['message' => 'Sorted successfully', 'body' =>  null ], 200);
     }
 
 }
