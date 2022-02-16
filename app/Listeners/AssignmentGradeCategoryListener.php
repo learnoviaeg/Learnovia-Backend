@@ -30,6 +30,7 @@ class AssignmentGradeCategoryListener
     {
         $top_parent_category = GradeCategory::where('course_id', $event->assignment_lesson->lesson->course_id)
                             ->whereNull('parent')->where('type','category')->first();
+                            // dd($event->assignment_lesson);
         $assignment = GradeCategory::updateOrCreate(
             [
                 'course_id' => $event->assignment_lesson->lesson->course_id,
