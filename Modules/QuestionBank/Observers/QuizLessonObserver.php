@@ -43,16 +43,18 @@ class QuizLessonObserver
 
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
-            $categoryOfQuiz = GradeCategory::create([
+            $categoryOfQuiz = GradeCategory::firstOrCreate([
                 'course_id' => $lesson->course_id,
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
                 'hidden' => $quizLesson->visible,
                 'calculation_type' => json_encode($quizLesson->grading_method_id),
-                'instance_type' => 'Quiz',
+                'instance_type' => 'Quiz'],[
                 'instance_id' => $quiz->id,
-                'lesson_id' => $lesson->id
+                'lesson_id' => $lesson->id,
             ]);
+            $categoryOfQuiz->index=GradeCategory::where('parent',$categoryOfQuiz->parent)->max('index')+1;
+            $categoryOfQuiz->save();
             ///add user grader to each enrolled student in course segment of this grade category
             $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
                                         ->where('course',$lesson->course_id)->pluck('user_id');
