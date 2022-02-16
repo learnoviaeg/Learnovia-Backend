@@ -483,7 +483,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('courses', CoursesController::class);
     Route::post('courses/{id}', 'CoursesController@update');
     Route::post('course/template', 'CoursesController@Apply_Template')->middleware(['permission:course/template']);
-    Route::post('course/sort', 'CoursesController@sort');//->middleware(['permission:course/template']);
+    Route::post('course/sort', 'CoursesController@sort')->middleware(['permission:course/sort']);
     
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
