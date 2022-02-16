@@ -27,7 +27,7 @@ class QuizLesson extends Model
         'visible','index','seen_number', 'grade_pass' , 'questions_mark', 'grade_by_user'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status', 'ended','token_attempts'];
+    protected $appends = ['started','user_seen_number','Status', 'ended'];
 
     protected $dispatchesEvents = [
         'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
@@ -105,12 +105,6 @@ class QuizLesson extends Model
         }
 
         return $status;
-    }
-
-    public function getTokenAttemptsAttribute()
-    {
-        $count = userQuiz::where('quiz_lesson_id', $this->id)->where('user_id', Auth::id())->where('submit_time','!=',null)->count();
-        return $count;
     }
 
     public function quiz()
