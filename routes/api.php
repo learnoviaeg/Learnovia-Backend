@@ -355,6 +355,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
         Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
         Route::get('get-gradecategories', 'GradeCategoryController@getgradecat')->name('singlegradecatgories')->middleware('permission:grade/category/get-gradecategories');
         Route::post('chain-categories', 'GradeCategoryController@getgradecatArray')->name('chaingradecategories')->middleware('permission:grade/category/chain-categories');
+        Route::get('reArrange', 'GradeCategoriesController@reArrange');
     });
 
     Route::group(['prefix' => 'item', 'middleware' => ['auth:api']], function () {
@@ -412,6 +413,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
     Route::get('changeLetterName', 'ScriptsController@changeLetterName');
     Route::get('course_sorting', 'ScriptsController@course_index');
+    Route::get('index_categories', 'ScriptsController@indexCatItem');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -570,7 +572,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
 });
-
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgls');
