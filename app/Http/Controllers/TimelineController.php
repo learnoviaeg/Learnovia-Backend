@@ -104,7 +104,7 @@ class TimelineController extends Controller
                 if($line->type == 'quiz'){
                     $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
                     $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
-                        ->where('submit_time','!',null)->count();
+                        ->whereNotNull('submit_time')->count();
                     $line['max_attemp']=$quizLesson->max_attemp;
                     $line['token_attempts']=$user_quiz;
                     return $line;
