@@ -37,7 +37,8 @@ class CourseResource extends JsonResource
             'start_date' => $start_date,
             'end_date' => $end_date,
             'progress' => round($this->courses['progress'],2) ,
-            'shared_lesson'=>$this->courses['shared_lesson']
+            'shared_lesson'=>$this->courses['shared_lesson'],
+            'index'=>$this->courses['index']
         ];
     }
 }

@@ -69,7 +69,7 @@ class CoursesController extends Controller
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level_id', 'ASC');
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
