@@ -379,4 +379,38 @@ class ScriptsController extends Controller
         }
         return 'done';
     }
+
+    public function indexCatItem(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course)
+        {
+            $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
+            $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
+            self::index($grades);
+        }
+
+        return 'Done';
+    }
+
+    public function index($gradeCat)
+    {
+        $index=1;
+        foreach($gradeCat as $grade)
+        {
+            if($grade->index == null)
+            {
+                $grade->index=$index;
+                $grade->save();
+                if(count($grade->categories_items) >= 1)
+                    self::index($grade->categories_items);
+    
+                $index++;
+            }
+        }
+    }
 }
