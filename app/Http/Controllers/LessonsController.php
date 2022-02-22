@@ -56,8 +56,14 @@ class LessonsController extends Controller
         }
         */
         $result = Lesson::whereIn('id',$result_lessons->keys());
-        if($request->filled('shared'))
-            $result->where('shared_lesson', $request->shared);
+        if($request->filled('shared')){
+            $result->where('shared_lesson', $request->shared)
+            ->where(function($query) use ($request){        //in case of "shared", get shared lessons only
+                $query->whereRaw('JSON_CONTAINS(`shared_classes`, '. '\'["'. implode('","',$request->classes) . '"]\'' .') AND JSON_LENGTH(`shared_classes`) = JSON_LENGTH(\'' . '["'. implode('","',$request->classes) . '"]\''. ')')
+                ->orWhereRaw('JSON_CONTAINS(`shared_classes`, '. '\'['. implode(',',$request->classes) . ']\'' .') AND JSON_LENGTH(`shared_classes`) = JSON_LENGTH(\'' . '['. implode(',',$request->classes) . ']\''. ')');
+            });
+        }
+
         return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->orderBy('index', 'ASC')->get()], 200);
     }
 
