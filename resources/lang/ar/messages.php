@@ -341,7 +341,7 @@ return [
         'list' => 'القائمة',
         'delete' => 'تم الحذف ',
         'CannotUpdate' => 'عذرًا ،يمكن التحديث',
-
+        'category_cannot_deleted' => 'لايمكن الحذف ',
     ],
     'grade_item' => [
         'add' => 'تم اضافة بنجاح',
