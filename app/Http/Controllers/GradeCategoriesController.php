@@ -197,6 +197,8 @@ class GradeCategoriesController extends Controller
     public function destroy($id)
     {
         $grade_category = GradeCategory::find($id);
+        if($grade_category->instance_type == 'Quiz')
+            return response()->json(['message' =>__('messages.grade_category.category_cannot_deleted'), 'body' => null ], 200);
         $top_parent_category = GradeCategory::where('course_id',$grade_category->course_id)->whereNull('parent')->where('type','category')->first();
         $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
         $grade_category->child()->update(['parent' => $top_parent_category->id]);
