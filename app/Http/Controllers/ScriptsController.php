@@ -418,7 +418,7 @@ class ScriptsController extends Controller
     {
         foreach(Course::cursor() as $course){
             $enrolled_students = Enroll::where('course', $course->id)->where('segment', '!=' , $course->segment_id);
-            if($enrolled_students->count > 0)
+            if($enrolled_students->count() > 0)
                 $enrolled_students->delete();
         }
         return 'Done';
