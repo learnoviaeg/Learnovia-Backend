@@ -215,6 +215,7 @@ return [
         'add' => 'Session added successfully',
         'update' => 'Session updated successfully',
         'delete' => 'Session deleted successfully',
+        'delete_all' => 'All Sessions deleted successfully',
         'list' => 'Sessions list',
         'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',

@@ -212,6 +212,17 @@ class AttendanceSessionController extends Controller
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete'));
     }
 
+    public function deleteAll(Request $request)
+    {
+        $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'integer',
+        ]);
+        $attendanceSession=AttendanceSession::whereIn('id',$request->ids)->delete();
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete_all'));
+    }
+
     public function takeAttendance(Request $request)
     {
         $request->validate([
