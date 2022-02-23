@@ -16,10 +16,10 @@ class AttendanceSessionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
-        $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
-        $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
+        // $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
+        // $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
+        // $this->middleware(['permission:attendance/edit-session'],   ['only' => ['update']]);
     }
 
     /**
@@ -210,6 +210,17 @@ class AttendanceSessionController extends Controller
         $attendanceSession->delete();
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete'));
+    }
+
+    public function deleteAll(Request $request)
+    {
+        $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'integer',
+        ]);
+        $attendanceSession=AttendanceSession::whereIn('id',$request->ids)->delete();
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete_all'));
     }
 
     public function takeAttendance(Request $request)
