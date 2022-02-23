@@ -43,13 +43,13 @@ class QuizLessonObserver
 
             $grade_category=GradeCategory::find($quizLesson->grade_category_id);
             //creating grade category for quiz
-            $categoryOfQuiz = GradeCategory::firstOrCreate([
+            $categoryOfQuiz = GradeCategory::create([
                 'course_id' => $lesson->course_id,
                 'parent' => $grade_category->id,
                 'name' => $quiz->name,
                 'hidden' => $quizLesson->visible,
                 'calculation_type' => json_encode($quizLesson->grading_method_id),
-                'instance_type' => 'Quiz'],[
+                'instance_type' => 'Quiz',
                 'instance_id' => $quiz->id,
                 'lesson_id' => $lesson->id,
             ]);
