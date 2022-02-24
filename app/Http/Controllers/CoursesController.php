@@ -34,7 +34,7 @@ class CoursesController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:course/my-courses' , 'ParentCheck'],   ['only' => ['index']]);
-        $this->middleware(['permission:course/layout' , 'ParentCheck'],   ['only' => ['show']]);
+        $this->middleware(['permission:course/layout'],   ['only' => ['show']]);
     }
 
     /**
@@ -62,20 +62,20 @@ class CoursesController extends Controller
             'search' => 'nullable',
             'user_id'=>'exists:users,id',
             'period' => 'in:past,future,no_segment'
-        ]);
+        ]); 
 
         $paginate = 12;
        
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        // if(!$request->user()->can('site/show-all-courses') && !isset($request->user_id)) //student or teacher
-        if(!$request->user()->can('site/show-all-courses')) //student or teacher
-            $enrolls->where('user_id',Auth::id());
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level_id', 'ASC');
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
+
+        if(!$request->has('user_id')) 
+            $enrolls->where('user_id',Auth::id());
         
         if($request->templates == 1){
             $templates = Course::where('is_template',1)->get()->pluck('id');
@@ -84,7 +84,11 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
-        })->groupBy(['course','level'])->get();
+        })
+        ->join('courses', 'enrolls.course', '=', 'courses.id')
+        ->orderBy('courses.index', 'ASC')
+        ->groupBy(['course','level'])->get();
+
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
     }
 
@@ -98,13 +102,9 @@ class CoursesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            // 'category' => 'exists:categories,id',
-            // 'level_id' => 'required|exists:levels,id',
-            // 'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
-            // 'shared_lesson' => 'required_with:no_of_lessons|in:0,1',
+            'shared_lesson' => 'required|in:0,1',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
-            // 'description' => 'string',
             'mandatory' => 'nullable',
             'short_name' =>'required',
             'is_template' => 'nullable|boolean',
@@ -115,10 +115,6 @@ class CoursesController extends Controller
             'chains.*.class' => 'array|required_with:chains.*.level',
             'chains.*.class.*' => 'required|exists:classes,id',
         ]);
-        // return $request->chains;
-        // if($request->is_template == 1){
-        //     $check = Course::where('segment_id',$segment)->where('short_name',$request->short_name)->count();
-        // }
         $no_of_lessons = 4;
 
         if($request->is_template == 1){
@@ -128,13 +124,13 @@ class CoursesController extends Controller
         }
         
         foreach ($request->chains as $chain){
-            // return $chain['level'];
             foreach ($chain['segment'] as $segment) {
                 foreach ($chain['level'] as $level) {
                     $short_names=Course::where('segment_id',$segment)->where('short_name',$request->short_name)->get();
                     if(count($short_names)>0)
                         return HelperController::api_response_format(400, null, 'short_name must be unique');
 
+                    $index = Course::where('level_id', $level)->max('index');
                     $course = Course::firstOrCreate([
                         'name' => $request->name,
                         'short_name' => $request->short_name,
@@ -146,26 +142,12 @@ class CoursesController extends Controller
                         'level_id' => $level,
                         'is_template' => isset($request->is_template) ? $request->is_template : 0,
                         'classes' => json_encode($chain['class']),
+                        'shared_lesson' => $request->shared_lesson,
+                        'index' => isset($index) ? $index+1 : 1 ,
                     ]);
 
-                    // $level_id=$course->level_id;
-                    // $segment=Segment::find($course->segment_id);
-                    // $segment_id=$segment->id;
-                    // $year_id=$segment->academic_year_id;
-                    // $type_id=$segment->academic_type_id;
-                    // $classes=Classes::where('level_id',$course->level_id)->get();
-                    // dd($classes);
                     if ($request->filled('no_of_lessons'))
                         $no_of_lessons = $request->no_of_lessons;
-
-                    // for ($i = 1; $i <= $no_of_lessons; $i++) {
-                    //     $lesson=lesson::firstOrCreate([
-                    //         'name' => 'Lesson ' . $i,
-                    //         'index' => $i,
-                    //         'shared_lesson' => isset($request->shared_lesson) ? $request->shared_lesson : 0,
-                    //         'course_id' => $course->id
-                    //     ]);
-                    // }
 
                     foreach ($chain['class'] as $class) {
 
@@ -198,7 +180,8 @@ class CoursesController extends Controller
 
                     $gradeCat = GradeCategory::firstOrCreate([
                         'name' => $course->name . ' Total',
-                        'course_id' => $course->id
+                        'course_id' => $course->id,
+                        'calculation_type' => json_encode(['Natural']),
                     ]);
                 }
             }
@@ -215,8 +198,6 @@ class CoursesController extends Controller
             $le['teachers']  = $teacher ;
         }
         return response()->json(['message' => __('messages.course.add'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
-
-        // return $courses;
     }
 
     /**
@@ -254,18 +235,19 @@ class CoursesController extends Controller
             'mandatory' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$id,
             'course_template' => 'nullable|exists:courses,id',
+            'shared_lesson' => 'in:1,0',
             'is_template' => 'nullable|boolean|required_with:course_template',
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
         $course = Course::find($id);
         // if course has an image
-        if ($request->hasFile('image')) 
+        if($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
         
-        foreach ($editable as $key) 
-            if ($request->filled($key)) 
+        foreach($editable as $key) 
+            if($request->filled($key)) 
                 $course->$key = $request->$key;
 
         if($request->filled('course_template')){
@@ -298,7 +280,7 @@ class CoursesController extends Controller
     public function destroy($id ,Request $request)
     {
         $course = Course::find($id);
-        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->count();
+        $enrolls = Enroll::where('course',$id)->where('role_id','!=',1)->count();
 
         if($enrolls > 0){
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
@@ -340,6 +322,7 @@ class CoursesController extends Controller
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
+                                'description' => $lesson->description,
                             ]);
                             $shared_ids[] = $id->id;
                         }else{
@@ -349,6 +332,7 @@ class CoursesController extends Controller
                                 'shared_lesson' => $lesson->shared_lesson,
                                 'course_id' => $course,
                                 'shared_classes' => $lesson->getOriginal('shared_classes'),
+                                'description' => $lesson->description,
                             ]);
                             event(new LessonCreatedEvent(Lesson::find($id->id)));
                             $shared_ids[] = $id->id;
@@ -361,6 +345,32 @@ class CoursesController extends Controller
             }
         }
         return HelperController::api_response_format(200, null, __('messages.course.template'));
+    }
+
+    public function sort(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'index' => 'required|integer',
+        ]);
+        $given_course = Course::whereId($request->course_id)->first();
+        
+        //////sort down
+        if($request->index > $given_course->index ){
+            $courses = Course::where('level_id', $given_course->level_id)->where('index', '>=', $given_course->index)->Where('index','<=', $request->index);
+            foreach($courses->cursor() as $course){
+                $course->decrement('index');
+            }
+        }
+        //////sort up
+        if($request->index < $given_course->index ){
+            $courses = Course::where('level_id', $given_course->level_id)->where('index', '<=', $given_course->index)->Where('index','>=', $request->index);
+            foreach($courses->cursor() as $course){
+                $course->increment('index');
+            }
+        }
+        $given_course->update(['index' => $request->index]);
+        return response()->json(['message' => 'Sorted successfully', 'body' =>  null ], 200);
     }
 
 }

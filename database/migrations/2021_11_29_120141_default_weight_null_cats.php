@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DropNotificationsTable extends Migration
+class DefaultWeightNullCats extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,9 @@ class DropNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::drop('notifications');
+        Schema::table('grade_categories', function (Blueprint $table) {
+            $table->float('weight')->nullable()->default(null)->change();
+        });
     }
 
     /**
@@ -23,6 +25,6 @@ class DropNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('notifications');
+        //
     }
 }

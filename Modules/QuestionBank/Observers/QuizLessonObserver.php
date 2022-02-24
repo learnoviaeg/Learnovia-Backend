@@ -51,8 +51,10 @@ class QuizLessonObserver
                 'calculation_type' => json_encode($quizLesson->grading_method_id),
                 'instance_type' => 'Quiz',
                 'instance_id' => $quiz->id,
-                'lesson_id' => $lesson->id
+                'lesson_id' => $lesson->id,
             ]);
+            $categoryOfQuiz->index=GradeCategory::where('parent',$categoryOfQuiz->parent)->max('index')+1;
+            $categoryOfQuiz->save();
             ///add user grader to each enrolled student in course segment of this grade category
             $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
                                         ->where('course',$lesson->course_id)->pluck('user_id');

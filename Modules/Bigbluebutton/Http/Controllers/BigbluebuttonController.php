@@ -169,13 +169,8 @@ class BigbluebuttonController extends Controller
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
                     $i=0;
-                    // $courseseg = CourseSegment::GetWithClassAndCourse($class,$object['course_id']);
                     LastAction::lastActionInCourse($object['course_id']);
-                    // if(isset($courseseg))
-                    //     $course_segments_ids->push($courseseg->id);
 
-                    // if(count($course_segments_ids) <= 0)
-                    //     return HelperController::api_response_format(404, null ,__('messages.error.no_active_segment'));
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
                         if(isset($request->last_day))
@@ -301,11 +296,11 @@ class BigbluebuttonController extends Controller
                 'participant_video'		=> false,
                 'cn_meeting'			=> false,
                 'in_meeting'			=> false,
-                'join_before_host'		=> false,
+                'join_before_host'		=> true,
                 'mute_upon_entry'		=> true,
                 'watermark'				=> false,
                 'use_pmi'				=> false,
-                'approval_type'			=> 1,
+                'approval_type'			=> 2,
                 'registration_type'		=> 1,
                 'audio'					=> 'voip',
                 'auto_recording'		=> $record, //2:local, 1:cloud, 0:none
@@ -341,15 +336,15 @@ class BigbluebuttonController extends Controller
         curl_close($curl);
 
         $bigbb->join_url=json_decode($response,true)['join_url'];
-        $bigbb->meeting_id=json_decode($response,true)['id'];
-        $bigbb->status = 'current';
-        $bigbb->started = 1;
-        $bigbb->actutal_start_date = Carbon::now();
-        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
-        if($request->user()->can('site/show-all-courses'))
-            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+        // $bigbb->meeting_id=json_decode($response,true)['id'];
+        // $bigbb->status = 'current';
+        // $bigbb->started = 1;
+        // $bigbb->actutal_start_date = Carbon::now();
+        // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        // if(Auth::id() == $bigbb->host_id)
+        //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
 
-        $bigbb->signature=$signature;
+        // $bigbb->signature=$signature;
         $bigbb->save();
         return $response;
     }
@@ -463,8 +458,14 @@ class BigbluebuttonController extends Controller
             return HelperController::api_response_format(200,null ,__('messages.virtual.cannot_join'));
 
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0 && $bigbb->type != 'teams'){
-            if($bigbb->type == 'Zoom')
+            if($bigbb->type == 'Zoom'){
                 $start_meeting = self::start_meeting_zoom($request);
+
+                $bigbb->meeting_id=json_decode($start_meeting,true)['id']."";
+                $bigbb->status = 'current';
+                $bigbb->started = 1;
+                $bigbb->actutal_start_date = Carbon::now();
+            }
 
             if($bigbb->type == 'BBB')
                 $start_meeting = self::start_meeting($request);
@@ -496,13 +497,25 @@ class BigbluebuttonController extends Controller
 
         if($bigbb->type=='teams'){
             $bigbb->started=1;
-            $bigbb->save();
+            // $bigbb->save();
         }
-        
+
+        $user=ZoomAccount::where('user_id',$bigbb->host_id)->first();
+        $updatedUser=ZoomAccount::refresh_jwt_token($user);
+        $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
+        if(Auth::id() == $bigbb->host_id)
+            $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
+
+        $bigbb->signature=$signature;
+        $bigbb->save();
+
         $output = array(
             'name' => $bigbb->name,
+            'meeting_id' => $bigbb->meeting_id,
             'duration' => $bigbb->duration,
-            'link'=> $url
+            'link'=> $url,
+            'signature' => $signature,
+            'api_key' => ZoomAccount::where('user_id',BigbluebuttonModel::find($request->id)->host_id)->pluck('api_key')->first()
         );
         return HelperController::api_response_format(200, $output,__('messages.virtual.join'));
     }

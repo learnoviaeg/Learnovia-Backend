@@ -7,7 +7,7 @@ use App\CourseSegment;
 use App\Enroll;
 use App\User;
 use Illuminate\Http\Request;
-use App\UserGrade;
+use App\UserGrader;
 use stdClass;
 use App\GradeCategory;
 use App\GradeItems;
@@ -15,69 +15,66 @@ use App\LastAction;
 use App\Grader\gradingMethodsInterface;
 use App\Events\RefreshGradeTreeEvent;
 use Auth;
+use App\Events\UserGradesEditedEvent;
+use App\Events\GradeCalculatedEvent;
+use Spatie\Permission\Models\Permission;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GradesExport;
+use App\Repositories\ChainRepositoryInterface;
+use Illuminate\Support\Facades\Storage;
+use App\LetterDetails;
+use App\ScaleDetails;
+use DB;
+
 class UserGradeController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+        $this->middleware('auth');
+    }
+
     /**
      * create User grade
-     *
-     * @param  [int] grade_item_id, user_id, raw_grade, raw_grade_max, raw_grade_min, raw_scale_id, final_grade, letter_id
-     * @param  [boolean] hidden, locked
-     * @param  [string] feedback
-     * @return [object] and [string] User Grade Created Successfully
      */
-    public function create(Request $request)
-    {
+    public function store(Request $request)   
+    { 
         $request->validate([
-            'users'                     => 'required|array',
-            'users.*.id'                => 'required|exists:users,id',
-            'users.*.items'             => 'required|array',
-            'users.*.items.*.id'        => 'required|exists:grade_items,id',
-            'users.*.items.*.grade'     => 'required',
-            'users.*.items.*.feedback'  => 'nullable|string',
+            'user'      =>'required|array',
+            'user.*.user_id' => 'required|exists:users,id',
+            'user.*.item_id'   => 'required|exists:grade_categories,id',
+            'user.*.grade'     => 'nullable',
+            'user.*.scale_id'     => 'nullable|exists:scale_details,id',
         ]);
-        $message = 'User Grade Added Successfully';
-        foreach ($request->users as $user) {
-            foreach ($user['items'] as $item) {
-                $enroll = Enroll::where('course_segment', GradeItems::find($item['id'])->GradeCategory->course_segment_id)
-                    ->where('user_id', $user['id'])
-                    ->first();
-                if ($enroll == null)
-                    continue;
-                $gradeItem = GradeItems::find($item['id']);
-                if($gradeItem->grademin > $item['grade'] || $gradeItem->grademax < $item['grade']){
-                    $message = 'Some Grades are invalid please check your inputs again';
-                    continue;
+        foreach($request->user as $user){
+            $percentage = 0;
+            $instance = GradeCategory::find($user['item_id']);
+
+            if($instance->max != null && $instance->max > 0){
+
+                if($instance->aggregation == 'Scale'){
+                    $scale = ScaleDetails::find( $user['scale_id']);
+                    $user['grade'] = $scale->grade;
+                    $percentage = ($scale->grade / $instance->max) * 100;
+
+                    UserGrader::updateOrCreate(
+                        ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
+                        ['scale' =>  $scale->evaluation , 'scale_id' => $scale->id ]
+                    );
+
                 }
-                $check = UserGrade::where('grade_item_id',$item['id'])
-                ->where('user_id' , $user['id'])
-                ->first();
-                if($check == null){
-                    $temp = UserGrade::create([
-                        'grade_item_id' => $item['id'],
-                        'user_id' => $user['id'],
-                        'raw_grade' => $item['grade'],
-                    ]);
-                    if (isset($item['feedback'])) {
-                        $temp->feedback = $item['feedback'];
-                        $temp->save();
-                    }
-                }
-                else 
-                {
-                    $check->update([
-                        'grade_item_id' => $item['id'],
-                        'user_id' => $user['id'],
-                        'raw_grade' => $item['grade'],
-                    ]);
-                    if (isset($item['feedback'])) {
-                        $check->feedback = $item['feedback'];
-                        $check->save();
-                    }
-                }
-            }
+                $percentage = ($user['grade'] / $instance->max) * 100;
+            }            
+            $grader = UserGrader::updateOrCreate(
+                ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
+                ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
+            );
+            if($instance->parent != null)
+                event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
+            event(new GradeCalculatedEvent($grader));
         }
-        return HelperController::api_response_format(200, null, $message);
-    }
+        return response()->json(['message' => __('messages.user_grade.update'), 'body' => null ], 200);
+    } 
 
     /**
      * update User grade
@@ -348,4 +345,128 @@ class UserGradeController extends Controller
         }
         return HelperController::api_response_format(200, array_values($cour));
     }
+
+
+    public function fglReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
+        $allowed_levels=json_decode($allowed_levels);
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $check=(array_intersect($allowed_levels, $student_levels));
+
+        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        $total = 0;
+        $student_mark = 0;
+        $grade_category_callback = function ($qu) use ($request ) {
+            $qu->where('name', 'First Term');
+            $qu->with(['userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]);     
+        };
+
+        $callback = function ($qu) use ($request , $grade_category_callback) {
+            // $qu->orderBy('course', 'Asc');
+            $qu->where('role_id', 3);
+            $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                ->with(['courses.gradeCategory' => $grade_category_callback]); 
+
+        };
+
+        $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
+                        ->with(['enroll' => $callback])->first();
+        $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
+
+        foreach($result->enrolls as $enroll){ 
+            if($enroll->courses->gradeCategory != null)
+                $total += $enroll->courses->gradeCategory[0]->max;
+
+            if($enroll->courses->gradeCategory[0]->userGrades != null)
+                $student_mark += $enroll->courses->gradeCategory[0]->userGrades[0]->grade;
+            
+            if(str_contains($enroll->courses->name, 'O.L'))
+                break;
+
+        }
+
+         $percentage = 0;
+         if($total != 0)
+            $percentage = ($student_mark /$total)*100;
+
+        $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                    ->where('higher_boundary', '>', $percentage)->first();
+
+        if($percentage == 100)
+            $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+            ->where('higher_boundary', '>=', $percentage)->first();
+
+        $result->total = $total;
+        $result->student_total_mark = $student_mark;
+        $result->evaluation = $evaluation->evaluation;
+        $result->add_total = true;
+        unset($result->enroll);
+        if(count($total_check) == 0)
+            $result->add_total = false;
+
+        return response()->json(['message' => null, 'body' => $result ], 200);
+    }
+
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'required|integer|exists:courses,id', 
+            'classes' => 'array',
+            'classes.*' => 'exists:classes,id',
+            ]);     
+
+        $grade_categories = GradeCategory::whereIn('course_id', $request->courses);
+        $cat_ids =  $grade_categories->get()->pluck('id')->toArray();
+
+        $grade_Categroies_ids = $grade_categories
+        ->select( DB::raw('CONCAT("item_",name, "_", id) AS name'))
+        ->pluck('name')->toArray();
+        
+        $headers =array_merge(array('fullname','username' , 'course'), $grade_Categroies_ids);
+
+        $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
+        ->with(array('user' => function($query) {
+            $query->addSelect(array('id' , 'username' , 'firstname' , 'lastname'));
+        }))->get();
+        $course_shortname = GradeCategory::whereIn('course_id', $request->courses)->first()->course->short_name;
+        $filename = $course_shortname;
+        $file = Excel::store(new GradesExport($headers , $students , $request->courses[0] , $cat_ids), 'Grades'.$filename.'.xlsx','public');
+        $file = url(Storage::url('Grades'.$filename.'.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
+
+    public function user_report_in_course(Request $request)
+    {
+        $request->validate([
+            'course_id'  => 'required|integer|exists:courses,id',
+            'user_id' => 'required|exists:users,id',
+            ]); 
+
+        $GLOBALS['user_id'] = $request->user_id;
+        $grade_categories = GradeCategory::where('course_id', $request->course_id)->whereNull('parent')
+                            ->with(['Children.userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            },'GradeItems.userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            },'userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            }])->get();
+
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
+
+    }
 }
+
+

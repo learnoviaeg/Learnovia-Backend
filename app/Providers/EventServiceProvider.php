@@ -61,15 +61,41 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\LessonCreatedEvent' => [
             'App\Listeners\AddSecondChainListener',
         ],
-        //7esab daragat el2s2la el manual(and_why & essay)
-        'App\Events\ManualCorrectionEvent' => [
-            'App\Listeners\GradeManualListener',
+
+        'App\Events\TakeAttendanceEvent' => [
+            'App\Listeners\CalculateSessionsListener',
         ],
+
+        'App\Events\SessionCreatedEvent' => [
+            'App\Listeners\LogsCreatedListener',
+        ],
+
+        //7esab daragat el2s2la el manual(and_why & essay)
+        // 'App\Events\ManualCorrectionEvent' => [
+        //     'App\Listeners\GradeManualListener',
+        // ],
 
         'App\Events\updateQuizAndQuizLessonEvent' => [
             'App\Listeners\updateTimelineListener',
-            'App\Listeners\updateGradeCatListener',
+            // 'App\Listeners\updateGradeCatListener',
         ],    
+
+        'App\Events\GraderSetupEvent' => [
+            'App\Listeners\RefreshGraderSetupListener',
+        ],
+
+        'App\Events\UserGradesEditedEvent' => [
+            'App\Listeners\CalculateUserGradesListener',
+        ],
+
+        'App\Events\AssignmentCreatedEvent' => [
+            'App\Listeners\AssignmentGradeCategoryListener',
+        ],
+
+        'App\Events\GradeCalculatedEvent' => [
+            'App\Listeners\LetterPercentageListener',
+        ],
+
     ];
 
     /**

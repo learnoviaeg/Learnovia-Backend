@@ -35,6 +35,7 @@ class SendNotifications implements ShouldQueue
      */
     public function handle()
     {
+        // dd($this->notification->users());
         //get list of users that should recieve this notification and has firebase token
         $users = $this->notification->users()->whereNotNull('token')->get();
 
@@ -118,6 +119,7 @@ class SendNotifications implements ShouldQueue
             }
             //end getting notifications URL
 
+            // dd($this->notification);
             //prepare notification request body
             $requestBody = json_encode(
                 array(
@@ -140,6 +142,7 @@ class SendNotifications implements ShouldQueue
                     )
                 )
             );
+            // dd($requestBody);
             //end preparing notifications request body
 
             //start sending realtime notifications

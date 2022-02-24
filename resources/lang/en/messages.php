@@ -30,6 +30,7 @@ return [
         'role_required' => 'Please, choose role first',
         'not_allowed' => 'You are not allowed to view this.',
         'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'not_allowed_to_delete' => 'You are not allowed to delete this.',
         'extension_error' => 'This extension is not valid'
     ],
     'success' => [
@@ -96,10 +97,10 @@ return [
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
-        'NotUpdate' => 'you cann\'t update this quiz',
+        'NotUpdate' => 'you can\'t update this quiz',
         'delete' => 'Quiz deleted successfully',
-        'assign' => 'Quiz assigned successfully',
-        'unAssign' => 'Quiz unAssigned successfully',
+        'assign' => 'Questions assigned successfully',
+        'unAssign' => 'Questions unAssigned successfully',
         'list' => 'Quizzes List',
         'count' => 'Quizzes count',
         'invaled_feedback' => 'Invalid feedback type, feedback can not be After submission',
@@ -113,7 +114,7 @@ return [
         'quiz_not_started' => 'This quiz didnt start yet',
         'grade_pass_settings' => 'Grade to pass settings added successfully',
         'grade_pass_settings_list' => 'Grade to pass settings',
-        'wrong_date' => 'You can\'t update with these date please, Revision duration and end_date',
+        'wrong_date' => 'You can\'t update with this date please, Revision duration and end_date',
         'quiz_notify' => 'You have a new quiz :quizName in course :courseName'
     ],
     'permissions' => [
@@ -176,27 +177,27 @@ return [
 
         'image' => [
             'add' => 'Image uploaded successfully',
-            'update' => 'Image updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Image deleted successfully',
         ],
         'video' => [
             'add' => 'Video uploaded successfully',
-            'update' => 'Video updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Video deleted successfully',
         ],
         'audio' => [
             'add' => 'Audio uploaded successfully',
-            'update' => 'Audio updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Audio deleted successfully',
         ],
         'link' => [
             'add' => 'Link uploaded successfully',
-            'update' => 'Link updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'Link deleted successfully',
         ],
         'url' => [
             'add' => 'URL uploaded successfully',
-            'update' => 'URL updated successfully',
+            'update' => 'Media updated successfully',
             'delete' => 'URL deleted successfully',
         ],
     ],
@@ -204,13 +205,22 @@ return [
         'list' => 'Materials list',
         'count' => 'Materials count',
     ],
+    'attendance' => [
+        'add' => 'Attendance added successfully',
+        'update' => 'Attendance updated successfully',
+        'delete' => 'Attendance deleted successfully',
+        'list' => 'Attendances list',
+    ],
     'attendance_session' => [
         'add' => 'Session added successfully',
         'update' => 'Session updated successfully',
         'delete' => 'Session deleted successfully',
+        'delete_all' => 'All Sessions deleted successfully',
         'list' => 'Sessions list',
         'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',
+        'cannot_add' => 'You can\'t add session please change the date',
+        'wrong_day' => 'please choose correct end_date'
     ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
@@ -228,7 +238,7 @@ return [
 
         'record' => [
             'list' => 'Virtual classrooms records list',
-            'no_records' => 'No records found',
+            'no_records' => 'No records found', 
         ],
 
         'attendnace' => [
@@ -315,7 +325,7 @@ return [
         'no_courses_belong_to_class' => 'No courses belong to this class',
     ],
     'zoom' => [
-        'zoom_account' => 'user haven\'t account on zoom',
+        'zoom_account' => 'user hasn\'t account on zoom',
         'Invalid' => 'Invalid Access Token',
     ],
     'status' => [
@@ -330,7 +340,9 @@ return [
         'update' => 'Grade category is updated successfully',
         'list' => 'Grade Categories List',
         'delete' => 'Grade category deleted successfully',
-        'not_found' => 'Cann\'t find grade category'
+        'not_found' => 'Can\'t find grade category',
+        'CannotUpdate' => 'you can\'t update this category',
+        'category_cannot_deleted' => 'Can\'t delete this category, please delete quiz',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
@@ -344,5 +356,23 @@ return [
         'update' => 'Updated Successfully',
         'faild' => 'there is no logo',
         'get' => 'logo is'
+    ],
+    'user_grade' => [
+        'update' => 'Grade is updated succefully',
+    ],
+    'letter' => [
+        'add' => 'Letter added successfully',
+        'delete' => 'Letter deleted successfully',
+        'update' => 'Letter updated Successfully',
+        'list' => 'Letter'
+    ],
+    'scale' => [
+        'add' => 'Scale added successfully',
+        'delete' => 'Scale deleted successfully',
+        'update' => 'Scale updated Successfully',
+        'list' => 'Scale',
+        'course' => 'Scales of a course',
+        'cannot_update' => 'Only name can be edited because the scale is assigned to grade category ',
+        'cannot_delete' => 'Cannot be deleted because the scale is assigned to grade category',
     ],
 ];

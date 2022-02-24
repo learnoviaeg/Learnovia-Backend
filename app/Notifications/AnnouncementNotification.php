@@ -28,25 +28,25 @@ class AnnouncementNotification extends SendNotification
 
     public function send(){
 
-        // $publish_date = $this->announcement->publish_date;
-        // if(Carbon::parse($publish_date)->isPast()){
-        //     $publish_date = Carbon::now();
-        // }
+        $publish_date = $this->announcement->publish_date;
+        if(Carbon::parse($publish_date)->isPast()){
+            $publish_date = Carbon::now();
+        }
 
-        // //Start preparing notifications object
-        // $notification = [
-        //     'type' => 'announcement',
-        //     'item_id' => $this->announcement->id,
-        //     'item_type' => 'announcement',
-        //     'message' => $this->message,
-        //     'publish_date' => $publish_date,
-        //     'created_by' => $this->announcement->created_by['id'],
-        // ];
+        //Start preparing notifications object
+        $notification = [
+            'type' => 'announcement',
+            'item_id' => $this->announcement->id,
+            'item_type' => 'announcement',
+            'message' => $this->message,
+            'publish_date' => $publish_date,
+            'created_by' => $this->announcement->created_by['id'],
+        ];
 
-        // //assign notification to given users
-        // $createdNotification = $this->toDatabase($notification,$this->users);
+        //assign notification to given users
+        $createdNotification = $this->toDatabase($notification,$this->users);
         
-        // //firebase Notifications
-        // $this->toFirebase($createdNotification);
+        //firebase Notifications
+        $this->toFirebase($createdNotification);
     }
 }

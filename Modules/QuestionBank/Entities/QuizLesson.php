@@ -2,6 +2,7 @@
 
 namespace Modules\QuestionBank\Entities;
 
+use App\GradeCategory;
 use App\Scopes\OverrideQuizScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Modules\QuestionBank\Entities\QuizOverride;
 use App\UserSeen;
 use App\SystemSetting;
+use App\UserGrader;
 
 class QuizLesson extends Model
 {
@@ -25,7 +27,7 @@ class QuizLesson extends Model
         'visible','index','seen_number', 'grade_pass' , 'questions_mark', 'grade_by_user'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status', 'ended'];
+    protected $appends = ['started','user_seen_number','Status', 'token_attempts', 'ended'];
 
     protected $dispatchesEvents = [
         'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
@@ -44,8 +46,8 @@ class QuizLesson extends Model
         if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
             $started = false;
         }
-        
-        return $started;  
+
+        return $started;
     }
 
     public function getEndedAttribute(){
@@ -56,12 +58,12 @@ class QuizLesson extends Model
             $override = $this->override->first();
             $this->due_date = $override->due_date;
         }
-        
+
         if((Auth::user()->can('site/course/student') && $this->due_date < Carbon::now())){
             $ended = true;
         }
 
-        return $ended;  
+        return $ended;
     }
 
     public function getUserSeenNumberAttribute(){
@@ -69,8 +71,8 @@ class QuizLesson extends Model
         $user_seen = 0;
         if($this->seen_number != 0)
             $user_seen = UserSeen::where('type','quiz')->where('item_id',$this->quiz_id)->where('lesson_id',$this->lesson_id)->count();
-            
-        return $user_seen;  
+
+        return $user_seen;
     }
 
     public function getStatusAttribute(){
@@ -81,11 +83,11 @@ class QuizLesson extends Model
 
             $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $this->id)->pluck('id');
             $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->get();
-            if(isset($user_quiz) && $this->max_attemp == count($user_quiz) && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
+            if(isset($user_quiz) && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
                 $status = __('messages.status.submitted');//submitted
-                
+
                 if(!in_array(NULL,$user_quiz_asnwer->pluck('user_grade')->toArray(),true))
-                    $status = __('messages.status.graded');//graded 
+                    $status = __('messages.status.graded');//graded
             }
         }
 
@@ -94,7 +96,7 @@ class QuizLesson extends Model
 
             $user_quiz = userQuiz::where('quiz_lesson_id', $this->id)->pluck('id');
             $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->pluck('user_grade');
-            
+
             if(count($user_quiz_asnwer) > 0)
                 $status = __('messages.status.not_graded');//not_graded
 
@@ -103,6 +105,12 @@ class QuizLesson extends Model
         }
 
         return $status;
+    }
+
+    public function getTokenAttemptsAttribute()
+    {
+        $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $this->id)->count();
+        return $user_quiz;
     }
 
     public function quiz()
@@ -116,6 +124,11 @@ class QuizLesson extends Model
     public function grading_method()
     {
         return $this->belongsTo('App\GradingMethod', 'grading_method_id', 'id');
+    }
+
+    public function userGrader()
+    {
+        return $this->hasManyThrough(UserGrader::class, GradeCategory::class, 'instance_id','item_id','quiz_id')->where('instance_type','Quiz');
     }
 
     public function getGradingMethodIdAttribute($value)
@@ -135,7 +148,7 @@ class QuizLesson extends Model
             if(isset($this->attributes['questions_mark']) && $this->attributes['questions_mark'] != 0)
                 $content = $this->attributes['questions_mark'] * $percentage;
         }
-        
+
         return (double) $content;
     }
 
@@ -148,8 +161,8 @@ class QuizLesson extends Model
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','quiz_lesson_id', 'id');
     }
-    
-    public static function boot() 
+
+    public static function boot()
     {
         parent::boot();
         static::addGlobalScope(new OverrideQuizScope);

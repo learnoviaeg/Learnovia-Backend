@@ -16,12 +16,12 @@ class EditUserImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         Validator::make($row,[
-            'id' => 'required|exists:users,id',
-            'email' => 'unique:users,email,' . $row['id'],
+            // 'id' => 'required|exists:users,id',
+            'email' => 'unique:users,email,' . $row['username'],
             // 'class_id' => 'exists:classes,id',
             // 'level' => 'exists:levels,id',
             // 'type' => 'exists:academic_types,id',
-            'username' => 'unique:users,username,'. $row['id']
+            'username' => 'required|exists:users,username'
         ])->validate();
 
         if(isset($row['language']))
@@ -38,18 +38,26 @@ class EditUserImport implements ToModel, WithHeadingRow
                     'language', 'timezone', 'religion', 'second language', 'class_id', 'level', 'type', 'firstname',
                     'lastname', 'username', 'real_password', 'suspend'];
 
-        $user=User::find($row['id']);
+        $user=User::where('username',($row['username']))->first();
+        if(isset($user)){
+            $array=[];
+            foreach(array_keys($row) as $key){
+                if(strpos($key,"extra_") > -1)
+                    $array[$key]=$row[$key];
+            }
+            $user->profile_fields=json_encode($array);
 
-        foreach ($optionals as $optional) {
-            if (isset($row[$optional])){
-                if($optional =='birthdate'){
-                    $row[$optional] =  Date::excelToDateTimeObject($row['birthdate']);
-                }
-                if($optional =='real_password'){
+            foreach ($optionals as $optional) {
+                if (isset($row[$optional])){
+                    if($optional =='birthdate'){
+                        $row[$optional] =  Date::excelToDateTimeObject($row['birthdate']);
+                    }
+                    if($optional =='real_password'){
+                        $user->update([$optional => $row[$optional]]);
+                        $user->password =   bcrypt($row[$optional]);
+                    }
                     $user->update([$optional => $row[$optional]]);
-                    $user->password =   bcrypt($row[$optional]);
                 }
-                $user->update([$optional => $row[$optional]]);
             }
         }
     }

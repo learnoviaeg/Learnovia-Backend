@@ -10,6 +10,10 @@ use App\GradeItems;
 use App\UserGrader;
 use App\Enroll;
 use App\Course;
+use App\Events\GraderSetupEvent;
+use App\Jobs\RefreshUserGrades;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\quiz;
 
 class GradeCategoriesController extends Controller
 {
@@ -43,7 +47,7 @@ class GradeCategoriesController extends Controller
             'parent' => 'exists:grade_categories,id',
         ]);
 
-        $grade_categories = GradeCategory::whereNull('instance_type');
+        $grade_categories = GradeCategory::whereNull('instance_type')->where('type', 'category');
             if($request->filled('name'))
                 $grade_categories->where('name','LIKE' , "%$request->name%");
             if($request->filled('parent'))
@@ -64,71 +68,61 @@ class GradeCategoriesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // 'year' => 'exists:academic_years,id',
-            // 'type' => 'exists:academic_types,id',
-            // 'level' => 'exists:levels,id',
-            // 'segment' => 'exists:segments,id',
             'courses'    => 'nullable|array|required_without:levels',
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'levels'    => 'nullable|array|required_without:courses',
             'levels.*'  => 'nullable|integer|exists:levels,id',
+            'category' => 'required|array',
             'category.*.name' => 'required|string',
             'category.*.parent' => 'exists:grade_categories,id',
-            'category.*.aggregation' => 'in:Natural,Simple weighted mean',
+            'category.*.aggregation' => 'in:Value,Scale',
             'category.*.hidden' => 'boolean',
-            'category.*.calculation_type' => 'nullable|in:Value,Scale',
+            'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean',
             'category.*.locked' => 'boolean',
-            'category.*.min'=>'between:0,99.99',
-            'category.*.max'=>'between:0,99.99',
+            'category.*.min'=>'between:0,100',
+            'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
-            'category.*.exclude_empty_grades' => 'boolean',
-            // 'name' => 'required|string',
-            // 'parent' => 'exists:grade_categories,id',
-            // 'hidden' => 'boolean',
-            // 'calculation_type' => 'nullable',
-            // 'locked' => 'boolean',
-            // 'min'=>'between:0,99.99',
-            // 'max'=>'between:0,99.99',
-            // 'weight_adjust' => 'boolean',
-            // 'exclude_empty_grades' => 'boolean',
+            'category.*.exclude_empty_grades' => 'boolean'
         ]);
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        $courses = $enrolls->get()->pluck('course')->unique(); 
-
+        if($request->filled('courses'))
+            $courses = $request->courses;
+        else{
+            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
+            $courses = $enrolls->get()->pluck('course')->unique(); 
+        }
         foreach($courses as $course){
+            $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
-                $cat = GradeCategory::firstOrCreate([
+                $cat = GradeCategory::create([
                     'course_id'=> $course,
                     'name' => $category['name'],
-                    'parent' => isset($category['parent']) ? $category['parent'] : null,
+                    'parent' => isset($category['parent']) ? $category['parent'] : $course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
-                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : null,
+                    'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
                     'locked' =>isset($category['locked']) ? $category['locked'] : 0,
                     'min' =>isset($category['min']) ? $category['min'] : 0,
                     'max' =>isset($category['max']) ? $category['max'] : null,
-                    'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Natural',
+                    'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
-                    // 'name' => $request->name,
-                    // 'parent' => isset($request->parent) ? $request->parent : null,
-                    // 'hidden' =>isset($request->hidden) ? $request->hidden : 0,
-                    // 'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : null,
-                    // 'locked' =>isset($request->locked) ? $request->locked : 0,
-                    // 'min' =>isset($request->min) ? $request->min : 0,
-                    // 'max' =>isset($request->max) ? $request->max : null,
-                    // 'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
-                    // 'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : 0,
                 ]);
+                $cat->index=GradeCategory::where('parent',$cat->parent)->max('index')+1;
+                $cat->save();
+
                 $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
                 foreach($enrolled_students as $student){
                     UserGrader::create([
                         'user_id'   => $student,
-                        'item_type' => 'Category',
+                        'item_type' => 'category',
                         'item_id'   => $cat->id,
                         'grade'     => null
                     ]);
                 }
-            }
+                event(new GraderSetupEvent($cat));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat));
+                dispatch($userGradesJob);
+                }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
@@ -158,20 +152,39 @@ class GradeCategoriesController extends Controller
             'name' => 'string',
             'parent' => 'exists:grade_categories,id',
             'hidden' => 'boolean',
-
+            'weight_adjust' => 'boolean'
         ]);
         $grade_category = GradeCategory::findOrFail($id);
+
+        if(isset($request->parent))
+        {
+            if($grade_category->parent != $request->parent){
+                $re=new Request([
+                    'grade_cat_id' => $id,
+                    'parent' => $request->parent
+                ]);
+                self::reArrange($re);
+            }
+        }
+
         $grade_category->update([
             'name'   => isset($request->name) ? $request->name : $grade_category->name,
             'parent' => isset($request->parent) ? $request->parent : $grade_category->parent,
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_category->hidden,
-            'calculation_type' =>isset($request->calculation_type) ? $request->calculation_type : $category['calculation_type'],
+            'calculation_type' =>isset($request->calculation_type) ? json_encode([$request->calculation_type]) : json_encode($grade_category['calculation_type']),
             'locked' =>isset($request->locked) ? $request->locked  : $grade_category['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
+            'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
             'exclude_empty_grades' =>isset($request->exclude_empty_grades) ? $request->exclude_empty_grades : $grade_category['exclude_empty_grades'],
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_category['aggregation'],
         ]);
+
+        event(new GraderSetupEvent($grade_category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $grade_category));
+        dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
 
@@ -184,14 +197,124 @@ class GradeCategoriesController extends Controller
     public function destroy($id)
     {
         $grade_category = GradeCategory::find($id);
-        if(!isset($grade_category))
-            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 404);
-
-        foreach($grade_category->Child as $child){
-            $child->GradeItems()->delete();
-        }
-        $grade_category->Child()->delete();
+        if($grade_category->instance_type == 'Quiz')
+            return response()->json(['message' =>__('messages.grade_category.category_cannot_deleted'), 'body' => null ], 200);
+        $top_parent_category = GradeCategory::where('course_id',$grade_category->course_id)->whereNull('parent')->where('type','category')->first();
+        $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
+        $grade_category->child()->update(['parent' => $top_parent_category->id]);
+        $parent_Category = GradeCategory::find($grade_category->parent);
         $grade_category->delete();
+        event(new GraderSetupEvent($parent_Category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+        dispatch($userGradesJob);
+
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
+    }
+
+
+    public function weight_adjust(Request $request)
+    {
+        $request->validate([
+            'instance' => 'required|array',
+            'instance.*.id' => 'required|exists:grade_categories,id',
+            'instance.*.weight' => 'numeric|min:0|max:100',
+            'instance.*.weight_adjust' => 'required|boolean',
+        ]);
+
+        foreach($request->instance as $instance)
+        {
+            $category = GradeCategory::find($instance['id']);
+            $category->update([
+                'name'   =>  isset($instance['name']) ? $instance['name'] : $category->name,
+                'hidden' => isset($instance['hidden']) ? $instance['hidden'] : $category->hidden,
+                'calculation_type' =>isset($instance['calculation_type']) ? $instance['calculation_type'] : json_encode($category->calculation_type),
+                'locked' =>isset($instance['locked']) ? $instance['locked']  : $category->locked,
+                'min' =>isset($instance['min']) ? $instance['min'] : $category->min,
+                'max' =>isset($instance['max']) ? $instance['max'] : $category->max,
+                'weight_adjust' =>isset($instance['weight_adjust']) ? $instance['weight_adjust'] : $category->weight_adjust,
+                'weights' =>isset($instance['weight']) ? $instance['weight'] : $category->weights,
+                'exclude_empty_grades' =>isset($instance['exclude_empty_grades']) ? $instance['exclude_empty_grades'] : $category->exclude_empty_grades,
+            ]);
+            if($category->instance_type != null){
+                if($category->instance_type == 'Quiz'){
+                    if($category->weights > 0)
+                        quiz::where('id', $category->instance_id )->update(['is_graded' => 1]);
+                    else
+                        quiz::where('id', $category->instance_id )->update(['is_graded' => 0]);
+                }
+                   
+                if($category->instance_type == 'Assignment'){
+                    if($category->weights > 0)
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 1]);
+                    else
+                        AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 0]);
+                }          
+            }
+            event(new GraderSetupEvent($category->Parents));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
+            dispatch($userGradesJob);
+        }
+        return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
+    }
+
+    public function reArrange(Request $request)
+    {
+        $request->validate([
+            'grade_cat_id' => 'required|exists:grade_categories,id',
+            'index' => 'integer',
+            'parent' => 'exists:grade_categories,id'
+        ]);
+
+        $category = GradeCategory::find($request->grade_cat_id);
+        $oldIndex=$category->index;
+        // dd($oldIndex);
+        if(isset($request->index))
+        {
+            $cat=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
+            if($request->index < $oldIndex)
+            {
+                foreach($cat->where('index','>=',$request->index)->where('index','<',$oldIndex)->get() as $updateIndex)
+                {
+                    $updateIndex->index+=1;
+                    $updateIndex->save();
+                }
+            }
+            elseif($request->index > $oldIndex)
+            {
+                foreach($cat->where('index','<=',$request->index)->where('index','>',$oldIndex)->get() as $updateIndex)
+                {
+                    $updateIndex->index-=1;
+                    $updateIndex->save();
+                }
+            }
+            $category->index=$request->index;
+        }
+
+        if(isset($request->parent))
+        {
+            $parent = GradeCategory::find($request->parent);
+            $all=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
+            foreach($all->where('index','>',$oldIndex)->get() as $gradeinx)
+            {
+                $gradeinx->index-=1;
+                $gradeinx->save();
+            }
+
+            $maxIndex=GradeCategory::where('parent',$request->parent)->max('index');
+            $category->index=$maxIndex+1;
+            $category->parent=$request->parent;
+
+            event(new GraderSetupEvent($parent));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+            dispatch($userGradesJob);
+        }
+
+        event(new GraderSetupEvent($category));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
+        dispatch($userGradesJob);
+
+        $category->save();
+
+        return 'Done';
     }
 }

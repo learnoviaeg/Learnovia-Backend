@@ -11,7 +11,7 @@ use App\Course;
 use App\Exports\CourseProgressReport;
 use App\User;
 use App\Paginate;
-use App\LAstAction;
+use App\LastAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
@@ -273,11 +273,11 @@ class ReportsController extends Controller
 
         foreach($courses as $course){
 
-            $level = $course->level->name;
+            $level = $course->level;
 
             foreach($course->classes as $groupId){
 
-                $group = Classes::whereId($groupId)->pluck('name')->first();
+                $group = Classes::whereId($groupId)->first();
 
                 $componentsHelper = new ComponentsHelper();
 
@@ -302,9 +302,12 @@ class ReportsController extends Controller
                         foreach($items as $item){
 
                             $reportObjects->push([
-                                'level' => $level,
+                                'level' => $level->name,
+                                'level_id' => $level->id,
                                 'course' => $course->name,
-                                'class' => $group,
+                                'course_id' => $course->id,
+                                'class' => $group->name,
+                                'class_id' => $group->id,
                                 'type' => $type,
                                 'item_name' => $item->name,
                                 'item_id' => $item->id,
@@ -318,9 +321,12 @@ class ReportsController extends Controller
                     if(!$request->has('details')){
 
                         $reportObjects->push([
-                            'level' => $level,
+                            'level' => $level->name,
+                            'level_id' => $level->id,
                             'course' => $course->name,
-                            'class' => $group,
+                            'course_id' => $course->id,
+                            'class' => $group->name,
+                            'class_id' => $group->id,
                             'type' => $type,
                             'count' => $componentsHelper->$type()->count(),
                         ]);
@@ -482,53 +488,53 @@ class ReportsController extends Controller
                                     }
                         
                                 })
-                                ->withCount(['user_quiz as solved_students' => function($q) use ($usersIds){
+                                ->withCount(['userGrader as solved_students' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereNotNull('grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
 
-                                },'user_quiz as got_zero' => function($q) use ($usersIds){
-
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
-                                    }
-
-                                    $q->where('grade', 0)->select(DB::raw('count(distinct(user_id))'));
-
-                                },'user_quiz as full_mark' => function($q) use ($usersIds){
+                                },'userGrader as got_zero' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','quiz_lessons.grade')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->where('grade', 0)->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
+
+                                },'userGrader as full_mark' => function($q) use ($usersIds){
+
+                                    if(count($usersIds) > 0){
+                                        $q->whereIn('user_id',$usersIds);
+                                    }
+
+                                    $q->whereColumn('grade','quiz_lessons.grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
+                                ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
+                                ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
-                                ,'user_quiz as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
+                                ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
                                     if(count($usersIds) > 0){
                                         $q->whereIn('user_id',$usersIds);
                                     }
 
-                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->select(DB::raw('count(distinct(user_id))'));
+                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                 }
                             ]);
 
@@ -576,9 +582,9 @@ class ReportsController extends Controller
                                                     'start_date'     => $quizLesson->start_date,
                                                     'due_date'       => $quizLesson->due_date,
                                                     'duration'       => round($quizLesson->quiz->duration/60,0),
-                                                    'period'         => $different_days->d.' Day/s, '.$different_days->h.' Hour/s',
+                                                    'period'         => $different_days->d.' days / '.$different_days->h.' hours / '.$different_days->i.' minutes',
                                                     'attempts_number'    => $quizLesson->max_attemp,
-                                                    'gradeing_method'    => $quizLesson->grading_method_id,
+                                                    'gradeing_method'    => count($quizLesson->grading_method_id) > 0 ? $quizLesson->grading_method_id : ['Last'],
                                                     'students_number'    => $quizLesson->lesson->students_number,
                                                     'solved_students'    => $quizLesson->solved_students,
                                                     'not_solved_students'    => $quizLesson->lesson->students_number - $quizLesson->solved_students,
@@ -608,8 +614,10 @@ class ReportsController extends Controller
             'type' => 'exists:academic_types,id',
             'level' => 'exists:levels,id',
             'segment' => 'exists:segments,id',
+            'roles' => 'array',
             'courses' => 'array',
             'courses.*' => 'exists:courses,id',
+            'roles.*' => 'exists:roles,id',
             'class' => 'exists:classes,id',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
@@ -618,8 +626,9 @@ class ReportsController extends Controller
             'report_month' => 'integer|required_with:report_day',
             'report_day' => 'integer',
             'never' => 'in:1',
-            'since' => 'in:1,5,10',
-            'export' => 'in:1'
+            // 'since' => 'in:1,5,10',
+            'export' => 'in:1',
+            'count' => 'in:1'
         ]);
 
         $since = 10;
@@ -627,7 +636,10 @@ class ReportsController extends Controller
             $since = $request->since;
         }
 
-        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->with('user')->get()->pluck('user');
+        $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->whereHas('user.roles', function($query) use ($request){
+            if(isset($request->roles))
+                $query->whereIn('id',$request->roles);
+        })->with('user.roles')->get()->pluck('user');
 
         //users who doesnt have any logs in system
         if($request->filled('never')){
@@ -706,9 +718,12 @@ class ReportsController extends Controller
                                 });
 
         if($request->filled('export')){
-
             $file = $this->exportUserStatusReport($userStatus);                
             return response()->json(['message' => __('messages.success.link_to_file') , 'body' => $file], 200);
+        }
+
+        if($request->count == 1){
+            $userStatus=$userStatus->count();
         }
 
         return response()->json(['message' => 'User status report', 'body' =>  $userStatus], 200);

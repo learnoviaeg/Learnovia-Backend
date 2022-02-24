@@ -201,6 +201,7 @@ class CourseController extends Controller
             'image' => 'nullable',
             'description' => 'nullable',
             'mandatory' => 'nullable|in:0,1',
+            'shared_lesson' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$request->id,
             'start_date' => 'date',
             'end_date' =>'date|after:start_date',
@@ -209,7 +210,7 @@ class CourseController extends Controller
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
         $course = Course::find($request->id);
         // if course has an image
         if ($request->hasFile('image')) 
@@ -236,6 +237,9 @@ class CourseController extends Controller
                 ]);
             }            
         }
+
+        if($request->filled('shared_lesson'))
+            $lessons = Lesson::where('course_id', $request->id)->update(['shared_lesson' => $request->shared_lesson]);
 
         // $course_segment = CourseSegment::where("course_id",$request->id);
         // if ($request->filled('start_date')) 

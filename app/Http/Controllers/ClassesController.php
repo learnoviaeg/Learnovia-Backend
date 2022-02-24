@@ -50,27 +50,11 @@ class ClassesController extends Controller
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
-        if($request->user()->can('site/show-all-courses'))
-        {
-            if(isset($request->types) &&isset($request->levels) )
-            {
-                $levels=Level::whereIn('academic_type_id',$request->types)->pluck('id');
-                $classes->whereIn('level_id',$levels)->where('type','class');
-                if(isset($request->levels))
-                    $classes->whereIn('level_id',$request->levels)->where('type','class');
-            }
-            if($request->filled('courses')){
-                $classesObj = Course::whereIn('id',$request->courses)->pluck('classes');
-                // $class=json_decode($classesObj);
-                // return Course::whereIn('id',$request->courses)->get();
-                // dd($classesObj);
-                $classes->whereIn('id',$classesObj[0])->where('type','class');
-            }
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
 
-            return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
-        }
-
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
+        if(!$request->has('user_id'))
+            $enrolls->where('user_id',Auth::id());
+            
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));

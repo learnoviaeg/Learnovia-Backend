@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
+use App\Course;
 use App\Level;
 use Auth;
 use App\Enroll;
@@ -176,15 +177,11 @@ class ChainRepository implements ChainRepositoryInterface
         if ($request->filled('class'))
             $enrolls=$enrolls->where('group', $request->class);
         if ($request->filled('courses')){
-            foreach($request->courses as $course_id){
-                LastAction::lastActionInCourse($course_id);
-            }
             $enrolls=$enrolls->whereIn('course', $request->courses);
         }
 
     return $enrolls;
     }
-
 
     public function getEnrollsByManyChain(Request $request){
 
@@ -193,13 +190,10 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('years'))
             $years = $request->years;
 
-
-        if(count($years) == 0){
+        if(count($years) == 0)
             throw new \Exception('There is no active year');
-        }
 
         $enrolls =  Enroll::whereIn('year', $years);
-        //dd($enrolls->get());
 
         if(count($enrolls->pluck('year'))==0)
             throw new \Exception('Please enroll some users in any course of this year');
@@ -211,7 +205,6 @@ class ChainRepository implements ChainRepositoryInterface
 
         $active_segments = Segment::Get_current_by_many_types($types);
         
-
         if($request->filled('period')){
             
             if($request->period == 'no_segment')
@@ -224,13 +217,13 @@ class ChainRepository implements ChainRepositoryInterface
                 $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now())->pluck('id');
         }
 
-        if($request->filled('segments')){
-              $active_segments = $request->segments ;
-        }
+        if($request->filled('segments'))
+            $active_segments = $request->segments;
+        
         if(count($active_segments) == 0)
             throw new \Exception('There is no active segment in those types'.$request->type);
 
-        $enrolls->whereIn('segment', $active_segments);
+        // $enrolls->whereIn('segment', $active_segments);
 
         if($request->filled('levels'))
             $enrolls->whereIn('level', $request->levels);
@@ -238,20 +231,26 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('classes'))
             $enrolls->whereIn('group', $request->classes);
 
-        if($request->filled('courses'))
+        // if($request->filled('courses'))
+        //     $enrolls->whereIn('course', $request->courses);
+
+        if($request->filled('courses')){
+            $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
+            $enrolls->whereIn('segment', $Course_segments);
             $enrolls->whereIn('course', $request->courses);
+        }
+
+        if(!$request->filled('courses'))
+            $enrolls->whereIn('segment', $active_segments);
 
         if($request->has('user_id'))
         {
-            if(!$request->user()->can('site/show-all-courses'))
-                $enrolls->where('user_id',Auth::id());
+            // if(!isset($request->user_id))
+            //     $enrolls->where('user_id',Auth::id());
 
             $enrolls->where('user_id',$request->user_id);
         }
 
         return $enrolls;    
     }
-
-
-
 }

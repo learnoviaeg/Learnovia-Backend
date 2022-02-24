@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\attachment;
 use App\Settings;
+use Spatie\Permission\Models\Permission;
 use App\Repositories\SettingsReposiotry;
 
 class SettingsController extends Controller
@@ -309,5 +310,68 @@ class SettingsController extends Controller
 
         // return $attachment;
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
+    }
+
+    public function editor(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:preview,view',
+        ]);
+
+        if($request->status =='view'){
+            $result= [
+                'selector' => 'textarea#open-source-plugins',
+                'plugins' => ['print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons'],
+                'menubar' => 'file edit view insert format tools table help',
+                'toolbar' => 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+                'toolbar_sticky' => true,
+                'autosave_ask_before_unload' => true,
+                'autosave_interval' => '30s',
+                'autosave_prefix' => '{path}{query}-{id}-',
+                'autosave_restore_when_empty' => false,
+                'autosave_retention' => '2m',
+                'image_advtab' => true,
+                'external_plugins' => [
+                'tiny_mce_wiris' => 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js'
+                ],
+                'importcss_append' => true,
+                'content_style' => 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px;height:100% }'
+            ];
+        }
+        else{
+            $result = [
+                'selector' => 'textarea#open-source-plugins',
+                'external_plugins' => [
+                    'tiny_mce_wiris' => 'https://www.wiris.net/demo/plugins/tiny_mce/plugin.js',
+                ],
+                'toolbar' => false,
+                'menubar' => false,
+                'statusbar' => false,
+                'readonly' => 1,
+                'plugins' => [
+                    'preview',
+                    'autoresize',
+                ],
+                'content_style' => "body { margin: 0px;} p { margin: 0;direction: ltr;unicode-bidi: plaintext;  } img{max-width:400px;max-height:250px;}",        
+                'strict_loading_mode' => true
+            ];
+        }
+        return view('editor', compact('result'));
+    }
+
+    public function setPermissionLevel(Request $request)
+    {
+        $domain=substr(env('App_URL'),8,-18);
+        $permi=Permission::where('name','LIKE',"%$domain%")->where('name','NOT LIKE','all')->first();
+        $request->validate([
+            'levels' => 'array',
+            'levels.*' => 'nullable|exists:levels,id'
+        ]);
+
+        $permission=Permission::whereId($permi->id)->update([
+            'allowed_levels' => json_encode($request->levels)
+        ]);
+
+        return response()->json(['message' => 'done', null], 200);
     }
 }
