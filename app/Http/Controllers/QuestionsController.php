@@ -109,8 +109,10 @@ class QuestionsController extends Controller
             $counts = $questions->select(DB::raw
                 (  "COUNT(case `question_type_id` when 4 then 1 else null end) as essay ,
                     COUNT(case `question_type_id` when 1 then 1 else null end) as tf ,
+                    COUNT(case `question_type_id` when 5 then 1 else null end) as paragraph ,
+                    COUNT(case `question_type_id` when 3 then 1 else null end) as matching ,
                     COUNT(case `question_type_id` when 2 then 1 else null end) as mcq" 
-                ))->first()->only(['essay','tf','mcq']);
+                ))->first()->only(['essay','tf','mcq', 'matching', 'paragraph']);
 
             return response()->json(['message' => __('messages.question.count'), 'body' => $counts], 200);
         }
