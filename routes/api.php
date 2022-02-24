@@ -355,6 +355,7 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
         Route::get('bulk-all-get', 'GradeCategoryController@GetGradeCategoryTree')->middleware('permission:grade/category/bulk-all-get');
         Route::get('get-gradecategories', 'GradeCategoryController@getgradecat')->name('singlegradecatgories')->middleware('permission:grade/category/get-gradecategories');
         Route::post('chain-categories', 'GradeCategoryController@getgradecatArray')->name('chaingradecategories')->middleware('permission:grade/category/chain-categories');
+        Route::get('reArrange', 'GradeCategoriesController@reArrange');
     });
 
     Route::group(['prefix' => 'item', 'middleware' => ['auth:api']], function () {
@@ -389,23 +390,6 @@ Route::group(['prefix' => 'grade', 'middleware' => ['auth:api','LastAction']], f
     });
 });
 
-Route::group(['prefix' => 'scale', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'ScaleController@AddScale')->name('addscale')->middleware('permission:scale/add');
-    Route::post('update', 'ScaleController@UpdateScale')->name('updatescale')->middleware('permission:scale/update');
-    Route::post('delete', 'ScaleController@DeleteScale')->name('deletescale')->middleware('permission:scale/delete');
-    Route::get('get', 'ScaleController@GetScale')->name('getscale')->middleware('permission:scale/get');
-    Route::get('get-with-course', 'ScaleController@GetScaleWithCourse')->name('getscale')->middleware('permission:scale/get-with-course');
-});
-
-// Route::group(['prefix' => 'letter', 'middleware' => ['auth:api','LastAction']], function () {
-//     Route::post('add', 'LetterController@add')->name('addletter')->middleware('permission:letter/add');
-//     Route::post('update', 'LetterController@update')->name('updateletter')->middleware('permission:letter/update');
-//     Route::post('delete', 'LetterController@delete')->name('deleteletter')->middleware('permission:letter/delete');
-//     Route::get('get', 'LetterController@get')->name('getletter')->middleware('permission:letter/get');
-//     Route::post('assign', 'LetterController@assignLetterToCourse')->name('assignletter')->middleware('permission:letter/assign');
-//     Route::get('get-with-course', 'LetterController@GetLettersWithCourse')->name('getwithcourse')->middleware('permission:letter/get-with-course');
-// });
-
 Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], function () {
     Route::post('add', 'EventController@create')->name('addevent')->middleware('permission:event/add');
     Route::post('delete', 'EventController@delete')->name('deleteevent')->middleware('permission:event/delete');
@@ -424,7 +408,13 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('full-mark', 'ScriptsController@Full_Mark');
     Route::post('add_user_grades', 'ScriptsController@user_grades');
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
-    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage');
+    Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
+    Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
+    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
+    Route::get('changeLetterName', 'ScriptsController@changeLetterName');
+    Route::get('course_sorting', 'ScriptsController@course_index');
+    Route::get('index_categories', 'ScriptsController@indexCatItem');
+    Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -451,6 +441,7 @@ Route::group(['prefix' => 'h5p', 'middleware' => ['auth:api','LastAction']], fun
 
     });
 });
+
 Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], function () {
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
@@ -495,6 +486,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('courses', CoursesController::class);
     Route::post('courses/{id}', 'CoursesController@update');
     Route::post('course/template', 'CoursesController@Apply_Template')->middleware(['permission:course/template']);
+    Route::post('course/sort', 'CoursesController@sort')->middleware(['permission:course/sort']);
+    
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
 
@@ -527,11 +520,16 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('announcement_overall_seen', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
     Route::get('announcement_overall_seen/{option}', 'SeenReportController@announcementsSeenReport')->middleware('permission:reports/overall_seen_report');
 
+    Route::Resource('scale', ScaleController::class);
+    Route::get('course_scale', 'ScaleController@scales_per_course')->name('getscale')->middleware('permission:grade/scale/course');
+
+
+
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
         Route::post('logo-update', 'SettingsController@updateLogo')->middleware('permission:settings/logo');
         Route::get('logo-get', 'SettingsController@getLogo');
-        Route::post('permission-level', 'SettingsController@setPermissionLevel');
+        Route::post('permission-level', 'SettingsController@setPermissionLevel');//->middleware('permission:report_card/allow_levels');
         Route::get('logo-delete', 'SettingsController@deleteLogo')->middleware('permission:settings/logo');
         Route::post('update', 'SettingsController@update')->middleware('permission:settings/extensions|settings/create_assignment_extensions|settings/submit_assignment_extensions|settings/upload_media_extensions|settings/upload_file_extensions');
         Route::post('grade-pass', 'QuizzesController@Grade_pass_settings')->middleware('permission:settings/grade_pass');
@@ -548,8 +546,15 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grader-setup', 'GraderReportController@grade_setup');
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
     Route::Resource('user-grade', UserGradeController::class);
+    Route::get('grade/export', 'UserGradeController@export')->name('exportGrade')->middleware('permission:grade/export');
+    Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware('permission:grade/report/user');
+    
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
+    Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
+    Route::delete('session', 'AttendanceSessionController@deleteAll');
+    Route::get('session/logs', 'AttendanceSessionController@LogsAttendance');
+    Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);
 
@@ -570,11 +575,16 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::Resource('logs', LogsController::class);
 });
 
-
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
-    Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgl');
+    Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgls');
+    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain');
+    Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
+    Route::get('manara', 'ReportCardsController@manaraReport');
+    Route::post('manara-all', 'ReportCardsController@manaraReportAll');
+    Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
+    Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
+    Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
 });
 
-
-
-
+//script for front-end editor
+Route::get('editor' , 'SettingsController@editor');

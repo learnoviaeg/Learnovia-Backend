@@ -9,7 +9,7 @@ use Modules\Attendance\Entities\AttendanceSession;
 class Course extends Model
 {
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
-    'is_template','classes', 'letter_id'];
+    'is_template','classes', 'letter_id','shared_lesson', 'index'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\CourseCreatedEvent::class,
@@ -38,6 +38,7 @@ class Course extends Model
     protected $hidden = [
         'created_at', 'updated_at',
     ];
+    
     public function category(){
         return $this->belongsTo('App\Category');
     }
@@ -94,5 +95,10 @@ class Course extends Model
     public function letter()
     {
         return $this->belongsTo('App\Letter', 'letter_id', 'id');
+    }
+
+    public function Scale()
+    {
+        return $this->hasMany('App\course_scales','course_id','id');
     }
 }

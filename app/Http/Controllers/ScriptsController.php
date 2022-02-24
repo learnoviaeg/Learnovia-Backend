@@ -4,20 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Course;
+use App\Segment;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
+use App\LetterDetails;
+use Modules\QuestionBank\Entities\QuestionsCategory;
 use Modules\QuestionBank\Entities\userQuiz;
 use App\GradeItems;
 use Auth;
+use App\Jobs\migrateChainAmdEnrollment;
 use Carbon\Carbon;
 use App\UserGrader;
 use App\Enroll;
+use App\lesson;
 use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
+use App\Level;
 
 class ScriptsController extends Controller
 {
@@ -226,7 +232,7 @@ class ScriptsController extends Controller
         $request->validate([
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            ]);
+        ]);
         $courses = Course::whereIn('id', $request->courses)->with('gradeCategory')->get();
         foreach($courses as $course)
         {
@@ -259,10 +265,162 @@ class ScriptsController extends Controller
 
     public function update_letter_percentage(Request $request)
     {
-        foreach(Course::whereNotNull('letter_id')->cursor() as $course){
-            $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation($course));
-            dispatch($userGradesJob);
+        $request->validate([
+            'course'  => 'required|integer|exists:courses,id',
+        ]);
+        $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course)->first()));
+        dispatch($userGradesJob);
+        return 'done';
+    }
+
+    public function MigrateChainWithEnrollment(Request $request)
+    {
+        $request->validate([
+            'segment_id'  => 'required|exists:segments,id',
+        ]);
+
+        // $migrated = (new \App\Jobs\migrateChainAmdEnrollment($request->segment_id));
+        // dispatch($migrated);
+        // dd($migrated);
+
+        $newSegment=Segment::find($request->segment_id);
+        $type=$newSegment->academic_type_id;
+        $oldSegment=Segment::Get_current_by_one_type($type);
+        $courses=Course::where('segment_id',$oldSegment)->get();
+
+        foreach($courses as $course)
+        {
+            if(Course::where('segment_id',$newSegment->id)->where('short_name',$course->short_name . "_" .$newSegment->name)->count() > 0)
+                continue;
+                
+            $coco=Course::firstOrCreate([
+                'name' => $course->name. "_" .$newSegment->name,
+                'short_name' => $course->short_name . "_" .$newSegment->name],[
+                'image' => $course->getOriginal()['image'],
+                'category_id' => $course->category,
+                'description' => $course->description,
+                'mandatory' => $course->mandatory,
+                'level_id' => $course->level_id,
+                'is_template' => $course->is_template,
+                'classes' => json_encode($course->classes),
+                'segment_id' => $newSegment->id,
+                'letter_id' => $course->letter_id
+            ]);
+
+            for ($i = 1; $i <= 4; $i++) {
+                $lesson=lesson::firstOrCreate([
+                    'name' => 'Lesson ' . $i,
+                    'index' => $i,
+                    'shared_lesson' => 1,
+                    'course_id' => $coco->id,
+                    'shared_classes' => json_encode($course->classes),
+                ]);
+            }
+
+            //Creating defult question category
+            $quest_cat = QuestionsCategory::firstOrCreate([
+                'name' => $coco->name . ' Category',
+                'course_id' => $coco->id,
+            ]);
+
+            $gradeCat = GradeCategory::firstOrCreate([
+                'name' => $coco->name . ' Total',
+                'course_id' => $coco->id,
+                'calculation_type' => json_encode(['Natural']),
+            ]);
+
+            $enrolls=Enroll::where('course',$course->id)->whereIn('segment',$oldSegment->toArray())->where('type',$type)->get()->unique();
+            foreach($enrolls as $enroll)
+            {
+                $f=Enroll::firstOrCreate([
+                    'user_id' => $enroll->user_id,
+                    'role_id'=> $enroll->role_id,
+                    'year' => $enroll->year,
+                    'type' => $type,
+                    'level' => $enroll->level,
+                    'group' => $enroll->group,
+                    'segment' => $newSegment->id,
+                    'course' => $coco->id
+                ]);
+            }
+        }
+
+        return 'Done';
+    }
+
+    public function delete_duplicated(Request $request)
+    {
+        $request->validate([
+            'segment_id'  => 'required|exists:segments,id',
+        ]);
+        
+        foreach(Course::where('segment_id',$request->segment_id)->cursor() as $course)
+        {
+            if(count(Course::where('short_name',$course->short_name)->get()) > 1)
+                Course::where('short_name',$course->short_name)->first()->delete();
+        }
+
+        return 'Done';
+    }
+
+    public function changeLetterName(Request $request)
+    {
+        LetterDetails::where('evaluation','Passed')->update(['evaluation' => 'Fair']);
+        UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
+        return 'Done';
+    }
+
+    public function course_index(Request $request)
+    {
+        foreach(Level::select('id')->cursor() as $level){
+            foreach(Course::where('level_id',$level->id)->cursor() as $key => $course){
+                $course->update([ 'index' => $key+1 ]);;
+            }
         }
         return 'done';
+    }
+
+    public function indexCatItem(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course)
+        {
+            $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
+            $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
+            self::index($grades);
+        }
+
+        return 'Done';
+    }
+
+    public function index($gradeCat)
+    {
+        $index=1;
+        foreach($gradeCat as $grade)
+        {
+            if($grade->index == null)
+            {
+                $grade->index=$index;
+                $grade->save();
+                if(count($grade->categories_items) >= 1)
+                    self::index($grade->categories_items);
+    
+                $index++;
+            }
+        }
+    }
+
+    public function ongoingPastCoursesIssue(Request $request)
+    {
+        foreach(Course::cursor() as $course){
+            $enrolled_students = Enroll::where('course', $course->id)->where('segment', '!=' , $course->segment_id);
+            if($enrolled_students->count() > 0)
+                $enrolled_students->delete();
+        }
+        return 'Done';
     }
 }

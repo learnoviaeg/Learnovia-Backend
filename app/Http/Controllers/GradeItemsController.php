@@ -9,6 +9,8 @@ use App\UserGrader;
 use App\Enroll;
 use App\Events\GraderSetupEvent;
 use App\Jobs\RefreshUserGrades;
+use App\scale;
+use App\ScaleDetails;
 
 use Illuminate\Http\Request;
 
@@ -57,8 +59,10 @@ class GradeItemsController extends Controller
             'name' => 'required|string',
             'grade_category_id' => 'required_without:course|exists:grade_categories,id',
             'min'=>'between:0,100',
-            'max'=>'between:0.1,100',
+            'max'=>'required_if:aggregation,==,Value|between:0.1,100',
             'weight_adjust' => 'boolean',
+            'aggregation' => 'required|in:Value,Scale',
+            'scale_id' => 'required_if:aggregation,==,Scale|exists:scales,id',
             'locked' => 'boolean',
             'hidden' => 'boolean',
         ]);
@@ -70,18 +74,26 @@ class GradeItemsController extends Controller
             $course = $request->course;
             $category = GradeCategory::whereNull('parent')->where('course_id',$request->course)->first();
         }
+
+        if($request->filled('scale_id')){
+            $scale = scale::find($request->scale_id);
+            $max_grade = $scale->details()->max('grade');
+        }
+
         $item = GradeCategory::create([
             'name' => $request->name,
             'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $category->id,
             'type' => 'item',
             'locked' =>isset($request->locked) ? $request->locked : 0,
             'min' =>isset($request->min) ? $request->min : 0,
-            'max' =>isset($request->max) ? $request->max : null,
+            'max' =>isset($max_grade) ? $max_grade : $request->max,
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
             'weights' =>isset($request->weight) ? $request->weight : NULL,
             'hidden' =>isset($request->hidden) ? $request->hidden : 0,
             'item_type' => 'Manual',
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : 'Value',
             'course_id' => $course,
+            'scale_id' => isset($request->scale_id) ? $request->scale_id : NULL,
         ]);    
         $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
         foreach($enrolled_students as $student){
@@ -123,14 +135,26 @@ class GradeItemsController extends Controller
         $request->validate([
             'name' => 'string',
             'grade_category_id' => 'exists:grade_categories,id',
+            'aggregation' => 'in:Value,Scale',
+            'scale_id' => 'required_if:aggregation,==,Scale|exists:scales,id',
         ]);
+
         $grade_items = GradeCategory::findOrFail($id);
         if($grade_items->item_type == 'Attendance')
             return response()->json(['message' => __('messages.error.not_allowed_to_delete'), 'body' => null ], 404);
         
         if($request->filled('grade_category_id'))
             event(new GraderSetupEvent($grade_items->Parents)); 
+
+        if($request->filled('scale_id')){
+            $scale = scale::find($request->scale_id);
+            $max_grade = $scale->details()->max('grade');
+        }
+
+        if($request->max)
+            $max_grade = $request->max;
         
+
         $old_parent = GradeCategory::findOrFail($grade_items->parent);
         $grade_items->update([
             'name'   => isset($request->name) ? $request->name : $grade_items['name'],
@@ -138,9 +162,12 @@ class GradeItemsController extends Controller
             'hidden' => isset($request->hidden) ? $request->hidden : $grade_items['hidden'],
             'locked' =>isset($request->locked) ? $request->locked  : $grade_items['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_items['min'],
-            'max' =>isset($request->max) ? $request->max : $grade_items['max'],
+            'max' =>isset($max_grade) ? $max_grade : $grade_items['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_items['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_items['weight'],
+            'aggregation' =>isset($request->aggregation) ? $request->aggregation : $grade_items['aggregation'],
+            'scale_id' => isset($request->scale_id) ? $request->scale_id : $grade_items['scale_id'],
+
         ]);
 
         $userGradesJobOld = (new \App\Jobs\RefreshUserGrades($this->chain , $old_parent));

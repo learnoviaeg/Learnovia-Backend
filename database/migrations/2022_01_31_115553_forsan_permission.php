@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DropNotificationsTable extends Migration
+class ForsanPermission extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,10 @@ class DropNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::drop('notifications');
+        Artisan::call('db:seed', [
+            '--class' => 'PermissionSeeder',
+            '--force' => true 
+        ]);
     }
 
     /**
@@ -23,6 +26,6 @@ class DropNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('notifications');
+        //
     }
 }

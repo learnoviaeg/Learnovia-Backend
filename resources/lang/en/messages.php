@@ -215,9 +215,12 @@ return [
         'add' => 'Session added successfully',
         'update' => 'Session updated successfully',
         'delete' => 'Session deleted successfully',
+        'delete_all' => 'All Sessions deleted successfully',
         'list' => 'Sessions list',
         'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',
+        'cannot_add' => 'You can\'t add session please change the date',
+        'wrong_day' => 'please choose correct end_date'
     ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
@@ -235,7 +238,7 @@ return [
 
         'record' => [
             'list' => 'Virtual classrooms records list',
-            'no_records' => 'No records found',
+            'no_records' => 'No records found', 
         ],
 
         'attendnace' => [
@@ -339,6 +342,7 @@ return [
         'delete' => 'Grade category deleted successfully',
         'not_found' => 'Can\'t find grade category',
         'CannotUpdate' => 'you can\'t update this category',
+        'category_cannot_deleted' => 'Can\'t delete this category, please delete quiz',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
@@ -355,5 +359,20 @@ return [
     ],
     'user_grade' => [
         'update' => 'Grade is updated succefully',
+    ],
+    'letter' => [
+        'add' => 'Letter added successfully',
+        'delete' => 'Letter deleted successfully',
+        'update' => 'Letter updated Successfully',
+        'list' => 'Letter'
+    ],
+    'scale' => [
+        'add' => 'Scale added successfully',
+        'delete' => 'Scale deleted successfully',
+        'update' => 'Scale updated Successfully',
+        'list' => 'Scale',
+        'course' => 'Scales of a course',
+        'cannot_update' => 'Only name can be edited because the scale is assigned to grade category ',
+        'cannot_delete' => 'Cannot be deleted because the scale is assigned to grade category',
     ],
 ];

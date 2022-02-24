@@ -279,8 +279,8 @@ class AttemptsController extends Controller
                 {
                     if($question->question_type_id == 5)
                     {
-                        foreach($quest as $child)
-                            userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$child]);
+                        foreach($question->children as $child)
+                            userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$child->id]);
                     }
                     else // because parent question(comprehension) not have answer
                         $dd=userQuizAnswer::firstOrCreate(['user_quiz_id'=>$last_attempt->id,'question_id'=>$question->id]);

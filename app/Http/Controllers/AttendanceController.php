@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Attendance;
 use Auth;
+use App\Enroll;
+use App\UserGrader;
 use App\GradeCategory;
+use App\AttendanceLevel;
+use App\AttendanceCourse;
 
 class AttendanceController extends Controller
 {
@@ -13,8 +17,8 @@ class AttendanceController extends Controller
     {
         $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
-        $this->middleware(['permission:attendance/get'],   ['only' => ['update']]);
-        $this->middleware(['permission:attendance/edit'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
+        $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
 
     /**
@@ -32,8 +36,8 @@ class AttendanceController extends Controller
             'level_id' => 'exists:levels,id',
             'course_id' => 'exists:courses,id',
             'grade_cat_id' => 'exists:grade_categories,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'start_date' => 'date',
+            'end_date' => 'date|after:start_date',
         ]);
         $attendance=Attendance::where('id', '!=', null);
 
@@ -46,17 +50,8 @@ class AttendanceController extends Controller
         if(isset($request->type_id))
             $attendance->where('type_id',$request->type_id);
 
-        if(isset($request->level_id))
-            $attendance->where('level_id',$request->level_id);
-
         if(isset($request->segment_id))
             $attendance->where('segment_id',$request->segment_id);
-
-        if(isset($request->course_id))
-            $attendance->where('course_id',$request->course_id);
-
-        if(isset($request->grade_cat_id))
-            $attendance->where('grade_cat_id',$request->grade_cat_id);
 
         if(isset($request->start_date))
             $attendance->where('start_date','>=', $request->start_date);
@@ -64,7 +59,19 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
-        return HelperController::api_response_format(200 , $attendance->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance.list'));
+        $all=[];
+        foreach($attendance->cursor() as $attendeence){
+            $callback = function ($qu) use ($request,$attendeence) {
+                $qu->whereIn('id',$attendeence->courses->pluck('id')->toArray());
+                if(isset($request->course_id))
+                    $qu->where('id',$request->course_id);
+            };
+            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback , 'attendanceStatus'])->first();
+            if(isset($check))
+                $all[]=$check;
+        }
+
+        return HelperController::api_response_format(200 , collect($all)->paginate(HelperController::GetPaginate($request)) , __('messages.attendance.list'));
     }
 
     /**
@@ -92,9 +99,8 @@ class AttendanceController extends Controller
             'end_date' => 'required|date|after:start_date',
             'min_grade' => 'nullable',
             'gradeToPass' => 'nullable',
-            'max_grade' => 'required',
+            'max_grade' => 'required_if:is_graded,==,1',
         ]);
-
 
         foreach($request->attendance as $attend)
         {
@@ -109,16 +115,22 @@ class AttendanceController extends Controller
                         'year_id' => $request->year_id,
                         'type_id' => $request->type_id,
                         'segment_id' => $request->segment_id,
-                        'level_id' => $attend['level_id'], //$level
-                        'course_id' => $attend['course_id'], //$course
                         'is_graded' => $request->is_graded,
-                        'grade_cat_id' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
                         'start_date' =>  $request->start_date,
                         'end_date' => $request->end_date,
-                        'min_grade' =>  $request->min_grade,
-                        'gradeToPass' => $request->gradeToPass,
-                        'max_grade' => $request->max_grade,
-                        'created_by' => Auth::id()
+                        'min_grade' =>  ($request->is_graded==1) ? $request->min_grade : null,
+                        'gradeToPass' => ($request->is_graded==1) ? $request->gradeToPass : null,
+                        'max_grade' => ($request->is_graded==1) ? $request->max_grade : null ,
+                        'created_by' => Auth::id(),
+                        'attendance_status' => 1
+                    ]);
+
+                    $attendance->levels()->sync($attend['level_id'],false); //b t3mel duplicate
+
+                    AttendanceCourse::firstOrCreate([
+                        'course_id' => $attend['course_id'],
+                        'grade_cat_id' => ($request->is_graded == 1) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'attendance_id' => $attendance->id
                     ]);
 
                     $gradeCat = GradeCategory::firstOrCreate([
@@ -128,11 +140,27 @@ class AttendanceController extends Controller
                         'instance_type' => 'Attendance',
                         'item_type' => 'Attendance',
                         'type' => 'item',
-                        'parent' => isset($attend['grade_cat_id']) ? $attend['grade_cat_id']: $top_parent_category->id,
-                        'max'    => $request->max_grade,
+                        'parent' => ($request->is_graded ==1) ? $attend['grade_cat_id']: $top_parent_category->id,
+                        'max'    => ($request->is_graded ==1) ? $request->max_grade :null,
                         'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
+
+                    $gradeCat->index=GradeCategory::where('parent',$gradeCat->parent)->max('index')+1;
+                    $gradeCat->save();
+
+                    $users = Enroll::where('role_id',3)->where('course',$attend['course_id'])->pluck('user_id');
+                    foreach($users as $user_id)
+                    {
+                        UserGrader::firstOrCreate([
+                            'user_id'   => $user_id,
+                            'item_type' => 'Item',
+                            'item_id'   => $gradeCat->id
+                        ],
+                        [
+                            'grade'     => null
+                        ]);
+                    } 
                 // }
             // }
         }
@@ -148,7 +176,14 @@ class AttendanceController extends Controller
      */
     public function show($id)
     {
-        $attendance=Attendance::find($id);
+        $attend=Attendance::find($id);
+
+        $callback = function ($qu) use ($attend) {
+            $qu->whereIn('id',$attend->courses->pluck('id')->toArray());
+        };
+
+        $attendance=Attendance::whereId($id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback, 'attendanceStatus'])->first();
+
         return HelperController::api_response_format(200 , $attendance , null);
     }
 
@@ -167,9 +202,12 @@ class AttendanceController extends Controller
             'year_id' => 'exists:academic_years,id',
             'type_id' => 'exists:academic_types,id',
             'segment_id' => 'exists:segments,id',
-            'level_id' => 'exists:levels,id',
-            'course_id' => 'exists:courses,id',
-            'grade_cat_id' => 'exists:grade_categories,id',
+            'attendance' => 'array',
+            'attendance.*.level_id' => 'exists:levels,id',
+            // 'attendance.*.level_id.*' => 'exists:levels,id', //will be array
+            'attendance.*.course_id' => 'exists:courses,id',
+            // 'attendance.*.course_id.*' => 'exists:courses,id', //will be array
+            'attendance.*.grade_cat_id' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'is_graded' => 'in:0,1',
             'start_date' => 'date',
             'end_date' => 'date|after:start_date',
@@ -179,23 +217,28 @@ class AttendanceController extends Controller
         ]);
 
         $attendance=Attendance::find($id);
-        // dd($attendance->attendance_type);
 
         $attendance->update([
-            'name' => ($request->name) ? $request->name : $attendance->name,
-            'attendance_type' => ($request->attendance_type) ? $request->attendance_type : $attendance->attendance_type,
-            'year_id' => ($request->year_id) ? $request->year_id : $attendance->year_id,
-            'type_id' => ($request->type_id) ? $request->type_id : $attendance->type_id,
-            'segment_id' => ($request->segment_id) ? $request->segment_id : $attendance->segment_id,
-            'level_id' => ($request->level) ? $request->level : $attendance->level_id,
-            'course_id' => ($request->course) ? $request->course : $attendance->course_id,
-            'is_graded' => ($request->is_graded) ? $request->is_graded : $attendance->is_graded,
-            'grade_cat_id' => ($request->grade_cat_id) ? $request->grade_cat_id : $attendance->grade_cat_id,
-            'start_date' =>  ($request->start_date) ? $request->start_date : $attendance->start_date,
-            'end_date' => ($request->end_date) ? $request->end_date : $attendance->end_date,
-            'min_grade' =>  ($request->min_grade) ? $request->min_grade : $attendance->min_grade,
-            'gradeToPass' => ($request->gradeToPass) ? $request->gradeToPass : $attendance->gradeToPass,
-            'max_grade' => ($request->max_grade) ? $request->max_grade : $attendance->max_grade,
+            'name' => isset($request->name) ? $request->name : $attendance->name,
+            'attendance_type' => isset($request->attendance_type) ? $request->attendance_type : $attendance->attendance_type,
+            'year_id' => isset($request->year_id) ? $request->year_id :  $attendance->year_id,
+            'type_id' => isset($request->type_id) ? $request->type_id : $attendance->type_id,
+            'segment_id' => isset($request->segment_id)? $request->segment_id : $attendance->segment_id,
+            'is_graded' => isset($request->is_graded) ? $request->is_graded : $attendance->is_graded,
+            'start_date' =>  isset($request->start_date) ? $request->start_date : $attendance->start_date,
+            'end_date' => isset($request->end_date) ? $request->end_date : $attendance->end_date,
+            'min_grade' =>  isset($request->min_grade) ? $request->min_grade : $attendance->min_grade,
+            'gradeToPass' => isset($request->gradeToPass) ? $request->gradeToPass: $attendance->gradeToPass,
+            'max_grade' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
+            'created_by' => $attendance->created_by 
+        ]);
+
+        $gradeCat = GradeCategory::where('instance_type','Attendance') -> where('type','item')
+                        ->where('instance_id',$attendance->id)->update([
+            'name' => isset($request->name) ? $request->name : $attendance->name,
+            'max' => isset($request->max_grade) ? $request->max_grade : $attendance->max_grade,
+            'weight_adjust' => ((bool) $request->is_graded == false) ? 1 : 0,
+            'weights' => ((bool) $request->is_graded == false) ? 0 : null,
         ]);
 
         return HelperController::api_response_format(200 , null , __('messages.attendance.update'));
