@@ -106,16 +106,13 @@ class AttendanceSessionController extends Controller
             'repeated_until' => 'required_if:repeated,==,1|date'
         ]);
         $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
-        $attendance=Attendance::where('id',$request->attendance_id)
-                ->whereDate('start_date', '<=', $request->start_date)
-                ->whereDate('end_date', '>=', $request->start_date)
-                ->first();
-        if(!isset($attendance))
-            return HelperController::api_response_format(200 , null , __('messages.attendance_session.cannot_add'));
+        $attendance=Attendance::find($request->attendance_id);
+        if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date'));
 
         $repeated_until=$request->repeated_until;
-        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->start_date))
-            $repeated_until=$attendance->end_date;
+        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date'));
 
         if($request->repeated == 1)
         {
