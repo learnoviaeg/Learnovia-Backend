@@ -11,11 +11,13 @@ use App\UserGrader;
 use App\SessionLog;
 use App\Events\TakeAttendanceEvent;
 use Auth;
+use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
 {
-    public function __construct()
+    public function __construct(ChainRepositoryInterface $chain)
     {
+        $this->chain = $chain;
         $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
         $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
@@ -43,6 +45,13 @@ class AttendanceSessionController extends Controller
         if(isset($request->attendance_id))
             $attendanceSession->where('attendance_id',$request->attendance_id);
 
+        if(isset($request->years))
+        {
+            $enrolls = $this->chain->getEnrollsByManyChain($request);
+            $classes=$enrolls->pluck('group')->unique();
+            $attendanceSession->whereIn('class_id',$classes);
+        }
+
         if(isset($request->class_id))
             $attendanceSession->where('class_id',$request->class_id);
 
@@ -52,7 +61,6 @@ class AttendanceSessionController extends Controller
         if(isset($request->filter))
             $attendanceSession->whereMonth('start_date', $request->filter);
 
-        // dd(Carbon::now()->format('m'));
         if(isset($request->current))
         {
             if($request->current == 'day')
