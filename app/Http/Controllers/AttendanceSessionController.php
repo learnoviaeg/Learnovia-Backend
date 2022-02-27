@@ -126,9 +126,6 @@ class AttendanceSessionController extends Controller
                 $attendancestart=(carbon::parse($request->start_date)->addDays(
                     array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
-                if($attendancestart > Carbon::parse($repeated_until) )
-                    return HelperController::api_response_format(200 , null , __('messages.attendance_session.wrong_day'));
-
                 while($attendancestart <= Carbon::parse($repeated_until)){
                     $attendance=AttendanceSession::firstOrCreate([
                         'name' => $request->name,
