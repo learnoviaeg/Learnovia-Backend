@@ -586,7 +586,7 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
     Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
     Route::get('fgl-prep3', 'ReportCardsController@fglPrep3Report')->middleware('permission:report_card/fgls');
-    Route::get('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
+    Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
 });
 
 //script for front-end editor
