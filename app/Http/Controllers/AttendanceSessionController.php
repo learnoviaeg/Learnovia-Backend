@@ -7,6 +7,9 @@ use App\AttendanceSession;
 use App\Attendance;
 use App\GradeCategory;
 use Carbon\Carbon;
+use App\Exports\AttendanceLogsExport;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
 use App\Events\TakeAttendanceEvent;
@@ -108,11 +111,11 @@ class AttendanceSessionController extends Controller
         $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
         $attendance=Attendance::find($request->attendance_id);
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
-            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date'));
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
 
         $repeated_until=$request->repeated_until;
         if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
-            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date'));
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
 
         if($request->repeated == 1)
         {
@@ -267,12 +270,23 @@ class AttendanceSessionController extends Controller
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }
 
-    public function LogsAttendance(Request $request)
+    public function LogsAttendance(Request $request,$export=0)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id'
         ]);
-        $all=SessionLog::where('session_id',$request->session_id)->with('user')->get();
+        $all=SessionLog::where('session_id',$request->session_id)->with('user','session')->get();
+        if($export == 1)
+            return $all;
+        
         return HelperController::api_response_format(200 , $all,null);
+    }
+
+    public function exportLogs(Request $request)
+    {
+        $allLogs=self::LogsAttendance($request,1);
+        $file = Excel::store(new AttendanceLogsExport($allLogs), 'AttendanceLogs.xlsx','public');
+        $file = url(Storage::url('AttendanceLogs.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }
