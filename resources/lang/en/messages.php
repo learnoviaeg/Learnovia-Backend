@@ -219,8 +219,8 @@ return [
         'list' => 'Sessions list',
         'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',
-        'invalid_end_date' => 'end date must between ',
-        'invalid_start_date' => 'start date must between ',
+        'invalid_end_date' => 'end date must be between ',
+        'invalid_start_date' => 'start date must be between ',
     ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
