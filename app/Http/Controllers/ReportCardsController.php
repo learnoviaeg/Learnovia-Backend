@@ -522,7 +522,7 @@ class ReportCardsController extends Controller
             };
     
             $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
-                            ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type'])->first();
+                            ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type', 'enroll.classes'])->first();
             if($result != null)
                 $result_collection->push($result);
         }
