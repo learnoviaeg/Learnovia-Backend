@@ -111,11 +111,11 @@ class AttendanceSessionController extends Controller
         $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
         $attendance=Attendance::find($request->attendance_id);
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
-            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
 
         $repeated_until=$request->repeated_until;
         if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
-            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
 
         if($request->repeated == 1)
         {
