@@ -232,7 +232,7 @@ class AuthController extends Controller
             $user->picture = $user->attachment->path;
 
         $user['level']=Level::find(Enroll::where('user_id',Auth::id())->pluck('level')->first());  
-        $user['class']=classes::find(Enroll::where('user_id',Auth::id())->pluck('group')->first());  
+        $user['class']=Classes::find(Enroll::where('user_id',Auth::id())->pluck('group')->first());  
         $user->setHidden(['password']);
 
         return HelperController::api_response_format(200, $user);
