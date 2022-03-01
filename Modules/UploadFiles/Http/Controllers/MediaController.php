@@ -37,7 +37,7 @@ class MediaController extends Controller
      */
     public function __construct(SettingsReposiotryInterface $setting)
     {
-        $this->setting = $setting;        
+        $this->setting = $setting;
     }
 
     public function getAllMedia(Request $request)
@@ -141,7 +141,9 @@ class MediaController extends Controller
             'type' => 'required|in:0,1',
             'name' => 'required',
             'show' => 'nullable|in:0,1',
-            'visible' =>'in:0,1'
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ];
 
         $customMessages = [
@@ -153,7 +155,7 @@ class MediaController extends Controller
                 'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' .__('messages.error.extension_not_supported')
             ];
         }
-    
+
         $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
@@ -298,7 +300,7 @@ class MediaController extends Controller
                 'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
             ];
         }
-    
+
         $this->validate($request, $rules, $customMessages);
 
         $media = media::find($request->id);
@@ -325,7 +327,7 @@ class MediaController extends Controller
             $media->link = $request->url;
             $media->size = null;
             $media->type = null;
-        } 
+        }
 
         if ($request->filled('description'))
             $media->description = $request->description;
@@ -538,7 +540,7 @@ class MediaController extends Controller
         $customMessages = [
             'exists' => __('messages.error.item_deleted')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
         $Media = media::with('MediaLesson')->find($request->id);
         if( $request->user()->can('site/course/student') && $Media->MediaLesson->visible==0)

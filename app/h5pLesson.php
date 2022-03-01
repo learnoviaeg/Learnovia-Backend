@@ -23,8 +23,8 @@ class h5pLesson extends Model
         $user_seen = 0;
         if($this->seen_number != 0)
             $user_seen = UserSeen::where('type','h5p')->where('item_id',$this->content_id)->where('lesson_id',$this->lesson_id)->count();
-            
-        return $user_seen;  
+
+        return $user_seen;
     }
 
     public function user(){
@@ -38,6 +38,10 @@ class h5pLesson extends Model
     public function lesson()
     {
         return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'h5pLesson');
     }
 
 }

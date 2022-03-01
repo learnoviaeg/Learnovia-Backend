@@ -42,7 +42,7 @@ class FilesController extends Controller
      */
     public function __construct(SettingsReposiotryInterface $setting)
     {
-        $this->setting = $setting;        
+        $this->setting = $setting;
     }
 
     public function install_file()
@@ -225,13 +225,15 @@ class FilesController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
-            'visible' =>'in:0,1'
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ];
 
         $customMessages = [
             'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
@@ -404,7 +406,7 @@ class FilesController extends Controller
                 'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
             ];
         }
-    
+
         $this->validate($request, $rules, $customMessages);
 
         $file = file::find($request->id);
@@ -434,7 +436,7 @@ class FilesController extends Controller
             } else {
                 $publishdate = Carbon::parse($request->publish_date);
             }
-            
+
             $fileLesson->update([
                 'publish_date' => $publishdate,
             ]);
@@ -444,7 +446,7 @@ class FilesController extends Controller
                 'visible' => $request->visible,
             ]);
           }
-        
+
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }
@@ -590,7 +592,7 @@ class FilesController extends Controller
         $customMessages = [
             'exists' => __('messages.error.item_deleted')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
         $File = file::with('FileLesson')->find($request->id);
         if( $request->user()->can('site/course/student') && $File->FileLesson->visible==0)
@@ -651,7 +653,7 @@ class FilesController extends Controller
             $Allmaterials[] =  $material;
         }
         foreach($materials['media'] as $media){
-            $mediaObj=media::find($media->media_id); 
+            $mediaObj=media::find($media->media_id);
             $material = collect([]);
             $material['item_id'] = $media->media_id;
             $material['name'] =$mediaObj->name;
@@ -663,7 +665,7 @@ class FilesController extends Controller
             $material['link'] = $mediaObj->link;
             $material['mime_type']= ($mediaObj->show&&$mediaObj->type==null )?'media link':$mediaObj->type;
             $Allmaterials[] =  $material;
-        
+
         }
         $Allmaterials = collect($Allmaterials)->sortBy('publish_date')->values();
         Material::insert($Allmaterials->toArray());
@@ -701,16 +703,16 @@ class FilesController extends Controller
             $storage = Storage::disk('public');
             // File::append($path, $request->file);
             file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
-            
+
             if ($request->has('is_last') && $request->boolean('is_last')) {
                 $name = basename($path, '.part');
-    
+
                 File::move($path, "public/$uncomplete_file->id/{$uncomplete_file->name}");
             }
-    
+
         }
 
-     
+
         return response()->json(['message' => null ,'body' => null], 200);
     }
 

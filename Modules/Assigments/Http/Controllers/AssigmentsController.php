@@ -55,7 +55,8 @@ use App\Events\UserGradesEditedEvent;
 use App\UserGrader;
 use App\Jobs\RefreshUserGrades;
 use App\Repositories\ChainRepositoryInterface;
-    
+use App\Helpers\CoursesHelper;
+
 class AssigmentsController extends Controller
 {
     protected $setting;
@@ -240,6 +241,8 @@ class AssigmentsController extends Controller
             'name' => 'required|string',
             'content' => 'string|required_without:file',
             'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ];
 
         $customMessages = [
@@ -258,6 +261,10 @@ class AssigmentsController extends Controller
         $assignment->name = $request->name;
         $assignment->created_by = Auth::id();
         $assignment->save();
+
+        if(isset($request->users_ids))
+            CoursesHelper::giveUsersAccessToViewCourseItem($assignment->id, 'assignment', $request->users_ids);
+
         return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
@@ -271,7 +278,12 @@ class AssigmentsController extends Controller
             'name' => 'string',
             'file_description' => 'string',
             'content'  => 'string',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ]);
+
+        //update students accessibility
+        CoursesHelper::updateCourseItem($request->id, 'assignment', $request->users_ids);
 
         $assigment = assignment::find($request->id);
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');
@@ -354,13 +366,13 @@ class AssigmentsController extends Controller
         ]);
         $AssignmentLesson->save();
         $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$AssignmentLesson->lesson_id)->pluck('user_id');
-       
-        //update assignment category        
+
+        //update assignment category
         if($assignment_category->count() > 0 )
             $assignment_category->update([
                 'lesson_id' => $request->updated_lesson_id
             ]);
-            
+
 
         if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
             $old_students = UserAssigment::where('assignment_lesson_id', $AssignmentLesson->id)->delete();
@@ -373,7 +385,7 @@ class AssigmentsController extends Controller
                 $userassigment->save();
             }
         }
-           
+
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($AssignmentLesson));
 
@@ -566,7 +578,7 @@ class AssigmentsController extends Controller
                         ['status_id' => 2,
                         'override' => 0, ]);
 
-        
+
 
         if ($assilesson->mark < $request->grade) {
             return HelperController::api_response_format(400, $body = [], $message = __('messages.error.grade_less_than') . $assilesson->mark);
@@ -590,7 +602,7 @@ class AssigmentsController extends Controller
         //recalculating grades
         $grade_category = GradeCategory::where('instance_id', $request->assignment_id)->where('item_type', 'Assignment')->where('instance_type', 'Assignment')
                             ->where('type' , 'item')->where('lesson_id', $request->lesson_id);
-                            
+
         if($grade_category->count() > 0){
             $percentage = 0;
             $assignment_category = $grade_category->first();
@@ -606,7 +618,7 @@ class AssigmentsController extends Controller
             event(new UserGradesEditedEvent(User::find($request->user_id) , $assignment_category->Parents));
         }
 
-      
+
         return HelperController::api_response_format(200, $body = $userassigment, $message = __('messages.grade.graded'));
     }
 
@@ -893,9 +905,9 @@ class AssigmentsController extends Controller
                 $assignment_lesson->scale_id = $request->scale;
             if ($request->filled('visible'))
                 $assignment_lesson->visible = $request->visible;
-            if ($request->filled('grade_category'))   
+            if ($request->filled('grade_category'))
                 $assignment_lesson->grade_category = $request->grade_category[0];
-            if ($request->filled('is_graded'))   
+            if ($request->filled('is_graded'))
                 $assignment_lesson->is_graded = $request->is_graded;
 
             $name_assignment = Assignment::find($request->assignment_id)->name;
@@ -918,7 +930,7 @@ class AssigmentsController extends Controller
                     'name' => $name_assignment,
                     'weight' => 0,
                 ]);
-   
+
             }
             $assignment_lesson->save();
             $assignmentLesson [] = $assignment_lesson;
@@ -930,13 +942,13 @@ class AssigmentsController extends Controller
                 'index' => LessonComponent::getNextIndex($lesson),
             ]);
             $lesson = Lesson::find($lesson);
-            
+
             LastAction::lastActionInCourse($lesson->course_id);
 
-            //sending notifications    
+            //sending notifications
             $notification = new AssignmentNotification($assignment_lesson, $name_assignment.' assignment is added');
             $notification->send();
-            
+
             ///create grade category for assignment
                 event(new AssignmentCreatedEvent($assignment_lesson));
         }
@@ -974,7 +986,7 @@ class AssigmentsController extends Controller
                 ['start_date' =>  $request->start_date,
                 'due_date' => $request->due_date,]
             );
-            
+
             UserAssigment:: updateOrCreate(
                 ['user_id' => $user,
                 'assignment_lesson_id' => $assigmentlesson],
@@ -1159,7 +1171,7 @@ class AssigmentsController extends Controller
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
             'classes' => 'array',
             'classes.*' => 'exists:classes,id',
-            'filter' => 'in:submitted,not_submitted,notGraded', 
+            'filter' => 'in:submitted,not_submitted,notGraded',
         ]);
 
         $user = Auth::user();
@@ -1171,7 +1183,7 @@ class AssigmentsController extends Controller
 
         // if(!$request->user()->can('site/parent'))
         //     LastAction::lastActionInCourse($Course->id);
-            
+
         $assignment = array();
         // $assignment = assignment::where('id', $request->assignment_id)->first();
         $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
@@ -1180,7 +1192,7 @@ class AssigmentsController extends Controller
         if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
             return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
-  
+
            /////////////student
         if ($user->can('site/assignment/getAssignment')) {
             $assignment_lesson = Lesson::where('id',$request->lesson_id)->with(['AssignmentLesson'=> function($query)use ($request){
@@ -1221,15 +1233,15 @@ class AssigmentsController extends Controller
                 };
                 $userassigments->whereHas('userAssignment', $callback)
                     ->with(['userAssignment'=> $callback]);
-            } 
-            
+            }
+
             if($request->filter == 'not_submitted'){
                 $callback = function ($query) use ($assigLessonID) {
                     $query->where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date');
                 };
                 $userassigments->whereDoesntHave('userAssignment', $callback)
                 ->with(['userAssignment'=> $callback]);
-            } 
+            }
 
             if($request->filter == 'notGraded'){
                 $callback = function ($query) use ($assigLessonID) {
@@ -1237,7 +1249,7 @@ class AssigmentsController extends Controller
                 };
                 $userassigments->whereDoesntHave('userAssignment', $callback)
                 ->with(['userAssignment'=> $callback]);
-            } 
+            }
 
             $result = $userassigments->with(['assignmentOverride'=> function($query)use ($assigLessonID){
                     $query->where('assignment_lesson_id', $assigLessonID->id);

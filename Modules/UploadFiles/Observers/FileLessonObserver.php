@@ -8,6 +8,7 @@ use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
 use App\SecondaryChain;
+use App\Helpers\CoursesHelper;
 
 class FileLessonObserver
 {
@@ -24,7 +25,7 @@ class FileLessonObserver
         $lesson = Lesson::find($fileLesson->lesson_id);
         $course_id = $sec_chain->course_id;
         if(isset($file)){
-            Material::firstOrCreate([
+            $material = Material::firstOrCreate([
                 'item_id' => $fileLesson->file_id,
                 'name' => $file->name,
                 'publish_date' => $fileLesson->publish_date,
@@ -36,6 +37,9 @@ class FileLessonObserver
                 'mime_type'=> $file->type,
 
             ]);
+
+            if(isset(request()->users_ids))
+                CoursesHelper::giveUsersAccessToViewCourseItem($material->id, 'material', request()->users_ids);
         }
     }
 
@@ -58,7 +62,7 @@ class FileLessonObserver
                             'lesson_id' => $fileLesson->lesson_id,
                             'type' => 'file',
                             'visible' => $fileLesson->visible,
-                            'link' => $file->url,    
+                            'link' => $file->url,
                             'mime_type'=> $file->type,
                         ]);
         }

@@ -20,6 +20,7 @@ use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\page;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 
 class MaterialsController extends Controller
 {
@@ -48,7 +49,7 @@ class MaterialsController extends Controller
             'sort_in' => 'in:asc,desc',
             'item_type' => 'string|in:page,media,file',
             'class' => 'nullable|integer|exists:classes,id',
-            'lesson' => 'nullable|integer|exists:lessons,id' 
+            'lesson' => 'nullable|integer|exists:lessons,id'
         ]);
         if(isset($request->item_id)){
             $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
@@ -57,7 +58,7 @@ class MaterialsController extends Controller
         }
 
         $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
-        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
 
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -73,8 +74,18 @@ class MaterialsController extends Controller
 
 
         $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
-        if($request->user()->can('site/course/student'))
-            $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        if($request->user()->can('site/course/student')){
+            $material
+            ->where('visible',1)
+            ->where('publish_date' ,'<=', Carbon::now())
+            ->where(function($query) {                //Where accessible
+                $query->doesntHave('courseItem')
+                    ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                        $query->where('user_id', Auth::id());
+                    });
+
+            });
+        }
 
 
         if($request->has('item_type'))
@@ -86,14 +97,14 @@ class MaterialsController extends Controller
             $all=$query->select(DB::raw
                             (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                                 COUNT(case `type` when 'media' then 1 else null end) as media ,
-                                COUNT(case `type` when 'page' then 1 else null end) as page" 
+                                COUNT(case `type` when 'page' then 1 else null end) as page"
                             ))->first()->only(['file','media','page']);
             $cc['all']=$all['file']+$all['media']+$all['page'];
-        
+
             $counts = $materials_query->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
-                    COUNT(case `type` when 'page' then 1 else null end) as page" 
+                    COUNT(case `type` when 'page' then 1 else null end) as page"
                 ))->first()->only(['file','media','page']);
             $counts['all']=$cc['all'];
 
@@ -103,7 +114,7 @@ class MaterialsController extends Controller
         $result['total']= $material->count();
 
         $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get();
-        
+
         foreach($AllMat as $one){
             $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
             $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
@@ -124,7 +135,7 @@ class MaterialsController extends Controller
      */
     public function store(Request $request)
     {
-        
+
     }
 
     /**
@@ -153,7 +164,7 @@ class MaterialsController extends Controller
             }
             return redirect($url);
         }
-        
+
     }
 
     public function Material_Details(Request $request)
@@ -163,10 +174,10 @@ class MaterialsController extends Controller
         ]);
 
         $material = Material::find($request->id);
-       
+
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
-        
+
         if ($material->type == "media") {
 
             $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
@@ -177,7 +188,7 @@ class MaterialsController extends Controller
         if ($material->type == "file") {
 
             $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
-            strrpos($material->getOriginal()['link'],"/")); 
+            strrpos($material->getOriginal()['link'],"/"));
             $result = file::find($material->item_id);
             $extension = $result->type;
         }
@@ -187,12 +198,12 @@ class MaterialsController extends Controller
 
         if(!file_exists($path))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
-            
+
         $fileName = $result->name.'.'.$extension;
         $fileName=str_replace('/','-',$fileName);
         $fileName=str_replace('\\','-',$fileName);
         $headers = ['Content-Type' => 'application/'.$extension];
-    
+
         return response()->download($path , $fileName , $headers);
     }
 
@@ -238,7 +249,7 @@ class MaterialsController extends Controller
 
         if(!file_exists($path))
         return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
-        
+
         $fileName = $attachment->name;
         $headers = ['Content-Type' => 'application/'.$attachment->extension];
 

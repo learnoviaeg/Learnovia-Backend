@@ -21,4 +21,8 @@ class page extends Model
     {
         return $value->getOriginal();
     }
+
+    public function material(){
+        return $this->hasOne('App\Material','item_id')->where('type', 'page');
+    }
 }

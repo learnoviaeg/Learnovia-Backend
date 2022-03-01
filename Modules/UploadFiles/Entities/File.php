@@ -38,4 +38,8 @@ class file extends Model
       public function getUrl1Attribute() {
         return 'https://docs.google.com/viewer?url=' .url(Storage::url($this->attributes['url2']));
       }
+
+    public function material(){
+        return $this->hasOne('App\Material','item_id')->where('type', 'file');
+    }
 }

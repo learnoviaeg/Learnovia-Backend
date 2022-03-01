@@ -78,8 +78,10 @@ class PageController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
-            'visible' =>'in:0,1'
-            
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+
         ]);
         if ($request->filled('publish_date')) {
             $publishdate = Carbon::parse($request->publish_date);
@@ -162,7 +164,7 @@ class PageController extends Controller
 
         if($request->filled('title'))
             $page->update([ 'title' => $request->title]);
-        
+
         if($request->filled('content'))
             $page->update(['content' => $request->content]);
         if($request->filled('visible'))
@@ -177,13 +179,13 @@ class PageController extends Controller
             $page_lesson->update([
                 'lesson_id' => $request->updated_lesson_id
             ]);
-        
+
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
         $page['lesson'] =  $page->Lesson;
-            
+
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
-        
+
     }
 
     /**
@@ -239,7 +241,7 @@ class PageController extends Controller
         if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
             return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
         unset($page->lesson);
-        
+
         return HelperController::api_response_format(200, $page);
     }
 

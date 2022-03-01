@@ -30,4 +30,8 @@ class media extends Model
             return 'Media';
         return 'Link';
     }
+
+    public function material(){
+        return $this->hasOne('App\Material','item_id')->where('type', 'media');
+    }
 }

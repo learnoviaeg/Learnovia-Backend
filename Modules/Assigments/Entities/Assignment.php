@@ -38,8 +38,12 @@ class assignment extends Model
     {
         return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'assignment_id', 'id');
     }
-        
+
     public function user(){
         return $this->belongsTo('App\User','created_by');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'assignment');
     }
 }

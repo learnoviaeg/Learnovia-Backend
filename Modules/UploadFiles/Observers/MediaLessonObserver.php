@@ -8,6 +8,7 @@ use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
 use App\SecondaryChain;
+use App\Helpers\CoursesHelper;
 
 class MediaLessonObserver
 {
@@ -24,7 +25,7 @@ class MediaLessonObserver
         $lesson = Lesson::find($mediaLesson->lesson_id);
         $course_id = $sec_chain->course_id;
         if(isset($media)){
-            Material::firstOrCreate([
+            $material = Material::firstOrCreate([
                 'item_id' => $mediaLesson->media_id,
                 'name' => $media->name,
                 'publish_date' => $mediaLesson->publish_date,
@@ -35,6 +36,10 @@ class MediaLessonObserver
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);
+
+            if(isset(request()->users_ids))
+                CoursesHelper::giveUsersAccessToViewCourseItem($material->id, 'material', request()->users_ids);
+
         }
     }
 
