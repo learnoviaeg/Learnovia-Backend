@@ -159,7 +159,7 @@ class MediaController extends Controller
             ];
         }
 
-        if(!in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
+        if($request->hasFile('Imported_file') && !in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
             $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
