@@ -130,7 +130,7 @@ class MediaController extends Controller
     {
         $settings = $this->setting->get_value('upload_media_extensions');
 
-        $exts = ['mpeg'.'mp3'];
+        $exts = ['mpeg','mp3'];
 
         //search for mime type of file in exts array
         //key value and check in settings string if contains
