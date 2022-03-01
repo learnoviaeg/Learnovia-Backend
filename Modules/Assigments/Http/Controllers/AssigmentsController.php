@@ -877,7 +877,7 @@ class AssigmentsController extends Controller
             'allow_edit_answer' => 'boolean',
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
-            'visible' => 'boolean',
+            'visible' => 'required|boolean',
         ]);
 
         foreach($request->lesson_id as $key => $lesson){

@@ -23,6 +23,7 @@ use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
+use App\Level;
 
 class ScriptsController extends Controller
 {
@@ -366,6 +367,60 @@ class ScriptsController extends Controller
     {
         LetterDetails::where('evaluation','Passed')->update(['evaluation' => 'Fair']);
         UserGrader::where('letter', 'Passed')->update(['letter' => 'Fair']);
+        return 'Done';
+    }
+
+    public function course_index(Request $request)
+    {
+        foreach(Level::select('id')->cursor() as $level){
+            foreach(Course::where('level_id',$level->id)->cursor() as $key => $course){
+                $course->update([ 'index' => $key+1 ]);;
+            }
+        }
+        return 'done';
+    }
+
+    public function indexCatItem(Request $request)
+    {
+        $request->validate([
+            'courses'    => 'required|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+        ]);
+
+        foreach($request->courses as $course)
+        {
+            $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
+            $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
+            self::index($grades);
+        }
+
+        return 'Done';
+    }
+
+    public function index($gradeCat)
+    {
+        $index=1;
+        foreach($gradeCat as $grade)
+        {
+            if($grade->index == null)
+            {
+                $grade->index=$index;
+                $grade->save();
+                if(count($grade->categories_items) >= 1)
+                    self::index($grade->categories_items);
+    
+                $index++;
+            }
+        }
+    }
+
+    public function ongoingPastCoursesIssue(Request $request)
+    {
+        foreach(Course::cursor() as $course){
+            $enrolled_students = Enroll::where('course', $course->id)->where('segment', '!=' , $course->segment_id);
+            if($enrolled_students->count() > 0)
+                $enrolled_students->delete();
+        }
         return 'Done';
     }
 }

@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-class HaramainAllPermission extends Migration
+
+class IndexCategories extends Migration
 {
     /**
      * Run the migrations.
@@ -12,10 +13,9 @@ class HaramainAllPermission extends Migration
      */
     public function up()
     {
-        Artisan::call('db:seed', [
-            '--class' => 'PermissionSeeder',
-            '--force' => true 
-        ]);
+        Schema::table('grade_categories', function (Blueprint $table) {
+            $table->bigInteger('index')->after('hidden')->nullable();
+        });
     }
 
     /**
@@ -25,6 +25,8 @@ class HaramainAllPermission extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('grade_categories', function (Blueprint $table) {
+            //
+        });
     }
 }

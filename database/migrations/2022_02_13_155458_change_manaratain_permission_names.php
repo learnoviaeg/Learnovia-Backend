@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use App\Dictionary;
 use Illuminate\Database\Migrations\Migration;
+use Spatie\Permission\Models\Permission;
+use App\Dictionary;
 use Maatwebsite\Excel\Facades\Excel;
 
-class TrasulatePermissionAndSetIT extends Migration
+class ChangeManaratainPermissionNames extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +16,16 @@ class TrasulatePermissionAndSetIT extends Migration
      */
     public function up()
     {
+        Permission::where('name','report_card/mfis/boys')->update([
+            'name' => 'report_card/mfis/mfisb'
+        ]);
+        Permission::where('name','report_card/mfis/girls')->update([
+            'name' => 'report_card/mfis/mfisg'
+        ]);
+        Permission::where('name','report_card/fgl')->update([
+            'name' => 'report_card/fgls'
+        ]);
+
         Artisan::call('db:seed', [
             '--class' => 'PermissionSeeder',
             '--force' => true 

@@ -25,7 +25,7 @@ class CreateAttendancesTable extends Migration
             $table->foreign('type_id')->references('id')->on('academic_types')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedBigInteger('segment_id');
-            $table->foreign('segment_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('segment_id')->references('id')->on('segments')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedBigInteger('level_id');
             $table->foreign('level_id')->references('id')->on('levels')->onDelete('cascade')->onUpdate('cascade');
