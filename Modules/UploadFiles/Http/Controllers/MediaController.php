@@ -130,6 +130,11 @@ class MediaController extends Controller
     {
         $settings = $this->setting->get_value('upload_media_extensions');
 
+        $exts = ['mpeg'.'mp3'];
+
+        //search for mime type of file in exts array
+        //key value and check in settings string if contains
+
         $rules = [
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
@@ -150,11 +155,12 @@ class MediaController extends Controller
 
         if ($request->hasFile('Imported_file')) {
             $customMessages = [
-                'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' .__('messages.error.extension_not_supported')
+                'Imported_file.*.mimes' => $request->Imported_file[0]->getClientOriginalExtension() . ' ' .__('messages.error.extension_not_supported')
             ];
         }
-    
-        $this->validate($request, $rules, $customMessages);
+
+        if(!in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
+            $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
