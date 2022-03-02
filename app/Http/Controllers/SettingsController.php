@@ -293,9 +293,9 @@ class SettingsController extends Controller
         $request->validate([
             'school_logo' => 'mimes:jpg,jpeg,png',
             'school_name' => 'required|string',
-            'attachment_id' => 'required|exists:attachments,id'
+            // 'attachment_id' => 'required'
         ]);
-        $attachment=attachment::find($request->attachment_id);
+        // $attachment=attachment::find($request->attachment_id);
         $attachment->description=$request->school_name;
         $attachment->save();
 
