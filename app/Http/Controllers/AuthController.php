@@ -227,13 +227,13 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
-        if(isset($user->class_id))
-          $user['class_name']=Classes::find($user->class_id)->name;
-        if(isset($user->level))
-          $user['level_name']=Level::find($user->level)->name;
-        
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
+
+        $user['level']=Level::find(Enroll::where('user_id',Auth::id())->pluck('level')->first());  
+        $user['class']=Classes::find(Enroll::where('user_id',Auth::id())->pluck('group')->first());  
+        $user->setHidden(['password']);
+
         return HelperController::api_response_format(200, $user);
     }
 
