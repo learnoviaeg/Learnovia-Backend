@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\User;
 use App\Classes;
 use App\Level;
+use App\Enroll;
 use App\LastAction;
 use App\attachment;
 use App\Language;
