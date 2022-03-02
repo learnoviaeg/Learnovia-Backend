@@ -92,7 +92,7 @@ class AttendanceSessionController extends Controller
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
-            'sessions.*.day' => 'in:SA,SU,MO,TU,TH,FR|required_if:repeated,==,1',
+            'sessions.*.day' => 'in:SA,SU,MO,TU,WE,TH,FR|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date'
