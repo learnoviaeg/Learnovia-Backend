@@ -293,22 +293,16 @@ class SettingsController extends Controller
         $request->validate([
             'school_logo' => 'mimes:jpg,jpeg,png',
             'school_name' => 'required|string',
-            // 'attachment_id' => 'required'
         ]);
-        // $attachment=attachment::find($request->attachment_id);
         $attachment->description=$request->school_name;
         $attachment->save();
 
         if(isset($request->school_logo))
         {
             $check=attachment::where('type','Logo')->delete();
-            // if($check)
-            //     $check->delete();
-
             $attachment = attachment::upload_attachment($request->school_logo, 'Logo',null,$request->school_name);
         }
 
-        // return $attachment;
         return response()->json(['message' => __('messages.logo.update'), 'body' => $attachment], 200);
     }
 
