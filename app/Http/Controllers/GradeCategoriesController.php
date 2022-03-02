@@ -330,6 +330,6 @@ class GradeCategoriesController extends Controller
 
         $category->save();
 
-        return 'Done';
+        return response()->json(['message' => 'Done', 'body' => null ], 200);
     }
 }
