@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Scopes\IndexScope;
 use stdClass;
 
 class GradeCategory extends Model
@@ -64,5 +65,11 @@ class GradeCategory extends Model
     public function scale()
     {
         return $this->belongsTo('App\scale', 'scale_id', 'id');
+    }
+
+    public static function boot() 
+    {
+        parent::boot();
+        static::addGlobalScope(new IndexScope);
     }
 }

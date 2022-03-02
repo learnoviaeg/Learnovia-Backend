@@ -343,6 +343,7 @@ return [
         'not_found' => 'Can\'t find grade category',
         'CannotUpdate' => 'you can\'t update this category',
         'category_cannot_deleted' => 'Can\'t delete this category, please delete quiz',
+        'reArrange' => 'you can\'t reArrange',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
