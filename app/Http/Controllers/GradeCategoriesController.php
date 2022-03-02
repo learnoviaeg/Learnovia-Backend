@@ -122,7 +122,7 @@ class GradeCategoriesController extends Controller
                 event(new GraderSetupEvent($cat));
                 $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat));
                 dispatch($userGradesJob);
-                }
+            }
         }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
@@ -261,38 +261,27 @@ class GradeCategoriesController extends Controller
     {
         $request->validate([
             'grade_cat_id' => 'required|exists:grade_categories,id',
-            'index' => 'integer',
-            'parent' => 'exists:grade_categories,id'
+            'parent' => 'exists:grade_categories,id',
+            'indexed_id' => 'exists:grade_categories,id'
         ]);
 
+        /**
+         * IN case grade_cat_id aaand parent >>> grade_cat_id will be in the last
+         * IN case grade_cat_id aaand indexed_id >>> grade_cat_id will be in the under of indexed_id
+         * IN case grade_cat_id aaand index >>> (same Level)grade_cat_id will be in this index
+         */
         $category = GradeCategory::find($request->grade_cat_id);
+        if(!isset($category->parent))
+            return response()->json(['message' => __('messages.grade_category.reArrange'), 'body' => null ], 400);
+
         $oldIndex=$category->index;
-        // dd($oldIndex);
-        if(isset($request->index))
-        {
-            $cat=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
-            if($request->index < $oldIndex)
-            {
-                foreach($cat->where('index','>=',$request->index)->where('index','<',$oldIndex)->get() as $updateIndex)
-                {
-                    $updateIndex->index+=1;
-                    $updateIndex->save();
-                }
-            }
-            elseif($request->index > $oldIndex)
-            {
-                foreach($cat->where('index','<=',$request->index)->where('index','>',$oldIndex)->get() as $updateIndex)
-                {
-                    $updateIndex->index-=1;
-                    $updateIndex->save();
-                }
-            }
-            $category->index=$request->index;
-        }
 
         if(isset($request->parent))
         {
             $parent = GradeCategory::find($request->parent);
+            if($parent->type == 'item')
+                return response()->json(['message' => __('messages.grade_category.reArrange'), 'body' => null ], 400);
+            
             $all=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
             foreach($all->where('index','>',$oldIndex)->get() as $gradeinx)
             {
@@ -309,8 +298,34 @@ class GradeCategoriesController extends Controller
             dispatch($userGradesJob);
         }
 
-        event(new GraderSetupEvent($category));
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category));
+        if(isset($request->indexed_id))
+        {
+            $newCatIndex = GradeCategory::find($request->indexed_id);
+            $AllNewParent=GradeCategory::where('parent',$newCatIndex->parent);
+            $AllOldParent=GradeCategory::where('parent',$category->parent);
+
+            foreach($AllNewParent->where('index','>',$newCatIndex->index)->get() as $gradeinx)
+            {
+                $gradeinx->index+=1;
+                $gradeinx->save();
+            }
+
+            foreach($AllOldParent->where('index','>',$category->index)->get() as $gradeinx)
+            {
+                $gradeinx->index-=1;
+                $gradeinx->save();
+            }
+
+            $category->index=$newCatIndex->index+1;
+            $category->parent=$newCatIndex->parent;
+
+            event(new GraderSetupEvent(GradeCategory::find($newCatIndex->parent)));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($newCatIndex->parent)));
+            dispatch($userGradesJob);
+        }
+
+        event(new GraderSetupEvent(GradeCategory::find($category->parent)));
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($category->parent)));
         dispatch($userGradesJob);
 
         $category->save();
