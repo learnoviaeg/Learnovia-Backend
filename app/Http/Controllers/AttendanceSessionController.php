@@ -7,15 +7,20 @@ use App\AttendanceSession;
 use App\Attendance;
 use App\GradeCategory;
 use Carbon\Carbon;
+use App\Exports\AttendanceLogsExport;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
 use App\Events\TakeAttendanceEvent;
 use Auth;
+use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
 {
-    public function __construct()
+    public function __construct(ChainRepositoryInterface $chain)
     {
+        $this->chain = $chain;
         $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
         $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
@@ -43,6 +48,13 @@ class AttendanceSessionController extends Controller
         if(isset($request->attendance_id))
             $attendanceSession->where('attendance_id',$request->attendance_id);
 
+        if(isset($request->years))
+        {
+            $enrolls = $this->chain->getEnrollsByManyChain($request);
+            $classes=$enrolls->pluck('group')->unique();
+            $attendanceSession->whereIn('class_id',$classes);
+        }
+
         if(isset($request->class_id))
             $attendanceSession->where('class_id',$request->class_id);
 
@@ -52,7 +64,6 @@ class AttendanceSessionController extends Controller
         if(isset($request->filter))
             $attendanceSession->whereMonth('start_date', $request->filter);
 
-        // dd(Carbon::now()->format('m'));
         if(isset($request->current))
         {
             if($request->current == 'day')
@@ -92,22 +103,19 @@ class AttendanceSessionController extends Controller
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
-            'sessions.*.day' => 'in:SA,SU,MO,TU,TH,FR|required_if:repeated,==,1',
+            'sessions.*.day' => 'in:SA,SU,MO,TU,WE,TH,FR|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date'
         ]);
         $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
-        $attendance=Attendance::where('id',$request->attendance_id)
-                ->whereDate('start_date', '<=', $request->start_date)
-                ->whereDate('end_date', '>=', $request->start_date)
-                ->first();
-        if(!isset($attendance))
-            return HelperController::api_response_format(200 , null , __('messages.attendance_session.cannot_add'));
+        $attendance=Attendance::find($request->attendance_id);
+        if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
 
         $repeated_until=$request->repeated_until;
-        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->start_date))
-            $repeated_until=$attendance->end_date;
+        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
+            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
 
         if($request->repeated == 1)
         {
@@ -120,9 +128,6 @@ class AttendanceSessionController extends Controller
                 if(array_search($session['day'],$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
                 $attendancestart=(carbon::parse($request->start_date)->addDays(
                     array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
-
-                if($attendancestart > Carbon::parse($repeated_until) )
-                    return HelperController::api_response_format(200 , null , __('messages.attendance_session.wrong_day'));
 
                 while($attendancestart <= Carbon::parse($repeated_until)){
                     $attendance=AttendanceSession::firstOrCreate([
@@ -212,6 +217,17 @@ class AttendanceSessionController extends Controller
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete'));
     }
 
+    public function deleteAll(Request $request)
+    {
+        $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'integer',
+        ]);
+        $attendanceSession=AttendanceSession::whereIn('id',$request->ids)->delete();
+
+        return HelperController::api_response_format(200 , null , __('messages.attendance_session.delete_all'));
+    }
+
     public function takeAttendance(Request $request)
     {
         $request->validate([
@@ -254,12 +270,23 @@ class AttendanceSessionController extends Controller
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }
 
-    public function LogsAttendance(Request $request)
+    public function LogsAttendance(Request $request,$export=0)
     {
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id'
         ]);
-        $all=SessionLog::where('session_id',$request->session_id)->with('user')->get();
+        $all=SessionLog::where('session_id',$request->session_id)->with('user','session')->get();
+        if($export == 1)
+            return $all;
+        
         return HelperController::api_response_format(200 , $all,null);
+    }
+
+    public function exportLogs(Request $request)
+    {
+        $allLogs=self::LogsAttendance($request,1);
+        $file = Excel::store(new AttendanceLogsExport($allLogs), 'AttendanceLogs.xlsx','public');
+        $file = url(Storage::url('AttendanceLogs.xlsx'));
+        return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
 }

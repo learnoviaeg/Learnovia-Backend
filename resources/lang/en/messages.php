@@ -215,11 +215,12 @@ return [
         'add' => 'Session added successfully',
         'update' => 'Session updated successfully',
         'delete' => 'Session deleted successfully',
+        'delete_all' => 'All Sessions deleted successfully',
         'list' => 'Sessions list',
         'same_time_session' => 'Sorry you cannot add different sessions to the same class',
         'taken' => 'Attendance taken successfully',
-        'cannot_add' => 'You can\'t add session please change the date',
-        'wrong_day' => 'please choose correct end_date'
+        'invalid_end_date' => 'end date must be between ',
+        'invalid_start_date' => 'start date must be between ',
     ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
@@ -341,6 +342,7 @@ return [
         'delete' => 'Grade category deleted successfully',
         'not_found' => 'Can\'t find grade category',
         'CannotUpdate' => 'you can\'t update this category',
+        'category_cannot_deleted' => 'Can\'t delete this category, please delete quiz',
     ],
     'grade_item' => [
         'add'    => 'Grade item added successfully',
