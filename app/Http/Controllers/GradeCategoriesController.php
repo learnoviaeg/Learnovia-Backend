@@ -107,8 +107,8 @@ class GradeCategoriesController extends Controller
                     'weights' =>isset($category['weight']) ? $category['weight'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                 ]);
-                $cat->index=GradeCategory::where('parent',$cat->parent)->max('index')+1;
-                $cat->save();
+                // $cat->index=GradeCategory::where('parent',$cat->parent)->max('index')+1;
+                // $cat->save();
 
                 $enrolled_students = Enroll::where('course',$course)->where('role_id',3)->get()->pluck('user_id')->unique();
                 foreach($enrolled_students as $student){
@@ -303,7 +303,6 @@ class GradeCategoriesController extends Controller
             $newCatIndex = GradeCategory::find($request->indexed_id);
             $AllNewParent=GradeCategory::where('parent',$newCatIndex->parent);
             $AllOldParent=GradeCategory::where('parent',$category->parent);
-
             foreach($AllNewParent->where('index','>',$newCatIndex->index)->get() as $gradeinx)
             {
                 $gradeinx->index+=1;
@@ -315,8 +314,8 @@ class GradeCategoriesController extends Controller
                 $gradeinx->index-=1;
                 $gradeinx->save();
             }
-
-            $category->index=$newCatIndex->index+1;
+            $afterUpdated = GradeCategory::find($request->indexed_id);
+            $category->index=$afterUpdated->index+1;
             $category->parent=$newCatIndex->parent;
 
             event(new GraderSetupEvent(GradeCategory::find($newCatIndex->parent)));
@@ -329,7 +328,9 @@ class GradeCategoriesController extends Controller
         dispatch($userGradesJob);
 
         $category->save();
+        // return $AllOldParent->where('index','>',$category->index)->get();
 
-        return 'Done';
+
+        return response()->json(['message' => __('messages.grade_category.Done'), 'body' => null ], 400);
     }
 }

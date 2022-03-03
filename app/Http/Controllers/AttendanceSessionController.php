@@ -36,7 +36,6 @@ class AttendanceSessionController extends Controller
     {
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
-            'class_id' => 'exists:classes,id',
             'start_date' => 'date',
             'from' => 'date_format:H:i',
             'to' => 'date_format:H:i|after:from',
