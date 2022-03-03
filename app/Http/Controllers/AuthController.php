@@ -12,7 +12,6 @@ use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
 use App\Classes;
-use App\Enroll;
 use App\Level;
 use App\Enroll;
 use App\LastAction;
