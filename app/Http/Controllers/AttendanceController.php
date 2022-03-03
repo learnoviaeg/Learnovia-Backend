@@ -16,7 +16,7 @@ class AttendanceController extends Controller
     public function __construct()
     {
         $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        $this->middleware(['permission:attendance/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
         $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
