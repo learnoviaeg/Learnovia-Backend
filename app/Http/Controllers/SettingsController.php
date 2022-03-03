@@ -294,6 +294,7 @@ class SettingsController extends Controller
             'school_logo' => 'mimes:jpg,jpeg,png',
             'school_name' => 'required|string',
         ]);
+        $attachment=attachment::where('type','Logo')->first();
         $attachment->description=$request->school_name;
         $attachment->save();
 
