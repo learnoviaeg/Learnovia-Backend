@@ -279,10 +279,11 @@ class MaterialsController extends Controller
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
 
-        $materials_query =  Material::orderBy('created_at','desc');
+        $materials_query =  Material::select('id', 'item_id', 'name' , 'publish_date' , 'course_id' , 'lesson_id' ,'type' , 'link' , 'visible' )
+                            ->orderBy('created_at','desc');
 
 
-        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
+        $material = $materials_query->with(['course.attachment'])->whereIn('lesson_id',$lessons);
         if($request->user()->can('site/course/student'))
             $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
 
@@ -312,17 +313,8 @@ class MaterialsController extends Controller
         $result['last_page'] = Paginate::allPages($material->count(),$paginate);
         $result['total']= $material->count();
 
-        $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get()->groupBy(['item_id', 'type'])->values();
-        
-        // return $AllMat;
-        foreach($AllMat as $mat){
-            return $mat;
-            foreach($mat as $one){
-                $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
-                $one->level = Level::whereIn('id',$one->class->pluck('level_id'))->first();
-                unset($one->lesson->SecondaryChain);
-            }
-        }
+        $AllMat=$material->groupBy('item_id', 'type')->skip(($page)*$paginate)->take($paginate)
+                    ->with('item.lessons')->get();
         $result['data'] =  $AllMat;
         $result['current_page']= $page + 1;
         $result['per_page']= count($result['data']);

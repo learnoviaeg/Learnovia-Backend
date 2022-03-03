@@ -21,4 +21,9 @@ class page extends Model
     {
         return $value->getOriginal();
     }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\Page\Entities\pageLesson', 'page_id' , 'id' , 'id' , 'id' );
+    }
 }

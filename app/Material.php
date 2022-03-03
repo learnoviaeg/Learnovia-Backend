@@ -70,4 +70,10 @@ class Material extends Model
     public function media(){
         return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
     }
+
+    public function item(){
+        return $this->morphTo('item' , 'type', 'item_id');
+    }
+
 }
+
