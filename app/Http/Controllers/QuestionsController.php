@@ -91,12 +91,11 @@ class QuestionsController extends Controller
             $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
             // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        // $course_ides = $user_course_segments->with('courseSegment')->get()->pluck('courseSegment.course_id')->unique()->values();
-
         $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->where('survey',0)->with(['course','question_category','question_type','children']);
 
         if($request->filled('search'))
-           $questions->where('text', 'LIKE' , "%$request->search%");
+           $questions->where('text', 'LIKE' , "%$request->search%")
+           ->orWhere('text', 'LIKE' ,  str_replace('\"', '"', "%$request->search%"));
         
         if (isset($request->Question_Category_id)) 
             $questions->whereIn('question_category_id', $request->Question_Category_id);
@@ -109,8 +108,10 @@ class QuestionsController extends Controller
             $counts = $questions->select(DB::raw
                 (  "COUNT(case `question_type_id` when 4 then 1 else null end) as essay ,
                     COUNT(case `question_type_id` when 1 then 1 else null end) as tf ,
+                    COUNT(case `question_type_id` when 5 then 1 else null end) as paragraph ,
+                    COUNT(case `question_type_id` when 3 then 1 else null end) as matching ,
                     COUNT(case `question_type_id` when 2 then 1 else null end) as mcq" 
-                ))->first()->only(['essay','tf','mcq']);
+                ))->first()->only(['essay','tf','mcq', 'matching', 'paragraph']);
 
             return response()->json(['message' => __('messages.question.count'), 'body' => $counts], 200);
         }

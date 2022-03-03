@@ -12,6 +12,7 @@ use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
 use App\Classes;
+use App\Enroll;
 use App\Level;
 use App\Enroll;
 use App\LastAction;
@@ -242,7 +243,8 @@ class AuthController extends Controller
     {
         return HelperController::api_response_format(200, $request->user()->roles);
     }
- /**
+
+    /**
      *
      * @Description :getuserPermessionFlags gets all permissions for logged in user.
      * @param : No parameters.

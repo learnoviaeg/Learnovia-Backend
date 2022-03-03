@@ -424,7 +424,6 @@ class ReportCardsController extends Controller
     }
 
 
-    
     public function fglPrep3Report(Request $request)
     {
         $request->validate([
@@ -528,5 +527,4 @@ class ReportCardsController extends Controller
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
-
 }
