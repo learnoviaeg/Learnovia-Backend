@@ -311,7 +311,7 @@ class GradeCategoriesController extends Controller
 
             foreach($AllOldParent->where('index','>',$category->index)->get() as $gradeinx)
             {
-                $gradeinx->index=$gradeinx->index-1;
+                $gradeinx->index-=1;
                 $gradeinx->save();
             }
             $afterUpdated = GradeCategory::find($request->indexed_id);
