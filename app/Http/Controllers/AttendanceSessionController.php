@@ -167,7 +167,7 @@ class AttendanceSessionController extends Controller
      */
     public function show($id)
     {
-        $attendanceSession=AttendanceSession::find($id);
+        $attendanceSession=AttendanceSession::whereId($id)->with('class.level')->first();
         return HelperController::api_response_format(200 , $attendanceSession , null);
     }
 
