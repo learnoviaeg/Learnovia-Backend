@@ -69,7 +69,7 @@ class CoursesController extends Controller
         if($request->has('paginate')){
             $paginate = $request->paginate;
         }
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level_id', 'ASC');
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
@@ -102,13 +102,9 @@ class CoursesController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            // 'category' => 'exists:categories,id',
-            // 'level_id' => 'required|exists:levels,id',
-            // 'segment_id' => 'required|exists:segments,id',
             'no_of_lessons' => 'integer',
             'shared_lesson' => 'required|in:0,1',
             'image' => 'file|distinct|mimes:jpg,jpeg,png,gif',
-            // 'description' => 'string',
             'mandatory' => 'nullable',
             'short_name' =>'required',
             'is_template' => 'nullable|boolean',
@@ -119,10 +115,6 @@ class CoursesController extends Controller
             'chains.*.class' => 'array|required_with:chains.*.level',
             'chains.*.class.*' => 'required|exists:classes,id',
         ]);
-        // return $request->chains;
-        // if($request->is_template == 1){
-        //     $check = Course::where('segment_id',$segment)->where('short_name',$request->short_name)->count();
-        // }
         $no_of_lessons = 4;
 
         if($request->is_template == 1){
@@ -132,13 +124,13 @@ class CoursesController extends Controller
         }
         
         foreach ($request->chains as $chain){
-            // return $chain['level'];
             foreach ($chain['segment'] as $segment) {
                 foreach ($chain['level'] as $level) {
                     $short_names=Course::where('segment_id',$segment)->where('short_name',$request->short_name)->get();
                     if(count($short_names)>0)
                         return HelperController::api_response_format(400, null, 'short_name must be unique');
 
+                    $index = Course::where('level_id', $level)->max('index');
                     $course = Course::firstOrCreate([
                         'name' => $request->name,
                         'short_name' => $request->short_name,
@@ -150,7 +142,8 @@ class CoursesController extends Controller
                         'level_id' => $level,
                         'is_template' => isset($request->is_template) ? $request->is_template : 0,
                         'classes' => json_encode($chain['class']),
-                        'shared_lesson' => $request->shared_lesson
+                        'shared_lesson' => $request->shared_lesson,
+                        'index' => isset($index) ? $index+1 : 1 ,
                     ]);
 
                     if ($request->filled('no_of_lessons'))
@@ -205,8 +198,6 @@ class CoursesController extends Controller
             $le['teachers']  = $teacher ;
         }
         return response()->json(['message' => __('messages.course.add'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
-
-        // return $courses;
     }
 
     /**
@@ -289,7 +280,7 @@ class CoursesController extends Controller
     public function destroy($id ,Request $request)
     {
         $course = Course::find($id);
-        $enrolls = Enroll::where('course',$id)->where('user_id','!=',1)->count();
+        $enrolls = Enroll::where('course',$id)->where('role_id','!=',1)->count();
 
         if($enrolls > 0){
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));

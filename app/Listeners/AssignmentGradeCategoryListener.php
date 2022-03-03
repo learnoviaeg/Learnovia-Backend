@@ -49,8 +49,8 @@ class AssignmentGradeCategoryListener
             ]
         );
 
-        $assignment->index=GradeCategory::where('parent',$assignment->parent)->max('index')+1;
-        $assignment->save();
+        // $assignment->index=GradeCategory::where('parent',$assignment->parent)->max('index')+1;
+        // $assignment->save();
 
         event(new GraderSetupEvent($assignment->Parents));
     }

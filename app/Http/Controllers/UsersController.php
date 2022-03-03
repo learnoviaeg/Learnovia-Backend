@@ -154,7 +154,17 @@ class UsersController extends Controller
                     $query->whereIn('course_id',$request->courses);
                 }]);
         }
-        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
+
+        if($my_chain=='dropdown'){
+            $permission = Permission::where('name','site/course/student')->with('roles')->first();
+            $roles_id = $permission->roles->pluck('id');
+            $enrolls->whereIn('role_id',$roles_id);
+
+            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['user.attachment', 'classes'])->get()->filter()->values();
+            return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
+        }
+
+        $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['user.attachment','user.roles', 'classes'])->get()->pluck('user')->filter()->values();
         if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {

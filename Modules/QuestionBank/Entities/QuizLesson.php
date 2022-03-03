@@ -46,8 +46,8 @@ class QuizLesson extends Model
         if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
             $started = false;
         }
-        
-        return $started;  
+
+        return $started;
     }
 
     public function getEndedAttribute(){
@@ -58,12 +58,12 @@ class QuizLesson extends Model
             $override = $this->override->first();
             $this->due_date = $override->due_date;
         }
-        
+
         if((Auth::user()->can('site/course/student') && $this->due_date < Carbon::now())){
             $ended = true;
         }
 
-        return $ended;  
+        return $ended;
     }
 
     public function getUserSeenNumberAttribute(){
@@ -71,8 +71,8 @@ class QuizLesson extends Model
         $user_seen = 0;
         if($this->seen_number != 0)
             $user_seen = UserSeen::where('type','quiz')->where('item_id',$this->quiz_id)->where('lesson_id',$this->lesson_id)->count();
-            
-        return $user_seen;  
+
+        return $user_seen;
     }
 
     public function getStatusAttribute(){
@@ -83,11 +83,11 @@ class QuizLesson extends Model
 
             $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $this->id)->pluck('id');
             $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->get();
-            if(isset($user_quiz) && $this->max_attemp == count($user_quiz) && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
+            if(isset($user_quiz) && $quiz_lesson->max_attemp >= count($user_quiz) && count($user_quiz)!=0 && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
                 $status = __('messages.status.submitted');//submitted
-                
+
                 if(!in_array(NULL,$user_quiz_asnwer->pluck('user_grade')->toArray(),true))
-                    $status = __('messages.status.graded');//graded 
+                    $status = __('messages.status.graded');//graded
             }
         }
 
@@ -96,7 +96,7 @@ class QuizLesson extends Model
 
             $user_quiz = userQuiz::where('quiz_lesson_id', $this->id)->pluck('id');
             $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->pluck('user_grade');
-            
+
             if(count($user_quiz_asnwer) > 0)
                 $status = __('messages.status.not_graded');//not_graded
 
@@ -148,7 +148,7 @@ class QuizLesson extends Model
             if(isset($this->attributes['questions_mark']) && $this->attributes['questions_mark'] != 0)
                 $content = $this->attributes['questions_mark'] * $percentage;
         }
-        
+
         return (double) $content;
     }
 
@@ -161,8 +161,8 @@ class QuizLesson extends Model
     {
         return  $this->hasMany('Modules\QuestionBank\Entities\QuizOverride','quiz_lesson_id', 'id');
     }
-    
-    public static function boot() 
+
+    public static function boot()
     {
         parent::boot();
         static::addGlobalScope(new OverrideQuizScope);
