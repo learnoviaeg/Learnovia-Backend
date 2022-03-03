@@ -424,7 +424,6 @@ class ReportCardsController extends Controller
     }
 
 
-
     public function fglPrep3Report(Request $request)
     {
         $request->validate([
