@@ -303,6 +303,9 @@ class GradeCategoriesController extends Controller
             $newCatIndex = GradeCategory::find($request->indexed_id);
             $AllNewParent=GradeCategory::where('parent',$newCatIndex->parent);
             $AllOldParent=GradeCategory::where('parent',$category->parent);
+            if($AllNewParent->parent == $category->id)
+                return response()->json(['message' => __('messages.grade_category.reArrange'), 'body' => null ], 400);
+                
             foreach($AllNewParent->where('index','>',$newCatIndex->index)->get() as $gradeinx)
             {
                 $gradeinx->index+=1;
@@ -331,6 +334,6 @@ class GradeCategoriesController extends Controller
         // return $AllOldParent->where('index','>',$category->index)->get();
 
 
-        return response()->json(['message' => __('messages.grade_category.Done'), 'body' => null ], 400);
+        return response()->json(['message' => __('messages.grade_category.Done'), 'body' => null ], 200);
     }
 }

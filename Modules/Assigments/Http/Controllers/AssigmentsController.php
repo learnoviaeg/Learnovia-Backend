@@ -327,6 +327,7 @@ class AssigmentsController extends Controller
 
         $assignment_category = GradeCategory::where('lesson_id', $AssignmentLesson->lesson_id)->where('instance_id' , $AssignmentLesson->assignment_id)
                                 ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
+        $parent=$assignment_category->first()->Parents;
 
         if ($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
@@ -346,9 +347,9 @@ class AssigmentsController extends Controller
             $AssignmentLesson->publish_date = $request->publish_date;
         $lesson=Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
-        if (!$request->filled('updated_lesson_id')) {
+        if (!$request->filled('updated_lesson_id'))
             $request->updated_lesson_id= $request->lesson_id;
-            }
+        
         $AssignmentLesson->update([
             'lesson_id' => $request->updated_lesson_id
         ]);
@@ -377,7 +378,7 @@ class AssigmentsController extends Controller
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($AssignmentLesson));
 
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $assignment_category->first()->Parents));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
             dispatch($userGradesJob);
 
         $all = AssignmentLesson::all();
