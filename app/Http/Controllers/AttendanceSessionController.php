@@ -47,12 +47,12 @@ class AttendanceSessionController extends Controller
         if(isset($request->attendance_id))
             $attendanceSession->where('attendance_id',$request->attendance_id);
 
-        if(isset($request->years))
-        {
-            $enrolls = $this->chain->getEnrollsByManyChain($request);
+        // if(isset($request->years))
+        // {
+            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
             $classes=$enrolls->pluck('group')->unique();
             $attendanceSession->whereIn('class_id',$classes);
-        }
+        // }
 
         if(isset($request->class_id))
             $attendanceSession->where('class_id',$request->class_id);
