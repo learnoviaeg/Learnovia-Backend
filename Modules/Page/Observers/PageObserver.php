@@ -5,8 +5,6 @@ namespace Modules\Page\Observers;
 use App\LessonComponent;
 use Modules\Page\Entities\Page;
 use App\Material;
-use App\Lesson;
-use App\SecondaryChain;
 
 class PageObserver
 {
