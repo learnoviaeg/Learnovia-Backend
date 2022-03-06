@@ -66,7 +66,7 @@ class AttendanceSessionController extends Controller
         if(isset($request->current))
         {
             if($request->current == 'day')
-                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'));
+                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'))->whereMonth('start_date',Carbon::now()->format('m'));
 
             if($request->current == 'week')
                 // from saterday to friday
