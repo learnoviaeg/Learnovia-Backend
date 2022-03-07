@@ -508,6 +508,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::Resource('notify', NotificationsController::class);
+    Route::Resource('workingDays', WorkingDayController::class);
     Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
     Route::Resource('announcement', AnnouncementsController::class);
