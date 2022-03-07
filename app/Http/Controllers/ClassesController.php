@@ -55,6 +55,9 @@ class ClassesController extends Controller
         if(!$request->has('user_id'))
             $enrolls->where('user_id',Auth::id());
             
+        if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses'))
+            return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
+
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));

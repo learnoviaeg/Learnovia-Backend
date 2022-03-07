@@ -48,9 +48,11 @@ class LevelController extends Controller
 
         if(!$request->has('user_id'))
             $enrolls->where('user_id',Auth::id());
+        
+        if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses'))
+            return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
 
         $levels->whereIn('id',$enrolls->pluck('level'));
-
         return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
 
