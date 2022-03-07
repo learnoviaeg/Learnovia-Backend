@@ -250,7 +250,7 @@ class FilesController extends Controller
                     $size = $singlefile->getSize();
                     $name = uniqid() . '.' . $extension;
                     
-                    $check = file::firstOrCreate([
+                    $file = file::firstOrCreate([
                             'type' => $extension,
                             'description' => $name,
                             'name' =>  ($request->filled('name')) ? $request->name : $fileName,
@@ -261,7 +261,6 @@ class FilesController extends Controller
                             'url2' => 'files/' . $name,
                     ]);
 
-                    if ($check) {
                         $fileLesson = new FileLesson;
                         $fileLesson->lesson_id = $lesson;
                         $fileLesson->file_id = $file->id;
@@ -284,7 +283,6 @@ class FilesController extends Controller
                             $singlefile,
                             $name
                         );
-                    }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
