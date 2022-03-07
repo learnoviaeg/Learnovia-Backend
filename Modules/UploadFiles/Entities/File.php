@@ -40,6 +40,10 @@ class file extends Model
       }
 
     public function material(){
-        return $this->hasOne('App\Material','item_id')->where('type', 'file');
+        return $this->hasMany('App\Material','item_id')->where('type', 'file');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'file');
     }
 }

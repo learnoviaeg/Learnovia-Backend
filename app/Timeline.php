@@ -102,4 +102,12 @@ class Timeline extends Model
     public function level(){
         return $this->belongsTo('App\Level');
     }
+
+    public function quiz(){
+        return $this->belongsTo('Modules\QuestionBank\Entities\Quiz','item_id')->where('type', 'quiz');
+    }
+
+    public function assignment(){
+        return $this->belongsTo('Modules\Assigments\Entities\Assignment','item_id')->where('type', 'assignment');
+    }
 }

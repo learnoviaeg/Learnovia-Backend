@@ -16,7 +16,6 @@ use App\LastAction;
 use App\Http\Controllers\Controller;
 use App\Notification;
 use App\Notifications\H5PNotification;
-use App\Helpers\CoursesHelper;
 
 class H5PLessonController extends Controller
 {
@@ -75,8 +74,6 @@ class H5PLessonController extends Controller
             'lesson_id' => 'required|exists:lessons,id|array',
             'visible'=>'in:0,1',
             'publish_date' => 'nullable|after:' . Carbon::now(),
-            'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
         ]);
 
         // $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->whereIn('lesson_id',$request->lesson_id)->first();
@@ -91,9 +88,6 @@ class H5PLessonController extends Controller
                 'visible'=>isset($request->visible)?$request->visible:1
             ]);
         // }
-
-            if(isset($request->users_ids))
-                CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5pLesson', $request->users_ids);
 
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);

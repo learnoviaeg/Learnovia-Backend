@@ -29,6 +29,7 @@ use App\Material;
 use  App\LastAction;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
+use App\Helpers\CoursesHelper;
 
 class FilesController extends Controller
 {
@@ -244,25 +245,30 @@ class FilesController extends Controller
         } else {
             $publishdate = Carbon::now();
         }
-        foreach ($request->lesson_id as $lesson) {
-            $tempLesson = Lesson::find($lesson);
-                foreach ($request->Imported_file as $singlefile) {
-                    $extension = $singlefile->getClientOriginalExtension();
-                    $fileName = $singlefile->getClientOriginalName();
-                    $size = $singlefile->getSize();
-                    $name = uniqid() . '.' . $extension;
-                    $file = new file;
-                    $file->type = $extension;
-                    $file->description = $name;
-                    $file->name = ($request->filled('name')) ? $request->name : $fileName;
-                    $file->size = $size;
-                    $file->attachment_name = $fileName;
-                    $file->user_id = Auth::user()->id;
-                    $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                    $file->url2 = 'files/' . $name;
-                    $check = $file->save();
 
-                    if ($check) {
+            foreach ($request->Imported_file as $singlefile) {
+                $extension = $singlefile->getClientOriginalExtension();
+                $fileName = $singlefile->getClientOriginalName();
+                $size = $singlefile->getSize();
+                $name = uniqid() . '.' . $extension;
+                $file = new file;
+                $file->type = $extension;
+                $file->description = $name;
+                $file->name = ($request->filled('name')) ? $request->name : $fileName;
+                $file->size = $size;
+                $file->attachment_name = $fileName;
+                $file->user_id = Auth::user()->id;
+                $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+                $file->url2 = 'files/' . $name;
+                $check = $file->save();
+
+                if ($check) {
+                    if(isset($request->users_ids))
+                        CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+
+                    foreach ($request->lesson_id as $lesson) {
+                        $tempLesson = Lesson::find($lesson);
+
                         $fileLesson = new FileLesson;
                         $fileLesson->lesson_id = $lesson;
                         $fileLesson->file_id = $file->id;

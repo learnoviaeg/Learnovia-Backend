@@ -79,11 +79,20 @@ class MaterialsController extends Controller
             ->where('visible',1)
             ->where('publish_date' ,'<=', Carbon::now())
             ->where(function($query) {                //Where accessible
-                $query->doesntHave('courseItem')
-                    ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
-                        $query->where('user_id', Auth::id());
-                    });
-
+                $query->where(function($query){
+                    $query->doesntHave('file.courseItem')
+                        ->doesntHave('media.courseItem')
+                        ->doesntHave('page.courseItem');
+                })
+                ->orWhereHas('file.courseItem.courseItemUsers', function (Builder $query){
+                    $query->where('user_id', Auth::id());
+                })
+                ->orWhereHas('media.courseItem.courseItemUsers', function (Builder $query){
+                    $query->where('user_id', Auth::id());
+                })
+                ->orWhereHas('page.courseItem.courseItemUsers', function (Builder $query){
+                    $query->where('user_id', Auth::id());
+                });
             });
         }
 

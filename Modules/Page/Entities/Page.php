@@ -23,6 +23,10 @@ class page extends Model
     }
 
     public function material(){
-        return $this->hasOne('App\Material','item_id')->where('type', 'page');
+        return $this->hasMany('App\Material','item_id')->where('type', 'page');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'page');
     }
 }

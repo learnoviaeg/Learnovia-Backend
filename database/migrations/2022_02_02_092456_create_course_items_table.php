@@ -16,7 +16,7 @@ class CreateCourseItemsTable extends Migration
         Schema::create('course_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('item_id');
-            $table->enum('type', ['material','assignment','quiz','h5pLesson']);
+            $table->enum('type', ['page','media','file','assignment','quiz','h5p_content']);
             $table->timestamps();
         });
     }

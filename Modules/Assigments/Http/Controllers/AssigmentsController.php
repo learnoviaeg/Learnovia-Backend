@@ -278,12 +278,7 @@ class AssigmentsController extends Controller
             'name' => 'string',
             'file_description' => 'string',
             'content'  => 'string',
-            'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
         ]);
-
-        //update students accessibility
-        CoursesHelper::updateCourseItem($request->id, 'assignment', $request->users_ids);
 
         $assigment = assignment::find($request->id);
         $assigmentLessons = AssignmentLesson::where('assignment_id',$request->id)->pluck('id');

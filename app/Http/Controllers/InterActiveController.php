@@ -73,8 +73,8 @@ class InterActiveController extends Controller
             ->where('visible',1)
             ->where('publish_date' ,'<=', Carbon::now())
             ->where(function($query) {                //Where accessible
-                $query->doesntHave('courseItem')
-                    ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                $query->doesntHave('h5pContent.courseItem')
+                    ->orWhereHas('h5pContent.courseItem.courseItemUsers', function (Builder $query){
                         $query->where('user_id', Auth::id());
                     });
             });

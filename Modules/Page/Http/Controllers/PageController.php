@@ -16,6 +16,7 @@ use App\Component;
 use App\LessonComponent;
 use App\LastAction;
 use Exception;
+use App\Helpers\CoursesHelper;
 
 class PageController extends Controller
 {
@@ -95,6 +96,10 @@ class PageController extends Controller
         $page->title = $request->title;
         $page->content = $request->content;
         $page->save();
+
+        if(isset($request->users_ids))
+            CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+
         foreach($request->lesson_id as $lesson){
             pageLesson::firstOrCreate([
                 'page_id' => $page->id,

@@ -74,8 +74,4 @@ class Material extends Model
     public function media(){
         return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
     }
-
-    public function courseItem(){
-        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'material');
-    }
 }

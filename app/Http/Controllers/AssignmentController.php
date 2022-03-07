@@ -127,7 +127,7 @@ class AssignmentController extends Controller
         if(!isset($assigLessonID))
             return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
 
-        $assignment = assignment::where('id',$assignment_id)->with('courseItem.courseItemUsers.user')->first();
+        $assignment = assignment::where('id',$assignment_id)->first();
         if(!isset($assignment))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 

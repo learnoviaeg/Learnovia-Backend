@@ -32,6 +32,10 @@ class media extends Model
     }
 
     public function material(){
-        return $this->hasOne('App\Material','item_id')->where('type', 'media');
+        return $this->hasMany('App\Material','item_id')->where('type', 'media');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'media');
     }
 }

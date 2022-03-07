@@ -247,12 +247,7 @@ class QuizzesController extends Controller
             'opening_time' => 'date',
             'closing_time' => 'date|after:opening_time',
             'publish_date' => 'date|before_or_equal:opening_time',
-            'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
         ]);
-
-        //update students accessibility
-        CoursesHelper::updateCourseItem($request->quiz_id, 'quiz', $request->users_ids);
 
         $quiz=Quiz::find($id);
         $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
@@ -398,7 +393,7 @@ class QuizzesController extends Controller
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
-        $quiz = quiz::where('id',$id)->with(['Question.children', 'courseItem.courseItemUsers.user'])->first();
+        $quiz = quiz::where('id',$id)->with('Question.children')->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();

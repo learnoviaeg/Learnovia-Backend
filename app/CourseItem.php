@@ -13,24 +13,16 @@ class CourseItem extends Model
         return $this->hasMany('App\UserCourseItem', 'course_item_id', 'id');
     }
 
-    // public function page(){
-    //     return $this->belongsTo('Modules\Page\Entities\Page','item_id')->where('type', 'page');
-    // }
+    public function page(){
+        return $this->belongsTo('Modules\Page\Entities\Page','item_id')->where('type', 'page');
+    }
 
-    // public function file(){
-    //     return $this->belongsTo('Modules\UploadFiles\Entities\File','item_id')->where('type', 'file');
-    // }
+    public function file(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\File','item_id')->where('type', 'file');
+    }
 
-    // public function media(){
-    //     return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
-    // }
-
-    // public function link(){
-    //     return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'link');
-    // }
-
-    public function material(){
-        return $this->belongsTo('App\Material','item_id')->where('type', 'material');
+    public function media(){
+        return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
     }
 
     public function assignment(){
@@ -41,12 +33,7 @@ class CourseItem extends Model
         return $this->belongsTo('Modules\QuestionBank\Entities\Quiz','item_id')->where('type', 'quiz');
     }
 
-    // public function h5p(){
-    //     return $this->belongsTo('Djoudi\LaravelH5p\Eloquents\H5pContent','item_id')->where('type', 'h5p');
-    // }
-
-    public function h5pLesson(){
-        return $this->belongsTo('App\h5pLesson','item_id')->where('type', 'h5pLesson');
+    public function h5pContent(){
+        return $this->belongsTo('Djoudi\LaravelH5p\Eloquents\H5pContent','item_id')->where('type', 'h5p_content');
     }
-
 }
