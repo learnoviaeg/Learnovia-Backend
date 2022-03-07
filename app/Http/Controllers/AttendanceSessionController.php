@@ -47,12 +47,12 @@ class AttendanceSessionController extends Controller
         if(isset($request->attendance_id))
             $attendanceSession->where('attendance_id',$request->attendance_id);
 
-        if(isset($request->years))
-        {
-            $enrolls = $this->chain->getEnrollsByManyChain($request);
+        // if(isset($request->years))
+        // {
+            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
             $classes=$enrolls->pluck('group')->unique();
             $attendanceSession->whereIn('class_id',$classes);
-        }
+        // }
 
         if(isset($request->class_id))
             $attendanceSession->where('class_id',$request->class_id);
@@ -66,12 +66,23 @@ class AttendanceSessionController extends Controller
         if(isset($request->current))
         {
             if($request->current == 'day')
-                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'));
+                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'))->whereMonth('start_date',Carbon::now()->format('m'));
 
-            if($request->current == 'week')
+            if($request->current == 'week'){
                 // from saterday to friday
-                $attendanceSession->where('start_date', '>=', Carbon::now()->startOfWeek()->subDay(2))
-                ->where('start_date', '<=', Carbon::now()->endOfWeek()->subDay(2));
+                if(Carbon::now()->format('l') == 'Saturday')
+                    $attendanceSession->where('start_date', '>=', Carbon::now()->addDay(7))
+                        ->where('start_date', '<=', Carbon::now()->addDay(7));
+
+                else
+                    for($i=1;$i<=7;$i++)
+                    {
+                        $day=Carbon::now()->subDay($i)->format('l');
+                        if($day == 'Saturday')
+                            $attendanceSession->where('start_date', '>=', Carbon::now()->subDay($i))
+                                ->where('start_date', '<=', Carbon::now()->subDay($i)->addDay(7));
+                    }
+            }
 
             if($request->current == 'month')
                 $attendanceSession->whereMonth('start_date', Carbon::now()->format('m'));
