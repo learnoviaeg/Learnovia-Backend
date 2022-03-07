@@ -245,4 +245,81 @@ class MaterialsController extends Controller
         return response()->download($path , $fileName , $headers);
 
     }
+
+    public function getMaterials(Request $request,$count = null)
+    {
+        $request->validate([
+            'year' => 'exists:academic_years,id',
+            'type' => 'exists:academic_types,id',
+            'level' => 'exists:levels,id',
+            'segment' => 'exists:segments,id',
+            'courses'    => 'nullable|array',
+            'courses.*'  => 'nullable|integer|exists:courses,id',
+            'sort_in' => 'in:asc,desc',
+            'item_type' => 'string|in:page,media,file',
+            'class' => 'nullable|integer|exists:classes,id',
+            'lesson' => 'nullable|integer|exists:lessons,id' 
+        ]);
+        if(isset($request->item_id)){
+            $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            if(!isset($check))
+                return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        }
+
+        $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();  
+
+        if($request->has('lesson')){
+            if(!in_array($request->lesson,$lessons->toArray()))
+                return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
+
+            $lessons = [$request->lesson];
+        }
+
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $materials_query =  Material::select('id', 'item_id', 'name' , 'publish_date' , 'course_id' , 'lesson_id' ,'type' , 'link' , 'visible' )
+                            ->orderBy('created_at','desc');
+
+
+        $material = $materials_query->with(['course.attachment'])->whereIn('lesson_id',$lessons);
+        if($request->user()->can('site/course/student'))
+            $material->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+
+
+        if($request->has('item_type'))
+            $material->where('type',$request->item_type);
+
+        if($count == 'count'){
+             //copy this counts to count it before filteration
+            $query=clone $materials_query;
+            $all=$query->select(DB::raw
+                            (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                                COUNT(case `type` when 'media' then 1 else null end) as media ,
+                                COUNT(case `type` when 'page' then 1 else null end) as page" 
+                            ))->first()->only(['file','media','page']);
+            $cc['all']=$all['file']+$all['media']+$all['page'];
+        
+            $counts = $materials_query->select(DB::raw
+                (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+                    COUNT(case `type` when 'media' then 1 else null end) as media ,
+                    COUNT(case `type` when 'page' then 1 else null end) as page" 
+                ))->first()->only(['file','media','page']);
+            $counts['all']=$cc['all'];
+
+            return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
+        }
+        $result['last_page'] = Paginate::allPages($material->count(),$paginate);
+        $result['total']= $material->count();
+
+        $AllMat=$material->groupBy('item_id', 'type')->skip(($page)*$paginate)->take($paginate)
+                    ->with('item.lessons')->get();
+        $result['data'] =  $AllMat;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
+
+        return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
+    }
 }
+
