@@ -7,6 +7,10 @@ use App\WorkingDay;
 
 class WorkingDayController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->middleware(['permission:settings/workingDays'],   ['only' => ['index','edit']]);
+    }
     /**
      * Display a listing of the resource.
      *
