@@ -28,7 +28,7 @@ class MaterialsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:material/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:material/get'],   ['only' => ['index' , 'getMaterials']]);
     }
 
     /**
