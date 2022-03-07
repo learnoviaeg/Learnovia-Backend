@@ -38,11 +38,15 @@ class AttendanceController extends Controller
             'grade_cat_id' => 'exists:grade_categories,id',
             'start_date' => 'date',
             'end_date' => 'date|after:start_date',
+            'search' => 'string'
         ]);
         $attendance=Attendance::where('id', '!=', null);
 
         if(isset($request->attendance_type))
             $attendance->where('attendance_type',$request->attendance_type);
+        
+        if(isset($request->search))
+            $attendance->where('name', 'LIKE' , "%$request->search%");
 
         if(isset($request->years))
             $attendance->whereIn('year_id',$request->years);
