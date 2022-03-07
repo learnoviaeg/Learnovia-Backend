@@ -249,18 +249,18 @@ class FilesController extends Controller
                     $fileName = $singlefile->getClientOriginalName();
                     $size = $singlefile->getSize();
                     $name = uniqid() . '.' . $extension;
-                    $file = new file;
-                    $file->type = $extension;
-                    $file->description = $name;
-                    $file->name = ($request->filled('name')) ? $request->name : $fileName;
-                    $file->size = $size;
-                    $file->attachment_name = $fileName;
-                    $file->user_id = Auth::user()->id;
-                    $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                    $file->url2 = 'files/' . $name;
-                    $check = $file->save();
+                    
+                    $file = file::firstOrCreate([
+                            'type' => $extension,
+                            'description' => $name,
+                            'name' =>  ($request->filled('name')) ? $request->name : $fileName,
+                            'size' => $size,
+                            'attachment_name' => $fileName,
+                            'user_id' => Auth::user()->id,
+                            'url' => 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name),
+                            'url2' => 'files/' . $name,
+                    ]);
 
-                    if ($check) {
                         $fileLesson = new FileLesson;
                         $fileLesson->lesson_id = $lesson;
                         $fileLesson->file_id = $file->id;
@@ -283,7 +283,6 @@ class FilesController extends Controller
                             $singlefile,
                             $name
                         );
-                    }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
