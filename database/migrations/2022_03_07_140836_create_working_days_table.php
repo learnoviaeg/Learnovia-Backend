@@ -31,6 +31,11 @@ class CreateWorkingDaysTable extends Migration
             ['day' => 'Friday','status' => false]
         ];
         WorkingDay::insert($workingDays);
+
+        Artisan::call('db:seed', [
+            '--class' => 'PermissionSeeder',
+            '--force' => true 
+        ]);
     }
 
     /**
