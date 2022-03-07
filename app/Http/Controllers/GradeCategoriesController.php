@@ -262,12 +262,13 @@ class GradeCategoriesController extends Controller
         $request->validate([
             'grade_cat_id' => 'required|exists:grade_categories,id',
             'parent' => 'exists:grade_categories,id',
-            'indexed_id' => 'exists:grade_categories,id'
+            // 'indexed_id' => 'exists:grade_categories,id'
+            'index' => 'integer'
         ]);
 
         /**
          * IN case grade_cat_id aaand parent >>> grade_cat_id will be in the last
-         * IN case grade_cat_id aaand indexed_id >>> grade_cat_id will be in the under of indexed_id
+         * IN case grade_cat_id aaand indexed_id >>> grade_cat_id will be in the under of indexed_id  //Not workigng yet for front
          * IN case grade_cat_id aaand index >>> (same Level)grade_cat_id will be in this index
          */
         $category = GradeCategory::find($request->grade_cat_id);
@@ -352,8 +353,6 @@ class GradeCategoriesController extends Controller
         dispatch($userGradesJob);
 
         $category->save();
-        // return $AllOldParent->where('index','>',$category->index)->get();
-
 
         return response()->json(['message' => __('messages.grade_category.Done'), 'body' => null ], 200);
     }

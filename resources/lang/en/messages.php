@@ -377,4 +377,8 @@ return [
         'cannot_update' => 'Only name can be edited because the scale is assigned to grade category ',
         'cannot_delete' => 'Cannot be deleted because the scale is assigned to grade category',
     ],
+    'working_day' => [
+        'list' => 'All Days',
+        'update' => 'Days updated successfully'
+    ]
 ];
