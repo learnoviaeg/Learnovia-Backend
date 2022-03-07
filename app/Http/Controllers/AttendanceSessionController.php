@@ -314,12 +314,13 @@ class AttendanceSessionController extends Controller
 
         $all=SessionLog::where('session_id',$request->session_id)->with('user','session');
         $allCount=clone $all;
+        $allCount = $allCount->count();
+        $attendees_object['Total']['count'] = $allCount;
+
         $attendees_object['Present']['count'] = $all->where('status','Present')->count();
         $attendees_object['Absent']['count'] =  $all->where('status','Absent')->count();
         $attendees_object['Late']['count'] =  $all->where('status','Late')->count();
         $attendees_object['Excuse']['count'] =  $all->where('status','Excuse')->count();
-
-        $allCount = $allCount->count();
 
         $attendees_object['Present']['precentage'] = round((($attendees_object['Present']['count']/$allCount)*100),2);
         $attendees_object['Absent']['precentage'] =  round((($attendees_object['Absent']['count']/$allCount)*100),2);
