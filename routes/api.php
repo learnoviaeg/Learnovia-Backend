@@ -471,7 +471,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
 
-    Route::get('getMaterials', 'MaterialsController@getMaterials');
+    Route::get('get-materials', 'MaterialsController@getMaterials');
 
     
     // Route::get('years/{export}', 'YearsController@index');
