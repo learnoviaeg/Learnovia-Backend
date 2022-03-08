@@ -40,22 +40,21 @@ class AttendanceSessionController extends Controller
             'from' => 'date_format:H:i',
             'to' => 'date_format:H:i|after:from',
             'current' => 'in:month,week,day', //current
-            'filter' => 'integer|between:1,12'
+            'filter' => 'integer|between:1,12',
+            'attendance_type' => 'in:Per Session,Daily',
+            'search' => 'string'
         ]);
         $attendanceSession=AttendanceSession::where('id', '!=', null);
+
+        if(isset($request->search))
+            $attendanceSession->where('name', 'LIKE' , "%$request->search%");
 
         if(isset($request->attendance_id))
             $attendanceSession->where('attendance_id',$request->attendance_id);
 
-        // if(isset($request->years))
-        // {
-            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
-            $classes=$enrolls->pluck('group')->unique();
-            $attendanceSession->whereIn('class_id',$classes);
-        // }
-
-        if(isset($request->class_id))
-            $attendanceSession->where('class_id',$request->class_id);
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
+        $classes=$enrolls->pluck('group')->unique();
+        $attendanceSession->whereIn('class_id',$classes);
 
         if(isset($request->start_date))
             $attendanceSession->where('start_date','>=', $request->start_date);
@@ -94,7 +93,14 @@ class AttendanceSessionController extends Controller
         if(isset($request->to))
             $attendanceSession->where('to','<', $request->to);
 
-        return HelperController::api_response_format(200 , $attendanceSession->with('class','attendance.courses')->get()->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        $callback = function ($qu) use ($request) {
+            if(isset($request->attendance_type))
+                $qu->where('attendance_type',$request->attendance_type);
+        };
+
+        return HelperController::api_response_format(200 , $attendanceSession->whereHas('attendance', $callback)
+            ->with(['class','attendance.courses','attendance'=>$callback])->get()
+            ->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
@@ -298,5 +304,27 @@ class AttendanceSessionController extends Controller
         $file = Excel::store(new AttendanceLogsExport($allLogs), 'AttendanceLogs.xlsx','public');
         $file = url(Storage::url('AttendanceLogs.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+    }
+
+    public function CountStatus(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:attendance_sessions,id'
+        ]);
+
+        $all=SessionLog::where('session_id',$request->session_id)->get();
+        $attendees_object['Total']['count'] = $all->count();
+
+        $attendees_object['Present']['count'] = $all->where('status','Present')->count();
+        $attendees_object['Absent']['count'] =  $all->where('status','Absent')->count();
+        $attendees_object['Late']['count'] =  $all->where('status','Late')->count();
+        $attendees_object['Excuse']['count'] =  $all->where('status','Excuse')->count();
+
+        $attendees_object['Present']['precentage'] = round((($attendees_object['Present']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Absent']['precentage'] =  round((($attendees_object['Absent']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Late']['precentage'] =  round((($attendees_object['Late']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Excuse']['precentage'] =  round((($attendees_object['Excuse']['count']/$attendees_object['Total']['count'])*100),2);
+
+        return HelperController::api_response_format(201,$attendees_object, 'Counts');
     }
 }
