@@ -312,20 +312,18 @@ class AttendanceSessionController extends Controller
             'session_id' => 'required|exists:attendance_sessions,id'
         ]);
 
-        $all=SessionLog::where('session_id',$request->session_id)->with('user','session');
-        $allCount=clone $all;
-        $allCount = $allCount->count();
-        $attendees_object['Total']['count'] = $allCount;
+        $all=SessionLog::where('session_id',$request->session_id)->get();
+        $attendees_object['Total']['count'] = $all->count();
 
         $attendees_object['Present']['count'] = $all->where('status','Present')->count();
         $attendees_object['Absent']['count'] =  $all->where('status','Absent')->count();
         $attendees_object['Late']['count'] =  $all->where('status','Late')->count();
         $attendees_object['Excuse']['count'] =  $all->where('status','Excuse')->count();
 
-        $attendees_object['Present']['precentage'] = round((($attendees_object['Present']['count']/$allCount)*100),2);
-        $attendees_object['Absent']['precentage'] =  round((($attendees_object['Absent']['count']/$allCount)*100),2);
-        $attendees_object['Late']['precentage'] =  round((($attendees_object['Late']['count']/$allCount)*100),2);
-        $attendees_object['Excuse']['precentage'] =  round((($attendees_object['Excuse']['count']/$allCount)*100),2);
+        $attendees_object['Present']['precentage'] = round((($attendees_object['Present']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Absent']['precentage'] =  round((($attendees_object['Absent']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Late']['precentage'] =  round((($attendees_object['Late']['count']/$attendees_object['Total']['count'])*100),2);
+        $attendees_object['Excuse']['precentage'] =  round((($attendees_object['Excuse']['count']/$attendees_object['Total']['count'])*100),2);
 
         return HelperController::api_response_format(201,$attendees_object, 'Counts');
     }

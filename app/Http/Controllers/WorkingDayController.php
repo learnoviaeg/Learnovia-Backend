@@ -7,9 +7,9 @@ use App\WorkingDay;
 
 class WorkingDayController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct()
     {
-        $this->middleware(['permission:settings/working-days'],   ['only' => ['index','edit']]);
+        // $this->middleware(['permission:settings/working-days'],   ['only' => ['index','edit']]);
     }
     /**
      * Display a listing of the resource.
@@ -50,8 +50,8 @@ class WorkingDayController extends Controller
             'ids.*' => 'exists:working_days,id'
         ]); 
 
-        WorkingDay::whereIn('id',$request->ids)->update(['status',true]);
-        WorkingDay::whereNotIn('id',$request->ids)->update(['status',false]);
+        WorkingDay::whereIn('id',$request->ids)->update(['status' => true]);
+        WorkingDay::whereNotIn('id',$request->ids)->update(['status' => false]);
 
         return HelperController::api_response_format(200 , WorkingDay::all() , __('messages.working_day.update'));
     }
