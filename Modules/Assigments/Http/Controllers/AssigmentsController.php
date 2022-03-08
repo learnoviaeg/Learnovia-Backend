@@ -34,6 +34,7 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\UserAssigment;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\Component;
+use App\CourseItem;
 use App\LessonComponent;
 use App\Status;
 use Illuminate\Support\Facades\Validator;
@@ -56,6 +57,7 @@ use App\UserGrader;
 use App\Jobs\RefreshUserGrades;
 use App\Repositories\ChainRepositoryInterface;
 use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class AssigmentsController extends Controller
 {
@@ -334,6 +336,7 @@ class AssigmentsController extends Controller
 
         $assignment_category = GradeCategory::where('lesson_id', $AssignmentLesson->lesson_id)->where('instance_id' , $AssignmentLesson->assignment_id)
                                 ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
+        $parent=$assignment_category->first()->Parents;
 
         if ($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
@@ -353,9 +356,9 @@ class AssigmentsController extends Controller
             $AssignmentLesson->publish_date = $request->publish_date;
         $lesson=Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
-        if (!$request->filled('updated_lesson_id')) {
+        if (!$request->filled('updated_lesson_id'))
             $request->updated_lesson_id= $request->lesson_id;
-            }
+
         $AssignmentLesson->update([
             'lesson_id' => $request->updated_lesson_id
         ]);
@@ -384,7 +387,7 @@ class AssigmentsController extends Controller
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($AssignmentLesson));
 
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $assignment_category->first()->Parents));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
             dispatch($userGradesJob);
 
         $all = AssignmentLesson::all();
@@ -753,8 +756,16 @@ class AssigmentsController extends Controller
         if(!isset($assigLessonID))
             return HelperController::api_response_format(404, null, __('messages.assignment.not_found'));
 
-        if( $request->user()->can('site/course/student') && $assigLessonID->visible==0)
-            return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($assigLessonID->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
+        }
         $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
         $override = assignmentOverride::where('user_id',Auth::user()->id)->where('assignment_lesson_id',$assigLessonID->id);
         if (count($userassigments) > 0) {

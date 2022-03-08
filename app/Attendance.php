@@ -27,7 +27,7 @@ class Attendance extends Model
 
     public function levels()
     {
-        return $this->belongsToMany('App\Level', 'attendance_levels','attendance_id','level_id')->withTimestamps();
+        return $this->belongsToMany('App\Level', 'attendance_levels','attendance_id','level_id');
     }
 
     public function courses()

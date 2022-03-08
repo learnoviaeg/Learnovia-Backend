@@ -59,9 +59,4 @@ class quiz extends Model
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'quiz');
     }
-
-    public function timeline()
-    {
-        return $this->hasMany('App\Timeline', 'item_id')->where('type', 'quiz');
-    }
 }

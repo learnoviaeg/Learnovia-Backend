@@ -12,6 +12,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use checkEnroll;
 use URL;
 use App\Classes;
+use App\CourseItem;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
@@ -26,6 +27,7 @@ use Modules\Page\Entities\pageLesson;
 use App\Repositories\SettingsReposiotryInterface;
 use App\SecondaryChain;
 use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class MediaController extends Controller
 {
@@ -554,9 +556,17 @@ class MediaController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        $Media = media::with('MediaLesson')->find($request->id);
-        if( $request->user()->can('site/course/student') && $Media->MediaLesson->visible==0)
-            return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+        $Media = media::with('MediaLesson')->with('courseItem.courseItemUsers')->find($request->id);
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $Media->id)->where('type', 'media')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($Media->MediaLesson[0]->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+        }
 
         return HelperController::api_response_format(200, $Media);
     }

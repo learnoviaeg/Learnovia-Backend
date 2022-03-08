@@ -33,6 +33,7 @@ use App\Events\GraderSetupEvent;
 use App\Jobs\RefreshUserGrades;
 use App\Events\UpdatedQuizQuestionsEvent;
 use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 use Illuminate\Database\Eloquent\Builder;
 
 class QuizzesController extends Controller
@@ -388,12 +389,18 @@ class QuizzesController extends Controller
         ]);
 
         if(Auth::user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $id)->where('type', 'quiz')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
             $users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('course_id',Lesson::find($request->lesson_id)->course_id)->pluck('user_id')->unique();
             if(!in_array(Auth::id(),$users->toArray()))
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
+        $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();

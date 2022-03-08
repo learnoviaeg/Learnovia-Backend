@@ -13,10 +13,12 @@ use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
 use App\Component;
+use App\CourseItem;
 use App\LessonComponent;
 use App\LastAction;
 use Exception;
 use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class PageController extends Controller
 {
@@ -232,7 +234,7 @@ class PageController extends Controller
             'exists'   => __('messages.error.item_deleted'), //attribute  but bage for user
         ];
         $this->validate($request, $rules, $customMessages);
-        $page = page::whereId($request->id)->first();
+        $page = page::whereId($request->id)->with('courseItem.courseItemUsers')->first();
         if ($page == null)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         $lesson = $page->lesson->where('id', $request->lesson_id)->first();
@@ -243,8 +245,16 @@ class PageController extends Controller
             return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
-        if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
-            return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $page->id)->where('type', 'page')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($page->page_lesson->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
+        }
         unset($page->lesson);
 
         return HelperController::api_response_format(200, $page);

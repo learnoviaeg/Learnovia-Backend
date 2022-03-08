@@ -9,6 +9,7 @@ use App\User;
 // use App\CourseSegment;
 use App\Enroll;
 use App\Component;
+use App\CourseItem;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -16,6 +17,7 @@ use App\LastAction;
 use App\Http\Controllers\Controller;
 use App\Notification;
 use App\Notifications\H5PNotification;
+use App\UserCourseItem;
 
 class H5PLessonController extends Controller
 {
@@ -138,8 +140,16 @@ class H5PLessonController extends Controller
             if(!isset($h5p_lesson))
                 return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
-            if($request->user()->can('site/course/student')  && ($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()) ){
-                return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
+            if($request->user()->can('site/course/student')){
+                $courseItem = CourseItem::where('item_id', $request->content_id)->where('type', 'h5p_content')->first();
+                if(isset($courseItem)){
+                        $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                    if(!in_array(Auth::id(), $users))
+                        return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+                }
+
+                if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                    return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));

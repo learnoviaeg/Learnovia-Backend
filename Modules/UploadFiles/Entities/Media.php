@@ -16,7 +16,7 @@ class media extends Model
 
     public function MediaLesson()
     {
-        return $this->belongsTo('Modules\UploadFiles\Entities\MediaLesson', 'id', 'media_id');
+        return $this->hasMany('Modules\UploadFiles\Entities\MediaLesson');
     }
 
     public function user()
@@ -31,11 +31,12 @@ class media extends Model
         return 'Link';
     }
 
-    public function material(){
-        return $this->hasMany('App\Material','item_id')->where('type', 'media');
-    }
-
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'media');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\MediaLesson', 'media_id' , 'id' , 'id' , 'id' );
     }
 }

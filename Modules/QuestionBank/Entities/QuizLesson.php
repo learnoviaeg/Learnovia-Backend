@@ -80,10 +80,10 @@ class QuizLesson extends Model
         //student statuses
         if(Auth::user()->can('site/course/student')){
             $status = __('messages.status.not_submitted');
-
+            $quiz_lesson = QuizLesson::whereId($this->id)->first();
             $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $this->id)->pluck('id');
             $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->get();
-            if(isset($user_quiz) && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
+            if(isset($user_quiz) && $quiz_lesson->max_attemp >= count($user_quiz) && count($user_quiz)!=0 && !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
                 $status = __('messages.status.submitted');//submitted
 
                 if(!in_array(NULL,$user_quiz_asnwer->pluck('user_grade')->toArray(),true))

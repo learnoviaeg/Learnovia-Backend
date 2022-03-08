@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\ServiceProvider;
@@ -61,10 +61,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->register(BackendServiceProvider::class);
         $this->app->register(GraderServiceProvider::class);
-        
+
         $FirstGrade = new FirstGrade();
         $this->app->instance('First', $FirstGrade);
-        
+
         $LastGrade = new LastGrade();
         $this->app->instance('Last', $LastGrade);
 
@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
 
         $LowestGrade = new LowestGrade();
         $this->app->instance('Lowest', $LowestGrade);
-        
+
         $AverageGrade = new AverageGrade();
         $this->app->instance('Average', $AverageGrade);
 
@@ -82,9 +82,9 @@ class AppServiceProvider extends ServiceProvider
 
         $SimpleWeightedMethod = new SimpleWeightedMethod();
         $this->app->instance('Simple_weighted_mean', $SimpleWeightedMethod);
-        
+
         $TypeGrader = new TypeGrader();
-        $this->app->instance(TypeGrader::class, $TypeGrader);        
+        $this->app->instance(TypeGrader::class, $TypeGrader);
     }
 
     public function boot()
@@ -103,6 +103,15 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
+
+        Relation::morphMap([
+            'page' => 'Modules\Page\Entities\page',
+            'media' => 'Modules\UploadFiles\Entities\media',
+            'file' => 'Modules\UploadFiles\Entities\file',
+            'quiz' => 'Modules\QuestionBank\Entities\quiz',
+            'assignment' => 'Modules\Assigments\Entities\assignment'
+        ]);
+
 
         DB::connection()
         ->getDoctrineSchemaManager()

@@ -22,6 +22,7 @@ use App\Enroll;
 use App\User;
 use App\Http\Controllers\HelperController;
 use App\Component;
+use App\CourseItem;
 use App\LessonComponent;
 use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
@@ -30,6 +31,7 @@ use  App\LastAction;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
 use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class FilesController extends Controller
 {
@@ -246,52 +248,52 @@ class FilesController extends Controller
             $publishdate = Carbon::now();
         }
 
-            foreach ($request->Imported_file as $singlefile) {
-                $extension = $singlefile->getClientOriginalExtension();
-                $fileName = $singlefile->getClientOriginalName();
-                $size = $singlefile->getSize();
-                $name = uniqid() . '.' . $extension;
-                $file = new file;
-                $file->type = $extension;
-                $file->description = $name;
-                $file->name = ($request->filled('name')) ? $request->name : $fileName;
-                $file->size = $size;
-                $file->attachment_name = $fileName;
-                $file->user_id = Auth::user()->id;
-                $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                $file->url2 = 'files/' . $name;
-                $check = $file->save();
+        foreach ($request->Imported_file as $singlefile) {
+            $extension = $singlefile->getClientOriginalExtension();
+            $fileName = $singlefile->getClientOriginalName();
+            $size = $singlefile->getSize();
+            $name = uniqid() . '.' . $extension;
+            $file = new file;
+            $file->type = $extension;
+            $file->description = $name;
+            $file->name = ($request->filled('name')) ? $request->name : $fileName;
+            $file->size = $size;
+            $file->attachment_name = $fileName;
+            $file->user_id = Auth::user()->id;
+            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+            $file->url2 = 'files/' . $name;
+            $check = $file->save();
 
-                if ($check) {
-                    if(isset($request->users_ids))
-                        CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+            if ($check) {
+                if(isset($request->users_ids))
+                    CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 
-                    foreach ($request->lesson_id as $lesson) {
-                        $tempLesson = Lesson::find($lesson);
+                foreach ($request->lesson_id as $lesson) {
+                    $tempLesson = Lesson::find($lesson);
 
-                        $fileLesson = new FileLesson;
-                        $fileLesson->lesson_id = $lesson;
-                        $fileLesson->file_id = $file->id;
-                        $fileLesson->index = FileLesson::getNextIndex($lesson);
-                        $fileLesson->publish_date = $publishdate;
-                        $fileLesson->visible = isset($request->visible)?$request->visible:1;
+                    $fileLesson = new FileLesson;
+                    $fileLesson->lesson_id = $lesson;
+                    $fileLesson->file_id = $file->id;
+                    $fileLesson->index = FileLesson::getNextIndex($lesson);
+                    $fileLesson->publish_date = $publishdate;
+                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
 
-                        $fileLesson->save();
+                    $fileLesson->save();
 
-                        LessonComponent::firstOrCreate([
-                            'lesson_id' => $fileLesson->lesson_id,
-                            'comp_id'   => $fileLesson->file_id,
-                            'module'    => 'UploadFiles',
-                            'model'     => 'file',
-                        ], [
-                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                            ]);
-                        Storage::disk('public')->putFileAs(
-                            'files/' . $request->$lesson,
-                            $singlefile,
-                            $name
-                        );
-                    }
+                    LessonComponent::firstOrCreate([
+                        'lesson_id' => $fileLesson->lesson_id,
+                        'comp_id'   => $fileLesson->file_id,
+                        'module'    => 'UploadFiles',
+                        'model'     => 'file',
+                    ], [
+                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                        ]);
+                    Storage::disk('public')->putFileAs(
+                        'files/' . $request->$lesson,
+                        $singlefile,
+                        $name
+                    );
+                }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
@@ -600,9 +602,18 @@ class FilesController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        $File = file::with('FileLesson')->find($request->id);
-        if( $request->user()->can('site/course/student') && $File->FileLesson->visible==0)
-             return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
+        $File = file::with(['FileLesson','courseItem.courseItemUsers'])->find($request->id);
+
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $File->id)->where('type', 'file')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($File->FileLesson[0]->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
+        }
 
         return HelperController::api_response_format(200, $File);
     }
