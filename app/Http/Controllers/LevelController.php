@@ -46,7 +46,7 @@ class LevelController extends Controller
 
         if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses')){
             if($request->filled('types'))
-                $levels->whereIn('types' , $request->types);
+                $levels->whereIn('academic_type_id' , $request->types);
 
             return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
