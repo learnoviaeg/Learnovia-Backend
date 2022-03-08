@@ -22,13 +22,13 @@ class CreateWorkingDaysTable extends Migration
         });
 
         $workingDays = [
-            ['day' => 'Saturday','status' => false ],
             ['day' => 'Sunday','status' => true],
             ['day' => 'Monday','status' => true],
             ['day' => 'Tuesday','status' => true ],
             ['day' => 'Wendesday','status' => true],
             ['day' => 'Thuresday','status' => true],
-            ['day' => 'Friday','status' => false]
+            ['day' => 'Friday','status' => false],
+            ['day' => 'Saturday','status' => false ],
         ];
         WorkingDay::insert($workingDays);
 

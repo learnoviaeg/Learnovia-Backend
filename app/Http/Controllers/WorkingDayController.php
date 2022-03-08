@@ -9,7 +9,7 @@ class WorkingDayController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware(['permission:settings/working-days'],   ['only' => ['index','edit']]);
+        $this->middleware(['permission:settings/working-days'],   ['only' => ['index','edit']]);
     }
     /**
      * Display a listing of the resource.
