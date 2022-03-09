@@ -123,14 +123,15 @@ class AttendanceSessionController extends Controller
             // 'sessions.*.day' => 'in:SA,SU,MO,TU,WE,TH,FR|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
-            'repeated_until' => 'required_if:repeated,==,1|date'
+            'repeated_until' => 'required_if:repeated,==,1|date',
+            'included_days' => 'exists:working_days,id'
         ]);
         $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
         if($attendance->attendance_type == 'Per Session')
             $request->validate([
                 'class_id' => 'required|exists:classes,id',
-                'sessions.*.day' => 'in:Saturday,Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday|required_if:repeated,==,1',
+                'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
             ]);
 
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
@@ -155,7 +156,7 @@ class AttendanceSessionController extends Controller
                             array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
         
                     while($attendancestart <= Carbon::parse($repeated_until)){
-                        $attendance=AttendanceSession::firstOrCreate([
+                        $attendance=AttendanceSession::firstOrCreate([ 
                             'name' => $request->name,
                             'attendance_id' => $request->attendance_id,
                             'class_id' => $request->class_id,
@@ -170,15 +171,18 @@ class AttendanceSessionController extends Controller
                 }
                 else
                 {
-                    foreach(WorkingDay::cursor() as $day)
+                    foreach(WorkingDay::whereIn('id',$request->included_days)->pluck('name') as $day)
                     {
+                        if($day->status == 0)
+                            continue;
+
                         if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
-                        $attendancestart=(carbon::parse($request->start_date)->subDay(
-                            Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
+                            $attendancestart=(carbon::parse($request->start_date)->subDay(
+                                Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
     
                         if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
-                        $attendancestart=(carbon::parse($request->start_date)->addDays(
-                            array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+                            $attendancestart=(carbon::parse($request->start_date)->addDays(
+                                array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
                         while($attendancestart <= Carbon::parse($repeated_until)){
                             $attendance=AttendanceSession::firstOrCreate([
