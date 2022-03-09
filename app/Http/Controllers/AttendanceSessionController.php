@@ -175,7 +175,7 @@ class AttendanceSessionController extends Controller
                         'included_days.*' => 'exists:working_days,id'
                     ]);
 
-                    foreach(WorkingDay::whereIn('id',$request->included_days)->pluck('name') as $day)
+                    foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
                     {
                         if($day->status == 0)
                             continue;
