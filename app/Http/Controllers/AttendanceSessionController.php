@@ -117,7 +117,7 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'attendance_id' => 'required|exists:attendances,id',
-            'class_id' => 'exists:classes,id',
+            // 'class_id' => 'exists:classes,id',
             'course_id' => 'required|exists:courses,id',
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
@@ -173,14 +173,14 @@ class AttendanceSessionController extends Controller
                 else
                 {
                     $request->validate([
-                        'class_id' => 'required|array',
+                        // 'class_id' => 'required|array',
                         // 'class_id.*' => 'exists:classes,id', // because front_end sent it empty
                         'included_days' => 'required|array',
                         'included_days.*' => 'exists:working_days,id'
                     ]);
 
-                    $classes=Course::whereId($request->course_id)->pluck('classes');
-                    if(count($request->class_id) > 0)
+                    $classes=Course::whereId($request->course_id)->pluck('classes')->first();
+                    if(count($request->class_id) > 0 && !in_array(null,$request->class_id))
                         $classes=$request->class_id;
 
                     foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
