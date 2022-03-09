@@ -173,9 +173,15 @@ class AttendanceSessionController extends Controller
                 else
                 {
                     $request->validate([
+                        'class_id' => 'required|array',
+                        // 'class_id.*' => 'exists:classes,id', // because front_end sent it empty
                         'included_days' => 'required|array',
                         'included_days.*' => 'exists:working_days,id'
                     ]);
+
+                    $classes=Course::whereId($request->course_id)->pluck('classes');
+                    if(count($request->class_id) > 0)
+                        $classes=$request->class_id;
 
                     foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
                     {
@@ -191,12 +197,12 @@ class AttendanceSessionController extends Controller
                                 array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
                         while($attendancestart <= Carbon::parse($repeated_until)){
-                            foreach(Classes::whereIn('id',Course::whereId($request->course_id)->pluck('classes'))->pluck('id') as $class)
+                            foreach($classes as $class)
                             {
                                 $attendance=AttendanceSession::firstOrCreate([
                                     'name' => $request->name,
                                     'attendance_id' => $request->attendance_id,
-                                    'class_id' => isset($request->class_id) ? $request->class_id : $class,
+                                    'class_id' => $class,
                                     'course_id' => $request->course_id,
                                     'start_date' => $attendancestart,
                                     'from' => Carbon::parse($session['from'])->format('H:i'),
