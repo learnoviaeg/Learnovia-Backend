@@ -293,6 +293,7 @@ class GradeCategoriesController extends Controller
             $maxIndex=GradeCategory::where('parent',$request->parent)->max('index');
             $category->index=$maxIndex+1;
             $category->parent=$request->parent;
+            $category->save();
 
             event(new GraderSetupEvent($parent));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
@@ -302,23 +303,24 @@ class GradeCategoriesController extends Controller
         if(isset($request->index))
         {
             $cat=GradeCategory::where('parent',$category->parent)->where('course_id',$category->course_id);
-            if($request->index < $oldIndex)
+            if($request->index < $category->index)
             {
-                foreach($cat->where('index','>=',$request->index)->where('index','<',$oldIndex)->get() as $updateIndex)
+                foreach($cat->where('index','>=',$request->index)->where('index','<',$category->index)->get() as $updateIndex)
                 {
                     $updateIndex->index+=1;
                     $updateIndex->save();
                 }
             }
-            elseif($request->index > $oldIndex)
+            elseif($request->index > $category->index)
             {
-                foreach($cat->where('index','<=',$request->index)->where('index','>',$oldIndex)->get() as $updateIndex)
+                foreach($cat->where('index','<=',$request->index)->where('index','>',$category->index)->get() as $updateIndex)
                 {
                     $updateIndex->index-=1;
                     $updateIndex->save();
                 }
             }
             $category->index=$request->index;
+            $category->save();
         }
         // if(isset($request->indexed_id))
         // {
@@ -351,8 +353,6 @@ class GradeCategoriesController extends Controller
         event(new GraderSetupEvent(GradeCategory::find($category->parent)));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($category->parent)));
         dispatch($userGradesJob);
-
-        $category->save();
 
         return response()->json(['message' => __('messages.grade_category.Done'), 'body' => null ], 200);
     }
