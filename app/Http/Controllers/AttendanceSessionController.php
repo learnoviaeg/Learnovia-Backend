@@ -127,17 +127,6 @@ class AttendanceSessionController extends Controller
         ]);
         $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
-        if($attendance->attendance_type == 'Per Session')
-            $request->validate([
-                'class_id' => 'required|exists:classes,id',
-                'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
-            ]);
-
-        else
-            $request->validate([
-                'included_days' => 'required|array',
-                'included_days.*' => 'exists:working_days,id'
-            ]);
 
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
             return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
@@ -152,6 +141,11 @@ class AttendanceSessionController extends Controller
             {
                 if($attendance->attendance_type == 'Per Session')
                 {
+                    $request->validate([
+                        'class_id' => 'required|exists:classes,id',
+                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
+                    ]);
+
                     if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
                         $attendancestart=(carbon::parse($request->start_date)->subDay(
                             Carbon::parse($request->start_date)->dayOfWeek - array_search($session['day'],$weekMap))->addDays(7));
@@ -176,7 +170,12 @@ class AttendanceSessionController extends Controller
                 }
                 else
                 {
-                    foreach(WorkingDay::whereIn('id',$request->included_days)->pluck('name') as $day)
+                    $request->validate([
+                        'included_days' => 'required|array',
+                        'included_days.*' => 'exists:working_days,id'
+                    ]);
+
+                    foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
                     {
                         if($day->status == 0)
                             continue;
