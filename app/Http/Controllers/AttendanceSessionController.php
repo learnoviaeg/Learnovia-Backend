@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
+use App\WorkingDay;
 use App\Events\TakeAttendanceEvent;
 use Auth;
 use App\Repositories\ChainRepositoryInterface;
@@ -114,50 +115,94 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'attendance_id' => 'required|exists:attendances,id',
-            'class_id' => 'required|exists:classes,id',
+            'class_id' => 'exists:classes,id',
             'course_id' => 'required|exists:courses,id',
             'repeated' => 'required|in:0,1',
             'sessions' => 'required_if:repeated,==,1|array',
             'start_date' => 'required|date',
-            'sessions.*.day' => 'in:SA,SU,MO,TU,WE,TH,FR|required_if:repeated,==,1',
+            // 'sessions.*.day' => 'in:SA,SU,MO,TU,WE,TH,FR|required_if:repeated,==,1',
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
-            'repeated_until' => 'required_if:repeated,==,1|date'
+            'repeated_until' => 'required_if:repeated,==,1|date',
         ]);
-        $weekMap = ['SU','MO','TU','WE','TH','FR','SA'];
+        $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
+
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
             return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_start_date').$attendance->start_date .','.$attendance->end_date);
 
-        $repeated_until=$request->repeated_until;
-        if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
-            return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
-
         if($request->repeated == 1)
         {
+            $repeated_until=$request->repeated_until;
+            if(Carbon::parse($request->repeated_until) > Carbon::parse($attendance->end_date))
+                return HelperController::api_response_format(400 , null , __('messages.attendance_session.invalid_end_date').$attendance->start_date .','.$attendance->end_date);
+
             foreach($request->sessions as $session)
             {
-                if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
-                    $attendancestart=(carbon::parse($request->start_date)->subDay(
-                        Carbon::parse($request->start_date)->dayOfWeek - array_search($session['day'],$weekMap))->addDays(7));
-
-                if(array_search($session['day'],$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
-                $attendancestart=(carbon::parse($request->start_date)->addDays(
-                    array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
-
-                while($attendancestart <= Carbon::parse($repeated_until)){
-                    $attendance=AttendanceSession::firstOrCreate([
-                        'name' => $request->name,
-                        'attendance_id' => $request->attendance_id,
-                        'class_id' => $request->class_id,
-                        'course_id' => $request->course_id,
-                        'start_date' => $attendancestart,
-                        'from' => Carbon::parse($session['from'])->format('H:i'),
-                        'to' => Carbon::parse($session['to'])->format('H:i'),
-                        'created_by' => Auth::id()
+                if($attendance->attendance_type == 'Per Session')
+                {
+                    $request->validate([
+                        'class_id' => 'required|exists:classes,id',
+                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
                     ]);
-                    $attendancestart=$attendancestart->addDays(7);                   
-                }   
+
+                    if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
+                        $attendancestart=(carbon::parse($request->start_date)->subDay(
+                            Carbon::parse($request->start_date)->dayOfWeek - array_search($session['day'],$weekMap))->addDays(7));
+    
+                    if(array_search($session['day'],$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
+                        $attendancestart=(carbon::parse($request->start_date)->addDays(
+                            array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+        
+                    while($attendancestart <= Carbon::parse($repeated_until)){
+                        $attendance=AttendanceSession::firstOrCreate([ 
+                            'name' => $request->name,
+                            'attendance_id' => $request->attendance_id,
+                            'class_id' => $request->class_id,
+                            'course_id' => $request->course_id,
+                            'start_date' => $attendancestart,
+                            'from' => Carbon::parse($session['from'])->format('H:i'),
+                            'to' => Carbon::parse($session['to'])->format('H:i'),
+                            'created_by' => Auth::id()
+                        ]);
+                        $attendancestart=$attendancestart->addDays(7);                   
+                    }   
+                }
+                else
+                {
+                    $request->validate([
+                        'included_days' => 'required|array',
+                        'included_days.*' => 'exists:working_days,id'
+                    ]);
+
+                    foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
+                    {
+                        if($day->status == 0)
+                            continue;
+
+                        if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
+                            $attendancestart=(carbon::parse($request->start_date)->subDay(
+                                Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
+    
+                        if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
+                            $attendancestart=(carbon::parse($request->start_date)->addDays(
+                                array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+
+                        while($attendancestart <= Carbon::parse($repeated_until)){
+                            $attendance=AttendanceSession::firstOrCreate([
+                                'name' => $request->name,
+                                'attendance_id' => $request->attendance_id,
+                                'class_id' => $request->class_id,
+                                'course_id' => $request->course_id,
+                                'start_date' => $attendancestart,
+                                'from' => Carbon::parse($session['from'])->format('H:i'),
+                                'to' => Carbon::parse($session['to'])->format('H:i'),
+                                'created_by' => Auth::id()
+                            ]);
+                            $attendancestart=$attendancestart->addDays(7);                   
+                        }   
+                    }
+                }
             }
         }      
         else
@@ -167,7 +212,7 @@ class AttendanceSessionController extends Controller
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,
                 'start_date' => $request->start_date,
-                'from' => null,
+                'from' => Carbon::parse($request->start_date)->format('H:i'),
                 'to' => null,
                 'created_by' => Auth::id()
             ]);

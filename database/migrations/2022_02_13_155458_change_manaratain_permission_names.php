@@ -31,9 +31,6 @@ class ChangeManaratainPermissionNames extends Migration
             '--force' => true 
         ]);
 
-        eval('$importer = new App\Imports\\LanguageImport();');
-        $check = Excel::import($importer, public_path('translation/EngTranslate.xlsx'));
-        $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
 
         Dictionary::where('value','=TRUE()')->update(['value' => 'True']);
         Dictionary::where('key','=TRUE()')->update(['key' => 'True']);

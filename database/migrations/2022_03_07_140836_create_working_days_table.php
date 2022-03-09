@@ -28,7 +28,7 @@ class CreateWorkingDaysTable extends Migration
             ['day' => 'Tuesday','status' => true ],
             ['day' => 'Wendesday','status' => true],
             ['day' => 'Thuresday','status' => true],
-            ['day' => 'Friday','status' => false]
+            ['day' => 'Friday','status' => false],
         ];
         WorkingDay::insert($workingDays);
 
