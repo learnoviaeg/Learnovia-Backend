@@ -68,15 +68,15 @@ class AssignmentController extends Controller
         if($request->user()->can('site/course/student')){
             $assignment_lessons
             ->where('visible',1)
-            ->where('publish_date' ,'<=', Carbon::now())
-            ->whereHas('Assignment',function($q){
-                $q->where(function($query) {                //Where accessible
-                        $query->doesntHave('courseItem')
-                                ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
-                                    $query->where('user_id', Auth::id());
-                                });
-                    });
-            });
+            ->where('publish_date' ,'<=', Carbon::now());
+            // ->whereHas('Assignment',function($q){
+            //     $q->where(function($query) {                //Where accessible
+            //             $query->doesntHave('courseItem')
+            //                     ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+            //                         $query->where('user_id', Auth::id());
+            //                     });
+            //         });
+            // });
         }
 
         if($count == 'count'){

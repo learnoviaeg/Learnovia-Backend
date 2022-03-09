@@ -141,12 +141,12 @@ class H5PLessonController extends Controller
                 return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
             if($request->user()->can('site/course/student')){
-                $courseItem = CourseItem::where('item_id', $request->content_id)->where('type', 'h5p_content')->first();
-                if(isset($courseItem)){
-                        $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
-                    if(!in_array(Auth::id(), $users))
-                        return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
-                }
+                // $courseItem = CourseItem::where('item_id', $request->content_id)->where('type', 'h5p_content')->first();
+                // if(isset($courseItem)){
+                //         $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                //     if(!in_array(Auth::id(), $users))
+                //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+                // }
 
                 if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));

@@ -12,6 +12,8 @@ use App\Level;
 use App\Classes;
 use App\Paginate;
 use App\attachment;
+use App\CourseItem;
+use App\Helpers\CoursesHelper;
 use Modules\Assigments\Entities\assignment;
 use DB;
 use App\SecondaryChain;
@@ -359,6 +361,42 @@ class MaterialsController extends Controller
         $result['per_page']= count($result['data']);
 
         return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
+    }
+
+    public function getMaterialAssignedUsers(Request $request){
+
+        $request->validate([
+            'id' => 'required|exists:materials,id',
+        ]);
+
+        $material = Material::with(['lesson', 'item.courseItem.courseItemUsers'])->find($request->id);
+
+        $shared_classes = $material->lesson->shared_classes;
+        foreach($shared_classes as $class)
+            $result['material_classes'][] = $class->id;
+
+        $result['restricted'] = false;
+        if(isset($material['item']->courseItem)){
+            $result['restricted'] = true;
+
+            $courseItemUsers = $material['item']->courseItem->courseItemUsers;
+            foreach($courseItemUsers as $user)
+                $result['assigned_users'][] = $user->user_id;
+        }
+
+        return response()->json($result, 200);
+    }
+
+    public function editMaterialAssignedUsers(Request $request){
+        $request->validate([
+            'id' => 'required|exists:materials,id',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+        ]);
+
+        $material = Material::find($request->id);
+        CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
+        return response()->json(['message' => 'Updated successfully'], 200);
     }
 }
 

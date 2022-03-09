@@ -150,8 +150,8 @@ class H5pController extends Controller
 
         $return_id = LaravelH5p::controllerStore($request, $this);
 
-        if(isset($request->users_ids))
-                CoursesHelper::giveUsersAccessToViewCourseItem($return_id, 'h5p_content', $request->users_ids);
+        // if(isset($request->users_ids))
+        //         CoursesHelper::giveUsersAccessToViewCourseItem($return_id, 'h5p_content', $request->users_ids);
 
         $editting_done ='false';
         if ($return_id) {

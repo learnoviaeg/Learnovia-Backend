@@ -74,22 +74,22 @@ class TimelineController extends Controller
 
         if(Auth::user()->can('site/course/student')){
             $timeline
-            ->where('visible',1)
-            ->where(function($query) {         //Where accessible
-                $query->whereHasMorph(
-                    'item',
-                    [
-                        'Modules\QuestionBank\Entities\quiz',
-                        'Modules\Assigments\Entities\assignment',
-                    ],
-                    function($query){
-                        $query->doesntHave('courseItem')
-                        ->orWhereHas('courseItem.courseItemUsers', function ($query){
-                            $query->where('user_id', Auth::id());
-                        });
-                    }
-                );
-            });
+            ->where('visible',1);
+            // ->where(function($query) {         //Where accessible
+            //     $query->whereHasMorph(
+            //         'item',
+            //         [
+            //             'Modules\QuestionBank\Entities\quiz',
+            //             'Modules\Assigments\Entities\assignment',
+            //         ],
+            //         function($query){
+            //             $query->doesntHave('courseItem')
+            //             ->orWhereHas('courseItem.courseItemUsers', function ($query){
+            //                 $query->where('user_id', Auth::id());
+            //             });
+            //         }
+            //     );
+            // });
         }
 
         if($request->has('item_type'))

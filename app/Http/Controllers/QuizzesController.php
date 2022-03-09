@@ -89,15 +89,15 @@ class QuizzesController extends Controller
         if($request->user()->can('site/course/student')){
             $quiz_lessons
             ->where('visible',1)
-            ->where('publish_date' ,'<=', Carbon::now())
-            ->whereHas('quiz',function($q){
-                $q->where(function($query) {                //Where accessible
-                        $query->doesntHave('courseItem')
-                                ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
-                                    $query->where('user_id', Auth::id());
-                                });
-                    });
-            });
+            ->where('publish_date' ,'<=', Carbon::now());
+            // ->whereHas('quiz',function($q){
+            //     $q->where(function($query) {                //Where accessible
+            //             $query->doesntHave('courseItem')
+            //                     ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+            //                         $query->where('user_id', Auth::id());
+            //                     });
+            //         });
+            // });
         }
 
         if(!$request->user()->can('quiz/view-drafts')){
@@ -187,8 +187,8 @@ class QuizzesController extends Controller
                 'correct_feedback' => $request->correct_feedback,
             ]);
 
-            if(isset($request->users_ids))
-                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            // if(isset($request->users_ids))
+            //     CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
 
             $lessons = Lesson::whereIn('id', $request->lesson_id)
                         ->with([
@@ -389,12 +389,12 @@ class QuizzesController extends Controller
         ]);
 
         if(Auth::user()->can('site/course/student')){
-            $courseItem = CourseItem::where('item_id', $id)->where('type', 'quiz')->first();
-            if(isset($courseItem)){
-                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
-                if(!in_array(Auth::id(), $users))
-                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
-            }
+            // $courseItem = CourseItem::where('item_id', $id)->where('type', 'quiz')->first();
+            // if(isset($courseItem)){
+            //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+            //     if(!in_array(Auth::id(), $users))
+            //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            // }
             $users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('course_id',Lesson::find($request->lesson_id)->course_id)->pluck('user_id')->unique();
             if(!in_array(Auth::id(),$users->toArray()))
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
