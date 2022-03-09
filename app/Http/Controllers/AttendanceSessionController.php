@@ -124,7 +124,6 @@ class AttendanceSessionController extends Controller
             'sessions.*.from' => 'required|date',
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date',
-            'included_days' => 'exists:working_days,id'
         ]);
         $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
@@ -132,6 +131,12 @@ class AttendanceSessionController extends Controller
             $request->validate([
                 'class_id' => 'required|exists:classes,id',
                 'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
+            ]);
+
+        else
+            $request->validate([
+                'included_days' => 'required|array',
+                'included_days.*' => 'exists:working_days,id'
             ]);
 
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
