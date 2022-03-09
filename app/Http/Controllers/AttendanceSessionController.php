@@ -8,6 +8,7 @@ use App\Attendance;
 use App\GradeCategory;
 use Carbon\Carbon;
 use App\Exports\AttendanceLogsExport;
+use App\Classes;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
@@ -15,6 +16,7 @@ use App\SessionLog;
 use App\WorkingDay;
 use App\Events\TakeAttendanceEvent;
 use Auth;
+use App\Course;
 use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
@@ -142,7 +144,7 @@ class AttendanceSessionController extends Controller
                 if($attendance->attendance_type == 'Per Session')
                 {
                     $request->validate([
-                        'class_id' => 'required|exists:classes,id',
+                        'class_id' => 'required',
                         'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
                     ]);
 
@@ -189,17 +191,20 @@ class AttendanceSessionController extends Controller
                                 array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
                         while($attendancestart <= Carbon::parse($repeated_until)){
-                            $attendance=AttendanceSession::firstOrCreate([
-                                'name' => $request->name,
-                                'attendance_id' => $request->attendance_id,
-                                'class_id' => $request->class_id,
-                                'course_id' => $request->course_id,
-                                'start_date' => $attendancestart,
-                                'from' => Carbon::parse($session['from'])->format('H:i'),
-                                'to' => Carbon::parse($session['to'])->format('H:i'),
-                                'created_by' => Auth::id()
-                            ]);
-                            $attendancestart=$attendancestart->addDays(7);                   
+                            foreach(Classes::whereIn('id',Course::whereId($request->course_id)->pluck('classes'))->pluck('id') as $class)
+                            {
+                                $attendance=AttendanceSession::firstOrCreate([
+                                    'name' => $request->name,
+                                    'attendance_id' => $request->attendance_id,
+                                    'class_id' => isset($request->class_id) ? $request->class_id : $class,
+                                    'course_id' => $request->course_id,
+                                    'start_date' => $attendancestart,
+                                    'from' => Carbon::parse($session['from'])->format('H:i'),
+                                    'to' => Carbon::parse($session['to'])->format('H:i'),
+                                    'created_by' => Auth::id()
+                                ]);
+                                $attendancestart=$attendancestart->addDays(7);                              
+                            }
                         }   
                     }
                 }
