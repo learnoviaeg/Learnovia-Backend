@@ -22,9 +22,9 @@ class H5PLessonController extends Controller
 
     public function install()
     {
-        if (\Spatie\Permission\Models\Permission::whereName('h5p/lesson/create')->first() != null) {
-            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        }
+        // if (\Spatie\Permission\Models\Permission::whereName('h5p/lesson/create')->first() != null) {
+        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        // }
 
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'Create Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle interactive visability']);
