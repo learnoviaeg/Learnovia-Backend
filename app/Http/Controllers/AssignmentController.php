@@ -63,7 +63,7 @@ class AssignmentController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment.assignmentLesson');
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment');
 
         if($request->user()->can('site/course/student')){
             $assignment_lessons
@@ -88,7 +88,7 @@ class AssignmentController extends Controller
 
         $assignments = collect([]);
         foreach($assignment_lessons as $assignment_lesson){
-            $assignment=$assignment_lesson->Assignment;
+            $assignment=assignment::whereId($assignment_lesson->assignment_id)->with('assignmentLesson')->first();
             $lessonn = Lesson::find($assignment_lesson->lesson_id);
             $classesIDS = SecondaryChain::select('group_id')->distinct()->where('lesson_id',$lessonn->id)->pluck('group_id');
             $classes = Classes::whereIn('id',$classesIDS)->get();

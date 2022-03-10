@@ -83,13 +83,13 @@ class QuizzesController extends Controller
             $sort_in = $request->sort_in;
 
         $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)
-        ->with(['quiz.course','quiz.Question.children','quiz.quizLesson'])
+        ->with(['quiz'])
         ->orderBy('created_at','desc');
 
         if($request->user()->can('site/course/student')){
             $quiz_lessons
-            ->where('visible',1)
-            ->where('publish_date' ,'<=', Carbon::now());
+            ->where('visible',1);
+            // ->where('publish_date' ,'<=', Carbon::now())
             // ->whereHas('quiz',function($q){
             //     $q->where(function($query) {                //Where accessible
             //             $query->doesntHave('courseItem')
@@ -121,7 +121,7 @@ class QuizzesController extends Controller
 
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=$quiz_lesson->quiz;
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->with(['course','Question.children','quizLesson'])->first();
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
             if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
                 $flag=true;
