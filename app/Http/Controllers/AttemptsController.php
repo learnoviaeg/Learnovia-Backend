@@ -144,14 +144,25 @@ class AttemptsController extends Controller
 
                 if($attem->status != 'Graded')
                     $countEss_TF++;
+                    
                 $user_Attemp['id']= $attem->id;
-
                 $user_Attemp["open_time"]= $attem->open_time;
                 $user_Attemp["submit_time"]= $attem->submit_time;
                 $user_Attemp["taken_duration"]= Carbon::parse($attem->open_time)->diffInSeconds(Carbon::parse($attem->submit_time),false);
                 $user_Attemp['details']= UserQuiz::whereId($attem->id)->with('UserQuizAnswer.Question')->first();
-                foreach($user_Attemp['details']->UserQuizAnswer as $answ)
+                foreach($user_Attemp['details']->UserQuizAnswer as $answ){
                     $answ->Question->grade_details=quiz_questions::where('quiz_id',$request->quiz_id)->where('question_id',$answ->question_id)->pluck('grade_details')->first();
+                    
+                    //for key_front totally graded or NOT
+                    $answ->totally_graded=false;
+                    if(in_array($answ->question_id,$essayQues->toArray()))
+                        if($answ->correction != null)
+                            $answ->totally_graded=true;
+                    
+                    if(in_array($answ->question_id,$t_f_Quest->pluck('id')->toArray()))
+                        if(isset($answ->correction->grade))
+                            $answ->totally_graded=true;
+                }
 
                 $useranswerSubmitted = userQuizAnswer::where('user_quiz_id',$attem->id)->where('force_submit',null)->count();
                 if($useranswerSubmitted < 1){

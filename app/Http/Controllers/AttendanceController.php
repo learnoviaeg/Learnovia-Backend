@@ -16,7 +16,7 @@ class AttendanceController extends Controller
     public function __construct()
     {
         $this->middleware(['permission:attendance/add'],   ['only' => ['store']]);
-        $this->middleware(['permission:attendance/delete'],   ['only' => ['delete']]);
+        $this->middleware(['permission:attendance/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:attendance/edit'],   ['only' => ['update']]);
         $this->middleware(['permission:attendance/viewAllAttendance'],   ['only' => ['index','show']]);
     }
@@ -38,20 +38,24 @@ class AttendanceController extends Controller
             'grade_cat_id' => 'exists:grade_categories,id',
             'start_date' => 'date',
             'end_date' => 'date|after:start_date',
+            'search' => 'string'
         ]);
         $attendance=Attendance::where('id', '!=', null);
 
         if(isset($request->attendance_type))
             $attendance->where('attendance_type',$request->attendance_type);
+        
+        if(isset($request->search))
+            $attendance->where('name', 'LIKE' , "%$request->search%");
 
-        if(isset($request->year_id))
-            $attendance->where('year_id',$request->year_id);
+        if(isset($request->years))
+            $attendance->whereIn('year_id',$request->years);
 
-        if(isset($request->type_id))
-            $attendance->where('type_id',$request->type_id);
+        if(isset($request->types))
+            $attendance->whereIn('type_id',$request->types);
 
-        if(isset($request->segment_id))
-            $attendance->where('segment_id',$request->segment_id);
+        if(isset($request->segments))
+            $attendance->whereIn('segment_id',$request->segments);
 
         if(isset($request->start_date))
             $attendance->where('start_date','>=', $request->start_date);
@@ -59,14 +63,21 @@ class AttendanceController extends Controller
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
 
+            // return $attendance->with('levels')->get();
+
         $all=[];
         foreach($attendance->cursor() as $attendeence){
             $callback = function ($qu) use ($request,$attendeence) {
                 $qu->whereIn('id',$attendeence->courses->pluck('id')->toArray());
-                if(isset($request->course_id))
-                    $qu->where('id',$request->course_id);
+                if(isset($request->courses))
+                    $qu->whereIn('id',$request->courses);
             };
-            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->with(['levels.courses' => $callback , 'attendanceStatus'])->first();
+            $callback2 = function ($q) use ($request) {
+                if(isset($request->levels))
+                    $q->whereIn('level_id',$request->levels);
+            };
+            $check=Attendance::whereId($attendeence->id)->whereHas('levels.courses', $callback)->whereHas('levels',$callback2)
+            ->with(['levels'=>$callback2,'levels.courses' => $callback , 'attendanceStatus'])->first();
             if(isset($check))
                 $all[]=$check;
         }
@@ -146,8 +157,8 @@ class AttendanceController extends Controller
                         'weights' => ((bool) $request->is_graded == false) ? 0 : null,
                     ]);
 
-                    $gradeCat->index=GradeCategory::where('parent',$gradeCat->parent)->max('index')+1;
-                    $gradeCat->save();
+                    // $gradeCat->index=GradeCategory::where('parent',$gradeCat->parent)->max('index')+1;
+                    // $gradeCat->save();
 
                     $users = Enroll::where('role_id',3)->where('course',$attend['course_id'])->pluck('user_id');
                     foreach($users as $user_id)

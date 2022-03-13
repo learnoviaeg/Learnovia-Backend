@@ -33,18 +33,18 @@ class AttendanceSessionController extends Controller
 {
     public function install()
     {
-        if (\Spatie\Permission\Models\Permission::whereName('attendance/add-session')->first() != null) {
-            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        }
+        // if (\Spatie\Permission\Models\Permission::whereName('attendance/add-session')->first() != null) {
+        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        // }
         
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Sessions']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'All Sessions','dashboard' => 1,'icon'=> 'Attendance']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'Delete Session']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'Edit Session']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Sessions']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-attendance', 'title' => 'All Sessions','dashboard' => 1,'icon'=> 'Attendance']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily','dashboard' => 1,'icon'=> 'Attendance']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/delete-attendance', 'title' => 'Delete Session']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/edit-attendance', 'title' => 'Edit Session']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
 
         $teacher_permissions=['attendance/add-log','attendance/get-attendance','attendance/get-daily','attendance/get-users-in-session','attendance/export'];
         $tecaher = \Spatie\Permission\Models\Role::find(4);
@@ -54,9 +54,6 @@ class AttendanceSessionController extends Controller
         $role->givePermissionTo('attendance/add-session');
         $role->givePermissionTo('attendance/add-log');
         $role->givePermissionTo('attendance/get-users-in-session');
-        $role->givePermissionTo('attendance/delete-attendance');
-        $role->givePermissionTo('attendance/edit-attendance');
-        $role->givePermissionTo('attendance/get-attendance');
         $role->givePermissionTo('attendance/export');
         $role->givePermissionTo('attendance/get-daily');
 

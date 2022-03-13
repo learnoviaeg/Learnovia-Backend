@@ -471,6 +471,9 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
 
+    Route::get('get-materials', 'MaterialsController@getMaterials');
+
+    
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
     Route::Resource('years', YearsController::class);
@@ -505,6 +508,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
     Route::Resource('notify', NotificationsController::class);
+    Route::post('working-days/edit', 'WorkingDayController@edit');
+    Route::Resource('working-days', WorkingDayController::class);
     Route::get('notification/{read}', 'NotificationsController@read')->middleware('permission:notifications/seen');
     Route::get('notifications/{types}', 'NotificationsController@index')->middleware('permission:notifications/get-all');
     Route::Resource('announcement', AnnouncementsController::class);
@@ -554,6 +559,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
     Route::delete('session', 'AttendanceSessionController@deleteAll');
     Route::get('session/logs', 'AttendanceSessionController@LogsAttendance');
+    Route::get('logs/count', 'AttendanceSessionController@CountStatus');
+    Route::get('logs/export', 'AttendanceSessionController@exportLogs');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session', AttendanceSessionController::class);
@@ -584,6 +591,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
     Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
     Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
+    Route::get('fgl-prep3', 'ReportCardsController@fglPrep3Report')->middleware('permission:report_card/fgls');
+    Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
 });
 
 //script for front-end editor

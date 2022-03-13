@@ -32,7 +32,7 @@ class PageServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        pageLesson::observe(PageObserver::class);
+        Page::observe(PageObserver::class);
         Page::observe(LogsObserver::class);
         PageLesson::observe(LogsObserver::class);
         PageLesson::observe(PageLessonObserver::class);

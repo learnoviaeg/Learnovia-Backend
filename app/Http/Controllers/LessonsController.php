@@ -64,6 +64,14 @@ class LessonsController extends Controller
             });
         }
 
+        //When adding materials
+        if($request->filled('material_filter')){
+            $result->where(function($query) use ($request){
+                $query->whereRaw('JSON_CONTAINS(`shared_classes`, '. '\'["'. implode('","',$request->classes) . '"]\'' .') AND JSON_LENGTH(`shared_classes`) = JSON_LENGTH(\'' . '["'. implode('","',$request->classes) . '"]\''. ')')
+                ->orWhereRaw('JSON_CONTAINS(`shared_classes`, '. '\'['. implode(',',$request->classes) . ']\'' .') AND JSON_LENGTH(`shared_classes`) = JSON_LENGTH(\'' . '['. implode(',',$request->classes) . ']\''. ')');
+            });
+        }
+
         return response()->json(['message' => __('messages.lesson.list'), 'body' => $result->orderBy('index', 'ASC')->get()], 200);
     }
 

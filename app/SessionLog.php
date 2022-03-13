@@ -17,4 +17,9 @@ class SessionLog extends Model
     {
         return $this->belongsTo('App\User' , 'taken_by' , 'id');
     }
+
+    public function session()
+    {
+        return $this->belongsTo('App\AttendanceSession' , 'session_id' , 'id');
+    }
 }
