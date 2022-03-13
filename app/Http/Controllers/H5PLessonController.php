@@ -9,6 +9,7 @@ use App\User;
 // use App\CourseSegment;
 use App\Enroll;
 use App\Component;
+use App\CourseItem;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -16,6 +17,7 @@ use App\LastAction;
 use App\Http\Controllers\Controller;
 use App\Notification;
 use App\Notifications\H5PNotification;
+use App\UserCourseItem;
 
 class H5PLessonController extends Controller
 {
@@ -38,7 +40,7 @@ class H5PLessonController extends Controller
         'h5p/lesson/allow-delete'];
         $tecaher = \Spatie\Permission\Models\Role::find(4);
         $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
-        
+
         $student_permissions=['h5p/lesson/get-all'];
         $student = \Spatie\Permission\Models\Role::find(3);
         $parent = \Spatie\Permission\Models\Role::find(7);
@@ -75,7 +77,7 @@ class H5PLessonController extends Controller
             'visible'=>'in:0,1',
             'publish_date' => 'nullable|after:' . Carbon::now(),
         ]);
-        
+
         // $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->whereIn('lesson_id',$request->lesson_id)->first();
         // if(!isset($h5p_lesson)){
         foreach($request->lesson_id as $lesson_id){
@@ -98,7 +100,7 @@ class H5PLessonController extends Controller
             $notification = new H5PNotification($h5p_lesson, $content->title.' interactive is added');
             $notification->send();
         }
-        
+
         return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
     }
 
@@ -112,7 +114,7 @@ class H5PLessonController extends Controller
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($h5pLesson))
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
-        
+
         $lesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
         $h5pLesson->visible = ($h5pLesson->visible == 1) ? 0 : 1;
@@ -138,13 +140,21 @@ class H5PLessonController extends Controller
             if(!isset($h5p_lesson))
                 return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
-            if($request->user()->can('site/course/student')  && ($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()) ){
-                return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
+            if($request->user()->can('site/course/student')){
+                // $courseItem = CourseItem::where('item_id', $request->content_id)->where('type', 'h5p_content')->first();
+                // if(isset($courseItem)){
+                //         $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                //     if(!in_array(Auth::id(), $users))
+                //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+                // }
+
+                if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                    return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
-        
+
 
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();
@@ -167,7 +177,7 @@ class H5PLessonController extends Controller
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if (!isset($h5pLesson))
             return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
-        
+
         $lesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
 
@@ -206,11 +216,11 @@ class H5PLessonController extends Controller
         if ($request->filled('visible')) {
             $h5pLesson->update([
                 'visible' => $request->visible
-            ]); 
+            ]);
         }
 
-           
-        
+
+
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
         // $content->pivot = [
@@ -222,5 +232,5 @@ class H5PLessonController extends Controller
 
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
-    
+
 }

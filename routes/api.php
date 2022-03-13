@@ -13,7 +13,7 @@ Route::group(['prefix' => 'auth'], function () {
 });
 use Illuminate\Http\Request;
 Route::get('h5p_protect', function(Request $request)
-{   
+{
     $data = explode('/',request()->data);
     $video_name = $data[count($data) - 1];
 
@@ -42,7 +42,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
-    
+
     //for editor
     Route::post('upload-editor', 'CourseController@Upload')->name('uploadForEditor');
 
@@ -465,15 +465,17 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
-    
+
     Route::Resource('timeline', TimelineController::class);
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
 
     Route::get('get-materials', 'MaterialsController@getMaterials');
+    Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');
+    Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers');
 
-    
+
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
     Route::Resource('years', YearsController::class);
@@ -490,7 +492,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('courses/{id}', 'CoursesController@update');
     Route::post('course/template', 'CoursesController@Apply_Template')->middleware(['permission:course/template']);
     Route::post('course/sort', 'CoursesController@sort')->middleware(['permission:course/sort']);
-    
+
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
 
@@ -553,7 +555,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('user-grade', UserGradeController::class);
     Route::get('grade/export', 'UserGradeController@export')->name('exportGrade')->middleware('permission:grade/export');
     Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware('permission:grade/report/user');
-    
+
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
@@ -566,7 +568,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('session', AttendanceSessionController::class);
 
     Route::Resource('topic', TopicController::class);
-    
+
     Route::post('quiz/get-all-attempts', 'AttemptsController@get_all_users_quiz_attempts')->middleware('permission:quiz/detailes');
     Route::get('courseProgressReport' , 'ReportsController@courseProgressReport')->middleware('permission:reports/course_progress');
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');

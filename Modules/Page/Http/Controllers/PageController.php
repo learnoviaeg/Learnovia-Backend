@@ -13,9 +13,12 @@ use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
 use App\Component;
+use App\CourseItem;
 use App\LessonComponent;
 use App\LastAction;
 use Exception;
+use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class PageController extends Controller
 {
@@ -78,8 +81,10 @@ class PageController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'publish_date' => 'nullable|date',
-            'visible' =>'in:0,1'
-            
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+
         ]);
         if ($request->filled('publish_date')) {
             $publishdate = Carbon::parse($request->publish_date);
@@ -93,6 +98,10 @@ class PageController extends Controller
         $page->title = $request->title;
         $page->content = $request->content;
         $page->save();
+
+        if(isset($request->users_ids))
+            CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+
         foreach($request->lesson_id as $lesson){
             pageLesson::firstOrCreate([
                 'page_id' => $page->id,
@@ -162,7 +171,7 @@ class PageController extends Controller
 
         if($request->filled('title'))
             $page->update([ 'title' => $request->title]);
-        
+
         if($request->filled('content'))
             $page->update(['content' => $request->content]);
         if($request->filled('visible'))
@@ -177,13 +186,13 @@ class PageController extends Controller
             $page_lesson->update([
                 'lesson_id' => $request->updated_lesson_id
             ]);
-        
+
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
         $page['lesson'] =  $page->Lesson;
-            
+
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
-        
+
     }
 
     /**
@@ -225,7 +234,7 @@ class PageController extends Controller
             'exists'   => __('messages.error.item_deleted'), //attribute  but bage for user
         ];
         $this->validate($request, $rules, $customMessages);
-        $page = page::whereId($request->id)->first();
+        $page = page::whereId($request->id)->with('courseItem.courseItemUsers')->first();
         if ($page == null)
             return HelperController::api_response_format(200, null, __('messages.error.not_found'));
         $lesson = $page->lesson->where('id', $request->lesson_id)->first();
@@ -236,10 +245,18 @@ class PageController extends Controller
             return HelperController::api_response_format(200, null , __('messages.page.page_not_belong'));
         $page->course_id=$course_id;
         $page->page_lesson = PageLesson::where('page_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
-        if( $request->user()->can('site/course/student') && $page->page_lesson->visible==0)
-            return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $page->id)->where('type', 'page')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($page->page_lesson->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.page.page_hidden'));
+        }
         unset($page->lesson);
-        
+
         return HelperController::api_response_format(200, $page);
     }
 
