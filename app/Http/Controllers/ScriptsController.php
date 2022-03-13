@@ -382,12 +382,7 @@ class ScriptsController extends Controller
 
     public function indexCatItem(Request $request)
     {
-        $request->validate([
-            'courses'    => 'required|array',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
-        ]);
-
-        foreach($request->courses as $course)
+        foreach(Course::where('segment_id',3)->pluck('id') as $course)
         {
             $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
             $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
