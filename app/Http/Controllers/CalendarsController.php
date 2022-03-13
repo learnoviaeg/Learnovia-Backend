@@ -52,14 +52,11 @@ class CalendarsController extends Controller
         $user_course_segments = $enrolls = $this->chain->getEnrollsByChain($request);
 
         if(!$request->user()->can('site/show-all-courses'))//any other user enrolled
-        {
             $user_course_segments = $enrolls = $user_course_segments->where('user_id',Auth::id());
-        }
 
         $enrolls=$enrolls->get();
 
         if(count($enrolls) > 0){
-
             //enrolled user announcements
             if(!$request->user()->can('site/show-all-courses'))
             {
@@ -74,11 +71,8 @@ class CalendarsController extends Controller
                     $query->whereIn('year',$enrolls->pluck('year'))->whereIn('segment',$enrolls->pluck('segment'));
                 }])->pluck('id');
             }
-
         }
-        $calendar['lessons'] =SecondaryChain::where('enroll_id',$enrolls->pluck('id'))->get()->pluck('lesson_id');
-
-        // $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        $calendar['lessons'] =SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id'));
         
         $timeline = Timeline::with(['class','course','level'])
                             ->where(function ($query) use ($calendar) {
