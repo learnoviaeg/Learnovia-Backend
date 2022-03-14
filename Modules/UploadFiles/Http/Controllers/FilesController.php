@@ -22,6 +22,7 @@ use App\Enroll;
 use App\User;
 use App\Http\Controllers\HelperController;
 use App\Component;
+use App\CourseItem;
 use App\LessonComponent;
 use  Modules\Page\Entities\pageLesson;
 use  Modules\Page\Entities\page;
@@ -29,6 +30,8 @@ use App\Material;
 use  App\LastAction;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
+use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class FilesController extends Controller
 {
@@ -42,35 +45,35 @@ class FilesController extends Controller
      */
     public function __construct(SettingsReposiotryInterface $setting)
     {
-        $this->setting = $setting;        
+        $this->setting = $setting;
     }
 
     public function install_file()
     {
-        if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
-            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        }
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add', 'title' => 'add media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update', 'title' => 'update media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete', 'title' => 'delete media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle', 'title' => 'toggle media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get', 'title' => 'get file and media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add', 'title' => 'add link']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update', 'title' => 'update link']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort', 'title' => 'sort file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort', 'title' => 'sort media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all', 'title' => 'get all files']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all', 'title' => 'get all media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get', 'title' => 'get media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
+        // if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
+        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        // }
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add', 'title' => 'add media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update', 'title' => 'update media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete', 'title' => 'delete media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle', 'title' => 'toggle media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get', 'title' => 'get file and media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add', 'title' => 'add link']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update', 'title' => 'update link']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort', 'title' => 'sort file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort', 'title' => 'sort media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all', 'title' => 'get all files']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all', 'title' => 'get all media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get', 'title' => 'get media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
 
         $teacher_permissions=['file/add','file/assign','file/update','file/delete','file/toggle','media/add','media/update','media/delete',
         'media/toggle','file/media/get','link/add','link/update','file/sort','media/sort','media/get','file/get','site/file/edit','site/media/edit',
@@ -225,13 +228,15 @@ class FilesController extends Controller
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
-            'visible' =>'in:0,1'
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ];
 
         $customMessages = [
             'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
@@ -242,47 +247,53 @@ class FilesController extends Controller
         } else {
             $publishdate = Carbon::now();
         }
-        foreach ($request->lesson_id as $lesson) {
-            $tempLesson = Lesson::find($lesson);
-                foreach ($request->Imported_file as $singlefile) {
-                    $extension = $singlefile->getClientOriginalExtension();
-                    $fileName = $singlefile->getClientOriginalName();
-                    $size = $singlefile->getSize();
-                    $name = uniqid() . '.' . $extension;
-                    
-                    $file = file::firstOrCreate([
-                            'type' => $extension,
-                            'description' => $name,
-                            'name' =>  ($request->filled('name')) ? $request->name : $fileName,
-                            'size' => $size,
-                            'attachment_name' => $fileName,
-                            'user_id' => Auth::user()->id,
-                            'url' => 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name),
-                            'url2' => 'files/' . $name,
-                    ]);
 
-                        $fileLesson = new FileLesson;
-                        $fileLesson->lesson_id = $lesson;
-                        $fileLesson->file_id = $file->id;
-                        $fileLesson->index = FileLesson::getNextIndex($lesson);
-                        $fileLesson->publish_date = $publishdate;
-                        $fileLesson->visible = isset($request->visible)?$request->visible:1;
+        foreach ($request->Imported_file as $singlefile) {
+            $extension = $singlefile->getClientOriginalExtension();
+            $fileName = $singlefile->getClientOriginalName();
+            $size = $singlefile->getSize();
+            $name = uniqid() . '.' . $extension;
+            $file = new file;
+            $file->type = $extension;
+            $file->description = $name;
+            $file->name = ($request->filled('name')) ? $request->name : $fileName;
+            $file->size = $size;
+            $file->attachment_name = $fileName;
+            $file->user_id = Auth::user()->id;
+            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+            $file->url2 = 'files/' . $name;
+            $check = $file->save();
 
-                        $fileLesson->save();
+            if ($check) {
+                if(isset($request->users_ids))
+                    CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 
-                        LessonComponent::firstOrCreate([
-                            'lesson_id' => $fileLesson->lesson_id,
-                            'comp_id'   => $fileLesson->file_id,
-                            'module'    => 'UploadFiles',
-                            'model'     => 'file',
-                        ], [
-                            'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                            ]);
-                        Storage::disk('public')->putFileAs(
-                            'files/' . $request->$lesson,
-                            $singlefile,
-                            $name
-                        );
+                foreach ($request->lesson_id as $lesson) {
+                    $tempLesson = Lesson::find($lesson);
+
+                    $fileLesson = new FileLesson;
+                    $fileLesson->lesson_id = $lesson;
+                    $fileLesson->file_id = $file->id;
+                    $fileLesson->index = FileLesson::getNextIndex($lesson);
+                    $fileLesson->publish_date = $publishdate;
+                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
+
+                    $fileLesson->save();
+
+                    LessonComponent::firstOrCreate([
+                        'lesson_id' => $fileLesson->lesson_id,
+                        'comp_id'   => $fileLesson->file_id,
+                        'module'    => 'UploadFiles',
+                        'model'     => 'file',
+                    ], [
+                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                        ]);
+                    Storage::disk('public')->putFileAs(
+                        'files/' . $request->$lesson,
+                        $singlefile,
+                        $name
+                    );
+                }
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
@@ -403,7 +414,7 @@ class FilesController extends Controller
                 'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
             ];
         }
-    
+
         $this->validate($request, $rules, $customMessages);
 
         $file = file::find($request->id);
@@ -433,7 +444,7 @@ class FilesController extends Controller
             } else {
                 $publishdate = Carbon::parse($request->publish_date);
             }
-            
+
             $fileLesson->update([
                 'publish_date' => $publishdate,
             ]);
@@ -443,7 +454,7 @@ class FilesController extends Controller
                 'visible' => $request->visible,
             ]);
           }
-        
+
         if (!$request->filled('updated_lesson_id')) {
           $request->updated_lesson_id= $request->lesson_id;
         }
@@ -589,11 +600,20 @@ class FilesController extends Controller
         $customMessages = [
             'exists' => __('messages.error.item_deleted')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
-        $File = file::with('FileLesson')->find($request->id);
-        if( $request->user()->can('site/course/student') && $File->FileLesson->visible==0)
-             return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
+        $File = file::with(['FileLesson','courseItem.courseItemUsers'])->find($request->id);
+
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $File->id)->where('type', 'file')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($File->FileLesson[0]->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.file.file_hidden'));
+        }
 
         return HelperController::api_response_format(200, $File);
     }
@@ -650,7 +670,7 @@ class FilesController extends Controller
             $Allmaterials[] =  $material;
         }
         foreach($materials['media'] as $media){
-            $mediaObj=media::find($media->media_id); 
+            $mediaObj=media::find($media->media_id);
             $material = collect([]);
             $material['item_id'] = $media->media_id;
             $material['name'] =$mediaObj->name;
@@ -662,7 +682,7 @@ class FilesController extends Controller
             $material['link'] = $mediaObj->link;
             $material['mime_type']= ($mediaObj->show&&$mediaObj->type==null )?'media link':$mediaObj->type;
             $Allmaterials[] =  $material;
-        
+
         }
         $Allmaterials = collect($Allmaterials)->sortBy('publish_date')->values();
         Material::insert($Allmaterials->toArray());
@@ -700,16 +720,16 @@ class FilesController extends Controller
             $storage = Storage::disk('public');
             // File::append($path, $request->file);
             file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
-            
+
             if ($request->has('is_last') && $request->boolean('is_last')) {
                 $name = basename($path, '.part');
-    
+
                 File::move($path, "public/$uncomplete_file->id/{$uncomplete_file->name}");
             }
-    
+
         }
 
-     
+
         return response()->json(['message' => null ,'body' => null], 200);
     }
 

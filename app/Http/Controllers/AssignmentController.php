@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use App\SecondaryChain;
 use App\GradeCategory;
 use App\Events\GraderSetupEvent;
+use Illuminate\Database\Eloquent\Builder;
 
 class AssignmentController extends Controller
 {
@@ -46,7 +47,7 @@ class AssignmentController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
-            'sort_in' => 'in:asc,desc', 
+            'sort_in' => 'in:asc,desc',
         ]);
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
@@ -54,7 +55,7 @@ class AssignmentController extends Controller
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
-            
+
             $lessons  = [$request->lesson];
         }
 
@@ -62,23 +63,32 @@ class AssignmentController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons);
+        $assignment_lessons = AssignmentLesson::whereIn('lesson_id',$lessons)->with('Assignment');
 
         if($request->user()->can('site/course/student')){
-            $assignment_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+            $assignment_lessons
+            ->where('visible',1)
+            ->where('publish_date' ,'<=', Carbon::now());
+            // ->whereHas('Assignment',function($q){
+            //     $q->where(function($query) {                //Where accessible
+            //             $query->doesntHave('courseItem')
+            //                     ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+            //                         $query->where('user_id', Auth::id());
+            //                     });
+            //         });
+            // });
         }
 
         if($count == 'count'){
-            
-            return response()->json(['message' => __('messages.assignment.count'), 'body' => $assignment_lessons->count()], 200);        
+
+            return response()->json(['message' => __('messages.assignment.count'), 'body' => $assignment_lessons->count()], 200);
         }
 
         $assignment_lessons = $assignment_lessons->get();
 
         $assignments = collect([]);
-
         foreach($assignment_lessons as $assignment_lesson){
-            $assignment=assignment::where('id',$assignment_lesson->assignment_id)->with('assignmentLesson')->first();
+            $assignment=assignment::whereId($assignment_lesson->assignment_id)->with('assignmentLesson')->first();
             $lessonn = Lesson::find($assignment_lesson->lesson_id);
             $classesIDS = SecondaryChain::select('group_id')->distinct()->where('lesson_id',$lessonn->id)->pluck('group_id');
             $classes = Classes::whereIn('id',$classesIDS)->get();
@@ -113,11 +123,11 @@ class AssignmentController extends Controller
     {
         $user = Auth::user();
 
-        $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();        
+        $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();
         if(!isset($assigLessonID))
             return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
 
-        $assignment = assignment::where('id',$assignment_id)->first();
+        $assignment = assignment::where('id',$assignment_id)->with('courseItem.courseItemUsers')->first();
         if(!isset($assignment))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
@@ -137,8 +147,8 @@ class AssignmentController extends Controller
         if(isset($studentassigment)){
             $assignment['user_submit'] =$studentassigment;}
         }
-       
-            return response()->json(['message' => __('messages.assignment.assignment_object'), 'body' => $assignment], 200);        
+
+            return response()->json(['message' => __('messages.assignment.assignment_object'), 'body' => $assignment], 200);
     }
 
     /**
@@ -169,10 +179,10 @@ class AssignmentController extends Controller
             return HelperController::api_response_format(400,null,__('messages.assignment.assignment_not_belong'));
 
         Timeline::where('item_id',$id)->where('type','assignment')->where('lesson_id',$request->lesson_id)->delete();
-        
+
         $lesson=Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
-        
+
         $assigment->delete();
 
         $assign = Assignment::where('id', $id)->first();

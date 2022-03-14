@@ -163,8 +163,9 @@ class LastActionMiddleWare
         // }
 
         $lastActionjob = (new lastActionjob($request));
+        // dispatch($lastActionjob);
+        
         return $next($request);
     }
-
 }
 

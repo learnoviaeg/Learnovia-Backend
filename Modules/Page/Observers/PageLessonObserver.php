@@ -55,7 +55,7 @@ class PageLessonObserver
                 'visible' => $pageLesson->visible,
             ]);
         }
-        
+
     }
 
     /**

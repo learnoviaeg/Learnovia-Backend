@@ -27,49 +27,49 @@ class QuestionBankController extends Controller
 
     public function install_question_bank()
     {
-        if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
-            return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        }
+        // if (\Spatie\Permission\Models\Permission::whereName('question/add')->first() != null) {
+        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
+        // }
 
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/add','title' => 'add question category']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/delete','title' => 'delete question category']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/update','title' => 'update question category']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/get','title' => 'get question categories']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add','title' => 'add question']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update','title' => 'update question']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get','title' => 'get question']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete','title' => 'delete question']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/random','title' => 'get random questions']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add-answer','title' => 'add question answer']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete-answer','title' => 'delete question answer']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add','title' => 'add quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update','title' => 'update quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/mark-field','title' => 'Mark Field']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get','title' => 'get quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grading-method','title' => 'get grading method']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories','title' => 'get all quiz categories']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort','title' => 'sort quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes','title' => 'get all quizes']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz','title' => 'get student in quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz','title' => 'get student answer quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer','title' => 'get all students answer']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/answer','title' => 'Answer quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/detailes','title' => 'Quiz Details']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/view-drafts','title' => 'Quiz Drafts']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz','title' => 'correct user quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
-        \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/add','title' => 'add question category']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/delete','title' => 'delete question category']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/update','title' => 'update question category']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/category/get','title' => 'get question categories']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add','title' => 'add question']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/update','title' => 'update question']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/get','title' => 'get question']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete','title' => 'delete question']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/random','title' => 'get random questions']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/add-answer','title' => 'add question answer']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'question/delete-answer','title' => 'delete question answer']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add','title' => 'add quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update','title' => 'update quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/mark-field','title' => 'Mark Field']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get','title' => 'get quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grading-method','title' => 'get grading method']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-categories','title' => 'get all quiz categories']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/sort','title' => 'sort quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes','title' => 'get all quizes']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz','title' => 'get student in quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz','title' => 'get student answer quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-all-students-answer','title' => 'get all students answer']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/answer','title' => 'Answer quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/detailes','title' => 'Quiz Details']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/view-drafts','title' => 'Quiz Drafts']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/correct-user-quiz','title' => 'correct user quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-grade-category','title' => 'get quiz grade category']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/toggle','title' => 'toggle quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
+        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
         $teacher_permissions=['question/category/add','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
         'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',

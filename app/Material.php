@@ -16,9 +16,9 @@ class Material extends Model
     ];
 
     protected $appends = ['media_type','attachment_name','user_seen_number','main_link'];
-    
+
     protected $hidden = ['mime_type'];
-    
+
     public function getMediaTypeAttribute(){
         if($this->mime_type != null)
             return $this->mime_type ;
@@ -38,8 +38,8 @@ class Material extends Model
         $user_seen = 0;
         if($this->seen_number != 0)
             $user_seen = UserSeen::where('type',$this->type)->where('item_id',$this->item_id)->where('lesson_id',$this->lesson_id)->count();
-            
-        return $user_seen;  
+
+        return $user_seen;
     }
 
     public function getLinkAttribute(){
@@ -58,17 +58,9 @@ class Material extends Model
     public function lesson(){
         return $this->belongsTo('App\Lesson');
     }
-    
+
     public function user(){
         return $this->belongsTo('App\User','created_by');
-    }
-
-    public function file(){
-        return $this->belongsTo('Modules\UploadFiles\Entities\File','item_id');
-    }
-
-    public function media(){
-        return $this->belongsTo('Modules\UploadFiles\Entities\Media','item_id')->where('type', 'media');
     }
 
     public function item(){
