@@ -73,10 +73,8 @@ class CalendarsController extends Controller
             }
         }
         $calendar['lessons'] =SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id'));
-        $sec_chain_class = SecondaryChain::select('group_id')->whereIn('enroll_id', $enrolls->pluck('id'))->where('user_id',Auth::id());
         
         $timeline = Timeline::with(['class','course','level'])
-                            ->whereIn('class_id',$sec_chain_class)
                             ->where(function ($query) use ($calendar) {
                                 $query->whereIn('item_id',$calendar['announcements'])->where('type','announcement')->orWhereIn('lesson_id',$calendar['lessons']);
                             })
@@ -95,6 +93,12 @@ class CalendarsController extends Controller
 
         if($request->filled('item_type'))
             $timeline->whereIn('type', $request->item_type);
+
+        if(!$request->user()->can('site/show-all-courses'))
+        {
+            $sec_chain_class = SecondaryChain::select('group_id')->whereIn('enroll_id', $enrolls->pluck('id'))->where('user_id',Auth::id());
+            $timeline->whereIn('class_id',$sec_chain_class);
+        }
 
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'desc')->get()], 200);
     }
