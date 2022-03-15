@@ -29,6 +29,14 @@ class AttendanceReportsController extends Controller
         $ObjSessions=new AttendanceSessionController($this->chain);
         $sessions=$ObjSessions->index($request);
 
+        $report=[];
+        if($request->attendance_type == 'Daily')
+        {
+            $report['daily'][$weeMap];
+        }
+
+        if($request->attendance_type == 'Per Session')
+
         SessionLog::whereIn('session_id',$sessions)->where('status',$request->status)->count();
     }
 
