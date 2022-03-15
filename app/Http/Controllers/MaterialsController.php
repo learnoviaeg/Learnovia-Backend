@@ -74,7 +74,6 @@ class MaterialsController extends Controller
 
         $materials_query =  Material::orderBy('created_at','desc');
 
-
         $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
         if($request->user()->can('site/course/student')){
             $material

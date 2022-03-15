@@ -94,6 +94,12 @@ class CalendarsController extends Controller
         if($request->filled('item_type'))
             $timeline->whereIn('type', $request->item_type);
 
+        if(!$request->user()->can('site/show-all-courses'))
+        {
+            $sec_chain_class = SecondaryChain::select('group_id')->whereIn('enroll_id', $enrolls->pluck('id'))->where('user_id',Auth::id());
+            $timeline->whereIn('class_id',$sec_chain_class);
+        }
+
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'desc')->get()], 200);
     }
 
