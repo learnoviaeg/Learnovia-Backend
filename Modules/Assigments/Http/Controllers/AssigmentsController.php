@@ -1207,7 +1207,6 @@ class AssigmentsController extends Controller
 
             $assigLessonID = AssignmentLesson::where('assignment_id', $request->assignment_id)->where('lesson_id', $request->lesson_id)->first();
 
-
             $studentassigment = User::where('id',Auth::id())
             ->with(['userAssignment'=> function($query)use ($assigLessonID){
                 $query->where('assignment_lesson_id', $assigLessonID->id);

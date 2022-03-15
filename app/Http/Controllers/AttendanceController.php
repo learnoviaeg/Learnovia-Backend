@@ -30,11 +30,6 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'attendance_type' => 'in:Per Session,Daily',
-            'year_id' => 'exists:academic_years,id',
-            'type_id' => 'exists:academic_types,id',
-            'segment_id' => 'exists:segments,id',
-            'level_id' => 'exists:levels,id',
-            'course_id' => 'exists:courses,id',
             'grade_cat_id' => 'exists:grade_categories,id',
             'start_date' => 'date',
             'end_date' => 'date|after:start_date',
@@ -62,8 +57,6 @@ class AttendanceController extends Controller
 
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
-
-            // return $attendance->with('levels')->get();
 
         $all=[];
         foreach($attendance->cursor() as $attendeence){

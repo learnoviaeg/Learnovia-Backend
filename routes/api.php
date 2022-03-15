@@ -565,6 +565,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('logs/export', 'AttendanceSessionController@exportLogs');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
+    Route::Resource('session/reports', AttendanceReportsController::class);
     Route::Resource('session', AttendanceSessionController::class);
 
     Route::Resource('topic', TopicController::class);

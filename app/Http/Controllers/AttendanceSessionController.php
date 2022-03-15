@@ -40,6 +40,7 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
             'start_date' => 'date',
+            'end_date' => 'date', // filter all session that started before this end_date
             'from' => 'date_format:H:i',
             'to' => 'date_format:H:i|after:from',
             'current' => 'in:month,week,day', //current
@@ -61,6 +62,9 @@ class AttendanceSessionController extends Controller
 
         if(isset($request->start_date))
             $attendanceSession->where('start_date','>=', $request->start_date);
+
+        if(isset($request->end_date))
+            $attendanceSession->where('start_date','<=', $request->end_date);
 
         if(isset($request->filter))
             $attendanceSession->whereMonth('start_date', $request->filter);
@@ -222,6 +226,7 @@ class AttendanceSessionController extends Controller
                 'name' => $request->name,
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,
+                'course_id' => $request->course_id,
                 'start_date' => $request->start_date,
                 'from' => Carbon::parse($request->start_date)->format('H:i'),
                 'to' => null,
