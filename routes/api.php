@@ -145,7 +145,6 @@ Route::group(['prefix' => 'year', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('set-current', 'AcademicYearController@setCurrent_year')->name('SetCurrentYear')->middleware('permission:year/set-current');
     Route::get('get-my-years', 'AcademicYearController@GetMyYears')->name('getmyyear')->middleware('permission:year/get-my-years');
     Route::get('export', 'AcademicYearController@export')->name('exportYears')->middleware('permission:year/export');
-
 });
 
 //Type Routes
@@ -158,7 +157,6 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
     // Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');
     Route::get('export', 'AC_year_type@export')->name('exportTypes')->middleware('permission:type/export');
-
 });
 
 //Level Routes
@@ -314,7 +312,6 @@ Route::group(['prefix' => 'contact', 'middleware' => ['auth:api','LastAction']],
     Route::post('add', 'ContactController@addContact')->name('addContact')->middleware('permission:contact/add');
     Route::get('get', 'ContactController@ViewMyContact')->name('ViewMyContact')->middleware('permission:contact/get');
     Route::post('search-contacts', 'ContactController@SearchMyContacts')->name('searchContact')->middleware('permission:contact/search');
-
 });
 
 //component routes
@@ -475,7 +472,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');
     Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers');
 
-
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
     Route::Resource('years', YearsController::class);
@@ -529,8 +525,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::Resource('scale', ScaleController::class);
     Route::get('course_scale', 'ScaleController@scales_per_course')->name('getscale')->middleware('permission:grade/scale/course');
-
-
 
     Route::group(['prefix' => 'settings', 'middleware' => ['auth:api']], function () {
         Route::post('logo-set', 'SettingsController@setLogo')->middleware('permission:settings/logo');
