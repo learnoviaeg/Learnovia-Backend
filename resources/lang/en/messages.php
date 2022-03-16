@@ -222,6 +222,10 @@ return [
         'invalid_end_date' => 'end date must be between ',
         'invalid_start_date' => 'start date must be between ',
     ],
+    'session_reports' => [
+        'daily' => 'Daily Report',
+        'per_session' => 'Per Session Report'
+    ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
         'update' => 'Virtual classroom updated successfully',

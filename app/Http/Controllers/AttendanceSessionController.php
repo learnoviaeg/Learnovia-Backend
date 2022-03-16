@@ -35,7 +35,7 @@ class AttendanceSessionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$reports=0)
     {
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
@@ -105,9 +105,12 @@ class AttendanceSessionController extends Controller
                 $qu->where('attendance_type',$request->attendance_type);
         };
 
-        return HelperController::api_response_format(200 , $attendanceSession->whereHas('attendance', $callback)
-            ->with(['class','attendance.courses','attendance'=>$callback])->get()
-            ->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        $result=$attendanceSession->whereHas('attendance', $callback)
+                ->with(['class','attendance.courses','attendance'=>$callback])->get();
+
+        if($reports)
+            return $result;
+        return HelperController::api_response_format(200 ,$result->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
@@ -189,7 +192,7 @@ class AttendanceSessionController extends Controller
 
                     foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
                     {
-                        if($day->status == 0)
+                        if(!$day->status)
                             continue;
 
                         if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
