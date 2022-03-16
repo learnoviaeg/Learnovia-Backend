@@ -188,13 +188,15 @@ class EnrollUserToCourseController extends Controller
             'course' => 'array|exists:courses,id'
         ]);
 
+        if(isset($request->course) && count($request->course) > 0)
+            if(Course::whereIn('id',$request->course)->segment_id != $request->segment)
+                return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+
         foreach ($request->users as $user) {
-            $courses=Course::where('level_id',$request->level)->where('mandatory',1)->get();
+            $courses=Course::where('segment_id',$request->segment)->where('level_id',$request->level)->where('mandatory',1)->get();
+
             if (count($courses) > 0) {
                 foreach($courses as $course){
-                    if($course->segment_id != $request->segment)
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
-
                     $en=Enroll::firstOrCreate([
                         'user_id' => $user,
                         'role_id' => 3,
@@ -212,9 +214,6 @@ class EnrollUserToCourseController extends Controller
             if(isset($request->course) && count($request->course) > 0)
             {
                 foreach($request->course as $corse){
-                    if($corse->segment_id != $request->segment)
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
-
                     Enroll::firstOrCreate([
                         'user_id' => $user,
                         'role_id' => 3,

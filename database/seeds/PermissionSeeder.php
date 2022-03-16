@@ -69,7 +69,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'year/get-my-years', 'title' => 'get all my years']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'year/export', 'title' => 'export all years']);
 
-
         //Type Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'type/delete', 'title' => 'delete type']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'type/add', 'title' => 'add type']);
@@ -79,7 +78,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'type/update', 'title' => 'update type']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'type/assign', 'title' => 'assign type']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'type/export', 'title' => 'export all types']);
-
 
         //Level Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'level/add', 'title' => 'add level']);
@@ -102,7 +100,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'class/get-lessons', 'title' => 'get class lessons']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'class/export', 'title' => 'export all classes']);
 
-
         //Segment Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'segment/add', 'title' => 'add segment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'segment/delete', 'title' => 'delete segment']);
@@ -113,7 +110,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'segment/set-current', 'title' => 'set current segment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'segment/get-my-segments', 'title' => 'get my segment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'segment/export', 'title' => 'export all segments']);
-
 
         //Cetegory Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'category/add', 'title' => 'add category']);
@@ -167,7 +163,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'enroll/get', 'title' => 'Get Chain']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'enroll/delete', 'title' => 'Destroy Chain']);
 
-
         //Events
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'event/add', 'title' => 'Add event to users']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'event/delete', 'title' => 'delete event']);
@@ -175,7 +170,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'event/my-events', 'title' => 'get my event']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'event/all-events', 'title' => 'get all events']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'event/add-bulk', 'title' => 'add bulk events']);
-
 
         //Contact Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'contact/add', 'title' => 'add contact']);
@@ -209,7 +203,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
-
         //Components Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'component/get', 'title' => 'get component']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'component/install', 'title' => 'install component']);
@@ -229,13 +222,9 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'announcements/mark-as-read', 'title' => 'mark announcements as read']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'announcements/my', 'title' => 'My Announcements'  , 'dashboard' => 1, 'icon'=> 'announcement']);
 
-
         //Calendar Permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'calendar/get', 'title' => 'get calendar']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'calendar/weekly', 'title' => 'get weekly calendar']);
-
-        //Import
-        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'import', 'title' => 'import excel sheet']);
 
         //Language Permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'languages/get', 'title' => 'Get Languages']);
@@ -248,9 +237,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'languages/deactivate', 'title' => 'Dea-ctivate language']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'languages/set-default', 'title' => 'Set default language']);
 
-
-
-        
         //Lesson Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'lesson/add', 'title' => 'add lesson']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'lesson/get', 'title' => 'get lesson']);
@@ -276,7 +262,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/category/chain-categories', 'title' => 'get all chain grade category']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/grades', 'title' => 'Grades', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/category/get-gradecategories', 'title' => 'Get Grade Categories']);
-
 
         //Grade Item
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
@@ -398,7 +383,6 @@ class PermissionSeeder extends Seeder
         //Attempts
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/unLimitedAttempts', 'title' => 'unLimited Attempts']);
         
-
         //Assignments permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/add', 'title' => 'add assignment']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/update', 'title' => 'update assignment']);
@@ -416,8 +400,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assignment/getAssignment', 'title' => 'get assignment for student']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/delete-assign-lesson', 'title' => 'Delete assigned lesson']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'assignment/assignment-override', 'title' => 'assignment override']);
-
-
 
         //Attendance permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-session', 'title' => 'Add Session']);
