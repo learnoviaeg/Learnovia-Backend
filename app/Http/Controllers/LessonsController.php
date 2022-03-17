@@ -45,7 +45,7 @@ class LessonsController extends Controller
         $lessons = SecondaryChain::select('*')->distinct()->where('user_id',Auth::id())->whereIn('enroll_id',$enrolls);
         if($request->filled('classes'))
             $lessons->whereIn('group_id',$request->classes);
-        $result_lessons = $lessons->get()->groupBy('lesson_id');
+        $result_lessons = $lessons->get()->groupBy('lesson_id'); 
         /*
         if($request->filled('classes')){
             foreach($result_lessons as $key=>$lesson){
