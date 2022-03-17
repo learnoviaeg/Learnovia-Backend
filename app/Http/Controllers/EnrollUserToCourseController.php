@@ -189,7 +189,7 @@ class EnrollUserToCourseController extends Controller
         ]);
 
         if(isset($request->course) && count($request->course) > 0)
-            if(Course::find($request->course)->segment_id != $request->segment)
+            if(!in_array($request->segment,Course::whereIn('id',$request->course)->pluck('segment_id')->toArray()))
                 return HelperController::api_response_format(400, [], __('messages.enroll.error'));
 
         foreach ($request->users as $user) {
