@@ -12,7 +12,7 @@ class AttendanceReportsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:attendance/report-daily|attendance/report-perSession|attendance/report-weekly'],   ['only' => ['index']]);
+        $this->middleware(['permission:attendance/report-daily|attendance/report-perSession'],   ['only' => ['index']]);
     }
 
     /**
@@ -34,7 +34,7 @@ class AttendanceReportsController extends Controller
 
         $report=[];
         $reports=[];
-        if($request->attendance_type == 'Daily')
+        if($request->attendance_type == 'Daily' || $request->user()->can('attendance/report-daily'))
         {
             $all=SessionLog::whereIn('session_id',$sessions->pluck('id'))->get();
             foreach($sessions->pluck('start_date') as $session){
@@ -46,7 +46,7 @@ class AttendanceReportsController extends Controller
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.daily'));
         }
 
-        if($request->attendance_type == 'Per Session')
+        if($request->attendance_type == 'Per Session' || $request->user()->can('attendance/report-perSession'))
         {
             foreach($sessions as $session){
                 $all=SessionLog::where('session_id',$session->id)->get();

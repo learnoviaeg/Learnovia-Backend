@@ -557,6 +557,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('session/logs', 'AttendanceSessionController@LogsAttendance');
     Route::get('logs/count', 'AttendanceSessionController@CountStatus');
     Route::get('logs/export', 'AttendanceSessionController@exportLogs');
+    Route::get('attendance/classes/{id}', 'AttendanceController@getClassAttendance');
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session/reports', AttendanceReportsController::class);
