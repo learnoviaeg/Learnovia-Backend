@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Attendance;
 use Auth;
 use App\Enroll;
+use App\Classes;
 use App\UserGrader;
 use App\GradeCategory;
 use App\AttendanceLevel;
@@ -260,5 +261,11 @@ class AttendanceController extends Controller
         $attendance->delete();
 
         return HelperController::api_response_format(200 , null , __('messages.attendance.delete'));
+    }
+
+    public function getClassAttendance($attendance_id)
+    {
+        $classes= Classes::select('id','name')->whereIn('id',Attendance::find($attendance_id)->courses[0]['classes'])->get();
+        return HelperController::api_response_format(200 , $classes , null);
     }
 }
