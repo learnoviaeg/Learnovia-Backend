@@ -32,6 +32,14 @@ class PageLessonObserver
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
             ]);
+
+            LessonComponent::firstOrCreate([
+                'lesson_id' => $lesson,
+                'comp_id' => $page->id,
+                'module' => 'Page',
+                'model' => 'page',
+                'index' => LessonComponent::getNextIndex($request->Lesson_id)
+            ]);
         }
     }
 

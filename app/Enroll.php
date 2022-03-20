@@ -69,9 +69,8 @@ class Enroll extends Model
 
     public function Lessons()
     {
-        return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
+        return $this->hasManyThrough(Lesson::class, SecondaryChain::class); // m4 4a8ala
     }
-
 
     public function topics()
     {

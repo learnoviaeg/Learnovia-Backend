@@ -109,13 +109,6 @@ class PageController extends Controller
                 'publish_date' => $publishdate,
                 'visible' =>isset($request->visible)?$request->visible:1
             ]);
-            LessonComponent::create([
-                'lesson_id' => $lesson,
-                'comp_id' => $page->id,
-                'module' => 'Page',
-                'model' => 'page',
-                'index' => LessonComponent::getNextIndex($request->Lesson_id)
-            ]);
 
             $TempLesson = Lesson::find($lesson);
             LastAction::lastActionInCourse($TempLesson->course_id);
@@ -123,7 +116,6 @@ class PageController extends Controller
 
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
         return HelperController::api_response_format(200, $tempReturn, __('messages.page.add'));
-
     }
 
     public function linkpagelesson(Request $request)

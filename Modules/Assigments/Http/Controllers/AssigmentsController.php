@@ -936,11 +936,10 @@ class AssigmentsController extends Controller
                     'name' => $name_assignment,
                     'weight' => 0,
                 ]);
-
             }
             $assignment_lesson->save();
             $assignmentLesson [] = $assignment_lesson;
-            LessonComponent::create([
+            LessonComponent::firstOrCreate([
                 'lesson_id' => $lesson,
                 'comp_id' => $request->assignment_id,
                 'module' => 'Assigments',
@@ -956,7 +955,7 @@ class AssigmentsController extends Controller
             $notification->send();
 
             ///create grade category for assignment
-                event(new AssignmentCreatedEvent($assignment_lesson));
+            event(new AssignmentCreatedEvent($assignment_lesson));
         }
 
         return HelperController::api_response_format(200, $assignmentLesson, __('messages.assignment.add'));

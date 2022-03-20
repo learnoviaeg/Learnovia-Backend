@@ -4,10 +4,9 @@ namespace App\Helpers;
 use App\CourseItem;
 use App\UserCourseItem;
 
-
 class CoursesHelper{
-    public static function giveUsersAccessToViewCourseItem($itemId, $type , array $usersIds){
 
+    public static function giveUsersAccessToViewCourseItem($itemId, $type , array $usersIds){
         $item = CourseItem::create([
             'item_id' => $itemId,
             'type' => $type
