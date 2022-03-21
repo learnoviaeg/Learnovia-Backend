@@ -14,7 +14,6 @@ use Modules\Page\Entities\pageLesson;
 use Illuminate\Support\Carbon;
 use App\Component;
 use App\CourseItem;
-use App\LessonComponent;
 use App\LastAction;
 use Exception;
 use App\Helpers\CoursesHelper;
