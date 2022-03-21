@@ -28,6 +28,7 @@ class QuizLessonObserver
     {
         $this->report = $report;
     }
+    
     /**
      * Handle the quiz lesson "created" event.
      *
