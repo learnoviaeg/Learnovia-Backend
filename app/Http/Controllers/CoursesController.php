@@ -306,12 +306,12 @@ class CoursesController extends Controller
             if($request->old_lessons == 0){
                 $old_lessons = Lesson::where('course_id', $course);
                 // $secondary_chains = SecondaryChain::whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->get()->delete();
-                $old_ids =  $old_lessons->get()->pluck('id');
+                $old_ids =  $old_lessons->pluck('id');
             }
             foreach ($classes_of_course->classes as $key => $class) {
-                if($request->old_lessons == 0){
-                    $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_lessons->get())->where('course_id',$course)->delete();                            
-                }
+                if($request->old_lessons == 0)
+                    $secondary_chains = SecondaryChain::where('group_id',$class)->whereIn('lesson_id',$old_ids)->where('course_id',$course)->delete();                            
+                
                 $lessonsPerGroup = SecondaryChain::where('group_id',$class)->where('course_id',$request->template_id)->get()->pluck('lesson_id');
                 $new_lessons = Lesson::whereIn('id', $lessonsPerGroup)->get();
                 foreach($new_lessons as $lesson){
