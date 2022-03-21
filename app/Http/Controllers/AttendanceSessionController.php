@@ -203,9 +203,9 @@ class AttendanceSessionController extends Controller
                             $attendancestart=(carbon::parse($request->start_date)->addDays(
                                 array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
-                        while($attendancestart <= Carbon::parse($repeated_until)){
-                            foreach($classes as $class)
-                            {
+                        $copy=$attendancestart;
+                        foreach($classes as $class){
+                            while($attendancestart <= Carbon::parse($repeated_until)){
                                 $attendance=AttendanceSession::firstOrCreate([
                                     'name' => $request->name,
                                     'attendance_id' => $request->attendance_id,
@@ -218,6 +218,7 @@ class AttendanceSessionController extends Controller
                                 ]);
                                 $attendancestart=$attendancestart->addDays(7);                              
                             }
+                            $attendancestart=$copy;
                         }   
                     }
                 }

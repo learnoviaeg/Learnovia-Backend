@@ -6,13 +6,14 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\SessionLog;
 use Carbon\Carbon;
+use App\Classes;
 
 class AttendanceReportsController extends Controller
 {
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:attendance/report-daily|attendance/report-perSession'],   ['only' => ['index']]);
+        // $this->middleware(['permission:attendance/report-daily|attendance/report-perSession'],   ['only' => ['index']]);
     }
 
     /**
@@ -36,21 +37,29 @@ class AttendanceReportsController extends Controller
         $reports=[];
         if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
-            foreach($sessions as $session){
-                $report['id']=$session->id;
-                $report['day']=Carbon::parse($session['start_date'])->format('l');
-                $report['date']=Carbon::parse($session['start_date'])->format('Y-m-d H:i');
-
-                $countSessionDay=$sessions->where('start_date',$session['start_date'])->count();
-                $all=SessionLog::where('session_id',$session->id);
-                $clo=clone $all;
-                $countStatus =$all->where('status',$request->status)->count();
-
-                // kol l session lly fel youm da
-                // kol l session elly feha 8eyab
-                $report['precentage']=round(($countStatus/$clo->count())*100,2);
-                array_push($reports,$report);
+            $classes=$sessions->pluck('class_id');
+            if(isset($request->classes))
+                $classes=$request->classes;
+            foreach($classes as $class)
+            {
+                foreach($sessions->where('class_id',$class) as $session){
+                    $report['id']=$session->id;
+                    $report['day']=Carbon::parse($session['start_date'])->format('l');
+                    $report['date']=Carbon::parse($session['start_date'])->format('Y-m-d H:i');
+    
+                    $countSessionDay=$sessions->where('start_date',$session['start_date'])->pluck('id');
+                    $all=SessionLog::whereIn('session_id',$countSessionDay);
+                    $clo=clone $all;
+                    $countStatus =$all->where('status',$request->status)->count();
+    
+                    // kol l session lly fel youm da
+                    // kol l session elly feha 8eyab
+                    $report['weekly']['class']=Classes::find($session->class_id);
+                    $report['weekly']['precentage']=round(($countStatus/$clo->count())*100,2);
+                    array_push($reports,$report);
+                }
             }
+
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.daily'));
         }
 
