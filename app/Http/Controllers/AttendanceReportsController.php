@@ -58,6 +58,7 @@ class AttendanceReportsController extends Controller
         {
             foreach($sessions as $session){
                 $all=SessionLog::where('session_id',$session->id);
+                $report['id']=$session->id;
                 $report['name']=$session->name;
                 $report['start_date']=Carbon::parse($session->start_date)->format('Y-m-d H:i:s');
                 $report['from']=Carbon::parse($session->from)->format('H:i');
