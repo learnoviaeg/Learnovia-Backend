@@ -34,27 +34,36 @@ class AttendanceReportsController extends Controller
 
         $report=[];
         $reports=[];
-        if($request->attendance_type == 'Daily' || $request->user()->can('attendance/report-daily'))
+        if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
-            $all=SessionLog::whereIn('session_id',$sessions->pluck('id'))->get();
-            foreach($sessions->pluck('start_date') as $session){
-                $report['day']=Carbon::parse($session)->format('l');
-                $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
-                $report['precentage']=($all->where('status',$request->status)->count()/count($all))*100;
+            foreach($sessions as $session){
+                $report['id']=$session->id;
+                $report['day']=Carbon::parse($session['start_date'])->format('l');
+                $report['date']=Carbon::parse($session['start_date'])->format('Y-m-d H:i');
+
+                $countSessionDay=$sessions->where('start_date',$session['start_date'])->count();
+                $all=SessionLog::where('session_id',$session->id);
+                $clo=clone $all;
+                $countStatus =$all->where('status',$request->status)->count();
+
+                // kol l session lly fel youm da
+                // kol l session elly feha 8eyab
+                $report['precentage']=round(($countStatus/$clo->count())*100,2);
                 array_push($reports,$report);
             }
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.daily'));
         }
 
-        if($request->attendance_type == 'Per Session' || $request->user()->can('attendance/report-perSession'))
+        if($request->attendance_type == 'Per Session' && $request->user()->can('attendance/report-perSession'))
         {
             foreach($sessions as $session){
-                $all=SessionLog::where('session_id',$session->id)->get();
+                $all=SessionLog::where('session_id',$session->id);
+                $report['id']=$session->id;
                 $report['name']=$session->name;
                 $report['start_date']=Carbon::parse($session->start_date)->format('Y-m-d H:i:s');
                 $report['from']=Carbon::parse($session->from)->format('H:i');
                 $report['to']=Carbon::parse($session->to)->format('H:i');
-                $report['precentage']=($all->where('status',$request->status)->count()/count($all))*100;
+                $report['precentage']=round(($all->where('status',$request->status)->count()/SessionLog::where('session_id',$session->id)->count())*100,2);
                 array_push($reports,$report);
             }
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.per_session'));

@@ -8,8 +8,7 @@ use App\Material;
 
 class PageObserver
 {
-
-        /**
+    /**
      * Handle the page "updated" event.
      *
      * @param  \App\Page  $page
@@ -21,7 +20,6 @@ class PageObserver
         ->update([
             'name' => $page->title,
         ]);
-
     }
 
     public function deleted(PageLesson $lesson)

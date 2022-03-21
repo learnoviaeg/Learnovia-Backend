@@ -5,6 +5,7 @@ use Modules\Page\Entities\PageLesson;
 use App\Events\MassLogsEvent;
 use Modules\Page\Entities\Page;
 use App\Material;
+use App\LessonComponent;
 use App\Lesson;
 use App\SecondaryChain;
 
@@ -31,6 +32,14 @@ class PageLessonObserver
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
+            ]);
+
+            LessonComponent::firstOrCreate([
+                'lesson_id' => $lesson->id,
+                'comp_id' => $page->id,
+                'module' => 'Page',
+                'model' => 'page',
+                'index' => LessonComponent::getNextIndex($lesson->id)
             ]);
         }
     }
