@@ -57,12 +57,12 @@ class AttendanceReportsController extends Controller
         if($request->attendance_type == 'Per Session' && $request->user()->can('attendance/report-perSession'))
         {
             foreach($sessions as $session){
-                $all=SessionLog::where('session_id',$session->id)->get();
+                $all=SessionLog::where('session_id',$session->id);
                 $report['name']=$session->name;
                 $report['start_date']=Carbon::parse($session->start_date)->format('Y-m-d H:i:s');
                 $report['from']=Carbon::parse($session->from)->format('H:i');
                 $report['to']=Carbon::parse($session->to)->format('H:i');
-                $report['precentage']=round(($all->where('status',$request->status)->count()/count($sessions))*100,2);
+                $report['precentage']=round(($all->where('status',$request->status)->count()/SessionLog::where('session_id',$session->id)->count())*100,2);
                 array_push($reports,$report);
             }
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.per_session'));
