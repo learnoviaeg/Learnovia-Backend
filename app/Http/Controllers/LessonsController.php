@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Lesson;
 use App\SecondaryChain;
+use App\Course;
 
 class LessonsController extends Controller
 {
@@ -118,5 +119,31 @@ class LessonsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function sort(Request $request)
+    {
+        $request->validate([
+            'lesson_id' => 'required|exists:lessons,id',
+            'index' => 'required|integer',
+        ]);
+        $given_lesson = Lesson::whereId($request->lesson_id)->first();
+        
+        //////sort down
+        if($request->index > $given_lesson->index ){
+            $lessons = Lesson::where('course_id', $given_lesson->course_id)->where('index', '>=', $given_lesson->index)->Where('index','<=', $request->index);
+            foreach($lessons->cursor() as $lesson){
+                $lesson->decrement('index');
+            }
+        }
+        //////sort up
+        if($request->index < $given_lesson->index ){
+            $lessons = Lesson::where('course_id', $given_lesson->course_id)->where('index', '<=', $given_lesson->index)->Where('index','>=', $request->index);
+            foreach($lessons->cursor() as $lesson){
+                $lesson->increment('index');
+            }
+        }
+        $given_lesson->update(['index' => $request->index]);
+        return response()->json(['message' => 'Sorted successfully', 'body' =>  null ], 200);
     }
 }
