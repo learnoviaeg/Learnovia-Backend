@@ -36,7 +36,7 @@ class AttendanceReportsController extends Controller
         $report=[];
         $reports=[];
         $sessionDay=[];
-        if($request->attendance_type == 'Daily')
+        if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
             $classes=$sessions->pluck('class_id');
             if(isset($request->classes))
