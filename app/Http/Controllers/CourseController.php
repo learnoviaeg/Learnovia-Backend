@@ -931,6 +931,8 @@ class CourseController extends Controller
         $result = [];
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id());
         $lessons = SecondaryChain::whereIn('enroll_id',$enrolls->pluck('id'))->pluck('lesson_id')->unique();
+        if(isset($request->lesson_id))
+            $lessons = [$request->lesson_id];
 
         $result = [];
         $i = 0;
