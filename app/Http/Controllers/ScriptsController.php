@@ -418,4 +418,14 @@ class ScriptsController extends Controller
         }
         return 'Done';
     }
+
+    public function lessons_index(Request $request)
+    {
+        foreach(Course::select('id')->cursor() as $course){
+            foreach(Lesson::where('course_id',$course->id)->cursor() as $key => $lesson){
+                $lesson->update([ 'index' => $key+1 ]);;
+            }
+        }
+        return 'done';
+    }
 }

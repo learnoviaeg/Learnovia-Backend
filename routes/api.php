@@ -412,6 +412,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('course_sorting', 'ScriptsController@course_index');
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
+    Route::get('lesson_sorting', 'ScriptsController@lessons_index');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -491,6 +492,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
+    Route::get('lesson/sort', 'LessonsController@sort')->middleware(['permission:lesson/sort']);
 
     Route::get('levels/{my}', 'TypesController@index');
     Route::get('levels/{export}', 'TypesController@index');
