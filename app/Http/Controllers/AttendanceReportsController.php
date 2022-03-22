@@ -13,7 +13,7 @@ class AttendanceReportsController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        // $this->middleware(['permission:attendance/report-daily|attendance/report-perSession'],   ['only' => ['index']]);
+        $this->middleware(['permission:attendance/report-daily|attendance/report-perSession'],   ['only' => ['index']]);
     }
 
     /**
