@@ -104,12 +104,15 @@ class MaterialsController extends Controller
         if($count == 'count'){
              //copy this counts to count it before filteration
             $query=clone $materials_query;
-            $all=$query->select(DB::raw
-                            (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
-                                COUNT(case `type` when 'media' then 1 else null end) as media ,
-                                COUNT(case `type` when 'page' then 1 else null end) as page"
-                            ))->first()->only(['file','media','page']);
+            $query1=clone $materials_query;
+            $query2=clone $materials_query;
+            $all['file']=$query->where('type','file')->count();
+            $all['media']=$materials_query->where('type','media')->count();
+            dd($all);
+            $all['page']=$query2->where('type','page')->count();
+            // $all1=$query->where('type','media')->count();//->first()->only(['file','media','page']);
             $cc['all']=$all['file']+$all['media']+$all['page'];
+            // dd($cc);
 
             $counts = $materials_query->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,

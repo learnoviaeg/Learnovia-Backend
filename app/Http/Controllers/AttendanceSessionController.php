@@ -187,25 +187,24 @@ class AttendanceSessionController extends Controller
                     ]);
 
                     $classes=Course::whereId($request->course_id)->pluck('classes')->first();
-                    if(count($request->class_id) > 0 && !in_array(null,$request->class_id))
+                    if(isset($request->class_id) && count($request->class_id) > 0 && !in_array(null,$request->class_id))
                         $classes=$request->class_id;
 
-                    foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
-                    {
-                        if(!$day->status)
-                            continue;
+                    foreach($classes as $class){
+                        foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
+                        {
+                            if(!$day->status)
+                                continue;
 
-                        if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
-                            $attendancestart=(carbon::parse($request->start_date)->subDay(
-                                Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
-    
-                        if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
-                            $attendancestart=(carbon::parse($request->start_date)->addDays(
-                                array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+                            if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
+                                $attendancestart=(carbon::parse($request->start_date)->subDay(
+                                    Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
+        
+                            if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
+                                $attendancestart=(carbon::parse($request->start_date)->addDays(
+                                    array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
-                        while($attendancestart <= Carbon::parse($repeated_until)){
-                            foreach($classes as $class)
-                            {
+                            while($attendancestart <= Carbon::parse($repeated_until)){
                                 $attendance=AttendanceSession::firstOrCreate([
                                     'name' => $request->name,
                                     'attendance_id' => $request->attendance_id,

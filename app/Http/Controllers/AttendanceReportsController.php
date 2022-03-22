@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\SessionLog;
 use Carbon\Carbon;
+use App\Classes;
 
 class AttendanceReportsController extends Controller
 {
@@ -34,23 +35,41 @@ class AttendanceReportsController extends Controller
 
         $report=[];
         $reports=[];
+        $sessionDay=[];
         if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
+            $classes=$sessions->pluck('class_id');
+            if(isset($request->classes))
+                $classes=$request->classes;
+            $i=0;
+            $rr=[];
             foreach($sessions as $session){
-                $report['id']=$session->id;
                 $report['day']=Carbon::parse($session['start_date'])->format('l');
                 $report['date']=Carbon::parse($session['start_date'])->format('Y-m-d H:i');
+                if(in_array($report['day'], array_column($reports, 'day')))
+                    continue;
 
-                $countSessionDay=$sessions->where('start_date',$session['start_date'])->count();
-                $all=SessionLog::where('session_id',$session->id);
+                $countSessionDay=$sessions->where('start_date',$session['start_date'])->pluck('id');
+                $all=SessionLog::whereIn('session_id',$countSessionDay);
                 $clo=clone $all;
                 $countStatus =$all->where('status',$request->status)->count();
 
                 // kol l session lly fel youm da
                 // kol l session elly feha 8eyab
-                $report['precentage']=round(($countStatus/$clo->count())*100,2);
+                foreach($sessions->where('start_date',$session['start_date'])->pluck('class_id') as $class)
+                {
+                    $class_name=Classes::find($class)->name;
+                    if(!in_array($class_name, array_column($rr, 'class_name'))){
+                        $rr[$i]['class_name']=$class_name;
+                        $rr[$i]['precentage']=round(($countStatus/$clo->count())*100,2);
+                        $report['weekly']=array_values($rr);
+                    }
+                    $i++;
+                }
+
                 array_push($reports,$report);
             }
+
             return HelperController::api_response_format(200 , $reports , __('messages.session_reports.daily'));
         }
 
