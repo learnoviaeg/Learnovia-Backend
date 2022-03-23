@@ -177,10 +177,10 @@ class AttendanceSessionController extends Controller
                         $attendancestart=$attendancestart->addDays(7);                   
                     }   
                 }
-                else
+                else if($attendance->attendance_type == 'Daily') // it entered if this type was per session so i write this if
                 {
                     $request->validate([
-                        // 'class_id' => 'required|array',
+                        'class_id' => 'required|array',
                         // 'class_id.*' => 'exists:classes,id', // because front_end sent it empty
                         'included_days' => 'required|array',
                         'included_days.*' => 'exists:working_days,id'

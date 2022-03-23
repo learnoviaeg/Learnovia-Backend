@@ -472,6 +472,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('get-materials', 'MaterialsController@getMaterials');
     Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');
     Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers');
+    Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers');
 
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
