@@ -187,8 +187,10 @@ class QuizzesController extends Controller
                 'correct_feedback' => $request->correct_feedback,
             ]);
 
-            if(isset($request->users_ids))
+            if(isset($request->users_ids)){
                 CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+                $quiz->restricted=1;
+            }
 
             $lessons = Lesson::whereIn('id', $request->lesson_id)
                         ->with([
@@ -224,7 +226,7 @@ class QuizzesController extends Controller
                 // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
                 // $notification->send();
             }
-
+            $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
     /**
@@ -503,12 +505,39 @@ class QuizzesController extends Controller
 
     public function editQuizAssignedUsers(Request $request){
         $request->validate([
-            'id' => 'required|exists:materials,id',
+            'id' => 'required|exists:assignments,id',
             'users_ids' => 'array',
             'users_ids.*' => 'exists:users,id'
         ]);
 
+        $quiz= Quiz::find($request->id);
+        if(!isset($request->users_ids)){
+            $quiz->restricted=0;
+            $quiz->save();
+        }
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
+    }
+
+    public function getQuizAssignedUsers(Request $request){
+
+        $request->validate([
+            'id' => 'required|exists:quizzes,id',
+        ]);
+
+        $quiz = Quiz::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
+
+        foreach($quiz->Lesson as $lesson)
+            $result['quiz_classes'][] = $lesson->shared_classes->pluck('id');
+
+        $result['restricted'] = $quiz->restricted;
+        if(isset($quiz['courseItem'])){
+
+            $courseItemUsers = $quiz['courseItem']->courseItemUsers;
+            foreach($courseItemUsers as $user)
+                $result['assigned_users'][] = $user->user_id;
+        }
+
+        return response()->json($result, 200);
     }
 }

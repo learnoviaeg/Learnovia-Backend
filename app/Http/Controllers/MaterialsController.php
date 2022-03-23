@@ -371,13 +371,11 @@ class MaterialsController extends Controller
 
         $material = Material::with(['lesson', 'item.courseItem.courseItemUsers'])->find($request->id);
 
-        $shared_classes = $material->lesson->shared_classes;
-        foreach($shared_classes as $class)
-            $result['material_classes'][] = $class->id;
+        $result['material_classes'] =  $material->lesson->shared_classes->pluck('id');
 
-        $result['restricted'] = false;
+        // $result['restricted'] = false;
+        $result['restricted'] = $material->restricted;
         if(isset($material['item']->courseItem)){
-            $result['restricted'] = true;
 
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
