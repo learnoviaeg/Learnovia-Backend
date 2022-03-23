@@ -43,21 +43,21 @@ class AttendanceReportsController extends Controller
                 $classes=$request->classes;
             $i=0;
             $rr=[];
-            foreach($sessions as $session){
-                $report['day']=Carbon::parse($session['start_date'])->format('l');
-                $report['date']=Carbon::parse($session['start_date'])->format('Y-m-d H:i');
+            foreach($sessions->pluck('start_date')->unique() as $session){
+                $report['day']=Carbon::parse($session)->format('l');
+                $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
                 if(in_array($report['day'], array_column($reports, 'day')))
                     continue;
 
-                $countSessionDay=$sessions->where('start_date',$session['start_date'])->pluck('id');
-                $all=SessionLog::whereIn('session_id',$countSessionDay);
-                $clo=clone $all;
-                $countStatus =$all->where('status',$request->status)->count();
-
                 // kol l session lly fel youm da
                 // kol l session elly feha 8eyab
-                foreach($sessions->where('start_date',$session['start_date'])->pluck('class_id') as $class)
+                foreach($sessions->pluck('class_id')->unique() as $class)
                 {
+                    $countSessionDay=$sessions->where('start_date',$session)->where('class_id',$class)->pluck('id');
+                    $all=SessionLog::whereIn('session_id',$countSessionDay);
+                    $clo=clone $all;
+                    $countStatus =$all->where('status',$request->status)->count();
+
                     $class_name=Classes::find($class)->name;
                     if(!in_array($class_name, array_column($rr, 'class_name'))){
                         $rr[$i]['class_name']=$class_name;
