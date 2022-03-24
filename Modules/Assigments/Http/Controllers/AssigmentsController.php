@@ -264,9 +264,6 @@ class AssigmentsController extends Controller
         $assignment->created_by = Auth::id();
         $assignment->save();
 
-        // if(isset($request->users_ids))
-        //     CoursesHelper::giveUsersAccessToViewCourseItem($assignment->id, 'assignment', $request->users_ids);
-
         return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
@@ -757,12 +754,12 @@ class AssigmentsController extends Controller
             return HelperController::api_response_format(404, null, __('messages.assignment.not_found'));
 
         if( $request->user()->can('site/course/student')){
-            // $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
-            // if(isset($courseItem)){
-            //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
-            //     if(!in_array(Auth::id(), $users))
-            //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
-            // }
+            $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
             if($assigLessonID->visible==0)
                 return HelperController::api_response_format(301,null, __('messages.assignment.assignment_hidden'));
         }
@@ -937,7 +934,14 @@ class AssigmentsController extends Controller
                     'weight' => 0,
                 ]);
             }
+
+            if(isset($request->users_ids)){
+                CoursesHelper::giveUsersAccessToViewCourseItem($request->assignment_id, 'assignment', $request->users_ids);
+                Assignment::where('id',$request->assignment_id)->update(['restricted' => 1]);
+            }
+
             $assignment_lesson->save();
+
             $assignmentLesson [] = $assignment_lesson;
             LessonComponent::firstOrCreate([
                 'lesson_id' => $lesson,

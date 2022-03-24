@@ -61,7 +61,9 @@ class AttendanceReportsController extends Controller
                     $class_name=Classes::find($class)->name;
                     if(!in_array($class_name, array_column($rr, 'class_name'))){
                         $rr[$i]['class_name']=$class_name;
-                        $rr[$i]['precentage']=round(($countStatus/$clo->count())*100,2);
+                        $rr[$i]['precentage']=0;
+                        if($clo->count() > 0)
+                            $rr[$i]['precentage']=round(($countStatus/$clo->count())*100,2);
                         $report['weekly']=array_values($rr);
                     }
                     $i++;

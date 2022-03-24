@@ -7,6 +7,7 @@ use Modules\Page\Entities\Page;
 use App\Material;
 use App\LessonComponent;
 use App\Lesson;
+use App\CourseItem;
 use App\SecondaryChain;
 
 class PageLessonObserver
@@ -24,7 +25,7 @@ class PageLessonObserver
         $lesson = Lesson::find($pageLesson->lesson_id);
         $course_id = $sec_chain->course_id;
         if(isset($page)){
-            Material::firstOrCreate([
+            $material=Material::firstOrCreate([
                 'item_id' => $pageLesson->page_id,
                 'name' => $page->title,
                 'publish_date' => $pageLesson->publish_date,
@@ -33,6 +34,12 @@ class PageLessonObserver
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
             ]);
+            $courseItem=CourseItem::where('item_id',$pageLesson->page_id)->where('type','page')->first();
+            if(isset($courseItem))
+            {
+                $material->restricted=1;
+                $material->save();
+            }
 
             LessonComponent::firstOrCreate([
                 'lesson_id' => $lesson->id,

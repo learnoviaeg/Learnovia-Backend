@@ -3,6 +3,7 @@
 namespace App\Helpers;
 use App\CourseItem;
 use App\UserCourseItem;
+use App\Material;
 
 class CoursesHelper{
 
@@ -38,6 +39,7 @@ class CoursesHelper{
             if(isset($courseItem)){
                 $courseItem->courseItemUsers()->delete();
                 $courseItem->delete();
+                Material::where('item_id',$itemId)->where('type',$type)->update(['restricted'=>0]);
             }
         }
     }
