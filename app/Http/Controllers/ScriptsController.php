@@ -423,4 +423,16 @@ class ScriptsController extends Controller
         }
         return 'Done';
     }
+
+    public function delete_duplicated_enroll(Request $request)
+    {
+        $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();
+        foreach($enrolls as $enroll)
+        {   
+            $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
+            if($count->count() > 1)
+                $countss=$count->delete();
+        }
+        return 'Done';
+    }
 }
