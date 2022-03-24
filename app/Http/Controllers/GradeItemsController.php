@@ -142,10 +142,10 @@ class GradeItemsController extends Controller
         $grade_items = GradeCategory::findOrFail($id);
         if($grade_items->item_type == 'Attendance')
             return response()->json(['message' => __('messages.error.not_allowed_to_delete'), 'body' => null ], 404);
-        
+       
         if($request->filled('grade_category_id'))
-            event(new GraderSetupEvent($grade_items->Parents)); 
-
+            $old_cat = GradeCategory::find($grade_items->parent);
+    
         if($request->filled('scale_id')){
             $scale = scale::find($request->scale_id);
             $max_grade = $scale->details()->max('grade');
@@ -169,6 +169,9 @@ class GradeItemsController extends Controller
             'scale_id' => isset($request->scale_id) ? $request->scale_id : $grade_items['scale_id'],
 
         ]);
+        
+        if($request->filled('grade_category_id'))
+            event(new GraderSetupEvent($old_cat)); 
 
         $userGradesJobOld = (new \App\Jobs\RefreshUserGrades($this->chain , $old_parent));
         dispatch($userGradesJobOld);
