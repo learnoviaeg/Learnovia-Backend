@@ -407,12 +407,13 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
     Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
-    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
+    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated'); // duplicated course
     Route::get('changeLetterName', 'ScriptsController@changeLetterName');
     Route::get('course_sorting', 'ScriptsController@course_index');
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
     Route::get('lesson_sorting', 'ScriptsController@lessons_index');
+    Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {

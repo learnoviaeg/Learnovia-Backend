@@ -1095,7 +1095,6 @@ class AssigmentsController extends Controller
         return HelperController::api_response_format(200, $images_path, 'Here pdf\'s images');
     }
 
-
     public function overwriteScript(){
 
         $overwrites=collect();
@@ -1171,7 +1170,6 @@ class AssigmentsController extends Controller
 
         return response()->json(['message' => 'all overwrites is assigned', 'body' => $overwrites], 200);
     }
-
 
     public function assignmentSubmissions(Request $request)
     {
@@ -1264,7 +1262,6 @@ class AssigmentsController extends Controller
                 }])->get();
 
             return HelperController::api_response_format(200,  AssignmentSubmissionResource::collection($result), $message = []);
-
         }
     }
 
