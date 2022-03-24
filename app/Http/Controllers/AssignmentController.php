@@ -213,7 +213,7 @@ class AssignmentController extends Controller
         $assignment = Assignment::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
 
         foreach($assignment->Lesson as $lesson)
-            $result['assignment_classes'][] = $lesson->shared_classes->pluck('id');
+            $result['assignment_classes']= $lesson->shared_classes->pluck('id');
 
         $result['restricted'] = $assignment->restricted;
         if(isset($assignment['courseItem'])){
@@ -234,10 +234,13 @@ class AssignmentController extends Controller
         ]);
 
         $assignment= Assignment::find($request->id);
-        if(!isset($request->users_ids)){
+        
+        $assignment->restricted=1;
+        if(!isset($request->users_ids))
             $assignment->restricted=0;
-            $assignment->save();
-        }
+        
+        $assignment->save();
+
         CoursesHelper::updateCourseItem($request->id, 'assignment', $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }
