@@ -505,16 +505,18 @@ class QuizzesController extends Controller
 
     public function editQuizAssignedUsers(Request $request){
         $request->validate([
-            'id' => 'required|exists:assignments,id',
+            'id' => 'required|exists:quizzes,id',
             'users_ids' => 'array',
             'users_ids.*' => 'exists:users,id'
         ]);
 
         $quiz= Quiz::find($request->id);
-        if(!isset($request->users_ids)){
+        $quiz->restricted=1;
+
+        if(!isset($request->users_ids))
             $quiz->restricted=0;
-            $quiz->save();
-        }
+        
+        $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }
@@ -528,7 +530,7 @@ class QuizzesController extends Controller
         $quiz = Quiz::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
 
         foreach($quiz->Lesson as $lesson)
-            $result['quiz_classes'][] = $lesson->shared_classes->pluck('id');
+            $result['quiz_classes']= $lesson->shared_classes->pluck('id');
 
         $result['restricted'] = $quiz->restricted;
         if(isset($quiz['courseItem'])){

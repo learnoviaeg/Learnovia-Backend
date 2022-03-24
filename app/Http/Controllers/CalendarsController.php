@@ -8,6 +8,7 @@ use App\Timeline;
 use App\Announcement;
 use App\userAnnouncement;
 use App\SecondaryChain;
+use App\Enroll;
 use Auth;
 
 class CalendarsController extends Controller
@@ -146,5 +147,17 @@ class CalendarsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function delete_duplicated_enroll(Request $request)
+    {
+        $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();
+        foreach($enrolls as $enroll)
+        {   
+            $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
+            if($count->count() > 1)
+                $countss=$count->delete();
+        }
+        return 'Done';
     }
 }
