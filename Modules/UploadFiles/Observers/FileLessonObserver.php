@@ -38,6 +38,17 @@ class FileLessonObserver
                 'mime_type'=> $file->type,
             ]);
 
+            LessonComponent::firstOrCreate([
+                'lesson_id' => $fileLesson->lesson_id,
+                'comp_id'   => $fileLesson->file_id,
+                'module'    => 'UploadFiles',
+                'model'     => 'file',
+                'course_id' => $course_id,
+                'visible'   => $fileLesson->visible,
+            ], [
+                'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                ]);
+
             $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
             if(isset($courseItem))
             {
@@ -84,6 +95,7 @@ class FileLessonObserver
                                     'comp_id' => $file->id,
                                     'module' => 'UploadFiles',
                                     'model' => 'file',
+                                    'visible' => $fileLesson->visible,
                                     'index' => LessonComponent::getNextIndex($fileLesson->lesson_id)
                                 ]);
             }
