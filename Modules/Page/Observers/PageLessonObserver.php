@@ -70,8 +70,25 @@ class PageLessonObserver
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
             ]);
-        }
 
+            ////updating component lesson and indexing mods in old lesson in case of updating lesson
+            if($pageLesson->getOriginal('lesson_id') != $pageLesson->lesson_id ){
+                $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$pageLesson->getOriginal('lesson_id'))->where('comp_id',$pageLesson->page_id)
+                ->where('model' , 'page')->first();
+
+                LessonComponent::where('lesson_id',$pageLesson->getOriginal('lesson_id'))
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+           
+                LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->getOriginal('lesson_id'))->where('model' , 'page')
+                                ->update([
+                                    'lesson_id' => $pageLesson->lesson_id,
+                                    'comp_id' => $page->id,
+                                    'module' => 'Page',
+                                    'model' => 'page',
+                                    'index' => LessonComponent::getNextIndex($pageLesson->lesson_id)
+                                ]);
+            }
+        }
     }
 
     /**
@@ -85,6 +102,16 @@ class PageLessonObserver
         //for log event
         $logsbefore= Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->get();
         $all = Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->first()->delete();
+        $LessonComponent = LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->lesson_id)->where('model' , 'page')->first();
+       
+        if(isset($LessonComponent)){
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$pageLesson->lesson_id)->where('comp_id',$pageLesson->page_id)
+            ->where('model' , 'page')->first();
+            LessonComponent::where('lesson_id',$pageLesson->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        }
+
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
     }

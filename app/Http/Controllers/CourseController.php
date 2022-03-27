@@ -47,6 +47,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Repositories\ChainRepositoryInterface;
+use App\Paginate;
 
 
 class CourseController extends Controller
@@ -928,6 +929,7 @@ class CourseController extends Controller
      */
     public function GetUserCourseLessonsSorted(Request $request)
     {
+        
         $result = [];
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id());
         $lessons = SecondaryChain::whereIn('enroll_id',$enrolls->pluck('id'))->pluck('lesson_id')->unique();
@@ -1172,5 +1174,102 @@ class CourseController extends Controller
         }
 
         return HelperController::api_response_format(201,null,'done');
+    }
+
+
+    public function sorted_components_in_lesson(Request $request,$count = null)
+    {
+        $request->validate([
+            // 'year' => 'exists:academic_years,id',
+            // 'type' => 'exists:academic_types,id',
+            // 'level' => 'exists:levels,id',
+            // 'segment' => 'exists:segments,id',
+            // 'courses'    => 'nullable|array',
+            // 'courses.*'  => 'nullable|integer|exists:courses,id',
+            // 'sort_in' => 'in:asc,desc',
+            // 'item_type' => 'string|in:page,media,file',
+            // 'class' => 'nullable|integer|exists:classes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id'
+        ]);
+        // if(isset($request->item_id)){
+        //     $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+        //     if(!isset($check))
+        //         return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+        // }
+
+        // $lessons = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        // $lessons = $lessons->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+
+        // if($request->has('lesson')){
+        //     if(!in_array($request->lesson,$lessons->toArray()))
+        //         return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
+
+        //     $lessons = [$request->lesson];
+        // }
+
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $materials_query =  LessonComponent::orderBy('index','ASC');
+
+
+        $material = $materials_query->where('lesson_id',$request->lesson_id);
+        if($request->user()->can('site/course/student')){
+            $material
+            // ->where('visible',1)
+            // ->where('publish_date' ,'<=', Carbon::now())
+            ->where(function($query) {                //Where accessible
+                $query->whereHasMorph(
+                    'item',
+                    [
+                        'Modules\Page\Entities\page',
+                        'Modules\UploadFiles\Entities\media',
+                        'Modules\UploadFiles\Entities\file',
+                        'Modules\QuestionBank\Entities\quiz',
+                        'Modules\Assigments\Entities\assignment',
+                    ],
+                    function($query){
+                        $query->doesntHave('courseItem')
+                        ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                            $query->where('user_id', Auth::id());
+                        });
+                    }
+                );
+            });
+        }
+
+
+        // if($request->has('item_type'))
+        //     $material->where('type',$request->item_type);
+
+        // if($count == 'count'){
+        //      //copy this counts to count it before filteration
+        //     $query=clone $materials_query;
+        //     $all=$query->select(DB::raw
+        //                     (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+        //                         COUNT(case `type` when 'media' then 1 else null end) as media ,
+        //                         COUNT(case `type` when 'page' then 1 else null end) as page"
+        //                     ))->first()->only(['file','media','page']);
+        //     $cc['all']=$all['file']+$all['media']+$all['page'];
+
+        //     $counts = $materials_query->select(DB::raw
+        //         (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
+        //             COUNT(case `type` when 'media' then 1 else null end) as media ,
+        //             COUNT(case `type` when 'page' then 1 else null end) as page"
+        //         ))->first()->only(['file','media','page']);
+        //     $counts['all']=$cc['all'];
+
+        //     return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
+        // }
+        $result['last_page'] = Paginate::allPages($material->count(),$paginate);
+        $result['total']= $material->count();
+
+        $AllMat=$material->skip(($page)*$paginate)->take($paginate)
+                    ->with('item')->get();
+        $result['data'] =  $AllMat;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
+
+        return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
     }
 }

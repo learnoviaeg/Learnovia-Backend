@@ -8,6 +8,7 @@ use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
 use App\SecondaryChain;
+use App\LessonComponent;
 use App\CourseItem;
 
 class MediaLessonObserver
@@ -69,6 +70,25 @@ class MediaLessonObserver
                                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
                             ]);
         }
+
+
+        ////updating component lesson and indexing mods in old lesson in case of updating lesson
+        if($mediaLesson->getOriginal('lesson_id') != $mediaLesson->lesson_id ){
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$mediaLesson->getOriginal('lesson_id'))->where('comp_id',$mediaLesson->media_id)
+            ->where('model' , 'media')->first();
+
+            LessonComponent::where('lesson_id',$mediaLesson->getOriginal('lesson_id'))
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+        
+            LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->getOriginal('lesson_id'))->where('model' , 'media')
+                            ->update([
+                                'lesson_id' => $mediaLesson->lesson_id,
+                                'comp_id' => $media->id,
+                                'module' => 'UploadFiles',
+                                'model' => 'media',
+                                'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
+                            ]);
+        }
     }
 
     /**
@@ -78,10 +98,38 @@ class MediaLessonObserver
      * @return void
      */
     public function deleted(MediaLesson $mediaLesson)
-    {
+    { 
         //for log event
+        // dd($mediaLesson);
         $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
         $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
+
+
+        $LessonComponent = LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('model' , 'media')->first();
+        // if($LessonComponent != null){
+        //     dd($LessonComponent);
+
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$mediaLesson->lesson_id)->where('comp_id',$mediaLesson->media_id)
+            // ->where('model' , 'media')
+            ->where('module', 'UploadFiles')->where('model', '!=', 'file')->first();
+            dd($current_lesson_component);
+            LessonComponent::where('lesson_id',$mediaLesson->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        // }
+
+
+
+        // $LessonComponent = LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('model' , 'media')->first();
+
+        // if(isset($LessonComponent)){
+        //     $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$mediaLesson->lesson_id)->where('comp_id',$mediaLesson->media_id)
+        //     ->where('model' , 'media')->first();
+        //     LessonComponent::where('lesson_id',$mediaLesson->lesson_id)
+        //     ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+        //     $LessonComponent->delete();
+        // }
+
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
     }

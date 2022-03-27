@@ -112,6 +112,23 @@ class AssignmentLessonObserver
                 ]);
             }
 
+            $LessonComponent = LessonComponent::where('comp_id',$assignmentLesson->assignment_id)->where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('model' , 'assignment')->first();
+
+            if(isset($LessonComponent)){
+                $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))->where('comp_id',$assignmentLesson->assignment_id)
+                ->where('model' , 'assignment')->first();
+                LessonComponent::where('lesson_id',$assignmentLesson->getOriginal('lesson_id'))
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+                $LessonComponent->update([
+                    'lesson_id' => $assignmentLesson->lesson_id,
+                    'comp_id' => $assignment->id,
+                    'module' => 'Assigments',
+                    'model' => 'assignment',
+                    'index' => LessonComponent::getNextIndex($assignmentLesson->lesson_id)
+                ]);
+            }
+
+
             $this->report->calculate_course_progress($course_id);
         }
     }
@@ -131,8 +148,20 @@ class AssignmentLessonObserver
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
 
-        LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
-        ->where('module','Assignment')->delete();
+        // LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
+        // ->where('module','Assignment')->delete();
+
+
+        $LessonComponent =  LessonComponent::where('comp_id',$assignmentLesson->assignment_id)
+                            ->where('lesson_id',$assignmentLesson->lesson_id)->where('model' , 'assignment')->first();
+
+
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
+                ->where('model' , 'assignment')->first();
+            LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        
 
         $lesson = Lesson::find($assignmentLesson->lesson_id);
         $course_id = $lesson->course_id;

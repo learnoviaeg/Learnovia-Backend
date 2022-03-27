@@ -9,6 +9,7 @@ use App\Lesson;
 use App\Material;
 use App\CourseItem;
 use App\SecondaryChain;
+use App\LessonComponent;
 
 class FileLessonObserver
 {
@@ -68,6 +69,25 @@ class FileLessonObserver
                             'link' => $file->url,
                             'mime_type'=> $file->type,
                         ]);
+
+            ////updating component lesson and indexing mods in old lesson in case of updating lesson
+            if($fileLesson->getOriginal('lesson_id') != $fileLesson->lesson_id ){
+                $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$fileLesson->getOriginal('lesson_id'))->where('comp_id',$fileLesson->file_id)
+                ->where('model' , 'file')->first();
+
+                LessonComponent::where('lesson_id',$fileLesson->getOriginal('lesson_id'))
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            
+                LessonComponent::where('comp_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->getOriginal('lesson_id'))->where('model' , 'file')
+                                ->update([
+                                    'lesson_id' => $fileLesson->lesson_id,
+                                    'comp_id' => $file->id,
+                                    'module' => 'UploadFiles',
+                                    'model' => 'file',
+                                    'index' => LessonComponent::getNextIndex($fileLesson->lesson_id)
+                                ]);
+            }
+
         }
     }
 
@@ -82,6 +102,15 @@ class FileLessonObserver
         //for log event
         $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
         $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->first()->delete();
+        $LessonComponent = LessonComponent::where('comp_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('model' , 'file')->first();
+
+        if(isset($LessonComponent)){
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$fileLesson->lesson_id)->where('comp_id',$fileLesson->file_id)
+            ->where('model' , 'file')->first();
+            LessonComponent::where('lesson_id',$fileLesson->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        }
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
     }

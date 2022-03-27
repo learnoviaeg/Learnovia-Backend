@@ -333,7 +333,7 @@ class AssigmentsController extends Controller
 
         $assignment_category = GradeCategory::where('lesson_id', $AssignmentLesson->lesson_id)->where('instance_id' , $AssignmentLesson->assignment_id)
                                 ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
-        $parent=$assignment_category->first()->Parents;
+        // $parent=$assignment_category->first()->Parents;
 
         if ($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
@@ -382,10 +382,10 @@ class AssigmentsController extends Controller
         }
 
             ///create grade category for assignment
-            event(new AssignmentCreatedEvent($AssignmentLesson));
+            // event(new AssignmentCreatedEvent($AssignmentLesson));
 
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
-            dispatch($userGradesJob);
+            // $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+            // dispatch($userGradesJob);
 
         $all = AssignmentLesson::all();
 
