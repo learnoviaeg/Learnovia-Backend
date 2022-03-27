@@ -231,8 +231,6 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
     Route::post('get-courses-by-classes', 'CourseController@get_courses_with_classes')->middleware('permission:course/get-courses-by-classes');
     Route::get('export', 'CourseController@export')->name('exportCourses')->middleware('permission:course/export');
     Route::get('question_category_for_courses', 'CourseController@AddQuestionCategorytoCourses')->middleware('permission:site/show-all-courses');
-
-
     Route::get('sorted-components', 'CourseController@sorted_components_in_lesson')->middleware(['permission:course/sorted-componenets' , 'ParentCheck']);
 });
 
