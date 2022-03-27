@@ -382,10 +382,10 @@ class AssigmentsController extends Controller
         }
 
             ///create grade category for assignment
-            // event(new AssignmentCreatedEvent($AssignmentLesson));
+            event(new AssignmentCreatedEvent($AssignmentLesson));
 
-            // $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
-            // dispatch($userGradesJob);
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
+            dispatch($userGradesJob);
 
         $all = AssignmentLesson::all();
 
@@ -943,13 +943,13 @@ class AssigmentsController extends Controller
             $assignment_lesson->save();
 
             $assignmentLesson [] = $assignment_lesson;
-            LessonComponent::firstOrCreate([
-                'lesson_id' => $lesson,
-                'comp_id' => $request->assignment_id,
-                'module' => 'Assigments',
-                'model' => 'assignment',
-                'index' => LessonComponent::getNextIndex($lesson),
-            ]);
+            // LessonComponent::firstOrCreate([
+            //     'lesson_id' => $lesson,
+            //     'comp_id' => $request->assignment_id,
+            //     'module' => 'Assigments',
+            //     'model' => 'assignment',
+            //     'index' => LessonComponent::getNextIndex($lesson),
+            // ]);
             $lesson = Lesson::find($lesson);
 
             LastAction::lastActionInCourse($lesson->course_id);

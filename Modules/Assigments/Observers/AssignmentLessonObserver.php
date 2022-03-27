@@ -54,8 +54,19 @@ class AssignmentLessonObserver
                 'type' => 'assignment',  
                 'visible' => isset($assignmentLesson->visible)?$assignmentLesson->visible:1
             ]);
+
+            LessonComponent::firstOrCreate([
+                'lesson_id' => $lesson,
+                'comp_id' => $request->assignment_id,
+                'module' => 'Assigments',
+                'model' => 'assignment',
+                'index' => LessonComponent::getNextIndex($lesson),
+                'course_id' =>  $courseID,
+                'visible' => $assignmentLesson->visible,
+            ]);
+
             $this->report->calculate_course_progress($courseID);
-        }
+        } 
 
 
         // if($assignmentLesson->is_graded == 1){
@@ -124,6 +135,7 @@ class AssignmentLessonObserver
                     'comp_id' => $assignment->id,
                     'module' => 'Assigments',
                     'model' => 'assignment',
+                    'visible' => $assignmentLesson->visible,
                     'index' => LessonComponent::getNextIndex($assignmentLesson->lesson_id)
                 ]);
             }
@@ -147,10 +159,6 @@ class AssignmentLessonObserver
         $all = Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
-
-        // LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
-        // ->where('module','Assignment')->delete();
-
 
         $LessonComponent =  LessonComponent::where('comp_id',$assignmentLesson->assignment_id)
                             ->where('lesson_id',$assignmentLesson->lesson_id)->where('model' , 'assignment')->first();

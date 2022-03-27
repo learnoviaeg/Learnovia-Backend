@@ -16,4 +16,8 @@ class LessonComponent extends Model
     public function item(){
         return $this->morphTo('item' , 'model', 'comp_id');
     }
+
+    public function lesson(){
+        return $this->belongsTo('App\Lesson');
+    }
 }

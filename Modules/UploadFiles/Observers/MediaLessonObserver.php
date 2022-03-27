@@ -38,6 +38,17 @@ class MediaLessonObserver
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);
 
+            LessonComponent::firstOrCreate([
+                'lesson_id' => $mediaLesson->lesson_id,
+                'comp_id'   => $mediaLesson->media_id,
+                'module'    => 'UploadFiles',
+                'model'     => 'media',
+                'course_id' => $course_id,
+                'visible'   => $mediaLesson->visible,
+                'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
+            ]);
+
+
             $courseItem=CourseItem::where('item_id',$mediaLesson->media_id)->where('type','media')->first();
             if(isset($courseItem))
             {
@@ -86,6 +97,7 @@ class MediaLessonObserver
                                 'comp_id' => $media->id,
                                 'module' => 'UploadFiles',
                                 'model' => 'media',
+                                'visible' => $mediaLesson->visible,
                                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
                             ]);
         }

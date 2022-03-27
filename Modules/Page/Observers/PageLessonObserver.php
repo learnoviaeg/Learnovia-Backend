@@ -46,6 +46,8 @@ class PageLessonObserver
                 'comp_id' => $page->id,
                 'module' => 'Page',
                 'model' => 'page',
+                'course_id' =>  $course_id,
+                'visible' => $pageLesson->visible,
                 'index' => LessonComponent::getNextIndex($lesson->id)
             ]);
         }
@@ -85,6 +87,7 @@ class PageLessonObserver
                                     'comp_id' => $page->id,
                                     'module' => 'Page',
                                     'model' => 'page',
+                                    'visible' => $pageLesson->visible,
                                     'index' => LessonComponent::getNextIndex($pageLesson->lesson_id)
                                 ]);
             }
