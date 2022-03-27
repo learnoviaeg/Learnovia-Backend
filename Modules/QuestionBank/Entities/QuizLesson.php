@@ -11,9 +11,12 @@ use Modules\QuestionBank\Entities\QuizOverride;
 use App\UserSeen;
 use App\SystemSetting;
 use App\UserGrader;
+use App\Traits\Auditable;
 
 class QuizLesson extends Model
 {
+    use Auditable;
+
     protected $fillable = [
         'quiz_id',
         'lesson_id',
@@ -167,5 +170,47 @@ class QuizLesson extends Model
         parent::boot();
         static::addGlobalScope(new OverrideQuizScope);
     }
+
+     // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }
 

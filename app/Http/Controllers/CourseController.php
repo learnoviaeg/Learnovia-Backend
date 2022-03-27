@@ -1151,7 +1151,7 @@ class CourseController extends Controller
             return HelperController::api_response_format(200,$final->unique()->values(),__('messages.course.list'));
         }
 
-        $courses=Course::get();
+        $courses = Course::get();
         return HelperController::api_response_format(200,$courses,__('messages.course.list'));
     }
 

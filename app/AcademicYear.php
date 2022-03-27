@@ -4,13 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use App\Traits\Auditable;
 
 class AcademicYear extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Auditable;
 
     protected $fillable = ['id','name','current'];
+    
     public function AC_Type()
     {
         return $this->belongsToMany('App\AcademicType', 'academic_year_types', 'academic_year_id','academic_type_id');
@@ -52,4 +53,46 @@ class AcademicYear extends Model
         }
         return $result->pluck('id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

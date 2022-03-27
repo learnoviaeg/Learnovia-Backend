@@ -90,6 +90,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        
+        if (config('app.debug')) {
+            error_reporting(E_ALL & ~E_USER_DEPRECATED);
+        } else {
+            error_reporting(0);
+        }
+
         Collection::macro('paginate', function ($perPage, $total = null, $page = null, $pageName = 'page') {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
             return new LengthAwarePaginator(
@@ -111,13 +118,13 @@ class AppServiceProvider extends ServiceProvider
 
         h5pLesson::observe(LogsObserver::class);
 
-        AcademicType::observe(LogsObserver::class);
-        AcademicYear::observe(LogsObserver::class);
-        Classes::observe(LogsObserver::class);
-        Course::observe(LogsObserver::class);
-        Level::observe(LogsObserver::class);
-        Lesson::observe(LogsObserver::class);
-        Segment::observe(LogsObserver::class);
+        // AcademicType::observe(LogsObserver::class); // commentedA
+        // AcademicYear::observe(LogsObserver::class); // commentedA
+        // Classes::observe(LogsObserver::class);
+        // Course::observe(LogsObserver::class);
+        // Level::observe(LogsObserver::class);
+        // Lesson::observe(LogsObserver::class);
+        // Segment::observe(LogsObserver::class);
         // AcademicYearType::observe(LogsObserver::class);
         // ClassLevel::observe(LogsObserver::class);
         // YearLevel::observe(LogsObserver::class);
@@ -132,9 +139,9 @@ class AppServiceProvider extends ServiceProvider
         // GradeItems::observe(GradeItemObserver::class);
         // GradeCategory::observe(LogsObserver::class);
         // UserGrader::observe(LogsObserver::class);
-        Announcement::observe(LogsObserver::class);
-        Timeline::observe(LogsObserver::class);
-        Material::observe(LogsObserver::class);
+        // Announcement::observe(LogsObserver::class);
+        // Timeline::observe(LogsObserver::class);
+        // Material::observe(LogsObserver::class);
         // AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);

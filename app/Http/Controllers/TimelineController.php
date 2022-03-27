@@ -20,6 +20,7 @@ use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
 use App\SecondaryChain;
+use App\Course;
 
 class TimelineController extends Controller
 {
@@ -145,11 +146,11 @@ class TimelineController extends Controller
         }
         
         $lesson = Lesson::find($item_Lesson->lesson_id);
-        $secondary_chains = SecondaryChain::where('lesson_id',$assignmentLesson->lesson_id)->get()->keyBy('group_id');
+        $secondary_chains = SecondaryChain::where('lesson_id',$request->lesson_id)->get()->keyBy('group_id');
             foreach($secondary_chains as $secondary_chain){
                 $course_id = $secondary_chain->course_id;
                 $class_id = $secondary_chain->group_id;
-                $level_id = Course::find($courseID)->level_id;
+                $level_id = Course::find($courseId)->level_id; 
                 // $course_id = $lesson->courseSegment->course_id;
                 // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
                 // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
@@ -168,7 +169,7 @@ class TimelineController extends Controller
                             'visible' => $item_Lesson->visible
                         ]);
                 }
-    }
+            }
         return response()->json(['message' => 'timeline created.','body' => $new_timeline], 200);
     }
 

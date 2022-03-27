@@ -5,8 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\UserSeen;
 use Illuminate\Support\Facades\DB;
+use App\Traits\Auditable;
+
 class h5pLesson extends Model
 {
+    use Auditable;
+
       protected $fillable = ['content_id',
         'lesson_id',
         'visible',
@@ -40,4 +44,45 @@ class h5pLesson extends Model
         return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
     }
 
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

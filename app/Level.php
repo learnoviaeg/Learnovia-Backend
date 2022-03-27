@@ -5,10 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Auditable;
 
 class Level extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Auditable;
 
     protected $fillable = ['name','academic_type_id'];
     public function type()
@@ -55,4 +56,56 @@ class Level extends Model
         // })
         return $this->hasMany('App\Course', 'level_id', 'id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $item_id = [intval($new['academic_type_id'])];
+        }else{
+            if ($old['academic_type_id'] == $new['academic_type_id']) {
+                $item_id = [intval($new['academic_type_id'])];
+            }else{
+                $item_id = [intval($old['academic_type_id']), intval($new['academic_type_id'])];
+            }
+        }
+        return $item_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

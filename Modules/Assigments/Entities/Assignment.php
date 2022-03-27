@@ -3,11 +3,15 @@
 namespace Modules\Assigments\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class assignment extends Model
 {
+    use Auditable;
+
     protected $fillable = ['name', 'content', 'attachment_id','created_by'];
     protected $appends = ['url' , 'url2'];
+    
     public function attachment()
     {
         return $this->belongsTo('App\attachment', 'attachment_id', 'id');
@@ -42,4 +46,46 @@ class assignment extends Model
     public function user(){
         return $this->belongsTo('App\User','created_by');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

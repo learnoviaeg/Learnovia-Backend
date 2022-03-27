@@ -10,9 +10,12 @@ use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Carbon\Carbon;
+use App\Traits\Auditable;
 
 class Timeline extends Model
 {
+    use Auditable;
+
     protected $fillable = [
         'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible','overwrite_user_id'
     ];
@@ -102,4 +105,76 @@ class Timeline extends Model
     public function level(){
         return $this->belongsTo('App\Level');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $level_id = [intval($new['level_id'])];
+        }else{
+            if ($old['level_id'] == $new['level_id']) {
+                $level_id = [intval($new['level_id'])];
+            }else{
+                $level_id = [intval($old['level_id']), intval($new['level_id'])];
+            }
+        }
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $class_id = [intval($new['class_id'])];
+        }else{
+            if ($old['class_id'] == $new['class_id']) {
+                $class_id = [intval($new['class_id'])];
+            }else{
+                $class_id = [intval($old['class_id']), intval($new['class_id'])];
+            }
+        }
+        return $class_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $course_id = [intval($new['course_id'])];
+        }else{
+            if ($old['course_id'] == $new['course_id']) {
+                $course_id = [intval($new['course_id'])];
+            }else{
+                $course_id = [intval($old['course_id']), intval($new['course_id'])];
+            }
+        }
+        return $course_id;
+    }
+    // end function get name and value attribute
 }
