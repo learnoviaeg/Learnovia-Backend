@@ -12,7 +12,7 @@ use App\UserSeen;
 class Material extends Model
 {
     protected $fillable = [
-        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by'
+        'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by','restricted'
     ];
 
     protected $appends = ['media_type','attachment_name','user_seen_number','main_link'];
@@ -67,5 +67,11 @@ class Material extends Model
         return $this->morphTo('item' , 'type', 'item_id');
     }
 
+    public function getRestrictedAttribute()
+    {
+        if($this->attributes['restricted'])
+            return True;
+        return False;
+    }
 }
 

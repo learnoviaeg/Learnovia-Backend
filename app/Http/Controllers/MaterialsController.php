@@ -104,6 +104,7 @@ class MaterialsController extends Controller
         if($count == 'count'){
              //copy this counts to count it before filteration
             $query=clone $materials_query;
+
             $all=$query->select(DB::raw
                             (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                                 COUNT(case `type` when 'media' then 1 else null end) as media ,
@@ -370,13 +371,11 @@ class MaterialsController extends Controller
 
         $material = Material::with(['lesson', 'item.courseItem.courseItemUsers'])->find($request->id);
 
-        $shared_classes = $material->lesson->shared_classes;
-        foreach($shared_classes as $class)
-            $result['material_classes'][] = $class->id;
+        $result['material_classes'] =  $material->lesson->shared_classes->pluck('id');
 
-        $result['restricted'] = false;
+        // $result['restricted'] = false;
+        $result['restricted'] = $material->restricted;
         if(isset($material['item']->courseItem)){
-            $result['restricted'] = true;
 
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
@@ -394,6 +393,8 @@ class MaterialsController extends Controller
         ]);
 
         $material = Material::find($request->id);
+        if(isset($request->users_ids))
+            Material::where('id',$request->id)->update(['restricted',1]);
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }

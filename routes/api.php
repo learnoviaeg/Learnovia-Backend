@@ -408,12 +408,13 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('updateGradeCatParent', 'ScriptsController@updateGradeCatParent');
     Route::get('percentage_letter', 'ScriptsController@update_letter_percentage')->middleware('permission:grade/recalculate-grades');
     Route::get('MigrateChain', 'ScriptsController@MigrateChainWithEnrollment');
-    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated');
+    Route::get('delete_duplicated', 'ScriptsController@delete_duplicated'); // duplicated course
     Route::get('changeLetterName', 'ScriptsController@changeLetterName');
     Route::get('course_sorting', 'ScriptsController@course_index');
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
     Route::get('lesson_sorting', 'ScriptsController@lessons_index');
+    Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -469,10 +470,15 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
+    Route::get('duplicate_enroll', 'CalendarsController@delete_duplicated_enroll');
 
     Route::get('get-materials', 'MaterialsController@getMaterials');
     Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');
     Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers');
+    Route::get('getQuizAssignedUsers', 'QuizzesController@getQuizAssignedUsers');
+    Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers');
+    Route::get('getAssignmentAssignedUsers', 'AssignmentController@getAssignmentAssignedUsers');
+    Route::post('editAssignmentAssignedUsers', 'AssignmentController@editAssignmentAssignedUsers');
 
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
