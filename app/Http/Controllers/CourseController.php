@@ -1192,7 +1192,7 @@ class CourseController extends Controller
         $material = $materials_query->with(['lesson.course:id'])->where('lesson_id',$request->lesson_id);
         if($request->user()->can('site/course/student')){
             $material
-            // ->where('visible',1)
+            ->where('visible',1)
             // ->where('publish_date' ,'<=', Carbon::now())
             ->where(function($query) {                //Where accessible
                 $query->whereHasMorph(
