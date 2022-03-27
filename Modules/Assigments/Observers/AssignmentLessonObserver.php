@@ -56,11 +56,11 @@ class AssignmentLessonObserver
             ]);
 
             LessonComponent::firstOrCreate([
-                'lesson_id' => $lesson,
-                'comp_id' => $request->assignment_id,
+                'lesson_id' => $assignmentLesson->lesson_id,
+                'comp_id' => $assignmentLesson->assignment_id,
                 'module' => 'Assigments',
                 'model' => 'assignment',
-                'index' => LessonComponent::getNextIndex($lesson),
+                'index' => LessonComponent::getNextIndex($assignmentLesson->lesson_id),
                 'course_id' =>  $courseID,
                 'visible' => $assignmentLesson->visible,
             ]);
