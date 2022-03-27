@@ -530,7 +530,7 @@ class QuizzesController extends Controller
         $quiz = Quiz::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
 
         foreach($quiz->Lesson as $lesson)
-            $result['quiz_classes']= $lesson->shared_classes->pluck('id');
+            $result['quiz_classes'][]= $lesson->shared_classes->pluck('id')->first();
 
         $result['restricted'] = $quiz->restricted;
         if(isset($quiz['courseItem'])){
