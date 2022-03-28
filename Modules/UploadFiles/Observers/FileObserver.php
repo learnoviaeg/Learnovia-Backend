@@ -2,7 +2,6 @@
 
 namespace Modules\UploadFiles\Observers;
 
-use App\LessonComponent;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\File;
 use App\Material;

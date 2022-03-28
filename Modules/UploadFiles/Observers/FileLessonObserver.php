@@ -6,7 +6,6 @@ use Modules\UploadFiles\Entities\FileLesson;
 use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
-use App\LessonComponent;
 use App\Material;
 use App\CourseItem;
 use App\SecondaryChain;
