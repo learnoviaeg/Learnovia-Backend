@@ -171,7 +171,10 @@ class CoursesController extends Controller
                             }
                         }
                     }
-
+        ////rearranging lessons
+                    foreach(Lesson::where('course_id',$course->id)->cursor() as $key => $lesson){
+                        $lesson->update([ 'index' => $key+1 ]);;
+                    }
                     //Creating defult question category
                     $quest_cat = QuestionsCategory::firstOrCreate([
                         'name' => $course->name . ' Category',

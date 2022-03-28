@@ -239,15 +239,6 @@ class MediaController extends Controller
 
                 $mediaLesson->save();
 
-                LessonComponent::firstOrCreate([
-                    'lesson_id' => $mediaLesson->lesson_id,
-                    'comp_id'   => $mediaLesson->media_id,
-                    'module'    => 'UploadFiles',
-                    'model'     => 'media',
-                ], [
-                    'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
-                ]);
-
                 if ($request->type == 0) {
                     Storage::disk('public')->putFileAs('media/', $item, $name);
                 }

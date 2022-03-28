@@ -279,15 +279,6 @@ class FilesController extends Controller
                     $fileLesson->visible = isset($request->visible)?$request->visible:1;
 
                     $fileLesson->save();
-
-                    LessonComponent::firstOrCreate([
-                        'lesson_id' => $fileLesson->lesson_id,
-                        'comp_id'   => $fileLesson->file_id,
-                        'module'    => 'UploadFiles',
-                        'model'     => 'file',
-                    ], [
-                        'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
-                        ]);
                     Storage::disk('public')->putFileAs(
                         'files/' . $request->$lesson,
                         $singlefile,

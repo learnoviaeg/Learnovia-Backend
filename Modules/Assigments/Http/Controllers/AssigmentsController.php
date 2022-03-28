@@ -333,7 +333,7 @@ class AssigmentsController extends Controller
 
         $assignment_category = GradeCategory::where('lesson_id', $AssignmentLesson->lesson_id)->where('instance_id' , $AssignmentLesson->assignment_id)
                                 ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
-        $parent=$assignment_category->first()->Parents;
+        // $parent=$assignment_category->first()->Parents;
 
         if ($request->filled('is_graded'))
             $AssignmentLesson->is_graded = $request->is_graded;
@@ -943,13 +943,6 @@ class AssigmentsController extends Controller
             $assignment_lesson->save();
 
             $assignmentLesson [] = $assignment_lesson;
-            LessonComponent::firstOrCreate([
-                'lesson_id' => $lesson,
-                'comp_id' => $request->assignment_id,
-                'module' => 'Assigments',
-                'model' => 'assignment',
-                'index' => LessonComponent::getNextIndex($lesson),
-            ]);
             $lesson = Lesson::find($lesson);
 
             LastAction::lastActionInCourse($lesson->course_id);

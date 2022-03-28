@@ -79,6 +79,8 @@ class QuizLessonObserver
             'comp_id'   => $quiz->id,
             'module'    => 'QuestionBank',
             'model'     => 'quiz',
+            'course_id' =>  $lesson->course_id,
+            'visible' => $quizLesson->visible,
             'index'     => LessonComponent::getNextIndex($lesson->id)
         ]);
     }
@@ -115,6 +117,23 @@ class QuizLessonObserver
                     'lesson_id' => $quizLesson->lesson_id
                 ]);
             }
+
+            $LessonComponent = LessonComponent::where('comp_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('model' , 'quiz')->first();
+            if(isset($LessonComponent)){
+                $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('comp_id',$quizLesson->quiz_id)
+                ->where('model' , 'quiz')->first();
+                LessonComponent::where('lesson_id',$quizLesson->getOriginal('lesson_id'))
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+                $LessonComponent->update([
+                    'lesson_id' => $quizLesson->lesson_id,
+                    'comp_id' => $quiz->id,
+                    'module' => 'QuestionBank',
+                    'model' => 'quiz',
+                    'visible' => $quizLesson->visible,
+                    'index' => LessonComponent::getNextIndex($quizLesson->lesson_id)
+                ]);
+            }
+
 
             $this->report->calculate_course_progress($course_id);
         }

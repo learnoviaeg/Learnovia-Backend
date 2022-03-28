@@ -35,6 +35,7 @@ use App\Events\UpdatedQuizQuestionsEvent;
 use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
 use Illuminate\Database\Eloquent\Builder;
+use App\LessonComponent;
 
 class QuizzesController extends Controller
 {
@@ -350,7 +351,20 @@ class QuizzesController extends Controller
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
-        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
+        $quizLesson = QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id);
+        
+        $LessonComponent =  LessonComponent::where('comp_id',$quizLesson->first()->quiz_id)
+        ->where('lesson_id',$quizLesson->first()->lesson_id)->where('model' , 'quiz')->first();
+        
+        if($LessonComponent !=  null){
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$quizLesson->first()->lesson_id)->where('comp_id',$quizLesson->first()->quiz_id)
+            ->where('model' , 'quiz')->first();
+            LessonComponent::where('lesson_id',$quizLesson->first()->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        }
+
+        $quizLesson->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();
