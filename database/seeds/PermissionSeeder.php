@@ -354,6 +354,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/edit_restriction', 'title' => 'Edit Restriction']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assign_restrition', 'title' => 'Assign Restriction']);
 
         //Timeline Resources Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'timeline/store', 'title' => 'Store Timeline']);

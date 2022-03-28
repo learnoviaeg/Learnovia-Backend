@@ -4,6 +4,7 @@ namespace Modules\Page\Observers;
 
 use App\LessonComponent;
 use Modules\Page\Entities\Page;
+use Modules\Page\Entities\PageLesson;
 use App\Material;
 
 class PageObserver
