@@ -381,8 +381,8 @@ class MaterialsController extends Controller
         }
 
         $result['restricted'] = $material->restricted;
+        
         if(isset($material['item']->courseItem)){
-
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
                 $result['assigned_users'][] = $user->user_id;
