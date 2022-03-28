@@ -396,7 +396,7 @@ class MaterialsController extends Controller
 
         $material = Material::find($request->id);
         if(isset($request->users_ids))
-            Material::where('id',$request->id)->update(['restricted',1]);
+            Material::where('id',$request->id)->update(['restricted'=>1]);
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }
