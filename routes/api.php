@@ -473,7 +473,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('duplicate_enroll', 'CalendarsController@delete_duplicated_enroll');
 
     Route::get('get-materials', 'MaterialsController@getMaterials');
-    Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');//->middleware(['permission:site/edit_restriction']);
     Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers')->middleware(['permission:site/edit_restriction']);
     Route::get('getQuizAssignedUsers', 'QuizzesController@getQuizAssignedUsers')->middleware(['permission:site/edit_restriction']);
     Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers')->middleware(['permission:site/edit_restriction']);
