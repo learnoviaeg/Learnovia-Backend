@@ -171,6 +171,10 @@ class AssignmentController extends Controller
             'is_graded' => 'boolean',
             'mark' => 'numeric|min:0',
             'lesson_id' => 'required|integer|exists:lessons,id',
+            //allow attachement
+                // 0===================>content
+                // 1===================>attached_file
+                // 2===================>can submit content or file
             'allow_attachment' => 'integer|min:0|max:3',
             'opening_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date |date_format:Y-m-d H:i:s',
@@ -179,6 +183,15 @@ class AssignmentController extends Controller
             'grade_category' => 'exists:grade_categories,id',
             'updated_lesson_id' =>'nullable|exists:lessons,id'
         ]);
+
+        if ($request->hasFile('file')) {
+
+            $settings = $this->setting->get_value('create_assignment_extensions');
+
+            $request->validate([
+                'file' => 'file|distinct|mimes:'.$settings,
+            ]);
+        }
 
         $assignment = assignment::find($id);
         $assigmentLesson = AssignmentLesson::where('lesson_id',$request->lesson_id)->where('assignment_id',$id)->first();
@@ -191,63 +204,63 @@ class AssignmentController extends Controller
                 'publish_date' => isset($request->publish_date) ? $request->publish_date : $assigmentLesson->publish_date,
             ]);
         }
+
         $assigmentLesson->update([
             'due_date' => isset($request->closing_date) ? $request->closing_date : $assigmentLesson->due_date,
             'visible' => isset($request->visible) ? $request->visible : $assigmentLesson->visible,
         ]);
-        $CheckIfAnswered = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->where('submit_date', '!=', null)->get();
+        
+        $ifStudent=[];
+        $users = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->where('submit_date', '!=', null)->pluck('user_id');
+        if(isset($users))
+            $ifStudent=Enroll::whereIn('user_id',$users)->where('role_id',3)->get();
 
-        if (count($CheckIfAnswered) <= 0)
+        if(isset($request->updated_lesson_id) && $request->updated_lesson_id !=$request->lesson_id && $ifStudent > 0)
+            return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
+
+        if (count($ifStudent) >= 0)
         {
-            $assignment->update([
+            if(isset($request->allow_attachment) && $request->allow_attachment == 3)
+            $assigmentLesson->update([
+                'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+            ]);
+        }
+        if (count($ifStudent) <= 0){
+            $description = (isset($request->file_description))? $request->file_description :null;
+
+            $assigmentLesson->update([
                 'content' => isset($request->content) ? $request->content : $assignment->content,
                 'name' => isset($request->name) ? $request->name : $assignment->name,
-            ]);
-        }
-        if (count($CheckIfAnswered) <= 0){
-            $assigmentLesson->update([
                 'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
+                'is_graded' => isset($request->is_graded) ? $request->is_graded : $assigmentLesson->is_graded,
                 'grade_category' => isset($request->grade_category) ? $request->grade_category : $assigmentLesson->grade_category,
                 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $assigmentLesson->lesson_id,
+                'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+                'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
             ]);
         }
-        if ($request->hasFile('file')) {
 
-            $settings = $this->setting->get_value('create_assignment_extensions');
-
-            $request->validate([
-                'file' => 'file|distinct|mimes:'.$settings,
-            ]);
-
-            $description = (isset($request->file_description))? $request->file_description :null;
-            $assignment->attachment_id = attachment::upload_attachment($request->file, 'assignment', $description)->id;
-        }
-        if($request->file == 'No_file')
-            $assignment->attachment_id=null;
+        // if($request->file == 'No_file')
+        //     $assignment->attachment_id=null;
 
         $assignment->save();
 
-        $assigmentLesson->update([
-            'due_date' => isset($request->is_graded) ? $request->is_graded : $assigmentLesson->is_graded,
-        ]);
-
-        if ($request->filled('allow_attachment'))
+        if ($request->filled('allow_attachment') )
             $assigmentLesson->allow_attachment = $request->allow_attachment;
 
         $assigmentLesson->save();
-        $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
-
-        if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
-            $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
-            foreach ($usersIDs as $userId) {
-                $userassigment = new UserAssigment;
-                $userassigment->user_id = $userId;
-                $userassigment->assignment_lesson_id = $assigmentLesson->id;
-                $userassigment->status_id = 2;
-                $userassigment->override = 0;
-                $userassigment->save();
-            }
-        }
+        // $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
+        // if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
+        //     $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
+        //     foreach ($usersIDs as $userId) {
+        //         $userassigment = new UserAssigment;
+        //         $userassigment->user_id = $userId;
+        //         $userassigment->assignment_lesson_id = $assigmentLesson->id;
+        //         $userassigment->status_id = 2;
+        //         $userassigment->override = 0;
+        //         $userassigment->save();
+        //     }
+        // }
 
         $AssignmentLesson = AssignmentLesson::where('assignment_id', $id)->where('lesson_id', $request->lesson_id)->first();
 
