@@ -325,8 +325,8 @@ class AttendanceSessionController extends Controller
             SessionLog::updateOrCreate([
                 'session_id' => $request->session_id,
                 'user_id' => $user['id'],
-                'taken_by' => Auth::id()
             ],[
+                'taken_by' => Auth::id(),
                 'status' => $user['status'],
             ]);
 

@@ -87,6 +87,9 @@ class PageLessonObserver
         $all = Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->first()->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
+
+        LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->lesson_id)
+        ->where('module','Page')->delete();
     }
 
     /**

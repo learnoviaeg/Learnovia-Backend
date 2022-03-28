@@ -84,6 +84,12 @@ class MediaLessonObserver
         $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
+
+        LessonComponent::where('comp_id',$mediaLesson->media_id)
+            ->where('lesson_id',$mediaLesson->lesson_id)
+            ->where('module','UploadFiles')
+            ->where('model' , 'media')
+            ->delete();
     }
 
     /**

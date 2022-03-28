@@ -6,6 +6,7 @@ use Modules\UploadFiles\Entities\FileLesson;
 use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
+use App\LessonComponent;
 use App\Material;
 use App\CourseItem;
 use App\SecondaryChain;
@@ -84,6 +85,12 @@ class FileLessonObserver
         $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->first()->delete();
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
+
+        LessonComponent::where('comp_id',$fileLesson->media_id)
+            ->where('lesson_id',$fileLesson->lesson_id)
+            ->where('module','UploadFiles')
+            ->where('model' , 'file')
+            ->delete();
     }
 
     /**
