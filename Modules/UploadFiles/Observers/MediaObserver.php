@@ -13,7 +13,6 @@ class MediaObserver
         Material::where('item_id',$media->id)->where('type' , 'media')
         ->update([
             'name' => $media->name,
-            'description' => $media->description,
             'link' => $media->link,
         ]);
     }
