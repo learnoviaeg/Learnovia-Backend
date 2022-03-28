@@ -479,6 +479,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers')->middleware(['permission:site/edit_restriction']);
     Route::get('getAssignmentAssignedUsers', 'AssignmentController@getAssignmentAssignedUsers')->middleware(['permission:site/edit_restriction']);
     Route::post('editAssignmentAssignedUsers', 'AssignmentController@editAssignmentAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::post('editH5pAssignedUsers', 'H5PLessonController@editH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::get('getH5pAssignedUsers', 'H5PLessonController@getH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
 
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
