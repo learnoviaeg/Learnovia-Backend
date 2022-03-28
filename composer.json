@@ -22,6 +22,7 @@
         "laravel/framework": "5.8.*",
         "laravel/passport": "^7.3",
         "laravel/tinker": "^1.0",
+        "lcobucci/jwt": "3.3",
         "league/flysystem-aws-s3-v3": "^1.0",
         "maatwebsite/excel": "^3.1",
         "ncjoes/office-converter": "^1.0",
@@ -59,18 +60,7 @@
         },
         "classmap": [
             "database/seeds",
-            "database/factories",
-            "vendor/google/apiclient/src/Google",
-            "vendor/h5p/h5p-core/h5p-default-storage.class.php",
-            "vendor/h5p/h5p-core/h5p-development.class.php",
-            "vendor/h5p/h5p-core/h5p-event-base.class.php",
-            "vendor/h5p/h5p-core/h5p-file-storage.interface.php",
-            "vendor/h5p/h5p-core/h5p.classes.php",
-            "vendor/h5p/h5p-editor/h5peditor-ajax.class.php",
-            "vendor/h5p/h5p-editor/h5peditor-ajax.interface.php",
-            "vendor/h5p/h5p-editor/h5peditor-file.class.php",
-            "vendor/h5p/h5p-editor/h5peditor-storage.interface.php",
-            "vendor/h5p/h5p-editor/h5peditor.class.php"
+            "database/factories"
         ]
     },
     "autoload-dev": {
