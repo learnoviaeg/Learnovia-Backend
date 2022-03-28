@@ -13,7 +13,6 @@ class FileObserver
         Material::where('item_id',$file->id)->where('type' , 'file')
         ->update([
             'name' => $file->name,
-            'description' => $file->description,
         ]);
     }
 
