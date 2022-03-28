@@ -120,6 +120,9 @@ class PageLessonObserver
 
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
+
+        LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->lesson_id)
+        ->where('module','Page')->delete();
     }
 
     /**
