@@ -48,6 +48,7 @@ class PageLessonObserver
                 'model' => 'page',
                 'course_id' =>  $course_id,
                 'visible' => $pageLesson->visible,
+                'publish_date' => $pageLesson->publish_date,
                 'index' => LessonComponent::getNextIndex($lesson->id)
             ]);
         }
@@ -71,6 +72,7 @@ class PageLessonObserver
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
+                'publish_date' => $pageLesson->publish_date,
             ]);
 
             ////updating component lesson and indexing mods in old lesson in case of updating lesson
@@ -88,6 +90,7 @@ class PageLessonObserver
                                     'module' => 'Page',
                                     'model' => 'page',
                                     'visible' => $pageLesson->visible,
+                                    'publish_date' => $pageLesson->publish_date,
                                     'index' => LessonComponent::getNextIndex($pageLesson->lesson_id)
                                 ]);
             }

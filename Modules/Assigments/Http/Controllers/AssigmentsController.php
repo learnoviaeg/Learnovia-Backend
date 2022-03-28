@@ -943,13 +943,6 @@ class AssigmentsController extends Controller
             $assignment_lesson->save();
 
             $assignmentLesson [] = $assignment_lesson;
-            // LessonComponent::firstOrCreate([
-            //     'lesson_id' => $lesson,
-            //     'comp_id' => $request->assignment_id,
-            //     'module' => 'Assigments',
-            //     'model' => 'assignment',
-            //     'index' => LessonComponent::getNextIndex($lesson),
-            // ]);
             $lesson = Lesson::find($lesson);
 
             LastAction::lastActionInCourse($lesson->course_id);

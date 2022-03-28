@@ -45,6 +45,7 @@ class MediaLessonObserver
                 'model'     => 'media',
                 'course_id' => $course_id,
                 'visible'   => $mediaLesson->visible,
+                'publish_date' => $mediaLesson->publish_date,
                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
             ]);
 
@@ -98,6 +99,7 @@ class MediaLessonObserver
                                 'module' => 'UploadFiles',
                                 'model' => 'media',
                                 'visible' => $mediaLesson->visible,
+                                'publish_date' => $mediaLesson->publish_date,
                                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
                             ]);
         }

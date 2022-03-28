@@ -45,6 +45,7 @@ class FileLessonObserver
                 'model'     => 'file',
                 'course_id' => $course_id,
                 'visible'   => $fileLesson->visible,
+                'publish_date' => $fileLesson->publish_date,
             ], [
                 'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
                 ]);
@@ -96,6 +97,7 @@ class FileLessonObserver
                                     'module' => 'UploadFiles',
                                     'model' => 'file',
                                     'visible' => $fileLesson->visible,
+                                    'publish_date' => $fileLesson->publish_date,
                                     'index' => LessonComponent::getNextIndex($fileLesson->lesson_id)
                                 ]);
             }
