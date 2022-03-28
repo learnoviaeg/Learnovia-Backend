@@ -381,7 +381,7 @@ class MaterialsController extends Controller
         }
 
         $result['restricted'] = $material->restricted;
-        
+
         if(isset($material['item']->courseItem)){
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
@@ -400,7 +400,8 @@ class MaterialsController extends Controller
 
         $material = Material::find($request->id);
         if(isset($request->users_ids))
-            Material::where('id',$request->id)->update(['restricted'=>1]);
+            Material::where('type',$material->type)->where('item_id',$material->item_id)->update(['restricted'=>1]);
+
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }
