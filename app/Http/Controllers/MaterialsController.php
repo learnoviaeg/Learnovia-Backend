@@ -373,12 +373,16 @@ class MaterialsController extends Controller
 
         $items=Material::where('item_id',$material->item_id)->where('type',$material->type)->
             with(['lesson', 'item.courseItem.courseItemUsers']);
-        foreach($items->get() as $item)
-            $result['material_classes'][]= $item->lesson->shared_classes->pluck('id')->first();
+        foreach($items->get() as $item){
+            if($item->lesson->shared_lesson ==1)
+                $result['material_classes']= $item->lesson->shared_classes->pluck('id');
+            else
+                $result['material_classes'][]= $item->lesson->shared_classes->pluck('id')->first();
+        }
 
         $result['restricted'] = $material->restricted;
+        
         if(isset($material['item']->courseItem)){
-
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
                 $result['assigned_users'][] = $user->user_id;

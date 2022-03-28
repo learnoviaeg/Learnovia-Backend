@@ -11,9 +11,9 @@ class FileObserver
     public function updated(File $file)
     {
         Material::where('item_id',$file->id)->where('type' , 'file')
-        ->update([
-            'name' => $file->name,
-        ]);
+            ->update([
+                'name' => $file->name,
+            ]);
     }
 
     public function deleted(File $file)
