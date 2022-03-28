@@ -243,8 +243,7 @@ class AssigmentsController extends Controller
             'name' => 'required|string',
             'content' => 'string|required_without:file',
             'file' => 'file|distinct|required_without:content|mimes:'.$settings,
-            'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
+
         ];
 
         $customMessages = [
@@ -473,8 +472,7 @@ class AssigmentsController extends Controller
         if($override != null)
             if (($override->start_date >  Carbon::now()) || (Carbon::now() > $override->due_date))
                 return HelperController::api_response_format(400,null, $message = __('messages.error.submit_limit'));
-
-
+                
         /*
             0===================>content
             1===================>attached_file
@@ -881,6 +879,8 @@ class AssigmentsController extends Controller
             'grade_category.*' => 'exists:grade_categories,id',
             'scale' => 'exists:scales,id',
             'visible' => 'required|boolean',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ]);
 
         foreach($request->lesson_id as $key => $lesson){
@@ -896,12 +896,12 @@ class AssigmentsController extends Controller
             $assignment_lesson->allow_attachment = $request->allow_attachment;
             $lesson_obj = Lesson::find($lesson);
 
-        $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
-        foreach($secondary_chains as $secondary_chain){
-            $segment = Segment::find($secondary_chain->Enroll->segment);
-            if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
-                return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
-        }
+            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $segment = Segment::find($secondary_chain->Enroll->segment);
+                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+            }
             if ($request->filled('closing_date'))
                 $assignment_lesson->due_date = $request->closing_date;
             if ($request->filled('scale'))

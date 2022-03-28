@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use App\Timeline;
 use App\Level;
+use App\Notifications\AssignmentNotification;
 use App\Course;
+use App\Segment;
 use App\Classes;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\Assigments\Entities\assignment;
@@ -22,14 +24,18 @@ use App\LastAction;
 use Carbon\Carbon;
 use App\SecondaryChain;
 use App\GradeCategory;
+use App\GradeItems;
+use App\Repositories\SettingsReposiotryInterface;
 use App\Events\GraderSetupEvent;
 use Illuminate\Database\Eloquent\Builder;
 
 class AssignmentController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,SettingsReposiotryInterface $setting)
     {
         $this->chain = $chain;
+        $this->setting = $setting;
+
         $this->middleware('auth');
         $this->middleware(['permission:assignment/get', 'ParentCheck'],   ['only' => ['index','show']]);
     }
@@ -113,7 +119,102 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $settings = $this->setting->get_value('create_assignment_extensions');
+
+        $rules = [
+            'name' => 'required|string',
+            'content' => 'string|required_without:file',
+            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            //assignment_lesson
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'exists:lessons,id',
+            'is_graded' => 'required|boolean',
+            'mark' => 'required|numeric|min:0',
+            'allow_attachment' => 'required|integer|min:0|max:3',
+            'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
+            'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
+            'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'grade_category' => 'array|required_if:is_graded,==,1|exists:grade_categories,id',
+            'allow_edit_answer' => 'boolean',
+            'scale' => 'exists:scales,id',
+            'visible' => 'required|boolean',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+        ];
+
+        $customMessages = [
+            'file.mimes' => __('messages.error.extension_error')
+        ];
+
+        $this->validate($request, $rules, $customMessages);
+
+        $assignment = Assignment::firstOrCreate([
+            'name' => $request->name,
+            'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
+            'content' => isset($request->conent) ? $request->content : null,
+            'created_by' => Auth::id(),
+        ]);
+
+        foreach($request->lesson_id as $key => $lesson){
+
+            $assignment_lesson = AssignmentLesson::firstOrCreate([
+                'lesson_id' => $lesson,
+                'assignment_id' => $assignment->id,
+                'publish_date' => $request->publish_date,
+                'due_date' => isset($request->closing_date) ? $request->closing_date : null,
+                'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
+                'scale_id' => isset($request->scale) ? $request->scale : null,
+                'visible' => $request->visible,
+                // 'grade_category' => isset($request->grade_category) ? $request->grade_category : $pp->id,
+                'is_graded' => $request->is_graded,
+                'start_date' => $request->opening_date,
+                'mark' => $request->mark,
+                'is_graded' => $request->is_graded,
+                'allow_attachment' => $request->allow_attachment,
+            ]);
+
+            $lesson_obj = Lesson::find($lesson);
+            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->where('lesson_id',$lesson)->whereNull('parent')->first();
+
+            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $segment = Segment::find($secondary_chain->Enroll->segment);
+                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+            }
+
+            if($request->is_graded)
+            {
+                GradeItems::create([
+                    'grade_category_id' => $request->grade_category,
+                    'grademin' => 0,
+                    'grademax' => $request->mark,
+                    'item_no' => 1,
+                    'scale_id' => (isset($request->scale)) ? $request->scale : 1,
+                    'grade_pass' => (isset($request->grade_to_pass)) ? $request->grade_to_pass : null,
+                    'aggregationcoef' => (isset($request->aggregationcoef)) ? $request->aggregationcoef : null,
+                    'aggregationcoef2' => (isset($request->aggregationcoef2)) ? $request->aggregationcoef2 : null,
+                    'type' => 'Assignment',
+                    'item_Entity' => $assignment->id,
+                    'name' => $assignment->name,
+                    'weight' => 0,
+                ]);
+            }
+
+            if(isset($request->users_ids)){
+                CoursesHelper::giveUsersAccessToViewCourseItem($assignment->id, 'assignment', $request->users_ids);
+                Assignment::where('id',$assignment->id)->update(['restricted' => 1]);
+            }
+
+            LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
+
+            //sending notifications
+            $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
+            $notification->send();
+
+            ///create grade category for assignment
+            event(new AssignmentCreatedEvent($assignment_lesson));
+        }
     }
 
     /**
