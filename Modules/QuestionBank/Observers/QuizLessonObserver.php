@@ -79,8 +79,6 @@ class QuizLessonObserver
             'comp_id'   => $quiz->id,
             'module'    => 'QuestionBank',
             'model'     => 'quiz',
-            'course_id' =>  $lesson->course_id,
-            'visible' => $quizLesson->visible,
             'index'     => LessonComponent::getNextIndex($lesson->id)
         ]);
     }

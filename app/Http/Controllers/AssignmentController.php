@@ -134,7 +134,7 @@ class AssignmentController extends Controller
             'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
-            'grade_category' => 'array|required_if:is_graded,==,1|exists:grade_categories,id',
+            'grade_category' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'allow_edit_answer' => 'boolean',
             'scale' => 'exists:scales,id',
             'visible' => 'required|boolean',
@@ -174,7 +174,8 @@ class AssignmentController extends Controller
             ]);
 
             $lesson_obj = Lesson::find($lesson);
-            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->where('lesson_id',$lesson)->whereNull('parent')->first();
+            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();
+            $assignment_lesson->grade_category=$pp->id;
 
             $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
             foreach($secondary_chains as $secondary_chain){
@@ -214,7 +215,11 @@ class AssignmentController extends Controller
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
+
+            $assignment_lesson->save();
         }
+
+        return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
     /**
@@ -237,12 +242,20 @@ class AssignmentController extends Controller
 
         $lesson_drag = Lesson::find($lesson_id);
         LastAction::lastActionInCourse($lesson_drag->course_id);
-        $userassigments = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date','!=',null)->get();
-        if (count($userassigments) > 0) {
+
+        $assignment['started'] = false;
+        $assignment['allow_edit'] = true;
+        if(Carbon::parse($assigLessonID->start_date) < Carbon::now())
+            $assignment['started'] = true;
+
+        $ifStudent=[];
+        $users = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('submit_date', '!=', null)->pluck('user_id');
+        if(isset($users))
+            $ifStudent=Enroll::whereIn('user_id',$users)->where('role_id',3)->get();
+
+        if(count($ifStudent) > 0)
             $assignment['allow_edit'] = false;
-        } else {
-            $assignment['allow_edit'] = true;
-        }
+
         $assignment['user_submit']=null;
         $assignment['visible'] = $assigLessonID->visible;
           /////////////student
@@ -309,6 +322,7 @@ class AssignmentController extends Controller
         $assigmentLesson->update([
             'due_date' => isset($request->closing_date) ? $request->closing_date : $assigmentLesson->due_date,
             'visible' => isset($request->visible) ? $request->visible : $assigmentLesson->visible,
+            'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : $assigmentLesson->allow_edit_answer,
         ]);
         
         $ifStudent=[];

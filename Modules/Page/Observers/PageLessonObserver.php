@@ -46,9 +46,6 @@ class PageLessonObserver
                 'comp_id' => $page->id,
                 'module' => 'Page',
                 'model' => 'page',
-                'course_id' =>  $course_id,
-                'visible' => $pageLesson->visible,
-                'publish_date' => $pageLesson->publish_date,
                 'index' => LessonComponent::getNextIndex($lesson->id)
             ]);
         }

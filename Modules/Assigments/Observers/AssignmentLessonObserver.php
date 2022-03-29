@@ -60,10 +60,7 @@ class AssignmentLessonObserver
                 'comp_id' => $assignmentLesson->assignment_id,
                 'module' => 'Assigments',
                 'model' => 'assignment',
-                'publish_date' =>  isset($assignmentLesson->publish_date)? $assignmentLesson->publish_date : Carbon::now(),
                 'index' => LessonComponent::getNextIndex($assignmentLesson->lesson_id),
-                'course_id' =>  $courseID,
-                'visible' => $assignmentLesson->visible,
             ]);
 
             $this->report->calculate_course_progress($courseID);
