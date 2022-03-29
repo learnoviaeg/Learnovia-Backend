@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\attachment;
 use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;

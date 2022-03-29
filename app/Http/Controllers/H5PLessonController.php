@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\h5pLesson;
 use App\Lesson;
 use App\User;
-// use App\CourseSegment;
 use App\Enroll;
 use App\Component;
 use App\CourseItem;
@@ -18,16 +17,14 @@ use App\Http\Controllers\Controller;
 use App\Notification;
 use App\Notifications\H5PNotification;
 use App\UserCourseItem;
+use App\Helpers\CoursesHelper;
+use Illuminate\Database\Eloquent\Builder;
 
 class H5PLessonController extends Controller
 {
 
     public function install()
     {
-        // if (\Spatie\Permission\Models\Permission::whereName('h5p/lesson/create')->first() != null) {
-        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        // }
-
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/create', 'title' => 'Create Learnovia interactive']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/toggle', 'title' => 'Toggle interactive visability']);
         \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'h5p/lesson/get-all', 'title' => 'Get all Learnovia interactive']);
@@ -76,6 +73,8 @@ class H5PLessonController extends Controller
             'lesson_id' => 'required|exists:lessons,id|array',
             'visible'=>'in:0,1',
             'publish_date' => 'nullable|after:' . Carbon::now(),
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ]);
 
         // $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->whereIn('lesson_id',$request->lesson_id)->first();
@@ -90,7 +89,11 @@ class H5PLessonController extends Controller
                 'visible'=>isset($request->visible)?$request->visible:1
             ]);
         // }
-
+            /////////user restrictions 
+            if(isset($request->users_ids)){
+                CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
+                $h5p_lesson->restricted = 1;
+            }
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
@@ -231,6 +234,53 @@ class H5PLessonController extends Controller
         // ];
 
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
+    }
+
+
+
+    ////////////////////user restrictions
+
+
+    public function editH5pAssignedUsers(Request $request){
+        $request->validate([
+            'content_id' => 'required|exists:h5p_lessons,content_id',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+        ]);
+
+        $h5pLessons= h5pLesson::where('content_id',$request->content_id);
+        $h5pLessons->update(['restricted' => 1]);
+
+        if(!isset($request->users_ids))
+            $h5pLessons->update(['restricted' => 0]);
+
+        foreach($h5pLessons->cursor() as $h5pLesson){
+            CoursesHelper::updateCourseItem($h5pLesson->id, 'h5p_content', $request->users_ids);
+        }
+
+        return response()->json(['message' => 'Updated successfully'], 200);
+    }
+
+    public function getH5pAssignedUsers(Request $request){
+
+        $request->validate([
+            'content_id' => 'required|exists:h5p_lessons,content_id',
+        ]);
+
+        $h5pLessons = h5pLesson::where('content_id', $request->content_id)->with(['Lesson', 'courseItem.courseItemUsers'])->get();
+        foreach($h5pLessons as $h5pLesson){
+            foreach($h5pLesson->Lesson->shared_classes->pluck('id') as $class_id)
+                    $classes[] = $class_id;
+        }
+        $result['h5p_classes'][] = array_unique($classes);
+        $result['restricted'] = $h5pLessons[0]->restricted;
+        if(isset($h5pLessons['courseItem'])){
+            $courseItemUsers = $h5pLessons['courseItem']->courseItemUsers;
+            foreach($courseItemUsers as $user)
+                $result['assigned_users'][] = $user->user_id;
+        }
+
+        return response()->json($result,200);
     }
 
 }
