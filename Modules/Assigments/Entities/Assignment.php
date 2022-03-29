@@ -5,7 +5,7 @@ namespace Modules\Assigments\Entities;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 
-class Assignment extends Model
+class assignment extends Model
 {
     use Auditable;
 
