@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class AttendanceSession extends Model
 {
-    protected $fillable = ['name', 'attendance_id', 'class_id','course_id', 'from', 'to', 'created_by', 'start_date'];
+    protected $fillable = ['name', 'attendance_id', 'class_id','course_id', 'from', 'to', 'created_by', 'start_date','session_id'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\SessionCreatedEvent::class,
@@ -38,5 +38,10 @@ class AttendanceSession extends Model
         if($this->attributes['taken'])
             return True;
         return False;
+    }
+
+    public function session_logs()
+    {
+        return $this->hasMany('Modules\Attendance\Entities\AttendanceLog','session_id','id');
     }
 }

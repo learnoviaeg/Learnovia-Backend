@@ -7,6 +7,10 @@ use App\Repositories\ChainRepositoryInterface;
 use App\SessionLog;
 use Carbon\Carbon;
 use App\Classes;
+use Illuminate\Support\Facades\Auth;
+use App\AttendanceSession;
+use Modules\Attendance\Entities\AttendanceLog;
+use App\User;
 
 class AttendanceReportsController extends Controller
 {
@@ -134,5 +138,51 @@ class AttendanceReportsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function user_attendance_report(Request $request){
+
+        $request->validate([
+            'type' => 'required|in:Per Session,Daily'
+        ]);
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
+
+        $attendance_type_callback = function ($query) use ($request ) {
+                $query->where('attendance_type', $request->type);
+        };
+        $sessions_ids = AttendanceSession::select('id')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))->where('taken' , 1)
+                        ->whereHas('attendance' , $attendance_type_callback)->pluck('id');
+        $logs = User::whereId(Auth::id())->select('id')->withCount('attendanceLogs as all_sessions_count')
+                ///counting Absent  
+                ->withCount(['attendanceLogs as Absent'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Absent');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Late
+                ->withCount(['attendanceLogs as Late'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Late');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Present
+                ->withCount(['attendanceLogs as Present'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Present');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Excuse
+                ->withCount(['attendanceLogs as Excuse'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Excuse');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])->first();
+
+        if($logs->all_sessions_count > 0){
+            $logs->Present =  ($logs->Present / $logs->all_sessions_count)*100;
+            $logs->Late =  ($logs->Late / $logs->all_sessions_count)*100;
+            $logs->Absent =  ($logs->Absent / $logs->all_sessions_count)*100;
+            $logs->Excuse =  ($logs->Excuse / $logs->all_sessions_count)*100;
+        }
+      
+        return response()->json(['message' => null , 'body' => $logs], 200);
     }
 }
