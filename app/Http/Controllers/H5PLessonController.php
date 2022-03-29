@@ -264,10 +264,10 @@ class H5PLessonController extends Controller
     public function getH5pAssignedUsers(Request $request){
 
         $request->validate([
-            'content_id' => 'required|exists:h5p_lessons,content_id',
+            'id' => 'required|exists:h5p_lessons,content_id',
         ]);
 
-        $h5pLessons = h5pLesson::where('content_id', $request->content_id)->with(['Lesson', 'courseItem.courseItemUsers'])->get();
+        $h5pLessons = h5pLesson::where('content_id', $request->id)->with(['Lesson', 'courseItem.courseItemUsers'])->get();
         foreach($h5pLessons as $h5pLesson){
             foreach($h5pLesson->Lesson->shared_classes->pluck('id') as $class_id)
                     $classes[] = $class_id;
