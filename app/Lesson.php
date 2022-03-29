@@ -15,14 +15,6 @@ class Lesson extends Model
         'created' => \App\Events\LessonCreatedEvent::class,
     ];
 
-    public function courseSegment(){
-        return $this->belongsTo('App\CourseSegment');
-    }
-    public static function Get_lessons_per_CourseSegment_from_lessonID($id){
-        $lesson=self::where('id',$id)->first();
-        $lessons=$lesson->courseSegment->lessons;
-        return $lessons;
-    }
     public function module($name,$model)
     {
         return $this->belongsToMany('Modules\\'.$name.'\Entities\\'.$model, $model.'_lessons', 'lesson_id', $model.'_id')->withPivot('publish_date','created_at');

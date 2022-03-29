@@ -20,7 +20,7 @@ class media extends Model
 
     public function MediaLesson()
     {
-        return $this->belongsTo('Modules\UploadFiles\Entities\MediaLesson', 'id', 'media_id');
+        return $this->hasMany('Modules\UploadFiles\Entities\MediaLesson');
     }
 
     public function user()
@@ -36,6 +36,7 @@ class media extends Model
         return 'Link';
     }
 
+<<<<<<< HEAD
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -78,3 +79,14 @@ class media extends Model
     }
     // end function get name and value attribute
 }
+=======
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'media');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\MediaLesson', 'media_id' , 'id' , 'id' , 'id' );
+    }
+}
+>>>>>>> development

@@ -382,12 +382,7 @@ class ScriptsController extends Controller
 
     public function indexCatItem(Request $request)
     {
-        $request->validate([
-            'courses'    => 'required|array',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
-        ]);
-
-        foreach($request->courses as $course)
+        foreach(Course::where('segment_id',3)->pluck('id') as $course)
         {
             $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
             $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
@@ -420,6 +415,27 @@ class ScriptsController extends Controller
             $enrolled_students = Enroll::where('course', $course->id)->where('segment', '!=' , $course->segment_id);
             if($enrolled_students->count() > 0)
                 $enrolled_students->delete();
+        }
+        return 'Done';
+    }
+
+    public function lessons_index(Request $request)
+    {
+        foreach(Course::select('id')->cursor() as $course){
+            foreach(Lesson::where('course_id',$course->id)->cursor() as $key => $lesson){
+                $lesson->update([ 'index' => $key+1 ]);;
+            }
+        }
+        return 'done';
+    }
+    public function delete_duplicated_enroll(Request $request)
+    {
+        $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();
+        foreach($enrolls as $enroll)
+        {   
+            $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
+            if($count->count() > 1)
+                $countss=$count->first()->delete();
         }
         return 'Done';
     }

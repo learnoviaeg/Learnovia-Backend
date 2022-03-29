@@ -151,9 +151,12 @@ class UsersImport implements ToModel, WithHeadingRow
         
                 $enrollcounter=1;
                 while(isset($row[$enrollOptional.$enrollcounter])) {
-                    $course_id=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->pluck('id')->first();
+                    $course=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->first();
+                    if($course->segment_id != $row['segment_id'])
+                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+    
+                    $course_id=$course->id;
                     if(!isset($course_id))
-                        // break;
                         die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
             
                     Enroll::firstOrCreate([
@@ -173,23 +176,26 @@ class UsersImport implements ToModel, WithHeadingRow
             else{
                 $teachercounter=1;
                 while(isset($row[$teacheroptional.$teachercounter])){
-                    $course_id=Course::where('short_name',$row[$teacheroptional.$teachercounter])->pluck('id')->first();
+                    $course=Course::where('short_name',$row[$teacheroptional.$teachercounter])->first();
+                    if($course->segment_id != $row['segment_id'])
+                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+        
+                    $course_id=$course->id;
                     if(!isset($course_id))
-                        // break;
                         die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
         
-                        Enroll::firstOrCreate([
-                            'user_id' => $user->id,
-                            'role_id'=> $row['role_id'],
-                            'year' => $year,
-                            'type' => $type,
-                            'level' => $level,
-                            'group' => $row['class_id'],
-                            'segment' => $segment_id,
-                            'course' => $course_id
-                        ]);
-        
-                        $teachercounter++;
+                    Enroll::firstOrCreate([
+                        'user_id' => $user->id,
+                        'role_id'=> $row['role_id'],
+                        'year' => $year,
+                        'type' => $type,
+                        'level' => $level,
+                        'group' => $row['class_id'],
+                        'segment' => $segment_id,
+                        'course' => $course_id
+                    ]);
+    
+                    $teachercounter++;
                 }
             }
         }

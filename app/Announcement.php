@@ -39,7 +39,7 @@ class Announcement extends Model
     public function getCreatedByAttribute($value)
     {
         $user['id'] = $value;
-        $user['name'] = User::find($value)->firstname;
+        $user['name'] = User::find($value)->fullname;
         return $user;
     }
 

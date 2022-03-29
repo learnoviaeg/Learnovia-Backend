@@ -11,7 +11,7 @@ use App\Classes;
 use Nwidart\Modules\Collection;
 use Log;
 use App\Course;
-use App\CourseSegment;
+use App\SecondaryChain;
 use App\Lesson;
 use App\Level;
 use App\SegmentClass;
@@ -47,6 +47,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Repositories\ChainRepositoryInterface;
+use App\Paginate;
 
 
 class CourseController extends Controller
@@ -928,51 +929,38 @@ class CourseController extends Controller
      */
     public function GetUserCourseLessonsSorted(Request $request)
     {
-        $request->validate([
-            'course_id' => 'required|exists:course_segments,course_id',
-            'class_id' => 'exists:classes,id',
-        ]);
+        
         $result = [];
-        $courseSegments = CourseSegment::whereIn('id' , Auth::user()->enroll->pluck('course_segment'))->where('course_id',$request->course_id)->get();
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id());
+        $lessons = SecondaryChain::whereIn('enroll_id',$enrolls->pluck('id'))->pluck('lesson_id')->unique();
+        if(isset($request->lesson_id))
+            $lessons = [$request->lesson_id];
 
-        if($request->filled('class_id')){
-            $course_Segment = CourseSegment::GetWithClassAndCourse($request->class_id,$request->course_id);
-            $courseSegments=[CourseSegment::find($course_Segment->id)];
-        }
-        $j = 0;
-        foreach($courseSegments as $courseSegment){
-            if ($courseSegment != null) {
-                $result[$j] = [];
-                $i = 0;
-                foreach ($courseSegment->lessons as $lesson) {
-                    $components = LessonComponent::whereLesson_id($lesson->id)->get();
-                    $result[$j][$i]['name'] = $lesson->name;
-                    $result[$j][$i]['LessonID'] =$lesson->id;
-                    
-                    $class=Classes::find(Lesson::find($lesson->id)->courseSegment->segmentClasses[0]->classLevel[0]->class_id);
-                    $result[$j][$i]['ClassName']=$class->name ;
-                    $result[$j][$i]['ClassID']= $class->id;
+        $result = [];
+        $i = 0;
+        foreach ($lessons as $lesson) {
+            $lesson=Lesson::find($lesson);
+            $components = LessonComponent::whereLesson_id($lesson->id)->orderBy('index')->get();
+            $result[$i]['name'] = $lesson->name;
+            $result[$i]['LessonID'] =$lesson->id;
 
-                    $result[$j][$i]['data'] = [];
-                    foreach ($components as $component) {
-                        $temp = $lesson->module($component->module, $component->model);
-                        if ($request->user()->can('site/course/student')) {
-                            $temp->where('visible', '=', 1)
-                                ->where('publish_date', '<=', Carbon::now());
-                        }
-                        if(count($temp->get()) == 0)
-                            continue;
-                        $tempBulk = $temp->get();
-                        foreach($tempBulk as $item){
-                            $item->flag = $component->model;
-                            if(!in_array($item, $result[$j][$i]['data']))
-                                $result[$j][$i]['data'][] = $item;
-                        }
-                    }
-                    $i++;
+            $result[$i]['data'] = [];
+            foreach ($components as $component) {
+                $temp = $lesson->module($component->module, $component->model);
+                if ($request->user()->can('site/course/student')) {
+                    $temp->where('visible', '=', 1)
+                        ->where('publish_date', '<=', Carbon::now());
+                }
+                if(count($temp->get()) == 0)
+                    continue;
+                $tempBulk = $temp->get();
+                foreach($tempBulk as $item){
+                    $item->flag = $component->model;
+                    if(!in_array($item, $result[$i]['data']))
+                        $result[$i]['data'][] = $item;
                 }
             }
-            $j++;
+            $i++;
         }
         return HelperController::api_response_format(200, $result , null);
     }
@@ -1027,20 +1015,9 @@ class CourseController extends Controller
 
     public function Count_Components(Request $request)
     {
-        $request->validate([
-            'course'  => 'required|exists:courses,id',
-            'class'  => 'integer|exists:classes,id',
-        ]);
-        if (isset($request->class)) {
-            $course_segments = [CourseSegment::GetWithClassAndCourse($request->class, $request->course)->id];
-        } else {
-            $course_segments = CourseSegment::where('course_id', $request->course)->where('is_active', '1')->pluck('id');
-        }
-        if (!isset($course_segments)) {
-            return HelperController::api_response_format(400, null, __('messages.error.no_active_segment'));
-        }
-        $lessons_id = Lesson::whereIn('course_segment_id', $course_segments)->pluck('id');
-        $components =  LessonComponent::whereIn('lesson_id', $lessons_id)
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id());
+        $lessons = SecondaryChain::where('enroll_id',$enrolls->pluck('id'))->pluck('lesson_id')->unique();
+        $components =  LessonComponent::whereIn('lesson_id', $lessons)
             ->select('model as name', DB::raw('count(*) as total'))
             ->groupBy('model')
             ->get();
@@ -1197,5 +1174,54 @@ class CourseController extends Controller
         }
 
         return HelperController::api_response_format(201,null,'done');
+    }
+
+
+    public function sorted_components_in_lesson(Request $request,$count = null)
+    {
+        $request->validate([
+            'lesson_id' => 'required|integer|exists:lessons,id'
+        ]);
+
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+
+        $materials_query =  LessonComponent::orderBy('index','ASC');
+
+
+        $material = $materials_query->with(['lesson.course:id'])->where('lesson_id',$request->lesson_id);
+        if($request->user()->can('site/course/student')){
+            $material
+            ->where('visible',1)
+            // ->where('publish_date' ,'<=', Carbon::now())
+            ->where(function($query) {                //Where accessible
+                $query->whereHasMorph(
+                    'item',
+                    [
+                        'Modules\Page\Entities\page',
+                        'Modules\UploadFiles\Entities\media',
+                        'Modules\UploadFiles\Entities\file',
+                        'Modules\QuestionBank\Entities\quiz',
+                        'Modules\Assigments\Entities\assignment',
+                    ],
+                    function($query){
+                        $query->doesntHave('courseItem')
+                        ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                            $query->where('user_id', Auth::id());
+                        });
+                    }
+                );
+            });
+        }
+        $result['last_page'] = Paginate::allPages($material->count(),$paginate);
+        $result['total']= $material->count();
+
+        $AllMat=$material->skip(($page)*$paginate)->take($paginate)
+                    ->with('item')->get();
+        $result['data'] =  $AllMat;
+        $result['current_page']= $page + 1;
+        $result['per_page']= count($result['data']);
+
+        return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
     }
 }

@@ -11,6 +11,7 @@ use H5pCore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\CoursesHelper;
 
 class H5pController extends Controller
 {
@@ -102,8 +103,8 @@ class H5pController extends Controller
                 //old
                // $content['params'] = $request->get('parameters');
                // $params = json_decode($content['params']);
-                
-                
+
+
                 //new
                 $params = json_decode($request->get('parameters'));
                 $content['params'] = json_encode($params->params);
@@ -148,6 +149,10 @@ class H5pController extends Controller
         }*/
 
         $return_id = LaravelH5p::controllerStore($request, $this);
+
+        // if(isset($request->users_ids))
+        //         CoursesHelper::giveUsersAccessToViewCourseItem($return_id, 'h5p_content', $request->users_ids);
+
         $editting_done ='false';
         if ($return_id) {
             return redirect()
@@ -191,7 +196,7 @@ class H5pController extends Controller
         $user = Auth::user();
          $editting_done =$_GET['editting_done'];
 
-        
+
         \Log::info('in edit '.$editting_done);
 
         return view('h5p.content.edit', compact('settings', 'user', 'id', 'content', 'library', 'parameters', 'display_options','editting_done'));
@@ -239,7 +244,7 @@ class H5pController extends Controller
                 //old
                 //$content['params'] = $request->get('parameters');
                 //$params = json_decode($content['params']);
-                
+
                 //new
                 $params = json_decode($request->get('parameters'));
                 $content['params'] = json_encode($params->params);

@@ -22,6 +22,7 @@
         "laravel/framework": "5.8.*",
         "laravel/passport": "^7.3",
         "laravel/tinker": "^1.0",
+        "lcobucci/jwt": "3.3",
         "league/flysystem-aws-s3-v3": "^1.0",
         "maatwebsite/excel": "^3.1",
         "ncjoes/office-converter": "^1.0",

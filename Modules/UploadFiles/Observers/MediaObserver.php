@@ -2,17 +2,23 @@
 
 namespace Modules\UploadFiles\Observers;
 
-use App\LessonComponent;
 use Modules\UploadFiles\Entities\MediaLesson;
+use Modules\UploadFiles\Entities\Media;
+use App\Material;
 
 class MediaObserver
 {
-    public function deleted(MediaLesson $lesson)
+    public function updated(Media $media)
     {
-        LessonComponent::where('comp_id',$lesson->media_id)
-        ->where('lesson_id',$lesson->lesson_id)
-        ->where('module','UploadFiles')
-        ->where('model' , 'media')
-        ->delete();
+        Material::where('item_id',$media->id)->where('type' , 'media')
+            ->update([
+                'name' => $media->name,
+                'link' => $media->link,
+            ]);
+    }
+
+    public function deleted(Media $media)
+    {
+
     }
 }

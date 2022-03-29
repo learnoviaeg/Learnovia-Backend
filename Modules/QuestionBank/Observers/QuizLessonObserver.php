@@ -28,6 +28,7 @@ class QuizLessonObserver
     {
         $this->report = $report;
     }
+    
     /**
      * Handle the quiz lesson "created" event.
      *
@@ -41,38 +42,47 @@ class QuizLessonObserver
        
         $this->report->calculate_course_progress($lesson->course_id);
 
-            $grade_category=GradeCategory::find($quizLesson->grade_category_id);
-            //creating grade category for quiz
-            $categoryOfQuiz = GradeCategory::create([
-                'course_id' => $lesson->course_id,
-                'parent' => $grade_category->id,
-                'name' => $quiz->name,
-                'hidden' => $quizLesson->visible,
-                'calculation_type' => json_encode($quizLesson->grading_method_id),
-                'instance_type' => 'Quiz',
-                'instance_id' => $quiz->id,
-                'lesson_id' => $lesson->id,
-            ]);
-            $categoryOfQuiz->index=GradeCategory::where('parent',$categoryOfQuiz->parent)->max('index')+1;
-            $categoryOfQuiz->save();
-            ///add user grader to each enrolled student in course segment of this grade category
-            $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
-                                        ->where('course',$lesson->course_id)->pluck('user_id');
-            if(count($enrolled_students) > 0){
-                foreach($enrolled_students as $student){
-                    UserGrader::firstOrCreate([
-                        'user_id'   => $student,
-                        'item_type' => 'Category',
-                        'item_id'   => $categoryOfQuiz->id
-                    ],[
-                        'grade'     => null
-                    ]);
-                };  
-            }
-      
-            //update quiz lesson with the id of grade categoey created for quiz
-            $quizLesson->grade_category_id = $categoryOfQuiz->id;
-            $quizLesson->save();
+        $grade_category=GradeCategory::find($quizLesson->grade_category_id);
+        //creating grade category for quiz
+        $categoryOfQuiz = GradeCategory::create([
+            'course_id' => $lesson->course_id,
+            'parent' => $grade_category->id,
+            'name' => $quiz->name,
+            'hidden' => $quizLesson->visible,
+            'calculation_type' => json_encode($quizLesson->grading_method_id),
+            'instance_type' => 'Quiz',
+            'instance_id' => $quiz->id,
+            'lesson_id' => $lesson->id,
+        ]);
+
+        ///add user grader to each enrolled student in course segment of this grade category
+        $enrolled_students = Enroll::where('role_id' , 3)->whereIn('group',$lesson->shared_classes->pluck('id'))
+                                    ->where('course',$lesson->course_id)->pluck('user_id');
+        if(count($enrolled_students) > 0){
+            foreach($enrolled_students as $student){
+                UserGrader::firstOrCreate([
+                    'user_id'   => $student,
+                    'item_type' => 'Category',
+                    'item_id'   => $categoryOfQuiz->id
+                ],[
+                    'grade'     => null
+                ]);
+            };  
+        }
+    
+        //update quiz lesson with the id of grade categoey created for quiz
+        $quizLesson->grade_category_id = $categoryOfQuiz->id;
+        $quizLesson->save();
+
+        LessonComponent::firstOrCreate([
+            'lesson_id' => $lesson->id,
+            'comp_id'   => $quiz->id,
+            'module'    => 'QuestionBank',
+            'model'     => 'quiz',
+            'course_id' =>  $lesson->course_id,
+            'visible' => $quizLesson->visible,
+            'index'     => LessonComponent::getNextIndex($lesson->id)
+        ]);
     }
 
     /**
@@ -107,6 +117,23 @@ class QuizLessonObserver
                     'lesson_id' => $quizLesson->lesson_id
                 ]);
             }
+
+            $LessonComponent = LessonComponent::where('comp_id',$quizLesson->quiz_id)->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('model' , 'quiz')->first();
+            if(isset($LessonComponent)){
+                $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$quizLesson->getOriginal('lesson_id'))->where('comp_id',$quizLesson->quiz_id)
+                ->where('model' , 'quiz')->first();
+                LessonComponent::where('lesson_id',$quizLesson->getOriginal('lesson_id'))
+                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+                $LessonComponent->update([
+                    'lesson_id' => $quizLesson->lesson_id,
+                    'comp_id' => $quiz->id,
+                    'module' => 'QuestionBank',
+                    'model' => 'quiz',
+                    'visible' => $quizLesson->visible,
+                    'index' => LessonComponent::getNextIndex($quizLesson->lesson_id)
+                ]);
+            }
+
 
             $this->report->calculate_course_progress($course_id);
         }

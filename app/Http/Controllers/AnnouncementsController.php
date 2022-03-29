@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Input;
 
 class AnnouncementsController extends Controller
 {
-
     protected $chain;
 
     /**
@@ -174,13 +173,11 @@ class AnnouncementsController extends Controller
             
             $enrolls->where('user_id','!=' ,Auth::id());
 
-            if(isset($chain['roles']) && count($chain['roles']) > 0){
+            if(isset($chain['roles']) && count($chain['roles']) > 0)
                 $enrolls->whereIn('role_id',$chain['roles']);
-            }
 
-            if(!isset($chain['roles'])){
+            if(!isset($chain['roles']))
                 $enrolls->where('role_id','!=', 1 );
-            }
 
             // to get users that on my chain
             $query_course=$query->where('user_id',Auth::id())->pluck('course');

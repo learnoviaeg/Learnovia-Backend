@@ -108,8 +108,13 @@ class TypesController extends Controller
         $AC = AcademicType::Find($id);
         $AC->update($req->all());
         $AC->save();
+<<<<<<< HEAD
         return 'updated';
         return HelperController::api_response_format(200, AcademicType::paginate(HelperController::GetPaginate($req),__('messages.type.update')));
+=======
+
+        return HelperController::api_response_format(200, AcademicType::with('year')->paginate(HelperController::GetPaginate($req)),__('messages.type.update'));
+>>>>>>> development
     }
 
     /**

@@ -3,13 +3,18 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Scopes\IndexScope;
 use stdClass;
 
 class GradeCategory extends Model
 {
-
     protected $fillable = ['name', 'course_id', 'parent','index', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,'scale_id',
             'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
+    
+    protected $dispatchesEvents = [
+        'created' => \App\Events\CreatedGradeCatEvent::class,
+    ];
+
     public function Child()
     {
         if(isset($GLOBALS['user_id']))
@@ -22,10 +27,12 @@ class GradeCategory extends Model
     {
         return $this->hasOne('App\GradeCategory', 'id', 'parent');
     }
+
     public function course()
     {
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
+
     public function GradeItems()
     {
         if(isset($GLOBALS['user_id']))
@@ -49,6 +56,7 @@ class GradeCategory extends Model
     {
         return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');
     }
+
     public function getCalculationTypeAttribute($value)
     {
         $content= json_decode($value);
@@ -64,5 +72,11 @@ class GradeCategory extends Model
     public function scale()
     {
         return $this->belongsTo('App\scale', 'scale_id', 'id');
+    }
+
+    public static function boot() 
+    {
+        parent::boot();
+        static::addGlobalScope(new IndexScope);
     }
 }

@@ -27,7 +27,7 @@ class file extends Model
 
     public function FileLesson()
     {
-        return $this->belongsTo('Modules\UploadFiles\Entities\FileLesson', 'id', 'file_id');
+        return $this->hasMany('Modules\UploadFiles\Entities\FileLesson');
     }
 
     public function user()
@@ -42,6 +42,7 @@ class file extends Model
         return 'https://docs.google.com/viewer?url=' .url(Storage::url($this->attributes['url2']));
       }
 
+<<<<<<< HEAD
       // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -83,4 +84,14 @@ class file extends Model
         return null;
     }
     // end function get name and value attribute
+=======
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'file');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\FileLesson', 'file_id' , 'id' , 'id' , 'id' );
+    }
+>>>>>>> development
 }
