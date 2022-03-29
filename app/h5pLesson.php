@@ -14,7 +14,8 @@ class h5pLesson extends Model
         'start_date' ,
         'due_date',
         'user_id',
-        'seen_number'
+        'seen_number',
+        'restricted'
     ];
     protected $appends = ['user_seen_number'];
 
@@ -42,5 +43,9 @@ class h5pLesson extends Model
 
     public function h5pContent(){
         return $this->belongsTo('Djoudi\LaravelH5p\Eloquents\H5pContent','content_id');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'h5p_content');
     }
 }

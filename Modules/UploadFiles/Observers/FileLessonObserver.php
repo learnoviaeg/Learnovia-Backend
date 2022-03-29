@@ -45,6 +45,7 @@ class FileLessonObserver
                 'model'     => 'file',
                 'course_id' => $course_id,
                 'visible'   => $fileLesson->visible,
+                'publish_date' => $fileLesson->publish_date,
             ], [
                 'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
                 ]);
@@ -96,6 +97,7 @@ class FileLessonObserver
                                     'module' => 'UploadFiles',
                                     'model' => 'file',
                                     'visible' => $fileLesson->visible,
+                                    'publish_date' => $fileLesson->publish_date,
                                     'index' => LessonComponent::getNextIndex($fileLesson->lesson_id)
                                 ]);
             }
@@ -125,6 +127,12 @@ class FileLessonObserver
         }
         if($all > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
+
+        LessonComponent::where('comp_id',$fileLesson->media_id)
+            ->where('lesson_id',$fileLesson->lesson_id)
+            ->where('module','UploadFiles')
+            ->where('model' , 'file')
+            ->delete();
     }
 
     /**

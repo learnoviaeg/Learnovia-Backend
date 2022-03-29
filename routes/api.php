@@ -462,6 +462,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('attempts/{id}', 'AttemptsController@update');
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
 
+    Route::post('assignments/update/{id}', 'AssignmentController@update')->middleware(['permission:assignment/update']);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
@@ -473,12 +474,14 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('duplicate_enroll', 'CalendarsController@delete_duplicated_enroll');
 
     Route::get('get-materials', 'MaterialsController@getMaterials');
-    Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers');
-    Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers');
-    Route::get('getQuizAssignedUsers', 'QuizzesController@getQuizAssignedUsers');
-    Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers');
-    Route::get('getAssignmentAssignedUsers', 'AssignmentController@getAssignmentAssignedUsers');
-    Route::post('editAssignmentAssignedUsers', 'AssignmentController@editAssignmentAssignedUsers');
+    Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::post('editMaterialAssignedUsers', 'MaterialsController@editMaterialAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::get('getQuizAssignedUsers', 'QuizzesController@getQuizAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::post('editQuizAssignedUsers', 'QuizzesController@editQuizAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::get('getAssignmentAssignedUsers', 'AssignmentController@getAssignmentAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::post('editAssignmentAssignedUsers', 'AssignmentController@editAssignmentAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::post('editH5pAssignedUsers', 'H5PLessonController@editH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
+    Route::get('getH5pAssignedUsers', 'H5PLessonController@getH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
 
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');

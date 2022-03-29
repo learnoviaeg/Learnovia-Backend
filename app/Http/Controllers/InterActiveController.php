@@ -71,13 +71,13 @@ class InterActiveController extends Controller
         if($request->user()->can('site/course/student')){
             $h5p_lessons
             ->where('visible',1)
-            ->where('publish_date' ,'<=', Carbon::now());
-            // ->where(function($query) {                //Where accessible
-            //     $query->doesntHave('h5pContent.courseItem')
-            //         ->orWhereHas('h5pContent.courseItem.courseItemUsers', function (Builder $query){
-            //             $query->where('user_id', Auth::id());
-            //         });
-            // });
+            ->where('publish_date' ,'<=', Carbon::now())
+            ->where(function($query) {                //Where accessible
+                $query->doesntHave('courseItem')
+                ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                    $query->where('user_id', Auth::id());
+                });
+            }); 
         }
 
         if($count == 'count'){

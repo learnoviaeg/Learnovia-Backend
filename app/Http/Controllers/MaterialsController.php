@@ -369,14 +369,20 @@ class MaterialsController extends Controller
             'id' => 'required|exists:materials,id',
         ]);
 
-        $material = Material::with(['lesson', 'item.courseItem.courseItemUsers'])->find($request->id);
+        $material = Material::find($request->id);
 
-        $result['material_classes'] =  $material->lesson->shared_classes->pluck('id');
+        $items=Material::where('item_id',$material->item_id)->where('type',$material->type)->
+            with(['lesson', 'item.courseItem.courseItemUsers']);
+        foreach($items->get() as $item){
+            if($item->lesson->shared_lesson ==1)
+                $result['material_classes']= $item->lesson->shared_classes->pluck('id');
+            else
+                $result['material_classes'][]= $item->lesson->shared_classes->pluck('id')->first();
+        }
 
-        // $result['restricted'] = false;
         $result['restricted'] = $material->restricted;
-        if(isset($material['item']->courseItem)){
 
+        if(isset($material['item']->courseItem)){
             $courseItemUsers = $material['item']->courseItem->courseItemUsers;
             foreach($courseItemUsers as $user)
                 $result['assigned_users'][] = $user->user_id;
@@ -394,7 +400,8 @@ class MaterialsController extends Controller
 
         $material = Material::find($request->id);
         if(isset($request->users_ids))
-            Material::where('id',$request->id)->update(['restricted',1]);
+            Material::where('type',$material->type)->where('item_id',$material->item_id)->update(['restricted'=>1]);
+
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);
     }

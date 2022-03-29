@@ -337,8 +337,7 @@ class MediaController extends Controller
         if ($request->filled('description'))
             $media->description = $request->description;
 
-        if ($request->filled('name'))
-            $media->name = $request->name;
+        $media->update (['name' => isset($request->name) ? $request->name :$media->name]);
         $media->save();
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
