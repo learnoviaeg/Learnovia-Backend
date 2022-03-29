@@ -26,7 +26,6 @@ class page extends Model
         return $value->getOriginal();
     }
 
-<<<<<<< HEAD
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -68,7 +67,7 @@ class page extends Model
         return null;
     }
     // end function get name and value attribute
-=======
+    
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'page');
     }
@@ -77,5 +76,5 @@ class page extends Model
     {
         return $this->hasManyThrough('App\Lesson' ,'Modules\Page\Entities\pageLesson', 'page_id' , 'id' , 'id' , 'id' );
     }
->>>>>>> development
+    
 }

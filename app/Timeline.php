@@ -106,7 +106,6 @@ class Timeline extends Model
         return $this->belongsTo('App\Level');
     }
 
-<<<<<<< HEAD
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -178,9 +177,7 @@ class Timeline extends Model
         return $course_id;
     }
     // end function get name and value attribute
-=======
     public function item(){
         return $this->morphTo('item' , 'type', 'item_id');
     }
->>>>>>> development
 }

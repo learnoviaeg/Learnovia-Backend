@@ -8,13 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class quiz extends Model
 {
-<<<<<<< HEAD
     use Auditable, SoftDeletes;
 
-    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit'];
-=======
+    
     protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit','restricted'];
->>>>>>> development
+
     protected $hidden = [
         'created_at', 'updated_at'
     ];
@@ -64,7 +62,7 @@ class quiz extends Model
         return $this->belongsTo('App\User','created_by');
     }
 
-<<<<<<< HEAD
+
      // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -116,7 +114,7 @@ class quiz extends Model
         return $course_id;
     }
     // end function get name and value attribute
-=======
+
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'quiz');
     }
@@ -127,5 +125,4 @@ class quiz extends Model
             return True;
         return False;
     }
->>>>>>> development
 }

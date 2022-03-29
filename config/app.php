@@ -167,11 +167,8 @@ return [
          */
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Chumper\Zipper\ZipperServiceProvider::class,
-<<<<<<< HEAD
-=======
         
->>>>>>> development
-        // Djoudi\LaravelH5p\LaravelH5pServiceProvider::class,
+       // Djoudi\LaravelH5p\LaravelH5pServiceProvider::class,
 
         /*
          * Application Service Providers...

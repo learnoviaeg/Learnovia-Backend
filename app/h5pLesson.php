@@ -45,7 +45,6 @@ class h5pLesson extends Model
         return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
     }
 
-<<<<<<< HEAD
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
@@ -87,7 +86,6 @@ class h5pLesson extends Model
         return null;
     }
     // end function get name and value attribute
-=======
     public function h5pContent(){
         return $this->belongsTo('Djoudi\LaravelH5p\Eloquents\H5pContent','content_id');
     }
@@ -95,5 +93,4 @@ class h5pLesson extends Model
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'h5p_content');
     }
->>>>>>> development
 }
