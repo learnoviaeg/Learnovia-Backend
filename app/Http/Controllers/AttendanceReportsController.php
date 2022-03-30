@@ -182,10 +182,10 @@ class AttendanceReportsController extends Controller
                 }])->first();
 
         if($logs->all_sessions_count > 0){
-            $logs->Present =  ($logs->Present / $logs->all_sessions_count)*100;
-            $logs->Late =  ($logs->Late / $logs->all_sessions_count)*100;
-            $logs->Absent =  ($logs->Absent / $logs->all_sessions_count)*100;
-            $logs->Excuse =  ($logs->Excuse / $logs->all_sessions_count)*100;
+            $logs->Present =  round(($logs->Present / $logs->all_sessions_count)*100 , 2);
+            $logs->Late =  round(($logs->Late / $logs->all_sessions_count)*100 , 2);
+            $logs->Absent =  round(($logs->Absent / $logs->all_sessions_count)*100 , 2);
+            $logs->Excuse =  round(($logs->Excuse / $logs->all_sessions_count)*100 ,2);
         }
       
         return response()->json(['message' => null , 'body' => $logs], 200);
