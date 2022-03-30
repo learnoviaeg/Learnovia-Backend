@@ -154,7 +154,12 @@ class AttendanceReportsController extends Controller
         };
         $sessions_ids = AttendanceSession::select('id')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))->where('taken' , 1)
                         ->whereHas('attendance' , $attendance_type_callback)->pluck('id');
-        $logs = User::whereId(Auth::id())->select('id')->withCount('attendanceLogs as all_sessions_count')
+        $logs = User::whereId(Auth::id())->select('id')
+                ///counting all sessions  
+                ->withCount(['attendanceLogs as all_sessions_count'=> function($q) use ($request, $sessions_ids){
+                    $q->whereNotNull('status');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
                 ///counting Absent  
                 ->withCount(['attendanceLogs as Absent'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Absent');
