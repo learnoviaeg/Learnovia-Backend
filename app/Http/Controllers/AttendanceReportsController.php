@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\AttendanceSession;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\User;
+use App\Paginate;
 
 class AttendanceReportsController extends Controller
 {
@@ -153,36 +154,36 @@ class AttendanceReportsController extends Controller
                         ->whereHas('attendance' , $attendance_type_callback)->pluck('id');
         $logs = User::whereId(Auth::id())->select('id')
                 ///counting all sessions  
-                ->withCount(['attendanceLogs as all_sessions_count'=> function($q) use ($request, $sessions_ids){
+                ->withCount(['attendanceLogs as taken_sessions_count'=> function($q) use ($request, $sessions_ids){
                     $q->whereNotNull('status');
                     $q->whereIn('session_id',$sessions_ids);
                 }])
                 ///counting Absent  
-                ->withCount(['attendanceLogs as Absent'=> function($q) use ($request, $sessions_ids){
+                ->withCount(['attendanceLogs as Absent_count'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Absent');
                     $q->whereIn('session_id',$sessions_ids);
                 }])
                 ///counting Late
-                ->withCount(['attendanceLogs as Late'=> function($q) use ($request, $sessions_ids){
+                ->withCount(['attendanceLogs as Late_count'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Late');
                     $q->whereIn('session_id',$sessions_ids);
                 }])
                 ///counting Present
-                ->withCount(['attendanceLogs as Present'=> function($q) use ($request, $sessions_ids){
+                ->withCount(['attendanceLogs as Present_count'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Present');
                     $q->whereIn('session_id',$sessions_ids);
                 }])
                 ///counting Excuse
-                ->withCount(['attendanceLogs as Excuse'=> function($q) use ($request, $sessions_ids){
+                ->withCount(['attendanceLogs as Excuse_count'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Excuse');
                     $q->whereIn('session_id',$sessions_ids);
                 }])->first();
 
-        if($logs->all_sessions_count > 0){
-            $logs->Present =  round(($logs->Present / $logs->all_sessions_count)*100 , 2);
-            $logs->Late =  round(($logs->Late / $logs->all_sessions_count)*100 , 2);
-            $logs->Absent =  round(($logs->Absent / $logs->all_sessions_count)*100 , 2);
-            $logs->Excuse =  round(($logs->Excuse / $logs->all_sessions_count)*100 ,2);
+        if($logs->taken_sessions_count > 0){
+            $logs->Present =  round(($logs->Present_count / $logs->taken_sessions_count)*100 , 2);
+            $logs->Late =  round(($logs->Late_count / $logs->taken_sessions_count)*100 , 2);
+            $logs->Absent =  round(($logs->Absent_count / $logs->taken_sessions_count)*100 , 2);
+            $logs->Excuse =  round(($logs->Excuse_count / $logs->taken_sessions_count)*100 ,2);
         }
       
         return response()->json(['message' => null , 'body' => $logs], 200);
@@ -200,6 +201,8 @@ class AttendanceReportsController extends Controller
             'search' => 'string'
         ]);
 
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
 
         $attendance_type_callback = function ($query) use ($request ) {
@@ -259,9 +262,18 @@ class AttendanceReportsController extends Controller
             $attendanceSession->where('from','>=', $request->from);
 
         if(isset($request->to))
-            $attendanceSession->where('to','<', $request->to);
+            $attendanceSession->where('to','<', $request->to); 
+
+
+            $result['last_page'] = Paginate::allPages($attendanceSession->count(),$paginate);
+            $result['total']= $attendanceSession->count();
+    
+            $attendanceSessionReport=$attendanceSession->skip(($page)*$paginate)->take($paginate)->get();
+            $result['data'] =  $attendanceSessionReport;
+            $result['current_page']= $page + 1;
+            $result['per_page']= count($result['data']);
                     
-        return response()->json(['message' => null , 'body' => $attendanceSession->get() ], 200);
+        return response()->json(['message' => null , 'body' => $result], 200);
 
     }
 }
