@@ -267,15 +267,17 @@ class H5PLessonController extends Controller
             'id' => 'required|exists:h5p_lessons,content_id',
         ]);
 
-        $h5pLessons = h5pLesson::where('content_id', $request->id)->with(['Lesson', 'courseItem.courseItemUsers'])->get();
-        foreach($h5pLessons as $h5pLesson){
-            foreach($h5pLesson->Lesson->shared_classes->pluck('id') as $class_id)
-                    $classes[] = $class_id;
+        $h5pLessons = h5pLesson::where('content_id', $request->id)->with(['lesson', 'courseItem.courseItemUsers'])->get();
+
+        foreach($h5pLessons as $lesson){
+            if($lesson->lesson->shared_lesson ==1)
+                $result['h5p_classes']= $lesson->lesson->shared_classes->pluck('id');
+            else
+                $result['h5p_classes'][]= $lesson->lesson->shared_classes->pluck('id')->first();
         }
-        $result['h5p_classes'][] = array_unique($classes);
         $result['restricted'] = $h5pLessons[0]->restricted;
-        if(isset($h5pLessons['courseItem'])){
-            $courseItemUsers = $h5pLessons['courseItem']->courseItemUsers;
+        if(isset($h5pLessons[0]['courseItem'])){
+            $courseItemUsers = $h5pLessons[0]['courseItem']->courseItemUsers;
             foreach($courseItemUsers as $user)
                 $result['assigned_users'][] = $user->user_id;
         }
