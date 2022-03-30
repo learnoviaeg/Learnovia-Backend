@@ -245,4 +245,15 @@ class User extends Authenticatable
         return null;
     }
     // end function get name and value attribute
+
+    public function attendanceLogs()
+    { 
+        return $this->hasMany('App\SessionLog','user_id','id');
+    }
 }
+
+
+
+
+
+

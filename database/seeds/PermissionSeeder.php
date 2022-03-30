@@ -421,6 +421,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-weekly', 'title' => 'Weekly Attendance Report','dashboard' => 0,'icon'=> 'Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/user_report', 'title' => 'attendance user report']);
 
         //Bigbluebutton permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/create','title' => 'create meeting']);

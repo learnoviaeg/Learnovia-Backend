@@ -43,9 +43,6 @@ class MediaLessonObserver
                 'comp_id'   => $mediaLesson->media_id,
                 'module'    => 'UploadFiles',
                 'model'     => 'media',
-                'course_id' => $course_id,
-                'visible'   => $mediaLesson->visible,
-                'publish_date' => $mediaLesson->publish_date,
                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
             ]);
 

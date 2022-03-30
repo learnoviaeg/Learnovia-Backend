@@ -93,4 +93,11 @@ class h5pLesson extends Model
     public function courseItem(){
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'h5p_content');
     }
+
+    public function getRestrictedAttribute()
+    {
+        if($this->attributes['restricted'])
+            return True;
+        return False;
+    }
 }
