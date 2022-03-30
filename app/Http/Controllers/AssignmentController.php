@@ -449,8 +449,12 @@ class AssignmentController extends Controller
 
         $assignment = Assignment::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
 
-        foreach($assignment->Lesson as $lesson)
-            $result['assignment_classes'][]= $lesson->shared_classes->pluck('id')->first();
+        foreach($assignment->Lesson as $lesson){
+            if($lesson->shared_lesson ==1)
+                $result['assignment_classes']= $lesson->shared_classes->pluck('id');
+            else
+                $result['assignment_classes'][]= $lesson->shared_classes->pluck('id')->first();
+        }
 
         $result['restricted'] = $assignment->restricted;
         if(isset($assignment['courseItem'])){
