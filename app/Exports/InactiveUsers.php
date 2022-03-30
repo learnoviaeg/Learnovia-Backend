@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class InactiveUsers implements FromCollection, WithHeadings
 {
     use Exportable;
+    
     protected $fields = ['fullname','username','since','status'];
 
     function __construct($report) {
@@ -21,6 +22,7 @@ class InactiveUsers implements FromCollection, WithHeadings
     public function collection()
     {
         $reports=collect();
+
         foreach ($this->report as $user) {
             
             $reports->push([

@@ -24,7 +24,7 @@ class createdLogsJob implements ShouldQueue
      */
     public function __construct($request)
     {
-        $this->req=$request;
+        $this->req = $request;
     }
 
     /**
@@ -34,12 +34,29 @@ class createdLogsJob implements ShouldQueue
      */
     public function handle()
     {
+        // addednew
+        // $namespace = '\\App\\'; 
+        // $entity = substr(get_class($this->req),strripos(get_class($this->req),'\\')+1);
+        // $model = $namespace . $entity;
+        // $year_get_value = $model::get_year_name($this->req, null);
+        // addednew
+
         $user = User::find(Auth::id());
-        $log=Log::create([
-            'user' => isset($user) ? $user->username : 'installer',
-            'action' => 'created',
-            'model' => substr(get_class($this->req),strripos(get_class($this->req),'\\')+1),
-            'data' => serialize($this->req),
+        $log  = Log::create([
+            'user'       => isset($user) ? $user->username : 'installer',
+            'action'     => 'created',
+            'model'      => substr(get_class($this->req),strripos(get_class($this->req),'\\')+1),
+            'data'       => serialize($this->req),
+            // addednew
+            'model_id'   => $this->req->id,
+            'user_id'    => isset($user) ? $user->id : 0,
+            'year_id'    => null, 
+            'type_id'    => null, 
+            'level_id'   => null, 
+            'class_id'   => null, 
+            'segment_id' => null, 
+            'course_id'  => null,
+            // addednew
         ]);
     }
 }

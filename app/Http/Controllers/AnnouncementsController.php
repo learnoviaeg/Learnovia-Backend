@@ -169,7 +169,7 @@ class AnnouncementsController extends Controller
 
             //get users that should receive the announcement
             $enrolls = $this->chain->getEnrollsByChain($chain_request);
-            $query=clone $enrolls;
+            $query   = clone $enrolls;
             
             $enrolls->where('user_id','!=' ,Auth::id());
 

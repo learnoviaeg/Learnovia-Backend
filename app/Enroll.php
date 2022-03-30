@@ -4,9 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\Traits\Auditable;
 
 class Enroll extends Model
 {
+    use Auditable;
+
     protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'group' ,'year', 'type', 'segment', 'course'];
 
     protected $dispatchesEvents = [
@@ -76,4 +79,118 @@ class Enroll extends Model
     {
         return $this->belongsToMany('App\Topic' , 'topic_id' , 'id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $year_id = [intval($new['year'])];
+        }else{
+            if ($old['year'] == $new['year']) {
+                $year_id = [intval($new['year'])];
+            }else{
+                $year_id = [intval($old['year']), intval($new['year'])];
+            }
+        }
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $type_id = [intval($new['type'])];
+        }else{
+            if ($old['type'] == $new['type']) {
+                $type_id = [intval($new['type'])];
+            }else{
+                $type_id = [intval($old['type']), intval($new['type'])];
+            }
+        }
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $level_id = [intval($new['level'])];
+        }else{
+            if ($old['level'] == $new['level']) {
+                $level_id = [intval($new['level'])];
+            }else{
+                $level_id = [intval($old['level']), intval($new['level'])];
+            }
+        }
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $class_id = [intval($new['group'])];
+        }else{
+            if ($old['group'] == $new['group']) {
+                $class_id = [intval($new['group'])];
+            }else{
+                $class_id = [intval($old['group']), intval($new['group'])];
+            }
+        }
+        return $class_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $segment_id = [intval($new['segment'])];
+        }else{
+            if ($old['segment'] == $new['segment']) {
+                $segment_id = [intval($new['segment'])];
+            }else{
+                $segment_id = [intval($old['segment']), intval($new['segment'])];
+            }
+        }
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+         $old_count = count($old);
+        if ($old_count == 0) {
+            $courses = $new['course']->pluck('id');
+        }else{
+                $v1      = $old['course'];
+                $first   = str_replace("\"", "", $v1);
+                $r       = array($first);
+                $move1   = trim($r[0], "[");
+                $move2   = trim($move1, "]");
+                $v1_edit = explode(",", $move2); 
+                $intvals = array();
+                foreach ($v1_edit as $key => $value) {
+                    array_push($intvals, intval($value));
+                }
+
+            if ($intvals == $new['course']->pluck('id')->toArray()) {
+                $courses = $new['course']->pluck('id');
+            }else{
+                $v2 = $new['course']->pluck('id')->toArray();
+                $courses = array_merge($intvals, $v2);
+            }
+        }
+        return $courses;
+    }
+    // end function get name and value attribute
 }

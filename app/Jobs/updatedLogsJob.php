@@ -34,7 +34,15 @@ class updatedLogsJob implements ShouldQueue
      */
     public function handle()
     {
-        $arr=array();
+        // addednew
+        // $namespace = '\\App\\'; 
+        // $entity = substr(get_class($this->req),strripos(get_class($this->req),'\\')+1);
+        // $model = $namespace . $entity;
+        //$year_get_value = $model::get_year_name($this->req);
+        // $year_get_value = $model::get_year_name($this->req->getOriginal(), $this->req);
+        // addednew
+        
+        $arr = array();
         $arr['before']=$this->req->getOriginal();
         $arr['after']=$this->req;
 
@@ -45,6 +53,18 @@ class updatedLogsJob implements ShouldQueue
             'action' => 'updated',
             'model' => substr(get_class($this->req),strripos(get_class($this->req),'\\')+1),
             'data' => serialize($arr),
+
+            // addednew
+            'model_id'   => $this->req->id,
+            'user_id'    => isset($user) ? $user->id : 0,
+            'year_id'    => null,
+            'type_id'    => null, 
+            'level_id'   => null,
+            'class_id'   => null, 
+            'segment_id' => null, 
+            'course_id'  => null,
+            // addednew
+
         ]);
     }
 }

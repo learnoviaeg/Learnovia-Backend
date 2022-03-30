@@ -105,6 +105,24 @@ class LessonController extends Controller
     */
     public function updateLesson(Request $request)
     {
+        /*$v = "[\"71\",\"72\"]";
+        $first = str_replace("\"", "", $v);
+        $r = array($first);
+        $move1 = trim($r[0], "[");
+        $move2 = trim($move1, "]");
+        $our_array = explode(",", $move2);
+        $unique = [];
+        return \App\Classes::whereIn('id', $our_array)->get();
+        return $our_array; */
+       /* $n1 = \App\AuditLog::where('id', 45)->select('class_id')->first()->class_id;
+        $n2 = \App\AuditLog::where('id', 46)->select('class_id')->first()->class_id;
+        if ($n1 == $n2) {
+            return 'aaa';
+        }else{
+            return 'bbb';
+        } */
+        // return \App\Classes::whereIn('id', $n)->get();
+
         $request->validate([
             'name' => 'nullable',
             'id'  => 'required|exists:lessons,id',
