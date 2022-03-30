@@ -39,31 +39,28 @@ class AttendanceReportsController extends Controller
 
         $report=[];
         $reports=[];
-        $sessionDay=[];
         if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
-            $classes=$sessions->pluck('class_id');
+            $classes=$sessions->pluck('class_id')->unique();
             if(isset($request->classes))
                 $classes=$request->classes;
-            $i=0;
-            $rr=[];
-            foreach($sessions->pluck('start_date')->unique() as $session){
-                $report['day']=Carbon::parse($session)->format('l');
-                $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
-                if(in_array($report['day'], array_column($reports, 'day')))
-                    continue;
 
-                // kol l session lly fel youm da
-                // kol l session elly feha 8eyab
-                foreach($sessions->pluck('class_id')->unique() as $class)
-                {
+            foreach($sessions->pluck('start_date')->unique() as $session){
+                // dd($sessions->pluck('start_date')->sortBy('start_date')->unique());
+                $i=0;
+                $rr=[];
+                foreach($classes as $class){
+                    // kol l session lly fel youm da
                     $countSessionDay=$sessions->where('start_date',$session)->where('class_id',$class)->pluck('id');
                     $all=SessionLog::whereIn('session_id',$countSessionDay);
                     $clo=clone $all;
+                    // kol l session elly feha 8eyab
                     $countStatus =$all->where('status',$request->status)->count();
 
                     $class_name=Classes::find($class)->name;
                     if(!in_array($class_name, array_column($rr, 'class_name'))){
+                        $report['day']=Carbon::parse($session)->format('l');
+                        $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
                         $rr[$i]['class_name']=$class_name;
                         $rr[$i]['precentage']=0;
                         if($clo->count() > 0)
