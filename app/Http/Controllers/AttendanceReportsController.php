@@ -7,6 +7,10 @@ use App\Repositories\ChainRepositoryInterface;
 use App\SessionLog;
 use Carbon\Carbon;
 use App\Classes;
+use Illuminate\Support\Facades\Auth;
+use App\AttendanceSession;
+use Modules\Attendance\Entities\AttendanceLog;
+use App\User;
 
 class AttendanceReportsController extends Controller
 {
@@ -35,31 +39,28 @@ class AttendanceReportsController extends Controller
 
         $report=[];
         $reports=[];
-        $sessionDay=[];
         if($request->attendance_type == 'Daily' && $request->user()->can('attendance/report-daily'))
         {
-            $classes=$sessions->pluck('class_id');
+            $classes=$sessions->pluck('class_id')->unique();
             if(isset($request->classes))
                 $classes=$request->classes;
-            $i=0;
-            $rr=[];
-            foreach($sessions->pluck('start_date')->unique() as $session){
-                $report['day']=Carbon::parse($session)->format('l');
-                $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
-                if(in_array($report['day'], array_column($reports, 'day')))
-                    continue;
 
-                // kol l session lly fel youm da
-                // kol l session elly feha 8eyab
-                foreach($sessions->pluck('class_id')->unique() as $class)
-                {
+            foreach($sessions->pluck('start_date')->unique() as $session){
+                // dd($sessions->pluck('start_date')->sortBy('start_date')->unique());
+                $i=0;
+                $rr=[];
+                foreach($classes as $class){
+                    // kol l session lly fel youm da
                     $countSessionDay=$sessions->where('start_date',$session)->where('class_id',$class)->pluck('id');
                     $all=SessionLog::whereIn('session_id',$countSessionDay);
                     $clo=clone $all;
+                    // kol l session elly feha 8eyab
                     $countStatus =$all->where('status',$request->status)->count();
 
                     $class_name=Classes::find($class)->name;
                     if(!in_array($class_name, array_column($rr, 'class_name'))){
+                        $report['day']=Carbon::parse($session)->format('l');
+                        $report['date']=Carbon::parse($session)->format('Y-m-d H:i');
                         $rr[$i]['class_name']=$class_name;
                         $rr[$i]['precentage']=0;
                         if($clo->count() > 0)
@@ -134,5 +135,128 @@ class AttendanceReportsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function user_attendance_report(Request $request){
+
+        $request->validate([
+            'type' => 'required|in:Per Session,Daily'
+        ]);
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
+
+        $attendance_type_callback = function ($query) use ($request ) {
+                $query->where('attendance_type', $request->type);
+        };
+        $sessions_ids = AttendanceSession::select('id')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))->where('taken' , 1)
+                        ->whereHas('attendance' , $attendance_type_callback)->pluck('id');
+        $logs = User::whereId(Auth::id())->select('id')->withCount('attendanceLogs as all_sessions_count')
+                ///counting Absent  
+                ->withCount(['attendanceLogs as Absent'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Absent');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Late
+                ->withCount(['attendanceLogs as Late'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Late');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Present
+                ->withCount(['attendanceLogs as Present'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Present');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
+                ///counting Excuse
+                ->withCount(['attendanceLogs as Excuse'=> function($q) use ($request, $sessions_ids){
+                    $q->where('status','Excuse');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])->first();
+
+        if($logs->all_sessions_count > 0){
+            $logs->Present =  ($logs->Present / $logs->all_sessions_count)*100;
+            $logs->Late =  ($logs->Late / $logs->all_sessions_count)*100;
+            $logs->Absent =  ($logs->Absent / $logs->all_sessions_count)*100;
+            $logs->Excuse =  ($logs->Excuse / $logs->all_sessions_count)*100;
+        }
+      
+        return response()->json(['message' => null , 'body' => $logs], 200);
+    }
+
+    public function user_attendance_report_details(Request $request){
+        $request->validate([
+            'type' => 'required|in:Per Session,Daily',
+            'start_date' => 'date',
+            'end_date' => 'date', // filter all session that started before this end_date
+            'from' => 'date_format:H:i',
+            'to' => 'date_format:H:i|after:from',
+            'current' => 'in:month,week,day', //current
+            'filter' => 'integer|between:1,12',
+            'search' => 'string'
+        ]);
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
+
+        $attendance_type_callback = function ($query) use ($request ) {
+                $query->where('attendance_type', $request->type);
+        };
+        $attendanceSession = AttendanceSession::whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))
+                            ->whereHas('attendance' , $attendance_type_callback)
+                            ->with(['attendance' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['class' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['course' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['session_logs' => function ($query) use ($request ) {
+                                $query->where('user_id', Auth::id());
+                                $query->select('session_id','status');
+                            }]);   
+
+        if(isset($request->start_date))
+        $attendanceSession->where('start_date','>=', $request->start_date);
+
+        if(isset($request->end_date))
+            $attendanceSession->where('start_date','<=', $request->end_date);
+
+        if(isset($request->filter))
+            $attendanceSession->whereMonth('start_date', $request->filter);
+
+        if(isset($request->current))
+        {
+            if($request->current == 'day')
+                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'))->whereMonth('start_date',Carbon::now()->format('m'));
+
+            if($request->current == 'week'){
+                // from saterday to friday
+                if(Carbon::now()->format('l') == 'Saturday')
+                    $attendanceSession->where('start_date', '>=', Carbon::now()->addDay(7))
+                        ->where('start_date', '<=', Carbon::now()->addDay(7));
+
+                else
+                    for($i=1;$i<=7;$i++)
+                    {
+                        $day=Carbon::now()->subDay($i)->format('l');
+                        if($day == 'Saturday')
+                            $attendanceSession->where('start_date', '>=', Carbon::now()->subDay($i))
+                                ->where('start_date', '<=', Carbon::now()->subDay($i)->addDay(7));
+                    }
+            }
+
+            if($request->current == 'month')
+                $attendanceSession->whereMonth('start_date', Carbon::now()->format('m'));
+        }
+
+        if(isset($request->from))
+            $attendanceSession->where('from','>=', $request->from);
+
+        if(isset($request->to))
+            $attendanceSession->where('to','<', $request->to);
+                    
+        return response()->json(['message' => null , 'body' => $attendanceSession->get() ], 200);
+
     }
 }

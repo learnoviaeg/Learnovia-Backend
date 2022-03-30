@@ -573,6 +573,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('attendance/status', AttendanceStatusController::class);
     Route::Resource('attendance', AttendanceController::class);
     Route::Resource('session/reports', AttendanceReportsController::class);
+    Route::get('user-attendance-report', 'AttendanceReportsController@user_attendance_report')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
+    Route::get('user-attendance-report-details', 'AttendanceReportsController@user_attendance_report_details')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
+
+    
     Route::Resource('session', AttendanceSessionController::class);
 
     Route::Resource('topic', TopicController::class);
