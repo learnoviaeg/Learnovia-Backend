@@ -185,4 +185,26 @@ class AttendanceReportsController extends Controller
       
         return response()->json(['message' => null , 'body' => $logs], 200);
     }
+
+    public function user_attendance_report_details(Request $request){
+        $request->validate([
+            'type' => 'required|in:Per Session,Daily'
+        ]);
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
+
+        $attendance_type_callback = function ($query) use ($request ) {
+                $query->where('attendance_type', $request->type);
+        };
+        $sessions_ids = AttendanceSession::select('id','name','start_date' , 'from' , 'to' , 'taken')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))
+                        ->whereHas('attendance' , $attendance_type_callback)
+                        ->with(['session_logs' => 
+                        function ($query) use ($request ) {
+                            $query->where('user_id', Auth::id());
+                    }])->get();
+                    
+                    
+        return $sessions_ids;
+
+    }
 }

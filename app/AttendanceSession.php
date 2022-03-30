@@ -42,6 +42,6 @@ class AttendanceSession extends Model
 
     public function session_logs()
     {
-        return $this->hasMany('Modules\Attendance\Entities\AttendanceLog','session_id','id');
+        return $this->hasMany('App\SessionLog','session_id','id');
     }
 }

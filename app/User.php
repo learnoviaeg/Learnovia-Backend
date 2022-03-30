@@ -206,6 +206,6 @@ class User extends Authenticatable
 
     public function attendanceLogs()
     { 
-        return $this->hasMany('Modules\Attendance\Entities\AttendanceLog','student_id','id');
+        return $this->hasMany('App\SessionLog','user_id','id');
     }
 }
