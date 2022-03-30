@@ -65,7 +65,6 @@ class H5PLessonController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
-
     public function create (Request $request)
     {
         $request->validate([
@@ -92,7 +91,7 @@ class H5PLessonController extends Controller
             /////////user restrictions 
             if(isset($request->users_ids)){
                 CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
-                $h5p_lesson->restricted = 1;
+                h5pLesson::where('id',$h5p_lesson->id)->update(['restricted' => 1]);
             }
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);

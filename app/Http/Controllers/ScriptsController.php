@@ -439,4 +439,22 @@ class ScriptsController extends Controller
         }
         return 'Done';
     }
+
+    public function update_publish_date(Request $request)
+    {
+        $assignments=AssignmentLesson::get();
+        foreach($assignments as $assignment)
+        {
+            $assignment->publish_date = $assignment->start_date;
+            $assignment->save();
+        }
+
+        $quizzes = QuizLesson::get();
+        foreach($quizzes as $quiz)
+        {
+            $quiz->publish_date=$quiz->start_date;
+            $quiz->save();
+        }
+        return 'Done';
+    }
 }
