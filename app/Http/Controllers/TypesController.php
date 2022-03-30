@@ -102,10 +102,12 @@ class TypesController extends Controller
             'segment_no' => 'integer',
         ]);
 
+        // $AC = AcademicType::Find($id);
+        // return $AC->getOriginal();
+
         $AC = AcademicType::Find($id);
         $AC->update($req->all());
-        $AC->save();
-
+        $AC->save();    
         return HelperController::api_response_format(200, AcademicType::with('year')->paginate(HelperController::GetPaginate($req)),__('messages.type.update'));
     }
 

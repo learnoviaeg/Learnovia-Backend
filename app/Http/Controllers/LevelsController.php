@@ -104,7 +104,7 @@ class LevelsController extends Controller
         $level->save();
 
         if ($request->filled('type'))
-            Level::where('id',$request->id)->update(['academic_type_id' => $request->type]);
+        $level->update(['academic_type_id' => $request->type]);
                 
         return HelperController::api_response_format(200, Level::paginate(HelperController::GetPaginate($request)), __('messages.level.update'));
     }

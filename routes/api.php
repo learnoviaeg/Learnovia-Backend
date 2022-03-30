@@ -1,4 +1,5 @@
 <?php
+
 Route::get('/' , 'AuthController@site');
 Route::get('testNotification' , 'NotificationController@testNotification');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
@@ -400,6 +401,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
     Route::get('quiz-mark', 'ScriptsController@quiz_total_mark');
     Route::get('grade_items', 'ScriptsController@grade_details_of_questions');
+    Route::get('update_publish_date', 'ScriptsController@update_publish_date');
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
     Route::get('update_publish_date', 'ScriptsController@update_publish_date');
@@ -595,6 +597,15 @@ Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
+
+    // added ahmed
+    Route::group(['prefix' => 'v1'], function () {
+    // logs filter with user and action 
+        Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFiltertionController@logs_filteration')->name('logs_filteration');
+        Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
+
+    });
+    // added ahmed
 });
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {

@@ -7,6 +7,7 @@ use App\Course;
 use App\Segment;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
 use App\LetterDetails;
@@ -428,6 +429,7 @@ class ScriptsController extends Controller
         }
         return 'done';
     }
+
     public function delete_duplicated_enroll(Request $request)
     {
         $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();

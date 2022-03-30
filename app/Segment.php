@@ -5,11 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
-
+use App\Traits\Auditable;
 
 class Segment extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Auditable;
 
     protected $fillable = ['name','academic_type_id','academic_year_id','start_date','end_date'];
 
@@ -47,4 +47,66 @@ class Segment extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $year_id = [intval($new['academic_year_id'])];
+        }else{
+            if ($old['academic_year_id'] == $new['academic_year_id']) {
+                $year_id = [intval($new['academic_year_id'])];
+            }else{
+                $year_id = [intval($old['academic_year_id']), intval($new['academic_year_id'])];
+            }
+        }
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $type_id = [intval($new['academic_type_id'])];
+        }else{
+            if ($old['academic_type_id'] == $new['academic_type_id']) {
+                $type_id = [intval($new['academic_type_id'])];
+            }else{
+                $type_id = [intval($old['academic_type_id']), intval($new['academic_type_id'])];
+            }
+        }
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

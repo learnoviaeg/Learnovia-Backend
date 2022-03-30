@@ -50,7 +50,7 @@ class LogsObserver
         //     'data' => serialize($arr),
         // ]);
 
-        $dispatch=(new updatedLogsJob($req));
+        $dispatch =(new updatedLogsJob($req));
         dispatch($dispatch);
     }
 
@@ -67,7 +67,9 @@ class LogsObserver
             'user' => isset($user) ? $user->username : 'installer',
             'action' => 'deleted',
             'model' => substr(get_class($req),strripos(get_class($req),'\\')+1),
-            'data' => serialize($req),
+            'model_id' => $req->id,
+            'user_id'  => isset($user) ? $user->id : 0,
+            'data'     => serialize($req),
         ]);
 
         // $dispatch=(new deletedLogsJob($req));

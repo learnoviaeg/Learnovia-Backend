@@ -114,12 +114,14 @@ class AC_year_type extends Controller
     {
         $req->validate([
             'name' => 'required',
-            'segment_no' => 'required'
+            'segment_no' => 'required',
+            'academic_year_id' => 'required|integer|exists:academic_years,id', // addednew
         ]);
 
         AcademicType::firstOrCreate([
-            'name' => $req->name,
-            'segment_no' => $req->segment_no
+            'name'             => $req->name,
+            'segment_no'       => $req->segment_no,
+            'academic_year_id' => $req->academic_year_id, // addednew
         ]);
 
         return HelperController::api_response_format(201, AcademicType::paginate(HelperController::GetPaginate($req)), __('messages.type.add'));

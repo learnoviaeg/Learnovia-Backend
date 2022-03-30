@@ -128,7 +128,7 @@ class ClassesController extends Controller
             'level_id' => 'exists:levels,id|required_with:year',
         ]);
 
-        $class = Classes::find($request->id);
+        $class = Classes::find($id);
         $class->update($request->all());
         $class->save();
 
