@@ -179,11 +179,6 @@ class AttendanceReportsController extends Controller
                     $q->whereIn('session_id',$sessions_ids);
                 }])->first();
 
-            $logs->Present =  0;
-            $logs->Late =  0;
-            $logs->Absent =  0;
-            $logs->Excuse =  0;       
-
         if($logs->taken_sessions_count > 0){
             $logs->Present =  round(($logs->Present_count / $logs->taken_sessions_count)*100 , 2);
             $logs->Late =  round(($logs->Late_count / $logs->taken_sessions_count)*100 , 2);
