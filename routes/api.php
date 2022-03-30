@@ -401,6 +401,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
     Route::get('quiz-mark', 'ScriptsController@quiz_total_mark');
     Route::get('grade_items', 'ScriptsController@grade_details_of_questions');
+    Route::get('update_publish_date', 'ScriptsController@update_publish_date');
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
     Route::get('delete-wrong-attempts', 'ScriptsController@deleteWrongAttempts');
     Route::get('shuffled_quizzes', 'ScriptsController@reassign_shuffled_questions');
