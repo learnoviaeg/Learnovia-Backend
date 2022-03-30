@@ -15,7 +15,12 @@ class AttendanceSession extends Model
 
     public function class()
     {
-        return $this->belongsTo('App\classes', 'class_id', 'id');
+        return $this->belongsTo('App\Classes', 'class_id', 'id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo('App\Course', 'course_id', 'id');
     }
 
     public function attendance()

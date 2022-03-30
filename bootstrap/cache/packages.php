@@ -39,17 +39,6 @@
       'PDF' => 'Elibyy\\TCPDF\\Facades\\TCPDF',
     ),
   ),
-  'exatech-group/laravel-h5p' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Djoudi\\LaravelH5p\\LaravelH5pServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'LaravelH5p' => 'Djoudi\\LaravelH5p\\Facades',
-    ),
-  ),
   'fideloper/proxy' => 
   array (
     'providers' => 
@@ -80,18 +69,6 @@
     'providers' => 
     array (
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    ),
-  ),
-  'laravelcollective/html' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Collective\\Html\\HtmlServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Form' => 'Collective\\Html\\FormFacade',
-      'Html' => 'Collective\\Html\\HtmlFacade',
     ),
   ),
   'maatwebsite/excel' => 

@@ -41,10 +41,10 @@ class AuthController extends Controller
             'lastname' => 'required|string'
         ]);
         $user = new User([
-            'username' => User::generateUsername(),
+            'username'  => User::generateUsername(),
             'firstname' => $request->firstname,
-            'lastname' => $request->firstname,
-            'password' => bcrypt($request->password),
+            'lastname'  => $request->firstname,
+            'password'  => bcrypt($request->password),
             'real_password' => $request->password
         ]);
         $user->save();

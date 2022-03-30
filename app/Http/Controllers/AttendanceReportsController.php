@@ -151,7 +151,12 @@ class AttendanceReportsController extends Controller
         };
         $sessions_ids = AttendanceSession::select('id')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))->where('taken' , 1)
                         ->whereHas('attendance' , $attendance_type_callback)->pluck('id');
-        $logs = User::whereId(Auth::id())->select('id')->withCount('attendanceLogs as all_sessions_count')
+        $logs = User::whereId(Auth::id())->select('id')
+                ///counting all sessions  
+                ->withCount(['attendanceLogs as all_sessions_count'=> function($q) use ($request, $sessions_ids){
+                    $q->whereNotNull('status');
+                    $q->whereIn('session_id',$sessions_ids);
+                }])
                 ///counting Absent  
                 ->withCount(['attendanceLogs as Absent'=> function($q) use ($request, $sessions_ids){
                     $q->where('status','Absent');
@@ -174,10 +179,10 @@ class AttendanceReportsController extends Controller
                 }])->first();
 
         if($logs->all_sessions_count > 0){
-            $logs->Present =  ($logs->Present / $logs->all_sessions_count)*100;
-            $logs->Late =  ($logs->Late / $logs->all_sessions_count)*100;
-            $logs->Absent =  ($logs->Absent / $logs->all_sessions_count)*100;
-            $logs->Excuse =  ($logs->Excuse / $logs->all_sessions_count)*100;
+            $logs->Present =  round(($logs->Present / $logs->all_sessions_count)*100 , 2);
+            $logs->Late =  round(($logs->Late / $logs->all_sessions_count)*100 , 2);
+            $logs->Absent =  round(($logs->Absent / $logs->all_sessions_count)*100 , 2);
+            $logs->Excuse =  round(($logs->Excuse / $logs->all_sessions_count)*100 ,2);
         }
       
         return response()->json(['message' => null , 'body' => $logs], 200);
@@ -185,7 +190,14 @@ class AttendanceReportsController extends Controller
 
     public function user_attendance_report_details(Request $request){
         $request->validate([
-            'type' => 'required|in:Per Session,Daily'
+            'type' => 'required|in:Per Session,Daily',
+            'start_date' => 'date',
+            'end_date' => 'date', // filter all session that started before this end_date
+            'from' => 'date_format:H:i',
+            'to' => 'date_format:H:i|after:from',
+            'current' => 'in:month,week,day', //current
+            'filter' => 'integer|between:1,12',
+            'search' => 'string'
         ]);
 
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', Auth::id())->where('role_id' , 3)->select('course','group');
@@ -193,15 +205,63 @@ class AttendanceReportsController extends Controller
         $attendance_type_callback = function ($query) use ($request ) {
                 $query->where('attendance_type', $request->type);
         };
-        $sessions_ids = AttendanceSession::select('id','name','start_date' , 'from' , 'to' , 'taken')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))
-                        ->whereHas('attendance' , $attendance_type_callback)
-                        ->with(['session_logs' => 
-                        function ($query) use ($request ) {
-                            $query->where('user_id', Auth::id());
-                    }])->get();
+        $attendanceSession = AttendanceSession::whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))
+                            ->whereHas('attendance' , $attendance_type_callback)
+                            ->with(['attendance' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['class' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['course' => function($query){
+                                $query->select('id','name');
+                            } ])
+                            ->with(['session_logs' => function ($query) use ($request ) {
+                                $query->where('user_id', Auth::id());
+                                $query->select('session_id','status');
+                            }]);   
+
+        if(isset($request->start_date))
+        $attendanceSession->where('start_date','>=', $request->start_date);
+
+        if(isset($request->end_date))
+            $attendanceSession->where('start_date','<=', $request->end_date);
+
+        if(isset($request->filter))
+            $attendanceSession->whereMonth('start_date', $request->filter);
+
+        if(isset($request->current))
+        {
+            if($request->current == 'day')
+                $attendanceSession->whereDay('start_date', Carbon::now()->format('j'))->whereMonth('start_date',Carbon::now()->format('m'));
+
+            if($request->current == 'week'){
+                // from saterday to friday
+                if(Carbon::now()->format('l') == 'Saturday')
+                    $attendanceSession->where('start_date', '>=', Carbon::now()->addDay(7))
+                        ->where('start_date', '<=', Carbon::now()->addDay(7));
+
+                else
+                    for($i=1;$i<=7;$i++)
+                    {
+                        $day=Carbon::now()->subDay($i)->format('l');
+                        if($day == 'Saturday')
+                            $attendanceSession->where('start_date', '>=', Carbon::now()->subDay($i))
+                                ->where('start_date', '<=', Carbon::now()->subDay($i)->addDay(7));
+                    }
+            }
+
+            if($request->current == 'month')
+                $attendanceSession->whereMonth('start_date', Carbon::now()->format('m'));
+        }
+
+        if(isset($request->from))
+            $attendanceSession->where('from','>=', $request->from);
+
+        if(isset($request->to))
+            $attendanceSession->where('to','<', $request->to);
                     
-                    
-        return $sessions_ids;
+        return response()->json(['message' => null , 'body' => $attendanceSession->get() ], 200);
 
     }
 }

@@ -12,7 +12,7 @@ use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceSession;
 use Modules\Attendance\Entities\AttendanceStatus;
 
-class Attendance_sessions implements ShouldQueue
+class AttendanceSessions implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
