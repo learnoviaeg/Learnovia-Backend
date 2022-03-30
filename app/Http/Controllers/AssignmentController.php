@@ -132,7 +132,7 @@ class AssignmentController extends Controller
             'is_graded' => 'required|boolean',
             'mark' => 'required|numeric|min:0',
             'allow_attachment' => 'required|integer|min:0|max:3',
-            'publish_date' => 'date|date_format:Y-m-d H:i:s|before:closing_date',
+            'publish_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
             'grade_category' => 'required_if:is_graded,==,1|exists:grade_categories,id',
@@ -161,7 +161,7 @@ class AssignmentController extends Controller
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
                 'assignment_id' => $assignment->id,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->start_date,
+                'publish_date' => $request->publish_date,
                 'due_date' => isset($request->closing_date) ? $request->closing_date : null,
                 'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
                 'scale_id' => isset($request->scale) ? $request->scale : null,
