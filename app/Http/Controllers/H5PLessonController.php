@@ -93,6 +93,7 @@ class H5PLessonController extends Controller
             if(isset($request->users_ids)){
                 CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
                 $h5p_lesson->restricted = 1;
+                $h5p_lesson->save();
             }
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);
@@ -194,19 +195,17 @@ class H5PLessonController extends Controller
     }
 
     public function edit (Request $request){
-
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
             'updated_lesson_id' => 'nullable|exists:lessons,id',
             'visible'=>'in:0,1'
-
-
         ]);
         // $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($h5pLesson))
             return HelperController::api_response_format(500, null,__('messages.interactive.interactive_not_belong'));
+        
         $lesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);
         if ($request->filled('updated_lesson_id')) {
@@ -222,8 +221,6 @@ class H5PLessonController extends Controller
             ]);
         }
 
-
-
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
         // $content->pivot = [
@@ -236,11 +233,7 @@ class H5PLessonController extends Controller
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
-
-
     ////////////////////user restrictions
-
-
     public function editH5pAssignedUsers(Request $request){
         $request->validate([
             'content_id' => 'required|exists:h5p_lessons,content_id',
