@@ -152,7 +152,7 @@ class AssignmentController extends Controller
         $assignment = Assignment::firstOrCreate([
             'name' => $request->name,
             'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
-            'content' => isset($request->conent) ? $request->content : null,
+            'content' => isset($request->content) ? $request->content : null,
             'created_by' => Auth::id(),
         ]);
 
@@ -237,7 +237,7 @@ class AssignmentController extends Controller
         if(!isset($assigLessonID))
             return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
 
-        $assignment = assignment::where('id',$assignment_id)->with('courseItem.courseItemUsers')->first();
+        $assignment = assignment::where('id',$assignment_id)->with('assignmentLesson','courseItem.courseItemUsers')->first();
         if(!isset($assignment))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
@@ -309,6 +309,7 @@ class AssignmentController extends Controller
         }
 
         $assignment = assignment::find($id);
+
         $assigmentLesson = AssignmentLesson::where('lesson_id',$request->lesson_id)->where('assignment_id',$id)->first();
         LastAction::lastActionInCourse($assigmentLesson->Lesson->course_id);
         
@@ -344,15 +345,17 @@ class AssignmentController extends Controller
         if (count($ifStudent) <= 0){
             $description = (isset($request->file_description))? $request->file_description :null;
 
-            $assigmentLesson->update([
+            $assignment->update([
                 'content' => isset($request->content) ? $request->content : $assignment->content,
                 'name' => isset($request->name) ? $request->name : $assignment->name,
+                'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
+            ]);
+            $assigmentLesson->update([
                 'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
                 'is_graded' => isset($request->is_graded) ? $request->is_graded : $assigmentLesson->is_graded,
                 'grade_category' => isset($request->grade_category) ? $request->grade_category : $assigmentLesson->grade_category,
                 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $assigmentLesson->lesson_id,
                 'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
-                'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
             ]);
         }
 
@@ -446,8 +449,12 @@ class AssignmentController extends Controller
 
         $assignment = Assignment::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
 
-        foreach($assignment->Lesson as $lesson)
-            $result['assignment_classes'][]= $lesson->shared_classes->pluck('id')->first();
+        foreach($assignment->Lesson as $lesson){
+            if($lesson->shared_lesson ==1)
+                $result['assignment_classes']= $lesson->shared_classes->pluck('id');
+            else
+                $result['assignment_classes'][]= $lesson->shared_classes->pluck('id')->first();
+        }
 
         $result['restricted'] = $assignment->restricted;
         if(isset($assignment['courseItem'])){
