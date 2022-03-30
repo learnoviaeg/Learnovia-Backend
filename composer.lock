@@ -1578,7 +1578,6 @@
         },
         {
             "name": "google/apiclient-services",
-<<<<<<< HEAD
             "version": "v0.239.0",
             "source": {
                 "type": "git",
@@ -1589,18 +1588,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/ce8e34d618bdef9e824fd1728d505a468818712c",
                 "reference": "ce8e34d618bdef9e824fd1728d505a468818712c",
-=======
-            "version": "v0.240.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "c6d39cda24d7ada02ecf8c464a1c8adb02607ba7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/c6d39cda24d7ada02ecf8c464a1c8adb02607ba7",
-                "reference": "c6d39cda24d7ada02ecf8c464a1c8adb02607ba7",
->>>>>>> development
                 "shasum": ""
             },
             "require": {
@@ -2436,7 +2423,6 @@
             ],
             "support": {
                 "issues": "https://github.com/lcobucci/jwt/issues",
-<<<<<<< HEAD
                 "source": "https://github.com/lcobucci/jwt/tree/3.4.6"
             },
             "funding": [
@@ -2450,11 +2436,6 @@
                 }
             ],
             "time": "2021-09-28T19:18:28+00:00"
-=======
-                "source": "https://github.com/lcobucci/jwt/tree/3.3"
-            },
-            "time": "2019-05-22T09:44:23+00:00"
->>>>>>> development
         },
         {
             "name": "league/event",
@@ -2845,7 +2826,6 @@
         },
         {
             "name": "maatwebsite/excel",
-<<<<<<< HEAD
             "version": "3.1.37",
             "source": {
                 "type": "git",
@@ -2856,18 +2836,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/49ccd4142d3d7bce492d6bfb9dd9a27b12935408",
                 "reference": "49ccd4142d3d7bce492d6bfb9dd9a27b12935408",
-=======
-            "version": "3.1.38",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/SpartnerNL/Laravel-Excel.git",
-                "reference": "dff132ce4d30b19863f4e84de1613fca99604992"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/dff132ce4d30b19863f4e84de1613fca99604992",
-                "reference": "dff132ce4d30b19863f4e84de1613fca99604992",
->>>>>>> development
                 "shasum": ""
             },
             "require": {
