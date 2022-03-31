@@ -7,6 +7,7 @@ use App\Course;
 use App\Segment;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
 use App\LetterDetails;
@@ -436,6 +437,24 @@ class ScriptsController extends Controller
             $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
             if($count->count() > 1)
                 $countss=$count->first()->delete();
+        }
+        return 'Done';
+    }
+
+    public function update_publish_date(Request $request)
+    {
+        $assignments=AssignmentLesson::get();
+        foreach($assignments as $assignment)
+        {
+            $assignment->publish_date = $assignment->start_date;
+            $assignment->save();
+        }
+
+        $quizzes = QuizLesson::get();
+        foreach($quizzes as $quiz)
+        {
+            $quiz->publish_date=$quiz->start_date;
+            $quiz->save();
         }
         return 'Done';
     }
