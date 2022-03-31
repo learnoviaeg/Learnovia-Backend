@@ -190,6 +190,9 @@ class AttendanceReportsController extends Controller
             $logs->Excuse =  round(($logs->Excuse_count / $logs->taken_sessions_count)*100 ,2);
         }
       
+        $logs->all_seesions = AttendanceSession::select('id')->whereIn('class_id' , $enrolls->pluck('group'))->whereIn('course_id' , $enrolls->pluck('course'))
+                            ->whereHas('attendance' , $attendance_type_callback)->count();
+
         return response()->json(['message' => null , 'body' => $logs], 200);
     }
 
