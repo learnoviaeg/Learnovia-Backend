@@ -151,7 +151,8 @@ class QuizzesController extends Controller
         $request->validate([
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
-            'lesson_id' => 'required|array|exists:lessons,id',
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'exists:lessons,id',
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
@@ -162,7 +163,7 @@ class QuizzesController extends Controller
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'in:First,Last,Highest,Lowest,Average',
-            'grade_category_id.*' => 'required_if:is_graded,==,1|exists:grade_categories,id',
+            'grade_category_id.*' => 'exists:grade_categories,id',
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'visible'=>"in:1,0",
