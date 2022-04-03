@@ -285,7 +285,7 @@ class AssignmentController extends Controller
             'content'  => 'string',
             'is_graded' => 'boolean',
             'mark' => 'numeric|min:0',
-            'lesson_id' => 'required|integer|exists:lessons,id',
+            'lesson_id' => 'integer|exists:lessons,id',
             //allow attachement
                 // 0===================>content
                 // 1===================>attached_file
@@ -296,7 +296,7 @@ class AssignmentController extends Controller
             'visible' => 'boolean',
             'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'grade_category' => 'exists:grade_categories,id',
-            'updated_lesson_id' =>'nullable|exists:lessons,id'
+            // 'updated_lesson_id' =>'nullable|exists:lessons,id'
         ]);
 
         if ($request->hasFile('file')) {
@@ -310,91 +310,107 @@ class AssignmentController extends Controller
 
         $assignment = assignment::find($id);
 
-        $assigmentLesson = AssignmentLesson::where('lesson_id',$request->lesson_id)->where('assignment_id',$id)->first();
-        LastAction::lastActionInCourse($assigmentLesson->Lesson->course_id);
-        
-        if(!Carbon::parse($assigmentLesson->start_date) < Carbon::now())
+        $assigmentLessons = AssignmentLesson::where('assignment_id',$id)->get();
+
+        foreach($assigmentLessons as $assigmentLesson)
         {
+            LastAction::lastActionInCourse($assigmentLesson->Lesson->course_id);
+            if(!Carbon::parse($assigmentLesson->start_date) < Carbon::now())
+            {
+                $assigmentLesson->update([
+                    'start_date' => isset($request->opening_date) ? $request->opening_date : $assigmentLesson->start_date,
+                    'publish_date' => isset($request->publish_date) ? $request->publish_date : $assigmentLesson->publish_date,
+                ]);
+            }
+    
             $assigmentLesson->update([
-                'start_date' => isset($request->opening_date) ? $request->opening_date : $assigmentLesson->start_date,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : $assigmentLesson->publish_date,
+                'due_date' => isset($request->closing_date) ? $request->closing_date : $assigmentLesson->due_date,
+                'visible' => isset($request->visible) ? $request->visible : $assigmentLesson->visible,
+                'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : $assigmentLesson->allow_edit_answer,
             ]);
+
+            $ifStudent=[];
+            $users = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->where('submit_date', '!=', null)->pluck('user_id');
+            if(isset($users))
+                $ifStudent=Enroll::whereIn('user_id',$users)->where('role_id',3)->get();
+
+            if (count($ifStudent) >= 0)
+            {
+                if(isset($request->allow_attachment) && $request->allow_attachment == 3)
+                $assigmentLesson->update([
+                    'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+                ]);
+            }
+            if (count($ifStudent) <= 0){
+                $description = (isset($request->file_description))? $request->file_description :null;
+    
+                $assignment->update([
+                    'content' => isset($request->content) ? $request->content : $assignment->content,
+                    'name' => isset($request->name) ? $request->name : $assignment->name,
+                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
+                ]);
+                $assigmentLesson->update([
+                    'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
+                    'is_graded' => isset($request->is_graded) ? $request->is_graded : $assigmentLesson->is_graded,
+                    'grade_category' => isset($request->grade_category) ? $request->grade_category : $assigmentLesson->grade_category,
+                    // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $assigmentLesson->lesson_id,
+                    'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+                ]);
+            }
+    
+            // if($request->file == 'No_file')
+            //     $assignment->attachment_id=null;
+    
+            $assignment->save();
+    
+            if ($request->filled('allow_attachment') )
+                $assigmentLesson->allow_attachment = $request->allow_attachment;
+    
+            $assigmentLesson->save();
+            // $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
+            // if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
+            //     $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
+            //     foreach ($usersIDs as $userId) {
+            //         $userassigment = new UserAssigment;
+            //         $userassigment->user_id = $userId;
+            //         $userassigment->assignment_lesson_id = $assigmentLesson->id;
+            //         $userassigment->status_id = 2;
+            //         $userassigment->override = 0;
+            //         $userassigment->save();
+            //     }
+            // }
         }
 
-        $assigmentLesson->update([
-            'due_date' => isset($request->closing_date) ? $request->closing_date : $assigmentLesson->due_date,
-            'visible' => isset($request->visible) ? $request->visible : $assigmentLesson->visible,
-            'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : $assigmentLesson->allow_edit_answer,
-        ]);
-        
-        $ifStudent=[];
-        $users = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->where('submit_date', '!=', null)->pluck('user_id');
-        if(isset($users))
-            $ifStudent=Enroll::whereIn('user_id',$users)->where('role_id',3)->get();
+        return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
+    }
 
-        if(isset($request->updated_lesson_id) && $request->updated_lesson_id !=$request->lesson_id && $ifStudent > 0)
+    public function Drag(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|integer|exists:assignments,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'updated_lesson_id' => 'required|exists:lessons,id'
+        ]);
+
+        $assigmentLesson = AssignmentLesson::where('lesson_id',$request->lesson_id)->where('assignment_id',$request->assignment_id)->first();
+        $check = AssignmentLesson::where('lesson_id',$request->updated_lesson_id)->where('assignment_id',$request->assignment_id)->first();
+            
+        if(isset($check))
             return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
 
-        if (count($ifStudent) >= 0)
-        {
-            if(isset($request->allow_attachment) && $request->allow_attachment == 3)
-            $assigmentLesson->update([
-                'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
-            ]);
-        }
-        if (count($ifStudent) <= 0){
-            $description = (isset($request->file_description))? $request->file_description :null;
-
-            $assignment->update([
-                'content' => isset($request->content) ? $request->content : $assignment->content,
-                'name' => isset($request->name) ? $request->name : $assignment->name,
-                'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
-            ]);
-            $assigmentLesson->update([
-                'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
-                'is_graded' => isset($request->is_graded) ? $request->is_graded : $assigmentLesson->is_graded,
-                'grade_category' => isset($request->grade_category) ? $request->grade_category : $assigmentLesson->grade_category,
-                'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $assigmentLesson->lesson_id,
-                'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
-            ]);
-        }
-
-        // if($request->file == 'No_file')
-        //     $assignment->attachment_id=null;
-
-        $assignment->save();
-
-        if ($request->filled('allow_attachment') )
-            $assigmentLesson->allow_attachment = $request->allow_attachment;
-
-        $assigmentLesson->save();
-        // $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
-        // if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
-        //     $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
-        //     foreach ($usersIDs as $userId) {
-        //         $userassigment = new UserAssigment;
-        //         $userassigment->user_id = $userId;
-        //         $userassigment->assignment_lesson_id = $assigmentLesson->id;
-        //         $userassigment->status_id = 2;
-        //         $userassigment->override = 0;
-        //         $userassigment->save();
-        //     }
-        // }
-
-        $AssignmentLesson = AssignmentLesson::where('assignment_id', $id)->where('lesson_id', $request->lesson_id)->first();
-
-        $assignment_category = GradeCategory::where('lesson_id', $AssignmentLesson->lesson_id)->where('instance_id' , $AssignmentLesson->assignment_id)
-                                ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
+        $assignment_category = GradeCategory::where('lesson_id', $assigmentLesson->lesson_id)->where('instance_id' , $assigmentLesson->assignment_id)
+            ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
         $parent=$assignment_category->first()->Parents;
 
         //update assignment category
         if($assignment_category->count() > 0 )
             $assignment_category->update([
-                'lesson_id' => $request->updated_lesson_id
+            'lesson_id' => $request->updated_lesson_id
             ]);
 
-        ///create grade category for assignment
-        event(new AssignmentCreatedEvent($AssignmentLesson));
+        $assigmentLesson->update([
+            'lesson_id' => $request->updated_lesson_id,
+        ]);
 
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent));
         dispatch($userGradesJob);
