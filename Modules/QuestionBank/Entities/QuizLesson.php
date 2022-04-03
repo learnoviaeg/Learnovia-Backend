@@ -12,6 +12,9 @@ use App\UserSeen;
 use App\SystemSetting;
 use App\UserGrader;
 use App\Traits\Auditable;
+use App\Course;
+use App\Lesson as Lessonmodel;
+use App\AuditLog;
 
 class QuizLesson extends Model
 {
@@ -209,7 +212,13 @@ class QuizLesson extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        return null;
+        $lessons_id   = QuizLesson::where('quiz_id', $new->quiz_id)->pluck('lesson_id');
+        $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
+        $audit_log_quiz_course_id->update([
+            'course_id' => $course_id
+        ]);
+        return $course_id;
     }
     // end function get name and value attribute
 }
