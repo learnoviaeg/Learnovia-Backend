@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\AttendanceSession;
 use Modules\Attendance\Entities\AttendanceLog;
 use App\User;
+use App\Paginate;
 
 class AttendanceReportsController extends Controller
 {
