@@ -21,6 +21,7 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll'],   ['only' => ['manaraMonthylReportAll']]);
     }
 
     public function haramainReport(Request $request)
@@ -580,5 +581,58 @@ class ReportCardsController extends Controller
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
+
+
+    public function manaraMonthylReportAll(Request $request)
+    {
+        $request->validate([
+            'month'   => 'required|in:Feb,March,April',
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+        ]);
+        $result_collection = collect([]);
+        $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
+        foreach($user_ids as $user_id){
+            $GLOBALS['user_id'] = $user_id;
+            $grade_category_callback = function ($qu) use ($user_id , $request) {
+                $qu->whereNull('parent')
+                ->with(['Children.userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                },'GradeItems.userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                },'userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                }]); 
+            };
+
+            $course_callback = function ($qu) use ($request ) {
+                $qu->where('name','LIKE', "%$request->month%");
+            };
+
+            $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
+                $qu->where('role_id', 3);
+                $qu->whereHas('courses' , $course_callback)
+                    ->with(['courses' => $course_callback]); 
+                $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                    ->with(['courses.gradeCategory' => $grade_category_callback]); 
+            };
+            $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
+                            ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+            if($result != null)
+                $result_collection->push($result);
+        }
+        return response()->json(['message' => null, 'body' => $result_collection ], 200);
+    }
+
 
 }
