@@ -396,7 +396,7 @@ class AssignmentController extends Controller
         $check = AssignmentLesson::where('lesson_id',$request->updated_lesson_id)->where('assignment_id',$request->assignment_id)->first();
             
         if(isset($check))
-            return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
+            return HelperController::api_response_format(400,[], $message = __('messages.error.assigned_before'));
 
         $assignment_category = GradeCategory::where('lesson_id', $assigmentLesson->lesson_id)->where('instance_id' , $assigmentLesson->assignment_id)
             ->where('item_type' , 'Assignment')->where('instance_type' , 'Assignment')->where('type','item');
