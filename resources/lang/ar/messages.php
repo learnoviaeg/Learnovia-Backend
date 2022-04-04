@@ -30,7 +30,8 @@ return [
         'role_required' => 'من فضلك ، اختر الوظيفة أولا',
         'not_allowed' => 'غير مسموح بذلك',
         'not_allowed_to_edit' => 'لا يمكن التعديل',
-        'extension_error' => 'هذا الامتداد غير صالح'
+        'extension_error' => 'هذا الامتداد غير صالح',
+        'assigned_before' => 'تم اصافته من قبل'
     ],
     'success' => [
         'submit_success' => 'تم إرسال الإجابة بنجاح',

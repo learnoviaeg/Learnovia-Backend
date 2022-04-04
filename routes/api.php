@@ -464,6 +464,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
 
     Route::post('assignments/update/{id}', 'AssignmentController@update')->middleware(['permission:assignment/update']);
+    Route::post('assignments/drag', 'AssignmentController@Drag')->middleware(['permission:assignment/update']);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
