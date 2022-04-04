@@ -7,9 +7,14 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Modules\Assigments\Entities\assignmentOverride;
 use App\UserSeen;
+use App\Lesson as Lessonmodel;
+use App\AuditLog;
+use App\Traits\Auditable;
 
 class AssignmentLesson extends Model
 {
+    use Auditable;
+    
     protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 
     protected $appends = ['started','user_seen_number','Status'];
@@ -88,5 +93,53 @@ class AssignmentLesson extends Model
         parent::boot();
         static::addGlobalScope(new overrideAssignmentScope);
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $lessons_id   = AssignmentLesson::where('assignment_id', $new->assignment_id)->pluck('lesson_id');
+        $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->first();
+        $audit_log_quiz_course_id->update([
+            'course_id' => $course_id
+        ]);
+        return $course_id;
+    }
+    // end function get name and value attribute
 }
 
