@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use App\Traits\Auditable;
 
 class Course extends Model
 {
+    use Auditable;
+    
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
     'is_template','classes', 'letter_id','shared_lesson', 'index'];
 
@@ -101,4 +103,87 @@ class Course extends Model
     {
         return $this->hasMany('App\course_scales','course_id','id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $level_id = [intval($new['level_id'])];
+        }else{
+            if ($old['level_id'] == $new['level_id']) {
+                $level_id = [intval($new['level_id'])];
+            }else{
+                $level_id = [intval($old['level_id']), intval($new['level_id'])];
+            }
+        }
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $classes = $new['shared_classes']->pluck('id');
+        }else{
+                $v1      = $old['shared_classes'];
+                $first   = str_replace("\"", "", $v1);
+                $r       = array($first);
+                $move1   = trim($r[0], "[");
+                $move2   = trim($move1, "]");
+                $v1_edit = explode(",", $move2); 
+                $intvals = array();
+                foreach ($v1_edit as $key => $value) {
+                    array_push($intvals, intval($value));
+                }
+            if ($intvals == $new['shared_classes']->pluck('id')->toArray()) {
+                $classes = $new['shared_classes']->pluck('id');
+            }else{
+                $v2 = $new['shared_classes']->pluck('id')->toArray();
+                $classes = array_merge($intvals, $v2);
+            }
+        }
+        return $classes;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $segment_id = [intval($new['segment_id'])];
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+            }else{
+                $segment_id = [intval($old['segment_id']), intval($new['segment_id'])];
+            }
+        }
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }
