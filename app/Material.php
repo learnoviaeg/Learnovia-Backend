@@ -8,9 +8,12 @@ use  Modules\Page\Entities\page;
 use Modules\UploadFiles\Entities\media;
 use Auth;
 use App\UserSeen;
+use App\Traits\Auditable;
 
 class Material extends Model
 {
+    use Auditable;
+    
     protected $fillable = [
         'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by','restricted'
     ];
@@ -73,5 +76,57 @@ class Material extends Model
             return True;
         return False;
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $course_id = [intval($new['course_id'])];
+        }else{
+            if ($old['course_id'] == $new['course_id']) {
+                $course_id = [intval($new['course_id'])];
+            }else{
+                $course_id = [intval($old['course_id']), intval($new['course_id'])];
+            }
+        }
+        return $course_id;
+    }
+    // end function get name and value attribute
 }
 
