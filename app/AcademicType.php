@@ -71,7 +71,7 @@ class AcademicType extends Model
     }
     // end function get name and value attribute
 
-    // start function get name and value f attribute
+    // start function get name and value attribute
     public static function get_course_name($old, $new)
     {
         return null;
