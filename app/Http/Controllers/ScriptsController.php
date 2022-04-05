@@ -458,4 +458,16 @@ class ScriptsController extends Controller
         }
         return 'Done';
     }
+
+    public function delete_wrong_course(Request $request)
+    {
+        $courses=Enroll::where('level',$request->level)->where('segment',3)->pluck('course');
+        foreach($courses as $course)
+        {
+            if(Course::find($course)->segment_id != 3)
+                Enroll::where('course',$course)->where('segment',3)->delete();
+        }
+
+        return 'Done';
+    }
 }
