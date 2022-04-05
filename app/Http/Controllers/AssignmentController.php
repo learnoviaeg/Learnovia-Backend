@@ -393,6 +393,10 @@ class AssignmentController extends Controller
         ]);
 
         $assigmentLesson = AssignmentLesson::where('lesson_id',$request->lesson_id)->where('assignment_id',$request->assignment_id)->first();
+        $assignment=Assignment::whereId($request->assignment_id)->with('courseItem')->first();
+        if(isset($assignment['courseItem']))
+            return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
+
         $check = AssignmentLesson::where('lesson_id',$request->updated_lesson_id)->where('assignment_id',$request->assignment_id)->first();
             
         if(isset($check))
@@ -405,7 +409,7 @@ class AssignmentController extends Controller
         //update assignment category
         if($assignment_category->count() > 0 )
             $assignment_category->update([
-            'lesson_id' => $request->updated_lesson_id
+                'lesson_id' => $request->updated_lesson_id
             ]);
 
         $assigmentLesson->update([
