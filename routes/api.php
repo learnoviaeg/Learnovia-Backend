@@ -416,6 +416,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
+    Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
