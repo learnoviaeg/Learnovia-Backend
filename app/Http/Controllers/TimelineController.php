@@ -72,8 +72,25 @@ class TimelineController extends Controller
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
 
-        if(Auth::user()->can('site/course/student'))
-            $timeline->where('visible',1);
+        if(Auth::user()->can('site/course/student')){
+            $timeline
+            ->where('visible',1);
+            // ->where(function($query) {         //Where accessible
+            //     $query->whereHasMorph(
+            //         'item',
+            //         [
+            //             'Modules\QuestionBank\Entities\quiz',
+            //             'Modules\Assigments\Entities\assignment',
+            //         ],
+            //         function($query){
+            //             $query->doesntHave('courseItem')
+            //             ->orWhereHas('courseItem.courseItemUsers', function ($query){
+            //                 $query->where('user_id', Auth::id());
+            //             });
+            //         }
+            //     );
+            // });
+        }
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
@@ -93,7 +110,7 @@ class TimelineController extends Controller
                 $course_sort =  $object_sort->get()->sortBy('course.name')->values()->pluck('id');
                 if($request->sort_in == 'desc')
                     $course_sort =  $object_sort->get()->sortByDesc('course.name')->values()->pluck('id');
-    
+
                 $ids_ordered = implode(',', $course_sort->toArray());
                 $timeline->orderByRaw("FIELD(id, $ids_ordered)");
             }
@@ -131,19 +148,19 @@ class TimelineController extends Controller
         if($request->type == 'assignment'){
             $request->validate(['id' => 'required|exists:assignments,id',]);
             $item_Lesson = AssignmentLesson::where('assignment_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
-            $assignment = Assignment::where('id',$item_Lesson->assignment_id)->first();  
-            if(isset($assignment))  
+            $assignment = Assignment::where('id',$item_Lesson->assignment_id)->first();
+            if(isset($assignment))
                 $item_name = $assignment->name;
         }
-        
+
         if($request->type == 'quiz'){
             $request->validate(['id' => 'required|exists:quizzes,id',]);
             $item_Lesson = QuizLesson::where('quiz_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
-            $quiz = Quiz::where('id',$item_Lesson->quiz_id)->first();  
-            if(isset($quiz))  
+            $quiz = Quiz::where('id',$item_Lesson->quiz_id)->first();
+            if(isset($quiz))
                 $item_name = $quiz->name;
         }
-        
+
         $lesson = Lesson::find($item_Lesson->lesson_id);
         $secondary_chains = SecondaryChain::where('lesson_id',$assignmentLesson->lesson_id)->get()->keyBy('group_id');
             foreach($secondary_chains as $secondary_chain){

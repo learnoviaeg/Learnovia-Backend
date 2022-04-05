@@ -29,8 +29,8 @@ class UploadFilesServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        MediaLesson::observe(MediaObserver::class);
-        FileLesson::observe(FileObserver::class);
+        Media::observe(MediaObserver::class);
+        File::observe(FileObserver::class);
 
         File::observe(LogsObserver::class);
         FileLesson::observe(LogsObserver::class);

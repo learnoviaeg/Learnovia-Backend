@@ -8,6 +8,7 @@ use App\Timeline;
 use App\Announcement;
 use App\userAnnouncement;
 use App\SecondaryChain;
+use App\Enroll;
 use Auth;
 
 class CalendarsController extends Controller
@@ -52,14 +53,11 @@ class CalendarsController extends Controller
         $user_course_segments = $enrolls = $this->chain->getEnrollsByChain($request);
 
         if(!$request->user()->can('site/show-all-courses'))//any other user enrolled
-        {
             $user_course_segments = $enrolls = $user_course_segments->where('user_id',Auth::id());
-        }
 
         $enrolls=$enrolls->get();
 
         if(count($enrolls) > 0){
-
             //enrolled user announcements
             if(!$request->user()->can('site/show-all-courses'))
             {
@@ -74,11 +72,8 @@ class CalendarsController extends Controller
                     $query->whereIn('year',$enrolls->pluck('year'))->whereIn('segment',$enrolls->pluck('segment'));
                 }])->pluck('id');
             }
-
         }
-        $calendar['lessons'] =SecondaryChain::where('enroll_id',$enrolls->pluck('id'))->get()->pluck('lesson_id');
-
-        // $calendar['lessons'] = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get()->pluck('courseSegment.lessons.*.id')->collapse();
+        $calendar['lessons'] =SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id'));
         
         $timeline = Timeline::with(['class','course','level'])
                             ->where(function ($query) use ($calendar) {
@@ -99,6 +94,12 @@ class CalendarsController extends Controller
 
         if($request->filled('item_type'))
             $timeline->whereIn('type', $request->item_type);
+
+        if(!$request->user()->can('site/show-all-courses'))
+        {
+            $sec_chain_class = SecondaryChain::select('group_id')->whereIn('enroll_id', $enrolls->pluck('id'))->where('user_id',Auth::id());
+            $timeline->whereIn('class_id',$sec_chain_class);
+        }
 
         return response()->json(['message' => __('messages.success.user_list_items'), 'body' => $timeline->orderBy('start_date', 'desc')->get()], 200);
     }
@@ -146,5 +147,17 @@ class CalendarsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function delete_duplicated_enroll(Request $request)
+    {
+        $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();
+        foreach($enrolls as $enroll)
+        {   
+            $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
+            if($count->count() > 1)
+                $countss=$count->delete();
+        }
+        return 'Done';
     }
 }

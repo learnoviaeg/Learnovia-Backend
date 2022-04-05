@@ -31,6 +31,10 @@ class media extends Model
         return 'Link';
     }
 
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'media');
+    }
+
     public function lessons()
     {
         return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\MediaLesson', 'media_id' , 'id' , 'id' , 'id' );

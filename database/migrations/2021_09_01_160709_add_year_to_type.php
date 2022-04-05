@@ -15,7 +15,7 @@ class AddYearToType extends Migration
     {
         Schema::table('academic_types', function (Blueprint $table) {
             $table->unsignedBigInteger('academic_year_id')->after('name')->nullable();
-            $table->foreign('academic_year_id')->references('id')->on('academic_types')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('academic_year_id')->references('id')->on('academic_years')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

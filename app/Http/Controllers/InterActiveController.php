@@ -15,6 +15,7 @@ use App\Classes;
 use App\Course;
 use Carbon\Carbon;
 use App\SecondaryChain;
+use Illuminate\Database\Eloquent\Builder;
 
 class InterActiveController extends Controller
 {
@@ -41,19 +42,19 @@ class InterActiveController extends Controller
             'courses.*'  => 'nullable|integer|exists:courses,id',
             'class' => 'nullable|integer|exists:classes,id',
             'lesson' => 'nullable|integer|exists:lessons,id',
-            'sort_in' => 'in:asc,desc', 
+            'sort_in' => 'in:asc,desc',
         ]);
 
         if($request->user()->can('site/show-all-courses')){//admin
             $enrolls = $this->chain->getEnrollsByChain($request);
-            $lessons = $enrolls->with('SecondaryChain')->where('user_id',Auth::id())->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique(); 
+            $lessons = $enrolls->with('SecondaryChain')->where('user_id',Auth::id())->get()->pluck('SecondaryChain.*.lesson_id')->collapse()->unique();
         }
 
         if(!$request->user()->can('site/show-all-courses')){//enrolled users
            $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
            $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
         }
-      
+
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
@@ -68,7 +69,15 @@ class InterActiveController extends Controller
         $h5p_lessons = h5pLesson::whereIn('lesson_id',$lessons);
 
         if($request->user()->can('site/course/student')){
-           $h5p_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+            $h5p_lessons
+            ->where('visible',1)
+            ->where('publish_date' ,'<=', Carbon::now())
+            ->where(function($query) {                //Where accessible
+                $query->doesntHave('courseItem')
+                ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                    $query->where('user_id', Auth::id());
+                });
+            }); 
         }
 
         if($count == 'count'){
@@ -81,7 +90,7 @@ class InterActiveController extends Controller
 
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
 
-        foreach($h5p_lessons as $h5p){                                
+        foreach($h5p_lessons as $h5p){
             $content = response()->json(DB::table('h5p_contents')->whereId($h5p->content_id)->first());
             $content->original->link = config('app.url').'api/interactive/'.$h5p->content_id.'/?api_token='.Auth::user()->api_token;
             $content->original->item_lesson_id = $h5p->id;
@@ -90,7 +99,7 @@ class InterActiveController extends Controller
             $content->original->edit_link = $url.'/api/h5p/'.$h5p->content_id.'/edit'.'?editting_done=false';
             if(!$request->user()->can('h5p/lesson/allow-edit') && $h5p->user_id != Auth::id())
                 $content->original->edit_link = null;
-            
+
             unset($content->original->parameters,$content->original->filtered,$content->original->metadata);
 
             $content->original->lesson = Lesson::find($h5p->lesson_id);

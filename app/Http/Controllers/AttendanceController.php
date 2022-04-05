@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Attendance;
 use Auth;
 use App\Enroll;
+use App\Classes;
 use App\UserGrader;
 use App\GradeCategory;
 use App\AttendanceLevel;
@@ -30,11 +31,6 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'attendance_type' => 'in:Per Session,Daily',
-            'year_id' => 'exists:academic_years,id',
-            'type_id' => 'exists:academic_types,id',
-            'segment_id' => 'exists:segments,id',
-            'level_id' => 'exists:levels,id',
-            'course_id' => 'exists:courses,id',
             'grade_cat_id' => 'exists:grade_categories,id',
             'start_date' => 'date',
             'end_date' => 'date|after:start_date',
@@ -62,8 +58,6 @@ class AttendanceController extends Controller
 
         if(isset($request->end_date))
             $attendance->where('end_date','<', $request->end_date);
-
-            // return $attendance->with('levels')->get();
 
         $all=[];
         foreach($attendance->cursor() as $attendeence){
@@ -267,5 +261,11 @@ class AttendanceController extends Controller
         $attendance->delete();
 
         return HelperController::api_response_format(200 , null , __('messages.attendance.delete'));
+    }
+
+    public function getClassAttendance($attendance_id)
+    {
+        $classes= Classes::select('id','name')->whereIn('id',Attendance::find($attendance_id)->courses[0]['classes'])->get();
+        return HelperController::api_response_format(200 , $classes , null);
     }
 }

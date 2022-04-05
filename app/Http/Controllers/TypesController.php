@@ -96,7 +96,7 @@ class TypesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $req, $id)
     {
         $req->validate([
             'segment_no' => 'integer',
@@ -106,7 +106,7 @@ class TypesController extends Controller
         $AC->update($req->all());
         $AC->save();
 
-        return HelperController::api_response_format(200, AcademicType::paginate(HelperController::GetPaginate($req),__('messages.type.update')));
+        return HelperController::api_response_format(200, AcademicType::with('year')->paginate(HelperController::GetPaginate($req)),__('messages.type.update'));
     }
 
     /**

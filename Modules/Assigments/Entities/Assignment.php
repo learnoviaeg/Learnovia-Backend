@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class assignment extends Model
 {
-    protected $fillable = ['name', 'content', 'attachment_id','created_by'];
+    protected $fillable = ['name', 'content', 'attachment_id','created_by','restricted'];
     protected $appends = ['url' , 'url2'];
     public function attachment()
     {
@@ -38,8 +38,19 @@ class assignment extends Model
     {
         return $this->hasMany('Modules\Assigments\Entities\AssignmentLesson', 'assignment_id', 'id');
     }
-        
+
     public function user(){
         return $this->belongsTo('App\User','created_by');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'assignment');
+    }
+
+    public function getRestrictedAttribute()
+    {
+        if($this->attributes['restricted'])
+            return True;
+        return False;
     }
 }

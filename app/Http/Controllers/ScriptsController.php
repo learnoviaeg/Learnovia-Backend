@@ -7,6 +7,7 @@ use App\Course;
 use App\Segment;
 use App\GradeCategory;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\Assigments\Entities\AssignmentLesson;
 use Modules\QuestionBank\Entities\Quiz;
 use App\Events\UpdatedAttemptEvent;
 use App\LetterDetails;
@@ -382,12 +383,7 @@ class ScriptsController extends Controller
 
     public function indexCatItem(Request $request)
     {
-        $request->validate([
-            'courses'    => 'required|array',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
-        ]);
-
-        foreach($request->courses as $course)
+        foreach(Course::where('segment_id',3)->pluck('id') as $course)
         {
             $gradeCategoryParent=GradeCategory::where('course_id',$course)->whereNull('parent')->first();
             $grades=GradeCategory::where('id',$gradeCategoryParent->id)->with('categories_items')->get();
@@ -421,6 +417,57 @@ class ScriptsController extends Controller
             if($enrolled_students->count() > 0)
                 $enrolled_students->delete();
         }
+        return 'Done';
+    }
+
+    public function lessons_index(Request $request)
+    {
+        foreach(Course::select('id')->cursor() as $course){
+            foreach(Lesson::where('course_id',$course->id)->cursor() as $key => $lesson){
+                $lesson->update([ 'index' => $key+1 ]);;
+            }
+        }
+        return 'done';
+    }
+    public function delete_duplicated_enroll(Request $request)
+    {
+        $enrolls=Enroll::select('user_id')->where('role_id',3)->where('course',$request->course_id)->get();
+        foreach($enrolls as $enroll)
+        {   
+            $count=Enroll::where('user_id',$enroll->user_id)->where('course',$request->course_id);
+            if($count->count() > 1)
+                $countss=$count->first()->delete();
+        }
+        return 'Done';
+    }
+
+    public function update_publish_date(Request $request)
+    {
+        $assignments=AssignmentLesson::get();
+        foreach($assignments as $assignment)
+        {
+            $assignment->publish_date = $assignment->start_date;
+            $assignment->save();
+        }
+
+        $quizzes = QuizLesson::get();
+        foreach($quizzes as $quiz)
+        {
+            $quiz->publish_date=$quiz->start_date;
+            $quiz->save();
+        }
+        return 'Done';
+    }
+
+    public function delete_wrong_course(Request $request)
+    {
+        $courses=Enroll::select('course','segment')->where('segment',$request->segment_id)->get();
+        foreach($courses as $course)
+        {
+            if(Course::find($course->course)->segment_id != $course->segment)
+                Enroll::where('course',$course->course)->where('segment',$request->segment_id)->delete();
+        }
+
         return 'Done';
     }
 }

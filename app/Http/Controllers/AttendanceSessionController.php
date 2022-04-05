@@ -35,11 +35,12 @@ class AttendanceSessionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$reports=0)
     {
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
             'start_date' => 'date',
+            'end_date' => 'date', // filter all session that started before this end_date
             'from' => 'date_format:H:i',
             'to' => 'date_format:H:i|after:from',
             'current' => 'in:month,week,day', //current
@@ -61,6 +62,9 @@ class AttendanceSessionController extends Controller
 
         if(isset($request->start_date))
             $attendanceSession->where('start_date','>=', $request->start_date);
+
+        if(isset($request->end_date))
+            $attendanceSession->where('start_date','<=', $request->end_date);
 
         if(isset($request->filter))
             $attendanceSession->whereMonth('start_date', $request->filter);
@@ -101,9 +105,12 @@ class AttendanceSessionController extends Controller
                 $qu->where('attendance_type',$request->attendance_type);
         };
 
-        return HelperController::api_response_format(200 , $attendanceSession->whereHas('attendance', $callback)
-            ->with(['class','attendance.courses','attendance'=>$callback])->get()
-            ->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
+        $result=$attendanceSession->whereHas('attendance', $callback)
+                ->with(['class','attendance.courses','attendance'=>$callback])->get();
+
+        if($reports)
+            return $result;
+        return HelperController::api_response_format(200 ,$result->paginate(HelperController::GetPaginate($request)) , __('messages.attendance_session.list'));
     }
 
     /**
@@ -170,35 +177,34 @@ class AttendanceSessionController extends Controller
                         $attendancestart=$attendancestart->addDays(7);                   
                     }   
                 }
-                else
+                else if($attendance->attendance_type == 'Daily') // it entered if this type was per session so i write this if
                 {
                     $request->validate([
-                        // 'class_id' => 'required|array',
-                        // 'class_id.*' => 'exists:classes,id', // because front_end sent it empty
+                        'class_id' => 'array',
+                        'class_id.*' => 'exists:classes,id', // because front_end sent it empty
                         'included_days' => 'required|array',
                         'included_days.*' => 'exists:working_days,id'
                     ]);
 
                     $classes=Course::whereId($request->course_id)->pluck('classes')->first();
-                    if(count($request->class_id) > 0 && !in_array(null,$request->class_id))
+                    if(isset($request->class_id) && count($request->class_id) > 0 && !in_array(null,$request->class_id))
                         $classes=$request->class_id;
 
-                    foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
-                    {
-                        if($day->status == 0)
-                            continue;
+                    foreach($classes as $class){
+                        foreach(WorkingDay::whereIn('id',$request->included_days)->get() as $day)
+                        {
+                            if(!$day->status)
+                                continue;
 
-                        if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
-                            $attendancestart=(carbon::parse($request->start_date)->subDay(
-                                Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
-    
-                        if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
-                            $attendancestart=(carbon::parse($request->start_date)->addDays(
-                                array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
+                            if(array_search($day->day,$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
+                                $attendancestart=(carbon::parse($request->start_date)->subDay(
+                                    Carbon::parse($request->start_date)->dayOfWeek - array_search($day->day,$weekMap))->addDays(7));
+        
+                            if(array_search($day->day,$weekMap) >= carbon::parse($request->start_date)->dayOfWeek )
+                                $attendancestart=(carbon::parse($request->start_date)->addDays(
+                                    array_search($day->day,$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
 
-                        while($attendancestart <= Carbon::parse($repeated_until)){
-                            foreach($classes as $class)
-                            {
+                            while($attendancestart <= Carbon::parse($repeated_until)){
                                 $attendance=AttendanceSession::firstOrCreate([
                                     'name' => $request->name,
                                     'attendance_id' => $request->attendance_id,
@@ -222,6 +228,7 @@ class AttendanceSessionController extends Controller
                 'name' => $request->name,
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,
+                'course_id' => $request->course_id,
                 'start_date' => $request->start_date,
                 'from' => Carbon::parse($request->start_date)->format('H:i'),
                 'to' => null,
@@ -318,8 +325,8 @@ class AttendanceSessionController extends Controller
             SessionLog::updateOrCreate([
                 'session_id' => $request->session_id,
                 'user_id' => $user['id'],
-                'taken_by' => Auth::id()
             ],[
+                'taken_by' => Auth::id(),
                 'status' => $user['status'],
             ]);
 

@@ -7,7 +7,7 @@ use DB;
 
 class Enroll extends Model
 {
-    protected $fillable = ['user_id', 'username', 'course_segment', 'role_id', 'level', 'group' ,'year', 'type', 'segment', 'course'];
+    protected $fillable = ['user_id', 'username', 'role_id', 'level', 'group' ,'year', 'type', 'segment', 'course'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\UserEnrolledEvent::class,
@@ -69,9 +69,8 @@ class Enroll extends Model
 
     public function Lessons()
     {
-        return $this->hasManyThrough(Lesson::class, SecondaryChain::class);
+        return $this->hasManyThrough(Lesson::class, SecondaryChain::class); // m4 4a8ala
     }
-
 
     public function topics()
     {

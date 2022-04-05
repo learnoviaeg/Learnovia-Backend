@@ -12,6 +12,7 @@ use Modules\UploadFiles\Entities\MediaLesson;
 use checkEnroll;
 use URL;
 use App\Classes;
+use App\CourseItem;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
@@ -25,6 +26,8 @@ use App\Lesson;
 use Modules\Page\Entities\pageLesson;
 use App\Repositories\SettingsReposiotryInterface;
 use App\SecondaryChain;
+use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
 
 class MediaController extends Controller
 {
@@ -37,7 +40,7 @@ class MediaController extends Controller
      */
     public function __construct(SettingsReposiotryInterface $setting)
     {
-        $this->setting = $setting;        
+        $this->setting = $setting;
     }
 
     public function getAllMedia(Request $request)
@@ -146,7 +149,9 @@ class MediaController extends Controller
             'type' => 'required|in:0,1',
             'name' => 'required',
             'show' => 'nullable|in:0,1',
-            'visible' =>'in:0,1'
+            'visible' =>'in:0,1',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ];
 
         $customMessages = [
@@ -170,78 +175,74 @@ class MediaController extends Controller
         } else {
             $publishdate = Carbon::now();
         }
-        foreach ($request->lesson_id as $lesson) {
+
+        if ($request->type == 0)
+            $array = $request->Imported_file;
+        else if ($request->type == 1)
+            $array = $request->url;
+        foreach ($array as $item) {
+            $media = new media;
+            $media->user_id = Auth::user()->id;
+            if ($request->type == 0) {
+                $formsg=$item->getClientMimeType();
+                $extension = $item->getClientOriginalExtension();
+                $fileName = $item->getClientOriginalName();
+                $size = $item->getSize();
+                $name = uniqid() . '.' . $extension;
+                $media->type = $item->getClientMimeType();
+                // $media->name = $name;
+                $media->size = $size;
+                $media->attachment_name = $fileName;
+                $media->link = url('storage/media/' . $name);
+            }
+
+            if ($request->type == 1) {
+                // $avaiableHosts = collect([
+                //     'www.youtube.com',
+                //     'vimeo.com',
+                //     'soundcloud.com',
+                // ]);
+
+                // $urlparts = parse_url($item);
+                // if (!$avaiableHosts->contains($urlparts['host'])) {
+                //     return HelperController::api_response_format(400, $item, 'Link is invalid');
+                // }
+
+                // if (!isset($urlparts['path'])) {
+                //     return HelperController::api_response_format(400, $item, 'Link is invalid');
+                // }
+                // $media->name = $request->name;
+                $media->attachment_name = $request->name;
+                $media->link = $item;
+            }
+
+            $media->name = $request->name;
+
+            if ($request->filled('description'))
+                $media->description = $request->description;
+            if ($request->filled('show'))
+                $media->show = $request->show;
+            $media->save();
+
+            if(isset($request->users_ids))
+                CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
+
+            foreach ($request->lesson_id as $lesson) {
 
                 $tempLesson = Lesson::find($lesson);
-                if ($request->type == 0)
-                    $array = $request->Imported_file;
-                else if ($request->type == 1)
-                    $array = $request->url;
-                foreach ($array as $item) {
-                    $media = new media;
-                    $media->user_id = Auth::user()->id;
-                    if ($request->type == 0) {
-                        $formsg=$item->getClientMimeType();
-                        $extension = $item->getClientOriginalExtension();
-                        $fileName = $item->getClientOriginalName();
-                        $size = $item->getSize();
-                        $name = uniqid() . '.' . $extension;
-                        $media->type = $item->getClientMimeType();
-                        // $media->name = $name;
-                        $media->size = $size;
-                        $media->attachment_name = $fileName;
-                        $media->link = url('storage/media/' . $name);
-                    }
+                $mediaLesson = new MediaLesson;
+                $mediaLesson->lesson_id = $lesson;
+                $mediaLesson->media_id = $media->id;
+                $mediaLesson->index = MediaLesson::getNextIndex($lesson);
+                $mediaLesson->publish_date = $publishdate;
+                $mediaLesson->visible = isset($request->visible)?$request->visible:1;
 
-                    if ($request->type == 1) {
-                        // $avaiableHosts = collect([
-                        //     'www.youtube.com',
-                        //     'vimeo.com',
-                        //     'soundcloud.com',
-                        // ]);
+                $mediaLesson->save();
 
-                        // $urlparts = parse_url($item);
-                        // if (!$avaiableHosts->contains($urlparts['host'])) {
-                        //     return HelperController::api_response_format(400, $item, 'Link is invalid');
-                        // }
-
-                        // if (!isset($urlparts['path'])) {
-                        //     return HelperController::api_response_format(400, $item, 'Link is invalid');
-                        // }
-                        // $media->name = $request->name;
-                        $media->attachment_name = $request->name;
-                        $media->link = $item;
-                    }
-
-                    $media->name = $request->name;
-
-                    if ($request->filled('description'))
-                        $media->description = $request->description;
-                    if ($request->filled('show'))
-                        $media->show = $request->show;
-                    $media->save();
-                    $mediaLesson = new MediaLesson;
-                    $mediaLesson->lesson_id = $lesson;
-                    $mediaLesson->media_id = $media->id;
-                    $mediaLesson->index = MediaLesson::getNextIndex($lesson);
-                    $mediaLesson->publish_date = $publishdate;
-                    $mediaLesson->visible = isset($request->visible)?$request->visible:1;
-
-                    $mediaLesson->save();
-
-                LessonComponent::firstOrCreate([
-                        'lesson_id' => $mediaLesson->lesson_id,
-                        'comp_id'   => $mediaLesson->media_id,
-                        'module'    => 'UploadFiles',
-                        'model'     => 'media',
-                    ], [
-                        'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
-                    ]);
-
-                    if ($request->type == 0) {
-                        Storage::disk('public')->putFileAs('media/', $item, $name);
-                    }
-        }
+                if ($request->type == 0) {
+                    Storage::disk('public')->putFileAs('media/', $item, $name);
+                }
+            }
         }
         $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();
         if($request->type == 0)
@@ -304,7 +305,7 @@ class MediaController extends Controller
                 'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
             ];
         }
-    
+
         $this->validate($request, $rules, $customMessages);
 
         $media = media::find($request->id);
@@ -331,13 +332,12 @@ class MediaController extends Controller
             $media->link = $request->url;
             $media->size = null;
             $media->type = null;
-        } 
+        }
 
         if ($request->filled('description'))
             $media->description = $request->description;
 
-        if ($request->filled('name'))
-            $media->name = $request->name;
+        $media->update (['name' => isset($request->name) ? $request->name :$media->name]);
         $media->save();
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -544,11 +544,19 @@ class MediaController extends Controller
         $customMessages = [
             'exists' => __('messages.error.item_deleted')
         ];
-    
+
         $this->validate($request, $rules, $customMessages);
-        $Media = media::with('MediaLesson')->find($request->id);
-        if( $request->user()->can('site/course/student') && $Media->MediaLesson->visible==0)
-            return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+        $Media = media::with('MediaLesson')->with('courseItem.courseItemUsers')->find($request->id);
+        if( $request->user()->can('site/course/student')){
+            $courseItem = CourseItem::where('item_id', $Media->id)->where('type', 'media')->first();
+            if(isset($courseItem)){
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+                if(!in_array(Auth::id(), $users))
+                    return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            }
+            if($Media->MediaLesson[0]->visible==0)
+                return HelperController::api_response_format(301,null, __('messages.media.media_hidden'));
+        }
 
         return HelperController::api_response_format(200, $Media);
     }
