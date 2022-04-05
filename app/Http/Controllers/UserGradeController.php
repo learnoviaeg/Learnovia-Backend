@@ -427,7 +427,7 @@ class UserGradeController extends Controller
             'classes.*' => 'exists:classes,id',
             ]);     
 
-        $grade_categories = GradeCategory::whereIn('course_id', $request->courses);
+        $grade_categories = GradeCategory::whereIn('course_id', $request->courses)->withoutGlobalScopes();
         $cat_ids =  $grade_categories->get()->pluck('id')->toArray();
 
         $grade_Categroies_ids = $grade_categories
