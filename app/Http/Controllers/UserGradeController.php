@@ -380,7 +380,7 @@ class UserGradeController extends Controller
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback])->first();
+                        ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
         $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
 
         foreach($result->enrolls as $enroll){ 
