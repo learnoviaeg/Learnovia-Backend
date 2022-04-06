@@ -22,6 +22,9 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll'],   ['only' => ['manaraMonthylReportAll']]);
+        $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
+
+        
     }
 
     public function haramainReport(Request $request)
@@ -540,18 +543,18 @@ class ReportCardsController extends Controller
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
-        // if($user->can('report_card/mfis/mfisg'))
-        //     $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/mfisg-monthly'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisg-monthly')->pluck('allowed_levels')->first();
         
         // if($user->can('report_card/mfis/mfisb'))
         //     $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
 
-        // $allowed_levels=json_decode($allowed_levels);
-        // $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        // $check=(array_intersect($allowed_levels, $student_levels));
+        $allowed_levels=json_decode($allowed_levels);
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $check=(array_intersect($allowed_levels, $student_levels));
 
-        // if(count($check) == 0)
-        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
@@ -632,6 +635,83 @@ class ReportCardsController extends Controller
                 $result_collection->push($result);
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
+    }
+
+
+
+    public function fglFinalReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        // $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
+        // $allowed_levels=json_decode($allowed_levels);
+        // $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        // $check=(array_intersect($allowed_levels, $student_levels));
+
+        // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
+
+        // if(count($check) == 0)
+        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+
+
+        // period == 'past'
+
+        $First_grade_category_callback = function ($qu) use ($request ) {
+            $qu->where('name', 'First Term');
+            $qu->with(['userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]);     
+        };
+
+        $Second_grade_category_callback = function ($qu) use ($request ) {
+            $qu->where('name', 'Second Term');
+            $qu->with(['userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]);     
+        };
+
+
+        $course_callback = function ($qu) use ($request ) {
+            $qu->orderBy('index', 'Asc');
+        };
+
+        $first_term = function ($qu) use ($request , $First_grade_category_callback , $course_callback) {
+            $qu->whereHas('courses' , $course_callback)
+            ->with(['courses' => $course_callback]); 
+            $qu->where('role_id', 3);
+            $qu->whereHas('courses.gradeCategory' , $First_grade_category_callback)
+                ->with(['courses.gradeCategory' => $First_grade_category_callback]); 
+
+        };
+
+
+        $second_term = function ($qu) use ($request , $Second_grade_category_callback , $course_callback) {
+            // $qu->orderBy('course', 'Asc');
+            $qu->where('role_id', 3);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
+            $qu->whereHas('courses.gradeCategory' , $Second_grade_category_callback)
+                ->with(['courses.gradeCategory' => $Second_grade_category_callback]); 
+
+        };
+
+        $first_term = User::whereId($request->user_id)->whereHas('enroll' , $first_term)
+                        ->with(['enroll' => $first_term])->first();
+
+        
+        $second_term = User::whereId($request->user_id)->whereHas('enroll' , $second_term)
+        ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+ 
+
+        foreach($first_term->enroll as $key => $enroll){   
+
+            $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+             ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+        }
+
+        return response()->json(['message' => null, 'body' => $second_term ], 200);
     }
 
 
