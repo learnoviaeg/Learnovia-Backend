@@ -613,8 +613,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
     Route::get('mfis/monthly', 'ReportCardsController@manaraMonthlyReport');
     Route::post('manara-monthly-all', 'ReportCardsController@manaraMonthylReportAll');
-
     Route::get('fgl-final-kg', 'ReportCardsController@fglFinalReport');
+    Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
 });
 
 //script for front-end editor
