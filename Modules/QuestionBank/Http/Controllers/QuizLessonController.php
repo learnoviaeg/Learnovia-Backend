@@ -129,13 +129,6 @@ class QuizLessonController extends Controller
                     'weight' => 0,
                  ]);
              }
-            LessonComponent::create([
-                'lesson_id' => $lessons,
-                'comp_id'   => $request->quiz_id,
-                'module'    => 'QuestionBank',
-                'model'     => 'quiz',
-                'index'     => LessonComponent::getNextIndex($lessons)
-            ]);
         }
         return HelperController::api_response_format(200, $quizLesson,__('messages.quiz.add'));
     }

@@ -14,6 +14,7 @@ use App\GradeCategory;
 use App\SecondaryChain;
 use App\Classes;
 use App\Course;
+use App\CourseItem;
 use App\Level;
 use App\UserGrader;
 use App\Paginate;
@@ -31,6 +32,10 @@ use App\SystemSetting;
 use App\Events\GraderSetupEvent;
 use App\Jobs\RefreshUserGrades;
 use App\Events\UpdatedQuizQuestionsEvent;
+use App\Helpers\CoursesHelper;
+use App\UserCourseItem;
+use Illuminate\Database\Eloquent\Builder;
+use App\LessonComponent;
 
 class QuizzesController extends Controller
 {
@@ -70,7 +75,7 @@ class QuizzesController extends Controller
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
                 return response()->json(['message' => __('messages.error.no_active_for_lesson'), 'body' => []], 400);
-            
+
             $lessons  = [$request->lesson];
         }
 
@@ -78,10 +83,23 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->orderBy('created_at','desc');;
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)
+        ->with(['quiz'])
+        ->orderBy('created_at','desc');
 
-        if($request->user()->can('site/course/student'))
-            $quiz_lessons->where('visible',1)->where('publish_date' ,'<=', Carbon::now());
+        if($request->user()->can('site/course/student')){
+            $quiz_lessons
+            ->where('visible',1)
+            ->where('publish_date' ,'<=', Carbon::now())
+            ->whereHas('quiz',function($q){
+                $q->where(function($query) {                //Where accessible
+                        $query->doesntHave('courseItem')
+                                ->orWhereHas('courseItem.courseItemUsers', function (Builder $query){
+                                    $query->where('user_id', Auth::id());
+                                });
+                    });
+            });
+        }
 
         if(!$request->user()->can('quiz/view-drafts')){
             $quiz_lessons->whereHas('quiz', function ($q){
@@ -104,7 +122,7 @@ class QuizzesController extends Controller
 
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::with('course','Question.children','quizLesson')->where('id',$quiz_lesson->quiz_id)->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->with(['course','Question.children','quizLesson'])->first();
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
             if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
                 $flag=true;
@@ -133,7 +151,8 @@ class QuizzesController extends Controller
         $request->validate([
             'name' => 'required|string|min:3',
             'course_id' => 'required|integer|exists:courses,id',
-            'lesson_id' => 'required|array|exists:lessons,id',
+            'lesson_id' => 'required|array',
+            'lesson_id.*' => 'exists:lessons,id',
             'is_graded' => 'required|boolean',
             'grade_category_id' => 'required_if:is_graded,==,1',
             'duration' => 'required|integer|min:60', //by second
@@ -144,16 +163,18 @@ class QuizzesController extends Controller
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
             'grading_method_id' => 'in:First,Last,Highest,Lowest,Average',
-            'grade_category_id.*' => 'required_if:is_graded,==,1|exists:grade_categories,id',
+            'grade_category_id.*' => 'exists:grade_categories,id',
             'grade_min' => 'integer',
             'grade_max' => 'integer',
             'visible'=>"in:1,0",
-            'publish_date' => 'date|before_or_equal:opening_time'
+            'publish_date' => 'date|before_or_equal:opening_time',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
         ]);
-  
+
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
- 
+
         $newQuestionsIDs=[];
         $oldQuestionsIDs=array();
 
@@ -167,7 +188,13 @@ class QuizzesController extends Controller
                 'grade_feedback' => $request->grade_feedback,
                 'correct_feedback' => $request->correct_feedback,
             ]);
-            $lessons = Lesson::whereIn('id', $request->lesson_id) 
+
+            if(isset($request->users_ids)){
+                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+                $quiz->restricted=1;
+            }
+
+            $lessons = Lesson::whereIn('id', $request->lesson_id)
                         ->with([
                             'course.gradeCategory'=> function($query)use ($request){
                                 $query->whereNull('parent');
@@ -176,9 +203,9 @@ class QuizzesController extends Controller
                             }])->get();
 
             foreach($lessons as $key => $lesson)
-            {   
+            {
                 $grade_Cat = $lesson->course->gradeCategory[0];
-                $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;      
+                $index = isset($lesson->QuizLesson[0]) ? $lesson->QuizLesson[0]->index :1;
                 //add validations for all the feilds
                 $newQuizLesson = QuizLesson::create([
                     'quiz_id' => $quiz->id,
@@ -201,7 +228,7 @@ class QuizzesController extends Controller
                 // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
                 // $notification->send();
             }
-            
+            $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
     /**
@@ -221,90 +248,117 @@ class QuizzesController extends Controller
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
             'correct_feedback' => 'in:After submission,After due_date,Never',
-            'updated_lesson_id' => 'exists:lessons,id',
+            // 'updated_lesson_id' => 'exists:lessons,id',
             'opening_time' => 'date',
             'closing_time' => 'date|after:opening_time',
-            'publish_date' => 'date|before_or_equal:opening_time'
+            'publish_date' => 'date|before_or_equal:opening_time',
         ]);
 
         $quiz=Quiz::find($id);
-        $quiz_lesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
-
-        if(!strtotime($quiz_lesson->start_date) < Carbon::now())
+        $quiz_lessons=QuizLesson::where('quiz_id',$id)->get();
+        foreach($quiz_lessons as $quiz_lesson)
         {
-            $quiz_lesson->update([
-                'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->start_date,
-                'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
-            ]);
-        }
-        
-        $quiz->update([
-            'name' => isset($request->name) ? $request->name : $quiz->name,
-            'is_graded' => isset($request->is_graded) ? $request->is_graded : $quiz->is_graded,
-            'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
-        ]);
+            LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
-        if(isset($request->closing_time)){
-            if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
-                return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
-        }
-
-        $quiz_lesson->update([
-            'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
-            'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
-            'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
-            'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
-            'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
-            'grade_category_id' => $quiz_lesson->grade_category_id,
-            'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
-            'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
-        ]);
-
-        if($quiz->allow_edit)
-        {
-            $quiz->update([
-                'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
-                'grade_feedback' => isset($request->grade_feedback) ? $request->grade_feedback : $quiz->grade_feedback,
-                'correct_feedback' => isset($request->correct_feedback) ? $request->correct_feedback : $quiz->correct_feedback,
-            ]);
-
-            if(isset($request->updated_lesson_id))
+            if(!strtotime($quiz_lesson->start_date) < Carbon::now())
             {
-                $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id',$quiz_lesson->lesson_id)
-                ->update(['lesson_id' => $request->updated_lesson_id]);
+                $quiz_lesson->update([
+                    'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->start_date,
+                    'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
+                ]);
+            }
+    
+            $quiz->update([
+                'name' => isset($request->name) ? $request->name : $quiz->name,
+                'is_graded' => isset($request->is_graded) ? $request->is_graded : $quiz->is_graded,
+                'shuffle' => isset($request->shuffle)?$request->shuffle:$quiz->shuffle,
+            ]);
+    
+            if(isset($request->closing_time)){
+                if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
+                    return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
             }
     
             $quiz_lesson->update([
-                'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
-                'start_date' => $quiz_lesson->start_date,
-                'publish_date' => $quiz_lesson->publish_date,
+                'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
+                // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
+                'grade' => isset($request->grade) ? $request->grade : $quiz_lesson->grade,
+                'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
+                'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
+                'grade_category_id' => $quiz_lesson->grade_category_id,
+                'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+                'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
             ]);
+    
+            if($quiz->allow_edit)
+            {
+                $quiz->update([
+                    'duration' => isset($request->duration) ? $request->duration : $quiz->duration,
+                    'grade_feedback' => isset($request->grade_feedback) ? $request->grade_feedback : $quiz->grade_feedback,
+                    'correct_feedback' => isset($request->correct_feedback) ? $request->correct_feedback : $quiz->correct_feedback,
+                ]);
+    
+                $quiz_lesson->update([
+                    'max_attemp' => isset($request->max_attemp) ? $request->max_attemp : $quiz_lesson->max_attemp,
+                    'start_date' => $quiz_lesson->start_date,
+                    'publish_date' => $quiz_lesson->publish_date,
+                ]);
+            }
+    
+            $quiz->save();
+            $quiz_lesson->save();
+            $quiz->quizLesson;
+    
+            $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
+                                ->whereNull('parent')->where('type','category')->first();
+    
+            $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
+            $gradeCat->update([
+                        'hidden' => $quiz_lesson->visible,
+                        'calculation_type' => json_encode($quiz_lesson->grading_method_id),
+                        'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
+                        // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
+                    ]);
+    
+            // update timeline object and sending notifications
+            event(new updateQuizAndQuizLessonEvent($quiz_lesson));
+            event(new UpdatedQuizQuestionsEvent($quiz->id));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
+            dispatch($userGradesJob);    
         }
-
-        $quiz->save();
-        $quiz_lesson->save();
-        $quiz->quizLesson;
-
-        $gg=GradeCategory::where('course_id', $quiz_lesson->lesson->course_id)
-                            ->whereNull('parent')->where('type','category')->first();
-        
-        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
-        $gradeCat->update([
-                    'hidden' => $quiz_lesson->visible,
-                    'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-                    'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
-                    'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
-                ]);        
-        
-        // update timeline object and sending notifications
-        event(new updateQuizAndQuizLessonEvent($quiz_lesson));
-        event(new UpdatedQuizQuestionsEvent($quiz->id));      
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
-        dispatch($userGradesJob);
-                            
-
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
+    }
+
+    public function Drag(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'updated_lesson_id' => 'required|exists:lessons,id'
+        ]);
+
+        $quiz_lesson = QuizLesson::where('lesson_id',$request->lesson_id)->where('quiz_id',$request->quiz_id)->first();
+        $quiz=Quiz::whereId($request->quiz_id)->with('courseItem')->first();
+        if(isset($quiz['courseItem']))
+            return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
+
+        $check = QuizLesson::where('lesson_id',$request->updated_lesson_id)->where('quiz_id',$request->quiz_id)->first();
+            
+        if(isset($check))
+            return HelperController::api_response_format(400,[], $message = __('messages.error.assigned_before'));
+
+        $grade_cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id',$quiz_lesson->lesson_id)
+                ->update(['lesson_id' => $request->updated_lesson_id]);
+
+        $quiz_lesson->update([
+            'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
+        ]);
+        
+        $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->updated_lesson_id)->first();
+        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
+        dispatch($userGradesJob);  
+
+        return HelperController::api_response_format(200, null, $message = __('messages.quiz.update'));
     }
 
     /**
@@ -319,18 +373,31 @@ class QuizzesController extends Controller
             'lesson_id' => 'required|exists:lessons,id',
         ]);
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
-        
+
         $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
         $parent_Category = GradeCategory::find($grade_category->parent);
         $grade_category->delete();
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
-        QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->delete();
+        $quizLesson = QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id);
+        
+        $LessonComponent =  LessonComponent::where('comp_id',$quizLesson->first()->quiz_id)
+        ->where('lesson_id',$quizLesson->first()->lesson_id)->where('model' , 'quiz')->first();
+        
+        if($LessonComponent !=  null){
+            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$quizLesson->first()->lesson_id)->where('comp_id',$quizLesson->first()->quiz_id)
+            ->where('model' , 'quiz')->first();
+            LessonComponent::where('lesson_id',$quizLesson->first()->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+            $LessonComponent->delete();
+        }
+
+        $quizLesson->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         if(!isset($quizlesson))
             $quiz=Quiz::where('id',$id)->delete();
-        
+
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
 
@@ -367,14 +434,20 @@ class QuizzesController extends Controller
         ]);
 
         if(Auth::user()->can('site/course/student')){
+            // $courseItem = CourseItem::where('item_id', $id)->where('type', 'quiz')->first();
+            // if(isset($courseItem)){
+            //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id')->toArray();
+            //     if(!in_array(Auth::id(), $users))
+            //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
+            // }
             $users = SecondaryChain::where('lesson_id', $request->lesson_id)->where('course_id',Lesson::find($request->lesson_id)->course_id)->pluck('user_id')->unique();
             if(!in_array(Auth::id(),$users->toArray()))
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
-        $quiz = quiz::where('id',$id)->with('Question.children')->first();
+        $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
-        
+
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();
         if($grade_Cat->parent != null)
             $quizLesson->Parent_grade_category = $grade_Cat->Parents->id;
@@ -387,7 +460,7 @@ class QuizzesController extends Controller
             $user_quiz=UserQuiz::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id);
 
         $quiz_override = QuizOverride::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
-       
+
         if($request->user_id)
             $quiz_override = QuizOverride::where('user_id',$request->user_id)->where('quiz_lesson_id',$quizLesson->id)->where('attemps','>','0')->first();
 
@@ -417,7 +490,7 @@ class QuizzesController extends Controller
             $usergrader = UserGrader::where('user_id',$last_attempt->user_id)->where('item_id', $quizLesson->grade_category_id)->where('item_type','category')->first();
             if(isset($usergrader))
                 $quiz->user_grade=$usergrader->grade;
-                
+
             $left_time=AttemptsController::leftTime($last_attempt);
             $quiz->remain_time = $left_time;
             $quiz->last_attempt_status = 'continue';
@@ -471,5 +544,49 @@ class QuizzesController extends Controller
             }
         }
         // return 'Done';
+    }
+
+    public function editQuizAssignedUsers(Request $request){
+        $request->validate([
+            'id' => 'required|exists:quizzes,id',
+            'users_ids' => 'array',
+            'users_ids.*' => 'exists:users,id'
+        ]);
+
+        $quiz= Quiz::find($request->id);
+        $quiz->restricted=1;
+
+        if(!isset($request->users_ids))
+            $quiz->restricted=0;
+        
+        $quiz->save();
+        CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);
+        return response()->json(['message' => 'Updated successfully'], 200);
+    }
+
+    public function getQuizAssignedUsers(Request $request){
+
+        $request->validate([
+            'id' => 'required|exists:quizzes,id',
+        ]);
+
+        $quiz = Quiz::with(['Lesson', 'courseItem.courseItemUsers'])->find($request->id);
+
+        foreach($quiz->Lesson as $lesson){
+            if($lesson->shared_lesson ==1)
+                $result['quiz_classes']= $lesson->shared_classes->pluck('id');
+            else
+                $result['quiz_classes'][]= $lesson->shared_classes->pluck('id')->first();
+        }
+        
+        $result['restricted'] = $quiz->restricted;
+        if(isset($quiz['courseItem'])){
+
+            $courseItemUsers = $quiz['courseItem']->courseItemUsers;
+            foreach($courseItemUsers as $user)
+                $result['assigned_users'][] = $user->user_id;
+        }
+
+        return response()->json($result, 200);
     }
 }

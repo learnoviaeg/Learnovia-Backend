@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class quiz extends Model
 {
-    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit'];
+    protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit','restricted'];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
@@ -54,5 +54,16 @@ class quiz extends Model
 
     public function user(){
         return $this->belongsTo('App\User','created_by');
+    }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'quiz');
+    }
+
+    public function getRestrictedAttribute()
+    {
+        if($this->attributes['restricted'])
+            return True;
+        return False;
     }
 }

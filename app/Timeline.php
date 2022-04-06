@@ -102,4 +102,8 @@ class Timeline extends Model
     public function level(){
         return $this->belongsTo('App\Level');
     }
+
+    public function item(){
+        return $this->morphTo('item' , 'type', 'item_id');
+    }
 }

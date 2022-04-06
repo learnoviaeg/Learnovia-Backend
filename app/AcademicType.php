@@ -10,10 +10,6 @@ class AcademicType extends Model
     use SoftDeletes;
 
     protected $fillable = ['name' , 'segment_no','academic_year_id'];
-    // public function AC_year()
-    // {
-    //     return $this->belongsToMany('App\AcademicYear', 'academic_year_types', 'academic_year_id', 'academic_type_id');
-    // }
 
     public function year()
     { 

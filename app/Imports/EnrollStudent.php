@@ -55,9 +55,12 @@ class EnrollStudent implements ToModel,WithHeadingRow
 
         $count=1;
         while(isset($row[$optional.$count])) {
-            $course_id=Course::where('short_name',$row[$optional.$count])->pluck('id')->first();
+            $course=Course::where('short_name',$row[$optional.$count])->first();
+            if($course->segment_id != $row['segment_id'])
+                return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+
+            $course_id=$course->id;
             if(!isset($course_id))
-            // break;
                 die('shortname '.$row[$optional.$count].'doesn\'t exist');
 
             Enroll::firstOrCreate([

@@ -203,4 +203,9 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Log','user','username');
     }
+
+    public function attendanceLogs()
+    { 
+        return $this->hasMany('App\SessionLog','user_id','id');
+    }
 }

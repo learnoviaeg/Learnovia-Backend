@@ -31,6 +31,7 @@ return [
         'not_allowed' => 'You are not allowed to view this.',
         'not_allowed_to_edit' => 'You are not allowed to edit this.',
         'not_allowed_to_delete' => 'You are not allowed to delete this.',
+        'assigned_before' => 'Assigned before',
         'extension_error' => 'This extension is not valid'
     ],
     'success' => [
@@ -222,6 +223,10 @@ return [
         'invalid_end_date' => 'end date must be between ',
         'invalid_start_date' => 'start date must be between ',
     ],
+    'session_reports' => [
+        'daily' => 'Daily Report',
+        'per_session' => 'Per Session Report'
+    ],
     'virtual' => [
         'add' => 'Virtual classroom/s added successfully',
         'update' => 'Virtual classroom updated successfully',
@@ -323,6 +328,7 @@ return [
         'delete' => 'User/s unenrolled successfully',
         'already_enrolled' => 'Those users are already enrolled',
         'no_courses_belong_to_class' => 'No courses belong to this class',
+        'error' => 'please, check segment'
     ],
     'zoom' => [
         'zoom_account' => 'user hasn\'t account on zoom',
@@ -377,4 +383,8 @@ return [
         'cannot_update' => 'Only name can be edited because the scale is assigned to grade category ',
         'cannot_delete' => 'Cannot be deleted because the scale is assigned to grade category',
     ],
+    'working_day' => [
+        'list' => 'All Days',
+        'update' => 'Days updated successfully'
+    ]
 ];

@@ -21,4 +21,13 @@ class page extends Model
     {
         return $value->getOriginal();
     }
+
+    public function courseItem(){
+        return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'page');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\Page\Entities\pageLesson', 'page_id' , 'id' , 'id' , 'id' );
+    }
 }

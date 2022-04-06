@@ -50,18 +50,17 @@ class ClassesController extends Controller
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
-            if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses')){
-                if($request->filled('levels'))
-                    $classes->whereIn('level_id' , $request->levels);
-                    
-                return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
-            }
-    
+        if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses')){
+            if($request->filled('levels'))
+                $classes->whereIn('level_id' , $request->levels);
+                
+            return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
+        }
+
         $enrolls = $this->chain->getEnrollsByManyChain($request);
 
         if(!$request->has('user_id'))
             $enrolls->where('user_id',Auth::id());
-            
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
         return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));

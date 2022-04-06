@@ -40,8 +40,8 @@ class SendNotification
         $createdNotification = Notification::create($notification);
         $attachedJob = (new createAndAttachNoti($createdNotification,$users));
         dispatch($attachedJob);
-        // $createdNotification->users()->attach($users);
+        //$createdNotification->users()->attach($users);
+
         return $createdNotification;
-        // return $notification;
     }
 }
