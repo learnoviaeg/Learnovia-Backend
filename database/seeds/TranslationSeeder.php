@@ -32,5 +32,9 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'february', 'language' => 2, 'value' => 'شهر فبراير']);
         Dictionary::firstOrCreate(['key' => 'March', 'language' => 2, 'value' => 'شهر مارس']);
         Dictionary::firstOrCreate(['key' => 'April', 'language' => 2, 'value' => 'شهر أبريل']);
+
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll', 'language' => 2, 'value' => 'التقرير الشهري']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll', 'language' => 1, 'value' => 'Monthly Report']);
+
     }
 }

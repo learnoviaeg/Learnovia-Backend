@@ -476,7 +476,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
-    Route::get('duplicate_enroll', 'CalendarsController@delete_duplicated_enroll');
 
     Route::get('get-materials', 'MaterialsController@getMaterials');
     Route::get('getMaterialAssignedUsers', 'MaterialsController@getMaterialAssignedUsers')->middleware(['permission:site/edit_restriction']);
