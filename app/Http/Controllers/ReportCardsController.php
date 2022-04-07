@@ -784,9 +784,9 @@ class ReportCardsController extends Controller
      
     
             foreach($first_term->enroll as $key => $enroll){   
-    
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                 ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                if(isset($second_term->enroll[$key]))
+                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
             }
             ///////////////////////////////////////////////////
             if($second_term != null)
