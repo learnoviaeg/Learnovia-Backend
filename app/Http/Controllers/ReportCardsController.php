@@ -731,8 +731,6 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        // return $user_ids;
-
         // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
@@ -786,7 +784,6 @@ class ReportCardsController extends Controller
      
     
             foreach($first_term->enroll as $key => $enroll){   
-
                 if(isset($second_term->enroll[$key]))
                     $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
                     ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
