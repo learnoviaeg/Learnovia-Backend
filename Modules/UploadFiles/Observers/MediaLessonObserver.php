@@ -46,7 +46,6 @@ class MediaLessonObserver
                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
             ]);
 
-
             $courseItem=CourseItem::where('item_id',$mediaLesson->media_id)->where('type','media')->first();
             if(isset($courseItem))
             {
@@ -79,7 +78,6 @@ class MediaLessonObserver
                                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
                             ]);
         }
-
 
         ////updating component lesson and indexing mods in old lesson in case of updating lesson
         if($mediaLesson->getOriginal('lesson_id') != $mediaLesson->lesson_id ){
@@ -115,7 +113,6 @@ class MediaLessonObserver
         $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
         $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
 
-
         $LessonComponent = LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('model' , 'media')->first();
         // if($LessonComponent != null){
         //     dd($LessonComponent);
@@ -123,13 +120,9 @@ class MediaLessonObserver
             $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$mediaLesson->lesson_id)->where('comp_id',$mediaLesson->media_id)
             // ->where('model' , 'media')
             ->where('module', 'UploadFiles')->where('model', '!=', 'file')->first();
-            dd($current_lesson_component);
             LessonComponent::where('lesson_id',$mediaLesson->lesson_id)
             ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
             $LessonComponent->delete();
-        // }
-
-
 
         // $LessonComponent = LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('model' , 'media')->first();
 
