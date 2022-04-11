@@ -288,6 +288,7 @@ class QuizzesController extends Controller
                 'grade_category_id' => $quiz_lesson->grade_category_id,
                 'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
                 'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
+                'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
     
             if($quiz->allow_edit)

@@ -23,7 +23,9 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
-        $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);        
+        $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
+        $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
+        $this->middleware(['permission:report_card/forsan/monthly/printAll'],   ['only' => ['forsanMonthylReportAll']]);
     }
 
     public function haramainReport(Request $request)
@@ -387,7 +389,7 @@ class ReportCardsController extends Controller
             };
     
             $result = User::whereId($user_id)->whereHas('enroll' , $callback)
-                            ->with(['enroll' => $callback])->first();
+                            ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
             $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
     
             foreach($result->enrolls as $enroll){ 
@@ -784,9 +786,9 @@ class ReportCardsController extends Controller
      
     
             foreach($first_term->enroll as $key => $enroll){   
-    
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                 ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                if(isset($second_term->enroll[$key]))
+                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
             }
             ///////////////////////////////////////////////////
             if($second_term != null)
@@ -794,4 +796,124 @@ class ReportCardsController extends Controller
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
+
+
+    public function forsanMonthlyReport(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'month'   => 'required|in:Feb,March,April',
+        ]);
+
+        $GLOBALS['user_id'] = $request->user_id;
+        $user = User::find($request->user_id);
+
+        if($request->month == 'Feb')
+            $arabic_search = 'فبراير';
+        if($request->month == 'March')
+            $arabic_search = 'مارس';
+        if($request->month == 'April')
+            $arabic_search = 'بريل';
+
+        if($user->can('report_card/forsan/monthly'))
+            $allowed_levels=Permission::where('name','report_card/forsan/monthly')->pluck('allowed_levels')->first();
+        
+
+        $allowed_levels=json_decode($allowed_levels);
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $check=(array_intersect($allowed_levels, $student_levels));
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+
+        $grade_category_callback = function ($qu) use ($request ) {
+            $qu->whereNull('parent')
+            ->with(['Children.userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            },'GradeItems.userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            },'userGrades' => function($query) use ($request){
+                $query->where("user_id", $request->user_id);
+            }]); 
+        };
+
+        $course_callback = function ($qu) use ($request, $arabic_search) { 
+            $qu->where('name','LIKE', "%$request->month%")
+                ->orWhere('name','LIKE', "%$arabic_search%");
+        };
+
+        $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
+            $qu->where('role_id', 3);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
+            $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                ->with(['courses.gradeCategory' => $grade_category_callback]); 
+        };
+
+        $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
+                        ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+
+        return response()->json(['message' => null, 'body' => $result ], 200);
+    }
+
+    public function forsanMonthylReportAll(Request $request)
+    {
+        $request->validate([
+            'month'   => 'required|in:Feb,March,April',
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
+        ]);
+        $result_collection = collect([]);
+        $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
+
+        if($request->month == 'Feb')
+            $arabic_search = 'فبراير';
+        if($request->month == 'March')
+            $arabic_search = 'مارس';
+        if($request->month == 'April')
+            $arabic_search = 'بريل';
+
+        foreach($user_ids as $user_id){
+            $GLOBALS['user_id'] = $user_id;
+            $grade_category_callback = function ($qu) use ($user_id , $request) {
+                $qu->whereNull('parent')
+                ->with(['Children.userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                },'GradeItems.userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                },'userGrades' => function($query) use ($user_id , $request){
+                    $query->where("user_id", $user_id);
+                }]); 
+            };
+
+            $course_callback = function ($qu) use ($request, $arabic_search ) {
+                $qu->where('name','LIKE', "%$request->month%")
+                    ->orWhere('name','LIKE', "%$arabic_search%");
+            };
+
+            $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
+                $qu->where('role_id', 3);
+                $qu->whereHas('courses' , $course_callback)
+                    ->with(['courses' => $course_callback]); 
+                $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                    ->with(['courses.gradeCategory' => $grade_category_callback]); 
+            };
+            $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
+                            ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+            if($result != null)
+                $result_collection->push($result);
+        }
+        return response()->json(['message' => null, 'body' => $result_collection ], 200);
+    }
+
 }
