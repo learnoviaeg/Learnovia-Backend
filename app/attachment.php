@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class attachment extends Model
 {
-    //
     protected $fillable = ['name', 'path', 'description', 'type', 'extension','mime_type'];
+
     public function assignment()
     {
         return $this->belongsTo('Modules\Assigments\Entities\assignment', 'attachment_id', 'id');
     }
+
     public function UserAssigment()
     {
         return $this->belongsTo('Modules\Assigments\Entities\UserAssigment', 'attachment_id', 'id');
@@ -43,6 +44,7 @@ class attachment extends Model
 
         return $attachment;
     }
+    
     public function getPathAttribute() {
       return url(Storage::url($this->attributes['path']));
     }
