@@ -79,6 +79,7 @@ class MaterialsController extends Controller
             $material
             ->where('visible',1)
             ->where('publish_date' ,'<=', Carbon::now())
+            // ->where('type','!=','application/octet-stream')
             ->where(function($query) {                //Where accessible
                 $query->whereHasMorph(
                     'item',
@@ -98,29 +99,23 @@ class MaterialsController extends Controller
         }
 
 
+        $query=clone $material;
+
         if($request->has('item_type'))
             $material->where('type',$request->item_type);
 
         if($count == 'count'){
              //copy this counts to count it before filteration
-            $query=clone $materials_query;
-
-            $all=$query->select(DB::raw
-                            (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
-                                COUNT(case `type` when 'media' then 1 else null end) as media ,
-                                COUNT(case `type` when 'page' then 1 else null end) as page"
-                            ))->first()->only(['file','media','page']);
-            $cc['all']=$all['file']+$all['media']+$all['page'];
-
             $counts = $materials_query->select(DB::raw
                 (  "COUNT(case `type` when 'file' then 1 else null end) as file ,
                     COUNT(case `type` when 'media' then 1 else null end) as media ,
                     COUNT(case `type` when 'page' then 1 else null end) as page"
                 ))->first()->only(['file','media','page']);
-            $counts['all']=$cc['all'];
+            $counts['all']=$query->count();
 
             return response()->json(['message' => __('messages.materials.count'), 'body' => $counts], 200);
         }
+
         $result['last_page'] = Paginate::allPages($material->count(),$paginate);
         $result['total']= $material->count();
 
