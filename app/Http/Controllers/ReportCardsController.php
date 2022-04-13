@@ -836,6 +836,9 @@ class ReportCardsController extends Controller
                     $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
                         ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
     
+                    $second_term->enroll[$key]->courses->gradeCategory[0]->max=
+                        ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+    
                         if($olFound == true){
                             if($enroll->courses->gradeCategory != null)
                                 $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
