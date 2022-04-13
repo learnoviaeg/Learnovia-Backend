@@ -822,14 +822,13 @@ class SpatieController extends Controller
     */
     public function Get_Individual_Role(Request $request)
     {
-
         $request->validate([
             'roleid' => 'required|integer|exists:roles,id',
         ]);
 
         $findrole = Role::find($request->roleid);
-        if(Auth::user()->can('site/show-all-courses'))
-            $findrole->permissions;
+        $findrole->permissions;
+        
         return HelperController::api_response_format(200, $findrole);
     }
 
