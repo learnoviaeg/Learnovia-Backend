@@ -143,7 +143,7 @@ class Course extends Model
                 $create_intvals = array();
                 $v1 = $new['classes'];
                 $first   = str_replace("\"", "", $v1);
-                $r       = array($first);
+                $r       = $first;
                 $move1   = trim($r[0], "[");
                 $move2   = trim($move1, "]");
                 $v1_edit = explode(",", $move2); 
