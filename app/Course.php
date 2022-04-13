@@ -140,9 +140,9 @@ class Course extends Model
     {
         $old_count = count($old);
         if ($old_count == 0) {
-            $classes = $new['shared_classes']->pluck('id');
+            $classes = $new['classes']->pluck('id');
         }else{
-                $v1      = $old['shared_classes'];
+                $v1      = $old['classes'];
                 $first   = str_replace("\"", "", $v1);
                 $r       = array($first);
                 $move1   = trim($r[0], "[");
@@ -152,10 +152,10 @@ class Course extends Model
                 foreach ($v1_edit as $key => $value) {
                     array_push($intvals, intval($value));
                 }
-            if ($intvals == $new['shared_classes']->pluck('id')->toArray()) {
-                $classes = $new['shared_classes']->pluck('id');
+            if ($intvals == $new['classes']->pluck('id')->toArray()) {
+                $classes = $new['classes']->pluck('id');
             }else{
-                $v2 = $new['shared_classes']->pluck('id')->toArray();
+                $v2 = $new['classes']->pluck('id')->toArray();
                 $classes = array_merge($intvals, $v2);
             }
         }
