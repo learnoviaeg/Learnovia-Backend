@@ -245,7 +245,9 @@ class QuestionsController extends Controller
             'questions.*' => 'exists:questions,id',
         ]);
         foreach($request->questions as $question)
-            quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->delete();
+
+            $quizQuestion = quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->first();
+            $quizQuestion->delete();
             
         event(new UpdatedQuizQuestionsEvent($quiz_id));
         return HelperController::api_response_format(200,null , __('messages.quiz.unAssign'));
