@@ -138,9 +138,21 @@ class Course extends Model
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
+        $create_intvals = array();
+        $v1 = $new['classes'];
+        $first   = str_replace("\"", "", $v1);
+        $r       = $first;
+        $move1   = trim($r[0], "[");
+        $move2   = trim($move1, "]");
+        $v1_edit = explode(",", $move2); 
+        $intvals = array();
+        foreach ($v1_edit as $key => $value) {
+            array_push($create_intvals, intval($value));
+        }
+
         $old_count = count($old);
         if ($old_count == 0) {
-                $create_intvals = array();
+                /*$create_intvals = array();
                 $v1 = $new['classes'];
                 $first   = str_replace("\"", "", $v1);
                 $r       = $first;
@@ -150,9 +162,11 @@ class Course extends Model
                 $intvals = array();
                 foreach ($v1_edit as $key => $value) {
                     array_push($create_intvals, intval($value));
-                }
+                }*/
                 $classes = $create_intvals;
         }else{
+                $new_classes = $create_intvals;
+
                 $v1      = $old['classes'];
                 $first   = str_replace("\"", "", $v1);
                 $r       = array($first);
@@ -163,11 +177,10 @@ class Course extends Model
                 foreach ($v1_edit as $key => $value) {
                     array_push($intvals, intval($value));
                 }
-            if ($intvals == $new['classes']->pluck('id')->toArray()) {
-                $classes = $new['classes']->pluck('id');
+            if ($intvals == $new_classes) {
+                $classes = $new_classes;
             }else{
-                $v2 = $new['classes']->pluck('id')->toArray();
-                $classes = array_merge($intvals, $v2);
+                $classes = array_merge($intvals, $new_classes);
             }
         }
         return $classes;
