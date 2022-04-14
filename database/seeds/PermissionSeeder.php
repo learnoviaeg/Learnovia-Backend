@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-
+use App\status;
 
 class PermissionSeeder extends Seeder
 {
@@ -528,5 +528,9 @@ class PermissionSeeder extends Seeder
 
         //parent permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/parent', 'title' => 'set as parent']);
+
+        //create status
+        Status::firstOrCreate(['name' => 'Graded']);
+        Status::firstOrCreate(['name' => 'Not Graded']);
     }
 }
