@@ -29,6 +29,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\LastAction;
+
 class EnrollUserToCourseController extends Controller
 {
         /**
