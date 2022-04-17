@@ -29,9 +29,9 @@ class QuizLesson extends Model
     protected $table = 'quiz_lessons';
     protected $appends = ['started','user_seen_number','Status', 'token_attempts', 'ended'];
 
-    protected $dispatchesEvents = [
-        'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
-    ];
+    // protected $dispatchesEvents = [
+    //     'updated' => \App\Events\updateQuizAndQuizLessonEvent::class,
+    // ];
 
     public function getStartedAttribute(){
 
