@@ -687,7 +687,6 @@ class ReportCardsController extends Controller
 
 
         $second_term = function ($qu) use ($request , $Second_grade_category_callback , $course_callback) {
-            // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses' , $course_callback)
                 ->with(['courses' => $course_callback]); 
@@ -704,33 +703,40 @@ class ReportCardsController extends Controller
         $second_term = User::select('id','firstname' , 'lastname')->whereId($request->user_id)->whereHas('enroll' , $second_term)
         ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
 
+
+        $first_term->enrolls =  collect($first_term->enroll)->sortBy('courses.index')->values();
+        $second_term->enrolls =  collect($second_term->enroll)->sortBy('courses.index')->values();
+
+        unset($first_term->enroll);
+        unset($second_term->enroll);
+
         $total = 0;
         $student_mark = 0;
         $result = collect([]);
 
         $olFound = true;
-        foreach($first_term->enroll as $key => $enroll){   
+        foreach($first_term->enrolls as $key => $enroll){   
             if(!$total_check)
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
 
-             if(isset($second_term->enroll[$key]->courses->gradeCategory[1])){
-                $factor = $second_term->enroll[$key]->courses->gradeCategory[1]->max;
+             if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
+                $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
 
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
 
-                $second_term->enroll[$key]->courses->gradeCategory[0]->max=
-                    ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
+                    ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
 
                     if($olFound == true){
                         if($enroll->courses->gradeCategory != null)
-                            $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                            $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
             
                         if($enroll->courses->gradeCategory[0]->userGrades != null)
-                            $student_mark += $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
+                            $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
                     }
-                    unset($second_term->enroll[$key]->courses->gradeCategory[1]);
+                    unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
                     if(str_contains($enroll->courses->name, 'O.L'))
                         $olFound = false;
             }   
@@ -767,7 +773,7 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
+        $total_check=(array_intersect([7 ,8 , 9, 10 , 11 , 12], $request->levels));
 
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
@@ -819,34 +825,40 @@ class ReportCardsController extends Controller
             
             $second_term = User::select('id','firstname' , 'lastname')->whereId($user_id)->whereHas('enroll' , $second_term)
             ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+
+            $first_term->enrolls =  collect($first_term->enroll)->sortBy('courses.index')->values();
+            $second_term->enrolls =  collect($second_term->enroll)->sortBy('courses.index')->values();
+    
+            unset($first_term->enroll);
+            unset($second_term->enroll);
     
             $total = 0;
             $student_mark = 0;
             $result = collect([]);
     
             $olFound = true;
-            foreach($first_term->enroll as $key => $enroll){   
+            foreach($first_term->enrolls as $key => $enroll){   
                 if(!$total_check)
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
     
-                 if(isset($second_term->enroll[$key]->courses->gradeCategory[1])){
-                    $factor = $second_term->enroll[$key]->courses->gradeCategory[1]->max;
+                 if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
+                    $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
     
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
     
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->max=
-                        ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
+                        ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
     
                         if($olFound == true){
                             if($enroll->courses->gradeCategory != null)
-                                $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                                $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
                 
                             if($enroll->courses->gradeCategory[0]->userGrades != null)
-                                $student_mark += $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
+                                $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
                         }
-                        unset($second_term->enroll[$key]->courses->gradeCategory[1]);
+                        unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
                         if(str_contains($enroll->courses->name, 'O.L'))
                             $olFound = false;
                 }   
