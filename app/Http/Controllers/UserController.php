@@ -120,7 +120,7 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-            try{
+           /* try{
                 $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
                     'headers'   => [
                         'Content-Type' => 'application/json'
@@ -130,20 +130,32 @@ class UserController extends Controller
             }
             catch(\Exception $e){
                 throw new \Exception($e->getMessage());
-            }
+            }*/
             
-            $user = User::create([
+           /* $user = User::create([
                 'firstname' => $firstname,
                 'lastname' => $request->lastname[$key],
                 'username' => $request->username[$key],
                 'password' => bcrypt($request->password[$key]),
                 'real_password' => $request->password[$key],
                 'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
-                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
-                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
+                //'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+                //'chat_token' => json_decode($res->getBody(),true)['custom_token'],
+                //'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
 
-            ]);
+            ]);*/
+
+                $user = new User;
+                $user->firstname               = $firstname;
+                $user->lastname                = $request->lastname[$key];
+                $user->username                = $request->username[$key];
+                $user->password                = bcrypt($request->password[$key]);
+                $user->real_password           = $request->password[$key];
+                $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
+                // $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
+                // $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
+                // $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
+
 
             foreach ($optionals as $optional){
                 if($request->filled($optional[$i])){
@@ -159,11 +171,11 @@ class UserController extends Controller
             }
             $i++;
 
-            $user->save();
             if(!isset($user->language)){
                 $user->language = Language::where('default', 1)->first()->id;
-                $user->save();
+                //$user->save();
             }
+            $user->save();
             $role = Role::find($request->role);
             $user->assignRole($role);
             if($request->role ==1)
@@ -244,10 +256,13 @@ class UserController extends Controller
             Parents::where('parent_id',$user->id)->update(['current'=> 0]);
         }
 
-        $check = $user->update([
+       /* $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
-        ]);
+        ]);*/
+
+            $user->firstname = $request->firstname;
+            $user->lastname  = $request->lastname;
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
@@ -342,7 +357,7 @@ class UserController extends Controller
 
         foreach($request->users_id as $user_id)
         {
-            $user=User::find($user_id);
+            $user = User::find($user_id);
 
             // user can't delete himself
             if(Auth::id() == $user_id)
@@ -353,10 +368,17 @@ class UserController extends Controller
                 if(in_array(1,$user->roles->pluck('id')->toArray()))
                     return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
         }
-        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
-
-        $user = User::whereIn('id',$request->users_id)->delete();
-
+        //$all=Enroll::whereIn('user_id',$request->users_id)->delete();
+        //$user = User::whereIn('id', $request->users_id)->delete();
+        foreach($request->users_id as $user_id)
+        {
+            $enroll  = Enroll::where('user_id',$user_id)->first();
+            if ($enroll != null) {
+                $enroll->delete();
+            }
+            $user    = User::find($user_id);
+            $user->delete();
+        }
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
 
