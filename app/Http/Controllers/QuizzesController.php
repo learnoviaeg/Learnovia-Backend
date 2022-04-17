@@ -323,7 +323,7 @@ class QuizzesController extends Controller
                     ]);
     
             // update timeline object and sending notifications
-            event(new updateQuizAndQuizLessonEvent($quiz_lesson));
+            // event(new updateQuizAndQuizLessonEvent($quiz_lesson));
             event(new UpdatedQuizQuestionsEvent($quiz->id));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
