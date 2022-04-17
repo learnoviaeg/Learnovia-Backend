@@ -167,9 +167,6 @@ class TimelineController extends Controller
                 $course_id = $secondary_chain->course_id;
                 $class_id = $secondary_chain->group_id;
                 $level_id = Course::find($courseID)->level_id;
-                // $course_id = $lesson->courseSegment->course_id;
-                // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-                // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
                 if(isset($item_name)){
                     $new_timeline = Timeline::firstOrCreate([
                             'item_id' => $request->id,

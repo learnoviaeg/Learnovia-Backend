@@ -50,9 +50,9 @@ class createTimelineListener
                 Timeline::updateOrCreate([
                                     'item_id' => $event->Quiz,
                                     'class_id' => $class,
-                                    'lesson_id' => $quiz_lesson->lesson_id,
                                     'type' => 'quiz',
                                 ],[
+                                    'lesson_id' => $quiz_lesson->lesson_id,
                                     'name' => $quiz->name,
                                     'start_date' => $quiz_lesson->start_date,
                                     'due_date' => $quiz_lesson->due_date,
