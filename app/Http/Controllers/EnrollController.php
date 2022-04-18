@@ -88,7 +88,12 @@ class EnrollController extends Controller
             Enroll::whereIn('user_id',$parent)->where('role_id',7)->where('course',$enroll->course)->delete();
         }
 
-        $chains->delete();
+        // updated ahmed
+        foreach ($chains as $key => $chain) {
+            $chain->delete();
+        }
+
+        // $chains->delete();
         return response()->json(['message' => __('messages.enroll.delete'), 'body' => null], 200);
     }
 }
