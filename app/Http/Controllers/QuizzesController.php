@@ -24,7 +24,6 @@ use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\Questions;
 use App\LastAction;
 use Carbon\Carbon;
-use App\Events\updateQuizAndQuizLessonEvent;
 use App\Notification;
 use App\Notifications\QuizNotification;
 use App\Timeline;
@@ -323,7 +322,6 @@ class QuizzesController extends Controller
                     ]);
     
             // update timeline object and sending notifications
-            // event(new updateQuizAndQuizLessonEvent($quiz_lesson));
             event(new UpdatedQuizQuestionsEvent($quiz->id));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
