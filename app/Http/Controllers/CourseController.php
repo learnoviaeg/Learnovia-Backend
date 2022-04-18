@@ -221,7 +221,7 @@ class CourseController extends Controller
         {
             $countAllLessons = Lesson::where('course_id', $request->id)->where('shared_lesson',1)->count();
             if($countAllLessons > 0)
-                return HelperController::api_response_format(400, $course, __('messages.course.canNot_update'));
+                return HelperController::api_response_format(200, $course, __('messages.course.canNot'));
 
             $editable[]='shared_lesson';    
         }
