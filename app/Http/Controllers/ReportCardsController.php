@@ -10,14 +10,14 @@ use App\ScaleDetails;
 use Spatie\Permission\Models\Permission;
 
 class ReportCardsController extends Controller
-{
+{ 
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb'],   ['only' => ['manaraReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
-        $this->middleware(['permission:report_card/haramain/all'],   ['only' => ['haramaninReportAll']]);
+        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
@@ -32,7 +32,24 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
+            'term'    => 'required|in:first,final',
         ]);
+
+        if($request->term == 'first')
+            $course_callback = function ($qu) use ($request ) {
+                $qu->Where(function ($query) {
+                    $query->where('name', 'LIKE' , "%First term%")
+                        ->orWhere('name','LIKE' , "%ترم الاول%");
+                });     
+            };
+
+        if($request->term == 'final')
+            $course_callback = function ($qu) use ($request ) {
+                $qu->Where(function ($query) {
+                    $query->where('name', 'LIKE' , "%Second term%")
+                        ->orWhere('name','LIKE' , "%ترم الثان%");
+                });     
+            };
 
         $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
         $allowed_levels=json_decode($allowed_levels);
@@ -55,13 +72,6 @@ class ReportCardsController extends Controller
             }]); 
         };
 
-        $course_callback = function ($qu) use ($request ) {
-            $qu->Where(function ($query) {
-                $query->where('name', 'LIKE' , "%Grades%")
-                      ->orWhere('name','LIKE' , "%درجات%");
-            });     
-        };
-
         $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
             $qu->where('role_id', 3);
             $qu->whereHas('courses' , $course_callback)
@@ -71,7 +81,7 @@ class ReportCardsController extends Controller
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback , 'enroll.levels' , 'enroll.type'])->first();
+                ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
@@ -246,6 +256,7 @@ class ReportCardsController extends Controller
             'segments.*' => 'exists:segments,id',
             'courses' => 'array',
             'courses.*' => 'exists:courses,id',
+            'term'    => 'required|in:first,final',
         ]);
     
         $result_collection = collect([]);
@@ -266,12 +277,21 @@ class ReportCardsController extends Controller
             };
 
 
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%Grades%")
-                        ->orWhere('name','LIKE' , "%درجات%");
-                });     
-            };
+            if($request->term == 'first')
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%First term%")
+                            ->orWhere('name','LIKE' , "%ترم الاول%");
+                    });     
+                };
+
+            if($request->term == 'final')
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%Second term%")
+                            ->orWhere('name','LIKE' , "%ترم الثان%");
+                    });     
+                };
 
             $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
                 $qu->where('role_id', 3);
@@ -643,10 +663,10 @@ class ReportCardsController extends Controller
     public function fglFinalReport(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id', 
         ]);
 
-        $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
+        $allowed_levels=Permission::where('name','report_card/fgls/final')->pluck('allowed_levels')->first();
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         $check=(array_intersect($allowed_levels, $student_levels));
@@ -687,7 +707,6 @@ class ReportCardsController extends Controller
 
 
         $second_term = function ($qu) use ($request , $Second_grade_category_callback , $course_callback) {
-            // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses' , $course_callback)
                 ->with(['courses' => $course_callback]); 
@@ -704,33 +723,40 @@ class ReportCardsController extends Controller
         $second_term = User::select('id','firstname' , 'lastname')->whereId($request->user_id)->whereHas('enroll' , $second_term)
         ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
 
+
+        $first_term->enrolls =  collect($first_term->enroll)->sortBy('courses.index')->values();
+        $second_term->enrolls =  collect($second_term->enroll)->sortBy('courses.index')->values();
+
+        unset($first_term->enroll);
+        unset($second_term->enroll);
+
         $total = 0;
         $student_mark = 0;
         $result = collect([]);
 
         $olFound = true;
-        foreach($first_term->enroll as $key => $enroll){   
+        foreach($first_term->enrolls as $key => $enroll){   
             if(!$total_check)
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
 
-             if(isset($second_term->enroll[$key]->courses->gradeCategory[1])){
-                $factor = $second_term->enroll[$key]->courses->gradeCategory[1]->max;
+             if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
+                $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
 
-                $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
 
-                $second_term->enroll[$key]->courses->gradeCategory[0]->max=
-                    ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
+                    ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
 
                     if($olFound == true){
                         if($enroll->courses->gradeCategory != null)
-                            $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                            $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
             
                         if($enroll->courses->gradeCategory[0]->userGrades != null)
-                            $student_mark += $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
+                            $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
                     }
-                    unset($second_term->enroll[$key]->courses->gradeCategory[1]);
+                    unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
                     if(str_contains($enroll->courses->name, 'O.L'))
                         $olFound = false;
             }   
@@ -767,7 +793,7 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
+        $total_check=(array_intersect([7 ,8 , 9, 10 , 11 , 12], $request->levels));
 
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
@@ -819,34 +845,40 @@ class ReportCardsController extends Controller
             
             $second_term = User::select('id','firstname' , 'lastname')->whereId($user_id)->whereHas('enroll' , $second_term)
             ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
+
+            $first_term->enrolls =  collect($first_term->enroll)->sortBy('courses.index')->values();
+            $second_term->enrolls =  collect($second_term->enroll)->sortBy('courses.index')->values();
+    
+            unset($first_term->enroll);
+            unset($second_term->enroll);
     
             $total = 0;
             $student_mark = 0;
             $result = collect([]);
     
             $olFound = true;
-            foreach($first_term->enroll as $key => $enroll){   
+            foreach($first_term->enrolls as $key => $enroll){   
                 if(!$total_check)
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
     
-                 if(isset($second_term->enroll[$key]->courses->gradeCategory[1])){
-                    $factor = $second_term->enroll[$key]->courses->gradeCategory[1]->max;
+                 if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
+                    $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
     
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
     
-                    $second_term->enroll[$key]->courses->gradeCategory[0]->max=
-                        ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
+                        ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
     
                         if($olFound == true){
                             if($enroll->courses->gradeCategory != null)
-                                $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enroll[$key]->courses->gradeCategory[0]->max) * $factor;
+                                $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
                 
                             if($enroll->courses->gradeCategory[0]->userGrades != null)
-                                $student_mark += $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
+                                $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
                         }
-                        unset($second_term->enroll[$key]->courses->gradeCategory[1]);
+                        unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
                         if(str_contains($enroll->courses->name, 'O.L'))
                             $olFound = false;
                 }   
