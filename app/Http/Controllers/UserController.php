@@ -120,7 +120,7 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-           /* try{
+            try{
                 $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
                     'headers'   => [
                         'Content-Type' => 'application/json'
@@ -130,7 +130,7 @@ class UserController extends Controller
             }
             catch(\Exception $e){
                 throw new \Exception($e->getMessage());
-            }*/
+            }
             
            /* $user = User::create([
                 'firstname' => $firstname,
@@ -152,9 +152,9 @@ class UserController extends Controller
                 $user->password                = bcrypt($request->password[$key]);
                 $user->real_password           = $request->password[$key];
                 $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
-                // $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
-                // $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
-                // $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
+                $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
+                $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
+                $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
 
 
             foreach ($optionals as $optional){

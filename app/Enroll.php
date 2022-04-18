@@ -153,12 +153,12 @@ class Enroll extends Model
     {
         $old_count = count($old);
         if ($old_count == 0) {
-            $segment_id = [intval($new['segment_id'])];
+            $segment_id = [intval($new['segment'])];
         }else{
-            if ($old['segment_id'] == $new['segment_id']) {
-                $segment_id = [intval($new['segment_id'])];
+            if ($old['segment'] == $new['segment']) {
+                $segment_id = [intval($new['segment'])];
             }else{
-                $segment_id = [intval($old['segment_id']), intval($new['segment_id'])];
+                $segment_id = [intval($old['segment']), intval($new['segment'])];
             }
         }
         return $segment_id;

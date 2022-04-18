@@ -12,7 +12,7 @@ use App\Traits\Auditable;
 
 class Material extends Model
 {
-    use Auditable;
+   use Auditable;
     
     protected $fillable = [
         'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by','restricted'
@@ -50,8 +50,12 @@ class Material extends Model
         return $url;
     }
 
-    public function getMainLinkAttribute(){
-        return $this->getOriginal()['link'];
+   public function getMainLinkAttribute()
+   {
+        if ($this->getOriginal() != null) 
+        {
+            return $this->getOriginal()['link'];
+        }
     }
 
     public function course(){
