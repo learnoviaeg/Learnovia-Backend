@@ -236,21 +236,30 @@ class CoursesController extends Controller
             'image' => 'nullable',
             'description' => 'nullable',
             'mandatory' => 'nullable|in:0,1',
+            'shared_lesson' => 'nullable|in:0,1',
             'short_name' => 'unique:courses,short_name,'.$id,
             'course_template' => 'nullable|exists:courses,id',
-            'shared_lesson' => 'in:1,0',
             'is_template' => 'nullable|boolean|required_with:course_template',
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
+        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
         $course = Course::find($id);
         // if course has an image
-        if($request->hasFile('image')) 
+        if ($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
         
-        foreach($editable as $key) 
-            if($request->filled($key)) 
+        if(isset($request->shared_lesson) && $request->shared_lesson == 0)
+        {
+            $countAllLessons = Lesson::where('course_id', $id)->where('shared_lesson',1)->count();
+            if($countAllLessons > 0)
+                return HelperController::api_response_format(200, $course, __('messages.course.canNot_update'));
+
+            $editable[]='shared_lesson';    
+        }
+
+        foreach ($editable as $key) 
+            if ($request->filled($key)) 
                 $course->$key = $request->$key;
 
         if($request->filled('course_template')){
@@ -270,6 +279,10 @@ class CoursesController extends Controller
                 ]);
             }            
         }
+
+        if($request->filled('shared_lesson'))
+            $lessons = Lesson::where('course_id', $request->id)->update(['shared_lesson' => $request->shared_lesson]);
+
         $course->save();
         return HelperController::api_response_format(200, $course, __('messages.course.update'));
     }

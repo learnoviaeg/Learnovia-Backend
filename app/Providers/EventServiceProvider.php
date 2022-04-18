@@ -77,12 +77,7 @@ class EventServiceProvider extends ServiceProvider
         //7esab daragat el2s2la el manual(and_why & essay)
         // 'App\Events\ManualCorrectionEvent' => [
         //     'App\Listeners\GradeManualListener',
-        // ],
-
-        'App\Events\updateQuizAndQuizLessonEvent' => [
-            'App\Listeners\updateTimelineListener',
-            // 'App\Listeners\updateGradeCatListener',
-        ],    
+        // ],   
 
         'App\Events\GraderSetupEvent' => [
             'App\Listeners\RefreshGraderSetupListener',

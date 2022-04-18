@@ -64,7 +64,7 @@ class TimelineController extends Controller
         $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
-                            ->whereIn('class_id',$sec_chain->pluck('group_id'))
+                            // ->whereIn('class_id',$sec_chain->pluck('group_id'))
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
                             ->whereIn('type', ['quiz','assignment'])

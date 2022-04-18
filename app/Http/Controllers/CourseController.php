@@ -216,6 +216,15 @@ class CourseController extends Controller
         // if course has an image
         if ($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
+
+        if(isset($request->shared_lesson) && $request->shared_lesson == 0)
+        {
+            $countAllLessons = Lesson::where('course_id', $request->id)->where('shared_lesson',1)->count();
+            if($countAllLessons > 0)
+                return HelperController::api_response_format(400, $course, __('messages.course.canNot_update'));
+
+            $editable[]='shared_lesson';    
+        }
         
         foreach ($editable as $key) 
             if ($request->filled($key)) 
@@ -242,17 +251,8 @@ class CourseController extends Controller
         if($request->filled('shared_lesson'))
             $lessons = Lesson::where('course_id', $request->id)->update(['shared_lesson' => $request->shared_lesson]);
 
-        // $course_segment = CourseSegment::where("course_id",$request->id);
-        // if ($request->filled('start_date')) 
-        //      $course_segment->update(['start_date'=>$request->start_date]); 
-        
-        // if ($request->filled('end_date')) 
-        //     $course_segment->update(['end_date' => $request->end_date]);
-         
         $course->save();
-        // $req = new Request();
         return HelperController::api_response_format(200, $course, __('messages.course.update'));
-          // return HelperController::api_response_format(200, Course::with(['category', 'attachment'])->paginate(HelperController::GetPaginate($request)), 'Course Updated Successfully');
     }
 
     /**
