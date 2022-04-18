@@ -89,7 +89,7 @@ class EnrollController extends Controller
         }
 
         // updated ahmed
-        foreach ($chains as $key => $chain) {
+        foreach ($logsbefore as $key => $chain) {
             $chain->delete();
         }
 
