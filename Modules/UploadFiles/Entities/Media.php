@@ -96,10 +96,10 @@ class media extends Model
             $course_id = null;
         }else{
             $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
-           /* $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'media', 'subject_id' => $new->id])->first();
+           $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'media', 'subject_id' => $new->id])->first();
             $audit_log_quiz_course_id->update([
                 'course_id' => $course_id
-            ]);*/
+            ]);
         }
         return $course_id;
     }

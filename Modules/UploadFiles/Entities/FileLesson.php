@@ -75,10 +75,10 @@ class FileLesson extends Model
     {
         $lesson_id   = $new->lesson_id;
         $course_id[]  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-        /*$audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->first();
+        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->first();
         $audit_log_quiz_course_id->update([
             'course_id' => $course_id
-        ]);*/
+        ]);
         return $course_id;
     }
     // end function get name and value attribute
