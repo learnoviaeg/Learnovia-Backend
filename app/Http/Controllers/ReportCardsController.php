@@ -22,7 +22,7 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll'],   ['only' => ['manaraMonthylReportAll']]);
-        $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
+        // $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
         $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
         $this->middleware(['permission:report_card/forsan/monthly/printAll'],   ['only' => ['forsanMonthylReportAll']]);
@@ -676,7 +676,6 @@ class ReportCardsController extends Controller
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
-
         $First_grade_category_callback = function ($qu) use ($request ) {
             $qu->where('name', 'First Term');
             $qu->with(['userGrades' => function($query) use ($request){
@@ -760,12 +759,26 @@ class ReportCardsController extends Controller
                     if(str_contains($enroll->courses->name, 'O.L'))
                         $olFound = false;
             }   
+
+            $percentage =($second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade /$second_term->enrolls[$key]->courses->gradeCategory[0]->max) * 100;
+           $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                       ->where('higher_boundary', '>', $percentage)->first();
+   
+           if($percentage == 100)
+               $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+               ->where('higher_boundary', '>=', $percentage)->first();
+
+            $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->letter = $evaluation->evaluation;
             
         }
         $second_term->add_total = false;
         if(count($total_check) > 0){
             $second_term->student_total_mark = $student_mark;
             $second_term->total = $total;
+            $second_term->total_mark_evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=',  ($student_mark/$total) *100 )
+                                            ->where('higher_boundary', '>',  ($student_mark/$total) *100)->first();
+            
+            // ($student_mark/$total) *100;
             $second_term->add_total = true;
         }
        
@@ -855,98 +868,72 @@ class ReportCardsController extends Controller
             $total = 0;
             $student_mark = 0;
             $result = collect([]);
-    
+
             $olFound = true;
-            foreach($first_term->enrolls as $key => $enroll){   
-                if(!$total_check)
+
+            foreach($first_term->enrolls as $key => $enroll){  
+                if(!$total_check){
+                    if(isset($second_term->enrolls[$key])){
                     $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                    ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
-    
-                 if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
-                    $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
-    
-                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
-    
-                    $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
-                        ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
-    
-                        if($olFound == true){
-                            if($enroll->courses->gradeCategory != null)
-                                $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
+                        ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
+
+                    $percentage =($second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade /$second_term->enrolls[$key]->courses->gradeCategory[0]->max) * 100;
+                    $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                                ->where('higher_boundary', '>', $percentage)->first();
+            
+                    if($percentage == 100)
+                        $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                        ->where('higher_boundary', '>=', $percentage)->first();
+        
+                    $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->letter = $evaluation->evaluation;
+                    }
+                }
+                    
+                    if(isset($second_term->enrolls[$key+1]->courses->gradeCategory[1])){
+                        $factor = $second_term->enrolls[$key+1]->courses->gradeCategory[1]->max;
+        
+                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade =
+                            ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+        
+                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max=
+                            ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * $factor;
+        
+                            $percentage =($second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade /$second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * 100;
+                        $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                                    ->where('higher_boundary', '>', $percentage)->first();
                 
-                            if($enroll->courses->gradeCategory[0]->userGrades != null)
-                                $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
-                        }
-                        unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
-                        if(str_contains($enroll->courses->name, 'O.L'))
-                            $olFound = false;
-                }   
-                
-            }
+                        if($percentage == 100)
+                            $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
+                            ->where('higher_boundary', '>=', $percentage)->first();
+            
+                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->letter = $evaluation->evaluation;
+
+                            if($olFound == true){
+                                if($enroll->courses->gradeCategory != null)
+                                    $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * $factor;
+                    
+                                if($enroll->courses->gradeCategory[0]->userGrades != null)
+                                    $student_mark += $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade;
+                            }
+                            unset($second_term->enrolls[$key+1]->courses->gradeCategory[1]);
+                            if(str_contains($enroll->courses->name, 'O.L'))
+                                $olFound = false;
+                    }
+                 
+             }
+ 
             $second_term->add_total = false;
             if(count($total_check) > 0){
                 $second_term->student_total_mark = $student_mark;
                 $second_term->total = $total;
+                if($total == 0)
+                    $second_term->total_mark_evaluation ='Failed';
+                    else
+                $second_term->total_mark_evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=',  ($student_mark/$total) *100 )
+                ->where('higher_boundary', '>',  ($student_mark/$total) *100)->first();
                 $second_term->add_total = true;
             }
 
-
-            //////////////////newnnew
-            ////////////////////////////////
-            // $First_grade_category_callback = function ($qu) use ($request , $user_id ) {
-            //     $qu->where('name', 'First Term');
-            //     $qu->with(['userGrades' => function($query) use ($request , $user_id){
-            //         $query->where("user_id", $user_id);
-            //     }]);     
-            // };
-    
-            // $Second_grade_category_callback = function ($qu) use ($request,$user_id ) {
-            //     $qu->where('name', 'Second Term');
-            //     $qu->with(['userGrades' => function($query) use ($request , $user_id){
-            //         $query->where("user_id", $user_id);
-            //     }]);     
-            // };
-    
-    
-            // $course_callback = function ($qu) use ($request ) {
-            //     $qu->orderBy('index', 'Asc');
-            // };
-    
-            // $first_term = function ($qu) use ($request , $First_grade_category_callback , $course_callback) {
-            //     $qu->whereHas('courses' , $course_callback)
-            //     ->with(['courses' => $course_callback]); 
-            //     $qu->where('role_id', 3);
-            //     $qu->whereHas('courses.gradeCategory' , $First_grade_category_callback)
-            //         ->with(['courses.gradeCategory' => $First_grade_category_callback]); 
-    
-            // };
-    
-    
-            // $second_term = function ($qu) use ($request , $Second_grade_category_callback , $course_callback) {
-            //     // $qu->orderBy('course', 'Asc');
-            //     $qu->where('role_id', 3);
-            //     $qu->whereHas('courses' , $course_callback)
-            //         ->with(['courses' => $course_callback]); 
-            //     $qu->whereHas('courses.gradeCategory' , $Second_grade_category_callback)
-            //         ->with(['courses.gradeCategory' => $Second_grade_category_callback]); 
-    
-            // };
-    
-            // $first_term = User::whereId($user_id)->whereHas('enroll' , $first_term)
-            //                 ->with(['enroll' => $first_term])->first();
-    
-            
-            // $second_term = User::whereId($user_id)->whereHas('enroll' , $second_term)
-            // ->with(['enroll' => $second_term , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
-     
-    
-            // foreach($first_term->enroll as $key => $enroll){   
-            //     if(isset($second_term->enroll[$key]))
-            //         $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
-            //         ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enroll[$key]->courses->gradeCategory[0]->userGrades[0]->grade)/2;
-            // }
-            ///////////////////////////////////////////////////
             if($second_term != null)
                 $result_collection->push($second_term);
         }
