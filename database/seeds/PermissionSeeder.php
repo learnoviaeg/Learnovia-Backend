@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-
+use App\status;
 
 class PermissionSeeder extends Seeder
 {
@@ -303,6 +303,19 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/all', 'title' => 'print all forsan','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl/all', 'title' => 'print all fgl','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/allow_levels', 'title' => 'Allow Levels','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/final', 'title' => 'Final report card (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/all-final', 'title' => 'Final report print all haramain','icon' => 'Report-Card','dashboard'=>1]);
+
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly', 'title' => 'Monthly Report(mfisg)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/feb', 'title' => 'February report','icon' => 'Report-Card']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/march', 'title' => 'March report','icon' => 'Report-Card']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/april', 'title' => 'April report','icon' => 'Report-Card']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/monthly/printAll', 'title' => 'monthly report print all girls','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/final', 'title' => 'Fgls Final Report','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/all-final', 'title' => 'Fgls Final Report (print all)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/monthly', 'title' => 'Forsan monthly report','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/monthly/printAll', 'title' => 'Forsan monthly report(print all)','icon' => 'Report-Card','dashboard'=>1]);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
@@ -355,7 +368,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/edit_restriction', 'title' => 'Edit Restriction']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assign_restrition', 'title' => 'Assign Restriction']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/assign_restriction', 'title' => 'Assign Restriction']);
 
         //Timeline Resources Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'timeline/store', 'title' => 'Store Timeline']);
@@ -518,5 +531,9 @@ class PermissionSeeder extends Seeder
 
         //parent permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/parent', 'title' => 'set as parent']);
+
+        //create status
+        Status::firstOrCreate(['name' => 'Graded']);
+        Status::firstOrCreate(['name' => 'Not Graded']);
     }
 }

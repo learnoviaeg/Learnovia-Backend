@@ -380,7 +380,7 @@ class UserGradeController extends Controller
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback])->first();
+                        ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
         $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
 
         foreach($result->enrolls as $enroll){ 
@@ -427,7 +427,7 @@ class UserGradeController extends Controller
             'classes.*' => 'exists:classes,id',
             ]);     
 
-        $grade_categories = GradeCategory::whereIn('course_id', $request->courses);
+        $grade_categories = GradeCategory::whereIn('course_id', $request->courses)->withoutGlobalScopes();
         $cat_ids =  $grade_categories->get()->pluck('id')->toArray();
 
         $grade_Categroies_ids = $grade_categories

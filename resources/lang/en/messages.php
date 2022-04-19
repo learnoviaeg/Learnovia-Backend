@@ -31,6 +31,7 @@ return [
         'not_allowed' => 'You are not allowed to view this.',
         'not_allowed_to_edit' => 'You are not allowed to edit this.',
         'not_allowed_to_delete' => 'You are not allowed to delete this.',
+        'assigned_before' => 'Assigned before',
         'extension_error' => 'This extension is not valid'
     ],
     'success' => [
@@ -299,6 +300,7 @@ return [
     'course' => [
         'add' => 'Course added successfully',
         'update' => 'Course updated successfully',
+        'canNot' => 'You can\'t update this course',
         'delete' => 'Course deleted successfully',
         'list' => 'Courses List',
         'object' => 'Course details',

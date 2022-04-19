@@ -458,4 +458,23 @@ class ScriptsController extends Controller
         }
         return 'Done';
     }
+
+    public function delete_wrong_course(Request $request)
+    {
+        $courses=Enroll::select('course','segment')->where('segment',$request->segment_id)->get();
+        foreach($courses as $course)
+        {
+            if(Course::find($course->course)->segment_id != $course->segment)
+                Enroll::where('course',$course->course)->where('segment',$request->segment_id)->delete();
+        }
+
+        return 'Done';
+    }
+
+    public function deleteEnrollmentInWrongClasses(Request $request)
+    {
+        // SELECT * FROM `enrolls` WHERE `created_at` >= '2022-04-04 08:00:53' ORDER BY `user_id` ASC
+        $enrolls=Enroll::where('created_at','>=', '2022-04-04 08:00:53')->whereNotIn('course',[905,903,904])->delete();
+        return 'Done';
+    }
 }

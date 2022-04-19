@@ -416,6 +416,8 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
     Route::get('lesson_sorting', 'ScriptsController@lessons_index');
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
+    Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
+    Route::get('deleteEnrollmentInWrongClasses', 'ScriptsController@deleteEnrollmentInWrongClasses');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -455,6 +457,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('quizzes/{quiz_id}/{questions}', 'QuestionsController@index')->middleware(['permission:quiz/detailes|quiz/answer' , 'ParentCheck']);
     Route::post('quizzes/{quiz_id}/{questions}', 'QuestionsController@assign');//->middleware(['permission:quiz/add' , 'ParentCheck']);
     Route::get('quizz/{count}', 'QuizzesController@index')->middleware(['permission:quiz/get' , 'ParentCheck']);
+    Route::post('quizzes/drag', 'QuizzesController@Drag')->middleware(['permission:quiz/update']);
 
     Route::get('close_attempts', 'QuizzesController@closeAttempts');
     Route::get('attempts/export', 'AttemptsController@exportAttempts');
@@ -464,6 +467,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     // Route::post('questions/assign', 'QuestionsController@Assign')->middleware(['permission:quiz/add']);
 
     Route::post('assignments/update/{id}', 'AssignmentController@update')->middleware(['permission:assignment/update']);
+    Route::post('assignments/drag', 'AssignmentController@Drag')->middleware(['permission:assignment/update']);
     Route::Resource('assignments', AssignmentController::class);
     Route::get('assignments/{assignment_id}/{lesson_id}', 'AssignmentController@show');
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
@@ -608,7 +612,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
     Route::get('fgl', 'UserGradeController@fglReport')->middleware('permission:report_card/fgls');
-    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain');
+    Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain|report_card/haramain/final');
     Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
     Route::get('manara', 'ReportCardsController@manaraReport');
     Route::post('manara-all', 'ReportCardsController@manaraReportAll');
@@ -617,6 +621,12 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
     Route::get('fgl-prep3', 'ReportCardsController@fglPrep3Report')->middleware('permission:report_card/fgls');
     Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
+    Route::get('mfis/monthly', 'ReportCardsController@manaraMonthlyReport');
+    Route::post('manara-monthly-all', 'ReportCardsController@manaraMonthylReportAll');
+    Route::get('fgl-final-kg', 'ReportCardsController@fglFinalReport');
+    Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
+    Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
+    Route::post('forsan/monthly-all', 'ReportCardsController@forsanMonthylReportAll');
 });
 
 //script for front-end editor

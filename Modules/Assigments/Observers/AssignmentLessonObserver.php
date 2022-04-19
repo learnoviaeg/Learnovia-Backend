@@ -139,7 +139,6 @@ class AssignmentLessonObserver
                 ]);
             }
 
-
             $this->report->calculate_course_progress($course_id);
         }
     }
@@ -152,7 +151,6 @@ class AssignmentLessonObserver
      */
     public function deleted(AssignmentLesson $assignmentLesson)
     {
-
         //for log event
         $logsbefore=Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->get();
         $all = Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
@@ -162,13 +160,11 @@ class AssignmentLessonObserver
         $LessonComponent =  LessonComponent::where('comp_id',$assignmentLesson->assignment_id)
                             ->where('lesson_id',$assignmentLesson->lesson_id)->where('model' , 'assignment')->first();
 
-
-            $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
-                ->where('model' , 'assignment')->first();
-            LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)
-                ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
-            $LessonComponent->delete();
-        
+        $current_lesson_component = LessonComponent::select('index')->where('lesson_id',$assignmentLesson->lesson_id)->where('comp_id',$assignmentLesson->assignment_id)
+            ->where('model' , 'assignment')->first();
+        LessonComponent::where('lesson_id',$assignmentLesson->lesson_id)
+            ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
+        $LessonComponent->delete();
 
         $lesson = Lesson::find($assignmentLesson->lesson_id);
         $course_id = $lesson->course_id;
