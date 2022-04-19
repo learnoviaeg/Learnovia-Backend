@@ -72,8 +72,9 @@ class MediaLesson extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $lessons_id   = MediaLesson::where('media_id', $new->media_id)->pluck('lesson_id');
-        $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        //$lessons_id   = MediaLesson::where('media_id', $new->media_id)->pluck('lesson_id');
+        $lesson_id   = $new->lesson_id;
+        $course_id[]  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'media', 'subject_id' => $new->media_id])->first();
         $audit_log_quiz_course_id->update([
             'course_id' => $course_id
