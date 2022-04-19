@@ -54,6 +54,7 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id'
         ]);
         if(isset($request->item_id)){
+           
             $check = Material::whereNull('deleted_at')->where('type',$request->item_type)->where('item_id',$request->item_id)->first();
             if(!isset($check))
                 return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
