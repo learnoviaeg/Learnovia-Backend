@@ -38,8 +38,8 @@ class UploadFilesServiceProvider extends ServiceProvider
         Media::observe(LogsObserver::class);
         MediaLesson::observe(LogsObserver::class);
 
-        //FileLesson::observe(FileLessonObserver::class);
-        //MediaLesson::observe(MediaLessonObserver::class);
+        FileLesson::observe(FileLessonObserver::class);
+        MediaLesson::observe(MediaLessonObserver::class);
     }
 
     /**
