@@ -775,6 +775,10 @@ class ReportCardsController extends Controller
         if(count($total_check) > 0){
             $second_term->student_total_mark = $student_mark;
             $second_term->total = $total;
+
+            if($total == 0)
+            $second_term->total_mark_evaluation ='Failed';
+            else
             $second_term->total_mark_evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=',  ($student_mark/$total) *100 )
                                             ->where('higher_boundary', '>',  ($student_mark/$total) *100)->first();
             
