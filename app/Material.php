@@ -9,13 +9,20 @@ use Modules\UploadFiles\Entities\media;
 use Auth;
 use App\UserSeen;
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Material extends Model
 {
-   use Auditable;
+   use Auditable, SoftDeletes;
     
     protected $fillable = [
         'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by','restricted'
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     protected $appends = ['media_type','attachment_name','user_seen_number','main_link'];
