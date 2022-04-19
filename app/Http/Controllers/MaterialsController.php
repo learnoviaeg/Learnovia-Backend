@@ -54,7 +54,7 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id'
         ]);
         if(isset($request->item_id)){
-            $check = Material::where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            $check = Material::whereNull('deleted_at')->where('type',$request->item_type)->where('item_id',$request->item_id)->first();
             if(!isset($check))
                 return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
         }
@@ -72,7 +72,7 @@ class MaterialsController extends Controller
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
 
-        $materials_query =  Material::orderBy('created_at','desc');
+        $materials_query =  Material::whereNull('deleted_at')->orderBy('created_at','desc');
 
         $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
         if($request->user()->can('site/course/student')){
