@@ -671,7 +671,7 @@ class ReportCardsController extends Controller
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         $check=(array_intersect($allowed_levels, $student_levels));
 
-        $total_check=(array_intersect([8 , 9, 10 , 11], $student_levels));
+        $total_check=(array_intersect([7, 8 , 9, 10 , 11], $student_levels));
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
@@ -775,6 +775,10 @@ class ReportCardsController extends Controller
         if(count($total_check) > 0){
             $second_term->student_total_mark = $student_mark;
             $second_term->total = $total;
+
+            if($total == 0)
+            $second_term->total_mark_evaluation ='Failed';
+            else
             $second_term->total_mark_evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=',  ($student_mark/$total) *100 )
                                             ->where('higher_boundary', '>',  ($student_mark/$total) *100)->first();
             
