@@ -7,10 +7,11 @@ use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Modules\UploadFiles\Entities\FileLesson;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class file extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['type',
     'description',
@@ -20,7 +21,16 @@ class file extends Model
     'user_id' ,
     'url' ,
     'url2' ];
+
     protected $hidden = ['updated_at','created_at','user_id'];
+
+    protected $softDelete = true;
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     public function FileCourseSegment()
     {
@@ -91,15 +101,15 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $lessons_id   = FileLesson::where('file_id', $new->id)->pluck('lesson_id');
+        $lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
         if (count($lessons_id) <= 0) {
             $course_id = null;
         }else{
             $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
-            $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->id])->first();
+            /*$audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->id])->first();
             $audit_log_quiz_course_id->update([
                 'course_id' => $course_id
-            ]);
+            ]);*/
         }
         return $course_id;
     }

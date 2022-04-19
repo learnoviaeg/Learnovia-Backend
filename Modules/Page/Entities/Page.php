@@ -7,12 +7,20 @@ use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Modules\Page\Entities\pageLesson;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class page extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['title', 'content', 'visible'];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
     public function Lesson()
     {
         return $this->belongsToMany('App\Lesson', 'page_lessons', 'page_id', 'lesson_id');

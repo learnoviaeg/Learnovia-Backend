@@ -6,12 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class pageLesson extends Model
 {
-	use Auditable;
+	use Auditable, SoftDeletes;
 
     protected $fillable = ['page_id','lesson_id','visible' , 'publish_date'];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     // start function get name and value f attribute
     public static function get_year_name($old, $new)

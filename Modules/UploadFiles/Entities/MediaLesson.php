@@ -6,14 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MediaLesson extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $table = 'media_lessons';
     protected $fillable = ['index' , 'visible' , 'publish_date' , 'media_id' , 'lesson_id'];
     protected $hidden = ['updated_at','created_at'];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
 
     public function Media()
