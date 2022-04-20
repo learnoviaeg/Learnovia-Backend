@@ -64,7 +64,7 @@ class TimelineController extends Controller
         $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
-                            ->whereIn('class_id',$sec_chain->pluck('group_id'))
+                            // ->whereIn('class_id',$sec_chain->pluck('group_id'))
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
                             ->whereIn('type', ['quiz','assignment'])
@@ -167,9 +167,6 @@ class TimelineController extends Controller
                 $course_id = $secondary_chain->course_id;
                 $class_id = $secondary_chain->group_id;
                 $level_id = Course::find($courseID)->level_id;
-                // $course_id = $lesson->courseSegment->course_id;
-                // $class_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->class_id;
-                // $level_id = $lesson->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id;
                 if(isset($item_name)){
                     $new_timeline = Timeline::firstOrCreate([
                             'item_id' => $request->id,
