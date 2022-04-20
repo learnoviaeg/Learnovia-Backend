@@ -8,6 +8,7 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\quiz_questions;
 use App\Traits\Auditable;
+use App\Lesson as Lessonmodel;
 
 class userQuiz extends Model
 {
@@ -161,7 +162,9 @@ class userQuiz extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        return null;
+        $QuizLesson   = QuizLesson::find($new->quiz_lesson_id);
+        $course_id[]  = Lessonmodel::where('id', $QuizLesson->lesson_id)->first()->course_id;
+        return $course_id;
     }
     // end function get name and value attribute
 }

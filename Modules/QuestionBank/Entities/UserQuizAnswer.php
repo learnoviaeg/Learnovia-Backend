@@ -5,6 +5,8 @@ namespace Modules\QuestionBank\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Modules\QuestionBank\Entities\Questions;
 use App\Traits\Auditable;
+use App\Lesson as Lessonmodel;
+use Modules\QuestionBank\Entities\userQuiz;
 
 class userQuizAnswer extends Model
 {
@@ -80,7 +82,10 @@ class userQuizAnswer extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        return null;
+        $userQuiZZ    = userQuiz::where('id', $new->user_quiz_id)->first();
+        $QuizLesson   = QuizLesson::find($userQuiZZ->quiz_lesson_id);
+        $course_id[]  = Lessonmodel::where('id', $QuizLesson->lesson_id)->first()->course_id;
+        return $course_id;
     }
     // end function get name and value attribute
 }
