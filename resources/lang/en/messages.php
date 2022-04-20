@@ -300,6 +300,7 @@ return [
     'course' => [
         'add' => 'Course added successfully',
         'update' => 'Course updated successfully',
+        'canNot' => 'You can\'t update this course',
         'delete' => 'Course deleted successfully',
         'list' => 'Courses List',
         'object' => 'Course details',
