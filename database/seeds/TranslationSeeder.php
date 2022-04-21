@@ -3,6 +3,7 @@
 use Illuminate\Database\Seeder;
 use App\Dictionary;
 use App\Language;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TranslationSeeder extends Seeder
 {
@@ -22,6 +23,10 @@ class TranslationSeeder extends Seeder
             'name' => 'Arabic',
             'default' => 0,
         ]);
+
+        eval('$importer = new App\Imports\\LanguageImport();');
+        $check = Excel::import($importer, public_path('translation/EngTranslate.xlsx'));
+        $check1 = Excel::import($importer, public_path('translation/ArabTranslate.xlsx'));
 
         Dictionary::firstOrCreate(['key' => 'attendance/report-perSession', 'language' => 1, 'value' => 'Per Session Report']);
         Dictionary::firstOrCreate(['key' => 'attendance/report-perSession', 'language' => 2, 'value' => 'التقرير بالحصة']);
