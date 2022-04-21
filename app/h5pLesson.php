@@ -11,6 +11,7 @@ use App\Lesson as Lessonmodel;
 
 class h5pLesson extends Model
 {
+    // log trait right here
       use Auditable, SoftDeletes;
 
       protected $fillable = ['content_id',

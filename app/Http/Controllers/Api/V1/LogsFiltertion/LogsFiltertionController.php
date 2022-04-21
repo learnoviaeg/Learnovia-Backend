@@ -26,7 +26,7 @@ class LogsFiltertionController extends Controller
         $class_id   = isset($request->class_id) ? $request->class_id : null;
         $segment_id = isset($request->segment_id) ? $request->segment_id : null;
         $course_id  = isset($request->course_id) ? $request->course_id : null;
-        $pagination = isset($request->paginate) ? $request->paginate : 10;
+        $pagination = isset($request->paginate) ? $request->paginate : 50;
         // chain attributes
 
          $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));

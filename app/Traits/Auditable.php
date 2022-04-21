@@ -13,6 +13,10 @@ trait Auditable
             self::audit('created', $model);
         });
 
+        /*static::index(function (Model $model) {
+            self::audit('index', $model);
+        });*/
+
         static::updated(function (Model $model) {
             self::audit('updated', $model);
         });
