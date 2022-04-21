@@ -38,7 +38,8 @@ class LogsFiltertionController extends Controller
     		// fetch logs default time (1 day from now)
             $data = AuditLog::where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
                                                               ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')//->get();
-                                                                ->get();
+                                                                //->get();
+                                                                ->paginate(Paginate::GetPaginate($request));
     	}
 
         // case 2
