@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Dictionary;
+use App\Language;
 
 class TranslationSeeder extends Seeder
 {
@@ -12,6 +13,16 @@ class TranslationSeeder extends Seeder
      */
     public function run()
     {
+        Language::firstOrCreate([
+            'name' => 'English',
+            'default' => 1,
+        ]);
+
+        Language::firstOrCreate([
+            'name' => 'Arabic',
+            'default' => 0,
+        ]);
+
         Dictionary::firstOrCreate(['key' => 'attendance/report-perSession', 'language' => 1, 'value' => 'Per Session Report']);
         Dictionary::firstOrCreate(['key' => 'attendance/report-perSession', 'language' => 2, 'value' => 'التقرير بالحصة']);
         Dictionary::firstOrCreate(['key' => 'edit_assigned_users', 'language' => 1, 'value' => 'Edit Assign Users']);
