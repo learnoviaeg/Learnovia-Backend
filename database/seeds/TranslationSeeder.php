@@ -44,7 +44,12 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/all', 'language' => 1, 'value' => 'All First term Reports']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/final', 'language' => 1, 'value' => 'Final Report']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain', 'language' => 1, 'value' => 'First term Reports']);
-        
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisg-final', 'language' => 1, 'value' => 'Final term Reports']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisb-final', 'language' => 1, 'value' => 'Final term Reports']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-boys/printAll-final', 'language' => 1, 'value' => 'All Final term Reports']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/printAll-final', 'language' => 1, 'value' => 'All Final term Reports']);
+
+
         Dictionary::firstOrCreate(['key' => 'report_card/forsan/monthly', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/forsan/monthly/printAll', 'language' => 2, 'value' => 'جميع التقارير الشهرية']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll', 'language' => 2, 'value' => 'جميع التقارير الشهرية']);
@@ -56,6 +61,12 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/all', 'language' => 2, 'value' =>  'جميع الشهادات']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/final', 'language' => 2, 'value' => 'شهاده اخر العام']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain', 'language' => 2, 'value' =>'الشهادة']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-boys/printAll-final', 'language' => 2, 'value' => 'جميع شهادات اخر العام']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/printAll-final', 'language' => 2, 'value' => 'جميع شهادات اخر العام']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisg-final', 'language' => 2, 'value' => 'شهاده اخر العام']);
+        Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisb-final', 'language' => 2, 'value' => 'شهاده اخر العام']);
+
+
         
 
     }
