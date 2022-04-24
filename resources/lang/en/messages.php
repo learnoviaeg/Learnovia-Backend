@@ -30,6 +30,7 @@ return [
         'role_required' => 'Please, choose role first',
         'not_allowed' => 'You are not allowed to view this.',
         'not_allowed_to_edit' => 'You are not allowed to edit this.',
+        'not_allowed_to_add' => 'You are not allowed to add this.',
         'not_allowed_to_delete' => 'You are not allowed to delete this.',
         'assigned_before' => 'Assigned before',
         'extension_error' => 'This extension is not valid'

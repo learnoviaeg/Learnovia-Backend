@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Lesson;
-use App\CourseSegment;
+use App\Course;
 use App\attachment;
 use App\LastAction;
 use App\SecondaryChain;
@@ -36,6 +36,10 @@ class LessonController extends Controller
         ]);
         LastAction::lastActionInCourse($request->course);
         $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
+        $course=Course::find($request->course);
+        if($course->shared_lesson == 0 && $request->shared_lesson ==1)
+            return HelperController::api_response_format(400,null ,__('messages.error.not_allowed'));
+        
         // return $lessons_in_Course;
         $Next_index = $lessons_in_Course + 1;
         $lesson= Lesson::create([
@@ -121,9 +125,13 @@ class LessonController extends Controller
             $lesson->image = attachment::upload_attachment($request->image, 'lesson', '')->path;
         }
          $lesson->description = "";
-        if ($request->filled('description')) {
+        if ($request->filled('description')) 
             $lesson->description = $request->description;
-        }
+        
+        $course-Course::find($lesson->course_id);
+        if($request->filled('shared_lesson') && $course->shared_lesson == 0 && $request->shared_lesson ==1)
+            return HelperController::api_response_format(400,null ,__('messages.error.not_allowed_to_edit'));
+        
         if ($request->filled('shared_lesson'))
             $lesson->shared_lesson = $request->shared_lesson;
 
