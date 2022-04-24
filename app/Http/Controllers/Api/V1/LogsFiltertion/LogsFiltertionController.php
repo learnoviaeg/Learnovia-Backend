@@ -228,13 +228,21 @@ class LogsFiltertionController extends Controller
     // no chain filter selected
     public function filter_with_none($data, $pagination, $request)
     {
-       $data =  $data->skip(($request->paginate * ($request->page - 1)))
+        $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
+        $right_now =  date("Y-m-d H:i:s");
+        
+       $data =  $data->where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
+                      ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
         foreach ($data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+
+            /*$nameSpace = '\\App\\';
+            $model = $nameSpace . $value->subject_type; 
+            $value['item_name']   = $model::where('id', $value->subject_id)->first()->name; */
             $value->makeHidden('user');
         }
         if ($request->has('export') && $request->export == 1) {
