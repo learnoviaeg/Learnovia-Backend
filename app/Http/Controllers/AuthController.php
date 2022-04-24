@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Spatie\Permission\Models\Role;
 use App\Parents;
 use App\Dictionary;
+use App\AcademicYear;
 use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
