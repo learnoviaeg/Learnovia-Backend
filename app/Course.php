@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Attendance\Entities\AttendanceSession;
 use App\Traits\Auditable;
+use App\Segment;
 
 class Course extends Model
 {
@@ -107,14 +108,55 @@ class Course extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+            $new_segment = Segment::find(intval($new['segment_id']));
+            $target_year_id = [$new_segment->academicYear->id];
+            $target_type_id = [$new_segment->academicType->id];
+
+        $old_count = count($old);
+        if ($old_count == 0) 
+        {
+            $year_id = $target_year_id;
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+                $year_id = $target_year_id;
+            }else{
+                $old_segment = Segment::find(intval($old['segment_id']));
+                if ($new_segment->academicYear->id == $old_segment->academicYear->id) {
+                    $year_id = $target_year_id;
+                }else{
+                    $year_id = [$new_segment->academicYear->id, $old_segment->academicYear->id];
+                }
+            }
+        }
+        return $year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $new_segment = Segment::find(intval($new['segment_id']));
+            $target_type_id = [$new_segment->academicType->id];
+
+        $old_count = count($old);
+        if ($old_count == 0) 
+        {
+            $type_id = $target_type_id;
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+                $type_id    = $target_type_id;
+            }else{
+                $old_segment = Segment::find(intval($old['segment_id']));
+                if ($new_segment->academicType->id == $old_segment->academicType->id) {
+                    $type_id = $target_type_id;
+                }else{
+                    $type_id = [$new_segment->academicType->id, $old_segment->academicType->id];
+                }
+            }
+        }
+        return $type_id;
     }
     // end function get name and value attribute
 
