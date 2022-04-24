@@ -230,12 +230,12 @@ class LogsFiltertionController extends Controller
                       ->take($request->paginate)
                       ->paginate($request->paginate);
         if ($request->has('export') && $request->export == 1) {
-            return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
-           /* $filename = uniqid();
-            $file = Excel::store(new AuditlogExport($data), 'AuditLog'.$filename.'.xlsx','public');
-            $file = url(Storage::url('AuditLog'.$filename.'.xlsx'));
+            //return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
+            $filename = uniqid();
+            $file     = Excel::store(new AuditlogExport($data), 'AuditLog'.$filename.'.xlsx','public');
+            $file     = url(Storage::url('AuditLog'.$filename.'.xlsx'));
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file')); 
-            */
+            
         }
         return response()->json(['data' => $data, 'status_code' => 200], 200);
     }
