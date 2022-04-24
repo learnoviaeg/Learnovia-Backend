@@ -27,17 +27,6 @@ class LogsFiltertionDropdownController extends Controller
 
     public function logs_actions_dropdown()
     {
-        /*$data      = AuditLog::pluck('action');
-        $chain_data  = $data->unique();
-        $actions_arr = array();
-        foreach ($chain_data as $key => $value) {
-        	if (in_array($value, $actions_arr)) {
-        		continue;
-        	}else{
-        		array_push($actions_arr, $value);
-        	}
-        }*/
-
        $data =  AuditLog::groupBy('action')->pluck('action');
         return response()->json([
         	'data' => $data, 
