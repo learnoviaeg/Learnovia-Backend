@@ -161,6 +161,7 @@ class QuizzesController extends Controller
             'opening_time' => 'required|date',
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
+            'collect_marks' => 'integer|in:0,1',
             'grading_method_id' => 'in:First,Last,Highest,Lowest,Average',
             'grade_category_id.*' => 'exists:grade_categories,id',
             'grade_min' => 'integer',
@@ -219,7 +220,8 @@ class QuizzesController extends Controller
                 'index' => ++$index,
                 'visible' => isset($request->visible)?$request->visible:1,
                 'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
-                'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                // 'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
 
@@ -244,6 +246,7 @@ class QuizzesController extends Controller
             'name' => 'string|min:3',
             'lesson_id' => 'required|exists:lessons,id',
             'is_graded' => 'boolean',
+            'collect_marks' => 'integer|in:0,1',
             'duration' => 'integer|min:60',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
@@ -286,7 +289,8 @@ class QuizzesController extends Controller
                 'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
                 'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
                 'grade_category_id' => $quiz_lesson->grade_category_id,
-                'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+                // 'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+                'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : $quiz_lesson->collect_marks,
                 'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
