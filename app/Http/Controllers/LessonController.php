@@ -38,7 +38,7 @@ class LessonController extends Controller
         $lessons_in_Course = Lesson::where('course_id', $request->course)->max('index');
         $course=Course::find($request->course);
         if($course->shared_lesson == 0 && $request->shared_lesson ==1)
-            return HelperController::api_response_format(400,null ,__('messages.error.not_allowed'));
+            return HelperController::api_response_format(400,null ,__('messages.error.not_allowed_to_add'));
         
         // return $lessons_in_Course;
         $Next_index = $lessons_in_Course + 1;

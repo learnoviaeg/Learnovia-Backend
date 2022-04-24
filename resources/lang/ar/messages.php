@@ -30,7 +30,7 @@ return [
         'role_required' => 'من فضلك ، اختر الوظيفة أولا',
         'not_allowed' => 'غير مسموح بذلك',
         'not_allowed_to_edit' => 'لا يمكن التعديل',
-        'not_allowed_to_edit' => 'لا يمكن اضافة هذا العنصر',
+        'not_allowed_to_add' => 'لا يمكن اضافة هذا العنصر',
         'extension_error' => 'هذا الامتداد غير صالح',
         'assigned_before' => 'تم اصافته من قبل'
     ],
