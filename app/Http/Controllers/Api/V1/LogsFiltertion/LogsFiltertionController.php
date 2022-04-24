@@ -10,6 +10,9 @@ use Auth;
 use App\AuditLog;
 use App\Http\Controllers\HelperController;
 use App\Paginate;
+use App\Exports\AuditlogExport;
+use Excel;
+use Illuminate\Support\Facades\Storage;
 
 class LogsFiltertionController extends Controller
 {
@@ -37,15 +40,19 @@ class LogsFiltertionController extends Controller
         if ($user_id == null && $action == null && $start_date == null && $end_date == null && $model == null) {
     		// fetch logs default time (1 day from now)
             $data = AuditLog::where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
-                                                              ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')//->get();
+                                                              ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                                 //->get();
-                                                                ->paginate(Paginate::GetPaginate($request));
+                                                                //->paginate(Paginate::GetPaginate($request));
     	}
 
         // case 2
         if ($user_id != null && $action == null && $model == null && $start_date == null && $end_date == null) {
             // fetch logs related with this user
-            $data = AuditLog::where('user_id', $user_id)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+            $data = AuditLog::where('user_id', $user_id)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')
+            //->get();
+            ->skip(($request->paginate * ($request->page - 1)))
+            ->take($request->paginate)
+            ->paginate($request->paginate);
         }
 
         // case 3
@@ -53,13 +60,15 @@ class LogsFiltertionController extends Controller
     		// fetch logs related with this user at this period
             $data = AuditLog::where('user_id', $user_id)->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
     	}
 
     	// case 4
         if ($user_id == null && $action != null && $model == null && $start_date == null && $end_date == null) {
     		// fetch logs related with this action
-            $data = AuditLog::where('action', $action)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+            $data = AuditLog::where('action', $action)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+            //->get();
     	}
 
     	// case 5
@@ -67,14 +76,17 @@ class LogsFiltertionController extends Controller
     		// fetch logs related with this action at this period
             $data = AuditLog::where('action', $action)->where('created_at', '>=', $start_date)
                                                 ->where('created_at', '<=', $end_date)
-                                                ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                //->get();
     	}
 
         // case 6
         if ($user_id == null && $action == null && $model != null && $start_date == null && $end_date == null) {
             // fetch logs related with this model
             $data = AuditLog::where('subject_type', $model)->orderBy('created_at', 'DESC')
-                                               ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                               ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                               //->get();
+                                              // ->paginate(Paginate::GetPaginate($request));
         }
 
         // case 7
@@ -82,28 +94,33 @@ class LogsFiltertionController extends Controller
             // fetch logs related with this model at this period
             $data = AuditLog::where('subject_type', $model)->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
+                                                   //->paginate(Paginate::GetPaginate($request));
         }
 
     	// case 8
         if ($user_id != null && $action != null && $start_date == null && $end_date == null) {
     		// fetch logs related with this user and this action
             $data = AuditLog::where('user_id', $user_id)->where('action', $action)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
     	}
 
         // case 9
         if ($user_id != null && $action == null && $model != null && $start_date == null && $end_date == null) {
             // fetch logs related with this user and this model
             $data = AuditLog::where('user_id', $user_id)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
         // case 10
         if ($user_id == null && $action != null && $model != null && $start_date == null && $end_date == null) {
             // fetch logs related with this action and this model
             $data = AuditLog::where('action', $action)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
     	// case 11
@@ -111,7 +128,8 @@ class LogsFiltertionController extends Controller
     		//fetch logs related with this user and this action at this period
             $data = AuditLog::where('user_id', $user_id)->where('action', $action)->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
     	}
 
         // case 12
@@ -119,7 +137,8 @@ class LogsFiltertionController extends Controller
             //fetch logs related with this user and this model at this period
             $data = AuditLog::where('user_id', $user_id)->where('subject_type', $model)->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
         // case 13
@@ -127,14 +146,16 @@ class LogsFiltertionController extends Controller
             //fetch logs related with this action and this model at this period
             $data = AuditLog::where('action', $action)->where('subject_type', $model)->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
         // case 14
         if ($user_id != null && $action != null && $model != null && $start_date == null && $end_date == null) {
             //fetch logs related with this user and this model and this action 
             $data = AuditLog::where('user_id', $user_id)->where('action', $action)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
         // case 15
@@ -143,7 +164,8 @@ class LogsFiltertionController extends Controller
             $data = AuditLog::where('user_id', $user_id)->where('action', $action)->where('subject_type', $model)
                                                    ->where('created_at', '>=', $start_date)
                                                    ->where('created_at', '<=', $end_date)
-                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                                   ->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                                   //->get();
         }
 
         // case 16
@@ -151,7 +173,8 @@ class LogsFiltertionController extends Controller
             // fetch logs related with this period
             $data = AuditLog::where('created_at', '>=', $start_date)->where('created_at', '<=', $end_date)
                                             ->orderBy('created_at', 'DESC')
-                                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')->get();
+                                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                            //->get();
         }
 
         foreach ($data as $key => $value) {
@@ -184,6 +207,7 @@ class LogsFiltertionController extends Controller
         }
         // case serach with course
         elseif ($year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id != null) {
+            //return 'aa';
             return $this->filter_with_course($data, $course_id, $pagination, $request);
         }
         // case serach with class
@@ -202,8 +226,17 @@ class LogsFiltertionController extends Controller
     // no chain filter selected
     public function filter_with_none($data, $pagination, $request)
     {
-        $data = $data->paginate(Paginate::GetPaginate($request));
-        //$data = $data->paginate($pagination);
+       $data =  $data->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
+        if ($request->has('export') && $request->export == 1) {
+            return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
+           /* $filename = uniqid();
+            $file = Excel::store(new AuditlogExport($data), 'AuditLog'.$filename.'.xlsx','public');
+            $file = url(Storage::url('AuditLog'.$filename.'.xlsx'));
+            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file')); 
+            */
+        }
         return response()->json(['data' => $data, 'status_code' => 200], 200);
     }
 
@@ -212,7 +245,11 @@ class LogsFiltertionController extends Controller
     {
         //$chain_ids = AuditLog::whereJsonContains('audit_logs.year_id', intval($year_id))->pluck('id')->toArray();
         $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -221,7 +258,11 @@ class LogsFiltertionController extends Controller
     {
         //$chain_ids = AuditLog::whereJsonContains('audit_logs.type_id', intval($type_id))->pluck('id')->toArray();
         $chain_ids = AuditLog::where('type_id', 'like', "%{$type_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -230,7 +271,11 @@ class LogsFiltertionController extends Controller
     {
        // $chain_ids = AuditLog::whereJsonContains('audit_logs.level_id', intval($level_id))->pluck('id')->toArray();
         $chain_ids = AuditLog::where('level_id', 'like', "%{$level_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -239,7 +284,11 @@ class LogsFiltertionController extends Controller
     {
         // $chain_ids = AuditLog::whereJsonContains('audit_logs.class_id', intval($class_id))->pluck('id')->toArray();
         $chain_ids = AuditLog::where('class_id', 'like', "%{$class_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -248,7 +297,11 @@ class LogsFiltertionController extends Controller
     {
         // $chain_ids = AuditLog::whereJsonContains('audit_logs.segment_id', intval($segment_id))->pluck('id')->toArray();
         $chain_ids = AuditLog::where('segment_id', 'like', "%{$segment_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -258,7 +311,11 @@ class LogsFiltertionController extends Controller
     {
         // $chain_ids  = AuditLog::whereJsonContains('audit_logs.course_id', intval($course_id))->pluck('id')->toArray();
         $chain_ids  = AuditLog::where('course_id', 'like', "%{$course_id}%")->pluck('id')->toArray();
-        $chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
+        $chain_data = $data->whereIn('id', $chain_ids)
+                      ->skip(($request->paginate * ($request->page - 1)))
+                      ->take($request->paginate)
+                      ->paginate($request->paginate);
+        //$chain_data = $data->whereIn('id', $chain_ids)->unique();
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 }

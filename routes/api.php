@@ -604,10 +604,26 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::group(['prefix' => 'v1'], function () {
     // logs filter with user and action 
         Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFiltertionController@logs_filteration')->name('logs_filteration');
-        Route::get('logs/models/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_models_dropdown')->name('logs_models_dropdown');
-        Route::get('logs/actions/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_actions_dropdown')->name('logs_actions_dropdown');
-        Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
 
+        Route::get('logs/models/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_models_dropdown')->name('logs_models_dropdown');
+        
+        Route::get('logs/actions/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_actions_dropdown')->name('logs_actions_dropdown');
+        
+        Route::get('logs/users/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_users_dropdown')->name('logs_users_dropdown');
+        
+        Route::get('logs/years/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_years_dropdown')->name('logs_years_dropdown');
+        
+        Route::get('logs/types/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_types_dropdown')->name('logs_types_dropdown');
+
+        Route::get('logs/levels/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_levels_dropdown')->name('logs_levels_dropdown');
+
+        Route::get('logs/classes/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_classes_dropdown')->name('logs_classes_dropdown');
+
+        Route::get('logs/segments/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_segments_dropdown')->name('logs_segments_dropdown');
+
+        Route::get('logs/courses/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_courses_dropdown')->name('logs_courses_dropdown');
+        
+        Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
     });
     // added ahmed
 });

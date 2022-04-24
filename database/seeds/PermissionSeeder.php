@@ -533,8 +533,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/parent', 'title' => 'set as parent']);
 
         // added ahmed
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs', 'title' => 'set as parent']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/log', 'title' => 'set as parent']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/logs', 'title' => 'ststistics']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/log', 'title' => 'log details']);
 
 
         //create status
