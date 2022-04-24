@@ -177,12 +177,6 @@ class LogsFiltertionController extends Controller
                                             //->get();
         }
 
-        foreach ($data as $key => $value) {
-            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
-            $value['since']       = $value->created_at->diffForHumans();
-            $value->makeHidden('user');
-        }
-
         return $this->chain_filteration($data, $year_id, $type_id, $level_id, $class_id, $segment_id, $course_id, $pagination, $request);
         // return response()->json(['data' => $data, 'status_code' => 200], 200);
     }
@@ -229,6 +223,12 @@ class LogsFiltertionController extends Controller
        $data =  $data->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         if ($request->has('export') && $request->export == 1) {
             //return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
             $filename = uniqid();
@@ -250,6 +250,12 @@ class LogsFiltertionController extends Controller
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -263,6 +269,12 @@ class LogsFiltertionController extends Controller
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -276,6 +288,12 @@ class LogsFiltertionController extends Controller
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -289,6 +307,12 @@ class LogsFiltertionController extends Controller
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -302,6 +326,12 @@ class LogsFiltertionController extends Controller
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 
@@ -316,6 +346,12 @@ class LogsFiltertionController extends Controller
                       ->take($request->paginate)
                       ->paginate($request->paginate);
         //$chain_data = $data->whereIn('id', $chain_ids)->unique();
+        foreach ($chain_data as $key => $value) {
+            $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
+            $value['since']       = $value->created_at->diffForHumans();
+            $value['username']    = $value->user->fullname;
+            $value->makeHidden('user');
+        }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
     }
 }
