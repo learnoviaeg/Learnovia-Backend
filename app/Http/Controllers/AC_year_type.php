@@ -8,7 +8,7 @@ use App\AcademicType;
 use App\AcademicYear;
 use App\Level;
 use App\Enroll;
-use App\Segment;
+use App\Segment;  
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -18,7 +18,7 @@ use Validator;
 use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\YearLevel;
-
+use App\SystemSetting;
 class AC_year_type extends Controller
 {
     /**
@@ -212,4 +212,118 @@ class AC_year_type extends Controller
         $file = url(Storage::url('Type'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
+
+    public function uploadsTrys(Request $request)
+    {
+        $request->validate([
+            'content' => 'required',
+            // 'id' => 'exists:.....,id',
+        ]);
+  
+        if(!$request->filled('id')){            
+            $setting  = SystemSetting::create([
+                'key' => uniqid(),
+                'data'=> json_encode($request->content),
+            ]);
+        }
+
+        if($request->filled('id')){
+            $setting = SystemSetting::whereId($request->id)->first();
+            $array = json_decode($setting->content) ;
+            $setting->data =  json_encode($setting->data.$request->content);
+            $setting->save();
+        }
+
+        if($request->filled('last') && $request->last == 1){
+            $base64_encoded_string = base64_decode(json_decode($setting->data));
+            $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
+            $ext = substr($extension,strrpos($extension,"/")+1);
+            Storage::append($setting->key.$ext ,$base64_encoded_string);
+        }
+
+
+        // $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
+
+        // $path = public_path() . "/img/designs/" . $png_url;
+        // $success = file_put_contents($path, $base64_encoded_string);
+
+        // Storage::disk('public')->putFileAs('assignment', $base64_encoded_string, 'salooka.png');
+
+        // return $extension;
+
+
+
+        // $file = $folderPath . uniqid() . '.png';
+
+        // Storage::put('salooka.png', $base64_encoded_string);
+
+        // $b64image = base64_encode(file_get_contents( url(Storage::url('assignment/'.$name))));
+
+        // Storage::disk('public')->putFileAs($folderPath, $base64_encoded_string, 'salooka.png');
+
+
+        // file_put_contents($file, $base64_encoded_string);
+
+
+
+        return 'done';
+
+        if($request->filled('id')){
+            $setting = SystemSetting::whereId($request->id)->first();
+            $b64image = base64_decode(file_get_contents( url(Storage::url('assignment/'.$name))));
+
+        Storage::disk('public')->putFileAs('hamada', $b64image, 'salooka.png');
+
+            
+
+            $img64 = 
+        $array = json_decode($setting->data) ;
+            $setting->data = json_encode(array_merge($array , $request->array));
+            $setting->save();
+        return $setting;
+        }
+
+        // SystemSetting::firstOrCreate([
+        //         'key' => 'test',
+        //         'data'=> json_encode($request->array)
+        // ]);
+
+
+    }
+
+
+    public function uploads(Request $request)
+    {
+        $request->validate([
+            'content' => 'required',
+            // 'id' => 'exists:.....,id',
+        ]);
+  
+        if(!$request->filled('id')){            
+            $setting  = SystemSetting::create([
+                'key' => uniqid(),
+                'data'=> $request->content,
+            ]);
+        }
+
+        if($request->filled('id')){
+            $setting = SystemSetting::whereId($request->id)->first();
+            $array = ($setting->content) ;
+            $setting->data =  ($setting->data.$request->content);
+            $setting->save();
+        }
+
+        if($request->filled('last') && $request->last == 1){
+            $base64_encoded_string = base64_decode(($setting->data));
+            $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
+            $ext = substr($extension,strrpos($extension,"/")+1);
+            Storage::append($setting->key.'.'.$ext ,$base64_encoded_string);
+            
+            return response()->json(['message' =>null, 'body' => url(Storage::url($setting->key.'.'.$ext)) ], 200);
+        }
+        return response()->json(['message' =>null, 'body' => $setting ], 200);
+
+    }
+
+
 }
