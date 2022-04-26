@@ -18,7 +18,7 @@ class LogsFiltertionDropdownController extends Controller
 {    
     public function logs_models_dropdown()
     {
-        $data =  AuditLog::groupBy('subject_type')->pluck('subject_type');
+        $data =  AuditLog::where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->groupBy('subject_type')->pluck('subject_type');
         return response()->json([
         	'data' => $data, 
         	'status_code' => 200,
