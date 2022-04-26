@@ -125,7 +125,8 @@ class AssignmentController extends Controller
         $rules = [
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            // 'file' => 'file|distinct|required_without:content|mimes:'.$settings,
+            'file_id' => 'exists:attachments,id|required_without:content',
             //assignment_lesson
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
@@ -151,7 +152,8 @@ class AssignmentController extends Controller
 
         $assignment = Assignment::firstOrCreate([
             'name' => $request->name,
-            'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
+            'attachment_id' => ($request->has('file_id')) ? $request->file_id : null,
+            // ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
             'content' => isset($request->content) ? $request->content : null,
             'created_by' => Auth::id(),
         ]);
