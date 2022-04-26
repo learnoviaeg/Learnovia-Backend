@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\ChunkUploads;
 use Illuminate\Support\Facades\Storage;
+use App\attachment;
 
 class ChunksUploadController extends Controller
 {
@@ -12,7 +13,7 @@ class ChunksUploadController extends Controller
     {
         $request->validate([
             'content' => 'required',
-            // 'id' => 'exists:.....,id',
+            'id' => 'exists:chunk_uploads,id',
         ]);
   
         if(!$request->filled('id')){  
@@ -44,12 +45,20 @@ class ChunksUploadController extends Controller
             $base64_encoded_string = base64_decode(($uploaded_file->data));
             $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
             $ext = substr($extension,strrpos($extension,"/")+1);            
-            // Storage::put($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
-            // file_put_contents($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
 
             Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
 
-            return response()->json(['message' =>null, 'body' => $uploaded_file ], 200);
+            ///////////////////moving file to attachment table 
+            $attachment = new attachment;
+            $attachment->name = $uploaded_file->name;
+            $attachment->path = $uploaded_file->getOriginal('path');
+            $attachment->type =  $uploaded_file->type;
+            $attachment->extension = $ext;
+            $attachment->mime_type = $extension;
+            $attachment->save();
+            //////////////////////////////////////////////////
+            ChunkUploads::whereId($uploaded_file->id)->delete();
+            return response()->json(['message' =>null, 'body' => $attachment ], 200);
         }
         return response()->json(['message' =>null, 'body' => $uploaded_file ], 200);
 
