@@ -56,11 +56,8 @@ class LogsFiltertionController extends Controller
         // case 2
         if ($user_id != null && $action == null && $model == null && $start_date == null && $end_date == null) {
             // fetch logs related with this user
-            $data = AuditLog::where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host')
+            $data = AuditLog::where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->orderBy('created_at', 'DESC')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
             //->get();
-            ->skip(($request->paginate * ($request->page - 1)))
-            ->take($request->paginate)
-            ->paginate($request->paginate);
         }
 
         // case 3
