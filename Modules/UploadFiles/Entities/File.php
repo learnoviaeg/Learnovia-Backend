@@ -8,6 +8,8 @@ use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Modules\UploadFiles\Entities\FileLesson;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Course;
+use App\Segment;
 
 class file extends Model
 {
@@ -66,6 +68,12 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
+       /* $lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        $course_id    = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $segment_id   = Course::where('id', $course_id)->segment_id;
+        $segment      = Segment::where('id', $segment_id)->first();
+        $academic_year_id = $segment->academic_year_id;
+        return $academic_year_id;*/
         return null;
     }
     // end function get name and value attribute
@@ -73,6 +81,12 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
+        /*$lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        $course_id    = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $segment_id   = Course::where('id', $course_id)->segment_id;
+        $segment      = Segment::where('id', $segment_id)->first();
+        $academic_type_id = $segment->academic_type_id;
+        return $academic_type_id;*/
         return null;
     }
     // end function get name and value attribute
@@ -80,6 +94,10 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
+        /*$lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        $course_id    = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $level_id     = Course::where('id', $course_id)->level_id;
+        return $level_id;*/
         return null;
     }
     // end function get name and value attribute
@@ -87,6 +105,10 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
+        /*$lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        $lesson       = Lessonmodel::whereIn('id', $lessons_id)->first();
+        $classes      = $lesson['shared_classes']->pluck('id');
+        return $classes;*/
         return null;
     }
     // end function get name and value attribute
@@ -94,6 +116,10 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
+        /*$lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        $course_id    = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
+        $level_id     = Course::where('id', $course_id)->level_id;
+        return $level_id;*/
         return null;
     }
     // end function get name and value attribute
@@ -101,7 +127,7 @@ class file extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
+        /*$lessons_id   = FileLesson::withTrashed()->where('file_id', $new->id)->pluck('lesson_id');
         if (count($lessons_id) <= 0) {
             $course_id = null;
         }else{
@@ -111,7 +137,8 @@ class file extends Model
                 'course_id' => $course_id
             ]);
         }
-        return $course_id;
+        return $course_id;*/
+        return null;
     }
     // end function get name and value attribute
 }
