@@ -14,6 +14,8 @@ use App\UserGrader;
 use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
+use App\Course;
+use App\Segment;
 
 class QuizLesson extends Model
 {
