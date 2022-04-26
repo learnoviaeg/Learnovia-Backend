@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\ChunkUploads;
+use Illuminate\Support\Facades\Storage;
 
 class ChunksUploadController extends Controller
 {
@@ -17,11 +18,15 @@ class ChunksUploadController extends Controller
         if(!$request->filled('id')){  
 
             $request->validate([
-                'type' => 'required|in:assignment,files'
+                'type' => 'required|in:assignment,files',
+                'name' => 'required',
             ]);
+
+            $fileName = uniqid() . $request->name;
             $uploaded_file  = ChunkUploads::create([
-                'name' => uniqid(),
+                'name' => $fileName,
                 'data'=> $request->content,
+                'type' => $request->type,
             ]);
         }
 
@@ -39,7 +44,11 @@ class ChunksUploadController extends Controller
             $base64_encoded_string = base64_decode(($uploaded_file->data));
             $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
             $ext = substr($extension,strrpos($extension,"/")+1);            
-            Storage::put($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
+            // Storage::put($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
+            // file_put_contents($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
+
+            Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name, $base64_encoded_string);
+
             return response()->json(['message' =>null, 'body' => $uploaded_file ], 200);
         }
         return response()->json(['message' =>null, 'body' => $uploaded_file ], 200);
