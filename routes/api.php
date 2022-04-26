@@ -157,6 +157,7 @@ Route::group(['prefix' => 'type', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('update', 'AC_year_type@updateType')->name('updatetype')->middleware('permission:type/update');
     // Route::post('assign', 'AC_year_type@Assign_to_anther_year')->name('assigntype')->middleware('permission:type/assign');
     Route::get('export', 'AC_year_type@export')->name('exportTypes')->middleware('permission:type/export');
+    Route::post('upload-chunks', 'AC_year_type@uploads');
 });
 
 //Level Routes
