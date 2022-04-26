@@ -83,7 +83,7 @@ class page extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $lessons_id   = pageLesson::where('page_id', $new->id)->pluck('lesson_id');
+        /*$lessons_id   = pageLesson::where('page_id', $new->id)->pluck('lesson_id');
         if (count($lessons_id) <= 0) {
             $course_id = null;
         }else{
@@ -93,7 +93,8 @@ class page extends Model
                 'course_id' => $course_id
             ]);
         }
-        return $course_id;
+        return $course_id;*/
+        return null;
     }
     // end function get name and value attribute
 }
