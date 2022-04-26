@@ -126,7 +126,7 @@ class AssignmentController extends Controller
             'name' => 'required|string',
             'content' => 'string|required_without:file',
             // 'file' => 'file|distinct|required_without:content|mimes:'.$settings,
-            'file_id' => 'exists:chunk_uploads,id|required_without:content',
+            'file_id' => 'exists:attachments,id|required_without:content',
             //assignment_lesson
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
