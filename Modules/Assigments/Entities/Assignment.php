@@ -98,7 +98,7 @@ class assignment extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $lessons_id   = AssignmentLesson::where('assignment_id', $new->id)->pluck('lesson_id');
+        /*$lessons_id   = AssignmentLesson::where('assignment_id', $new->id)->pluck('lesson_id');
         if (count($lessons_id) <= 0) {
             $course_id = null;
         }else{
@@ -108,7 +108,8 @@ class assignment extends Model
                 'course_id' => $course_id
             ]);
         }
-        return $course_id;
+        return $course_id;*/
+        return null;
     }
     // end function get name and value attribute
 }

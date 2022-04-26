@@ -25,7 +25,7 @@ class LogsFiltertionController extends Controller
     	$end_date   = isset($request->end_date) ? $request->end_date : null;
     	$user_id    = isset($request->user_id) ? $request->user_id : null;
     	$action     = isset($request->action) ? $request->action : null;
-        $model      = isset($request->model) ? $request->model : null;
+      $model      = isset($request->model) ? $request->model : null;
         // chain attributes
         $year_id    = isset($request->year_id) ? $request->year_id : null;
         $type_id    = isset($request->type_id) ? $request->type_id : null;
@@ -227,8 +227,10 @@ class LogsFiltertionController extends Controller
     {
         $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
         $right_now =  date("Y-m-d H:i:s");
+        $year_id   = 2;
+        $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->pluck('id')->toArray();
 
-       $data =  $data->where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
+        $data =  $data->whereIn('id', $chain_ids)->where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
                       ->paginate($request->paginate);

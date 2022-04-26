@@ -115,7 +115,7 @@ class quiz extends Model
         // get course id that thses lessons belongs to 
         // these lessons is under one course 
         // save this course into audit_log
-        $lessons_id   = QuizLesson::where('quiz_id', $new->id)->pluck('lesson_id');
+        /*$lessons_id   = QuizLesson::where('quiz_id', $new->id)->pluck('lesson_id');
         if (count($lessons_id) <= 0) {
             $course_id = null;
         }else{
@@ -125,7 +125,8 @@ class quiz extends Model
                 'course_id' => $course_id
             ]);
         }
-        return $course_id;
+        return $course_id;*/
+        return null;
     }
     // end function get name and value attribute
 }
