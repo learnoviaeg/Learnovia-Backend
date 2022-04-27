@@ -11,6 +11,8 @@ use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Carbon\Carbon;
 use App\Traits\Auditable;
+use App\Course;
+use App\Segment;
 
 class Timeline extends Model
 {
@@ -113,30 +115,27 @@ class Timeline extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_year_id[] = $segment->academic_year_id;
+        return $academic_year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_type_id[] = $segment->academic_type_id;
+        return $academic_type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $level_id = [intval($new['level_id'])];
-        }else{
-            if ($old['level_id'] == $new['level_id']) {
-                $level_id = [intval($new['level_id'])];
-            }else{
-                $level_id = [intval($old['level_id']), intval($new['level_id'])];
-            }
-        }
+        $level_id[] = Course::where('id', intval($new['course_id']))->first()->level_id;
         return $level_id;
     }
     // end function get name and value attribute
@@ -144,16 +143,7 @@ class Timeline extends Model
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $class_id = [intval($new['class_id'])];
-        }else{
-            if ($old['class_id'] == $new['class_id']) {
-                $class_id = [intval($new['class_id'])];
-            }else{
-                $class_id = [intval($old['class_id']), intval($new['class_id'])];
-            }
-        }
+        $class_id = [intval($new['class_id'])];
         return $class_id;
     }
     // end function get name and value attribute
@@ -161,23 +151,15 @@ class Timeline extends Model
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        return null;
+        $segment_id[] = Course::where('id', intval($new['course_id']))->first()->segment_id;
+        return $segment_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $course_id = [intval($new['course_id'])];
-        }else{
-            if ($old['course_id'] == $new['course_id']) {
-                $course_id = [intval($new['course_id'])];
-            }else{
-                $course_id = [intval($old['course_id']), intval($new['course_id'])];
-            }
-        }
+        $course_id = [intval($new['course_id'])];
         return $course_id;
     }
     // end function get name and value attribute
