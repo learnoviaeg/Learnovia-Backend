@@ -54,31 +54,27 @@ class Classes extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $level_id           = intval($new['level_id']);
+        $academic_type_id   = Level::where('id', $level_id)->first()->academic_type_id;
+        $academic_year_id[] = AcademicType::where('id', $academic_type_id)->first()->academic_year_id;
+        return $academic_year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $level_id           = intval($new['level_id']);
+        $academic_type_id[] = Level::where('id', $level_id)->first()->academic_type_id;
+        return $academic_type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $item_id = [intval($new['level_id'])];
-        }else{
-            if ($old['level_id'] == $new['level_id']) {
-                $item_id = [intval($new['level_id'])];
-            }else{
-                $item_id = [intval($old['level_id']), intval($new['level_id'])];
-            }
-        }
-        return $item_id;
+        $level_id = [intval($new['level_id'])];
+        return $level_id;
     }
     // end function get name and value attribute
 

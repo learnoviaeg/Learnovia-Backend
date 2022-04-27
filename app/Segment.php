@@ -52,16 +52,7 @@ class Segment extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $year_id = [intval($new['academic_year_id'])];
-        }else{
-            if ($old['academic_year_id'] == $new['academic_year_id']) {
-                $year_id = [intval($new['academic_year_id'])];
-            }else{
-                $year_id = [intval($old['academic_year_id']), intval($new['academic_year_id'])];
-            }
-        }
+        $year_id = [intval($new['academic_year_id'])];
         return $year_id;
     }
     // end function get name and value attribute
@@ -69,16 +60,7 @@ class Segment extends Model
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $type_id = [intval($new['academic_type_id'])];
-        }else{
-            if ($old['academic_type_id'] == $new['academic_type_id']) {
-                $type_id = [intval($new['academic_type_id'])];
-            }else{
-                $type_id = [intval($old['academic_type_id']), intval($new['academic_type_id'])];
-            }
-        }
+        $type_id = [intval($new['academic_type_id'])];
         return $type_id;
     }
     // end function get name and value attribute
