@@ -7,10 +7,11 @@ use App\Traits\Auditable;
 use Modules\Assigments\Entities\AssignmentLesson;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class assignment extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
 
     protected $fillable = ['name', 'content', 'attachment_id','created_by','restricted'];
     protected $appends = ['url' , 'url2'];
