@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 use App\Course;
 use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuestionsCategory extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['name','course_segment_id','course_id'];
     

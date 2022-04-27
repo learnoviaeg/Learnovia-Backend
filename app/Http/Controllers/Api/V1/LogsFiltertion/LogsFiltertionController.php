@@ -254,17 +254,15 @@ class LogsFiltertionController extends Controller
               'media'             => '\Modules\UploadFiles\Entities\media',
             ];
 
-            //return $value->subject_type;
-
             if (array_key_exists($value->subject_type, $names_array)) {
               $model = $names_array[$value->subject_type];
             }else{
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            //return $model;
             $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
             // end item name
+
             $value->makeHidden('user');
         }
         if ($request->has('export') && $request->export == 1) {
@@ -292,6 +290,31 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
+
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
@@ -312,6 +335,31 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
+
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
@@ -332,6 +380,31 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
+
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
@@ -353,6 +426,31 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
+
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
@@ -374,6 +472,30 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
+
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);
@@ -396,6 +518,29 @@ class LogsFiltertionController extends Controller
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
             $value['since']       = $value->created_at->diffForHumans();
             $value['username']    = $value->user->fullname;
+            // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($value->subject_type, $names_array)) {
+              $model = $names_array[$value->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$value->subject_type; 
+            }
+            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            // end item name
             $value->makeHidden('user');
         }
         return response()->json(['data' => $chain_data, 'status_code' => 200], 200);

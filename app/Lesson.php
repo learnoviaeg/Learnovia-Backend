@@ -6,14 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 use App\Course;
 use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lesson extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
+
     protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id' ,'shared_classes'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\LessonCreatedEvent::class,
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     public function module($name,$model)

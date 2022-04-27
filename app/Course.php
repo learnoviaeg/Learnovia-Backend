@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Attendance\Entities\AttendanceSession;
 use App\Traits\Auditable;
 use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
     'is_template','classes', 'letter_id','shared_lesson', 'index'];
