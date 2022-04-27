@@ -29,9 +29,9 @@ class FetchOneLogApiController extends Controller
         $chain_details['year']     = $log->year_id == null ? null : AcademicYear::whereIn('id', $log->year_id)->first()->name;
         $chain_details['type']     = $log->type_id == null ? null :  AcademicType::whereIn('id', $log->type_id)->first()->name;
         $chain_details['level']    = $log->level_id == null ? null :  Level::whereIn('id', $log->level_id)->first()->name;
-        $chain_details['class']    = $log->class_id == null ? null :  Classes::whereIn('id', $log->class_id)->first()->name;
+        $chain_details['class']    = $log->class_id == null ? null :  Classes::whereIn('id', $log->class_id)->groupBy('name')->pluck('name');
         $chain_details['segment']  = $log->segment_id == null ? null :  Segment::whereIn('id', $log->segment_id)->first()->name;
-        $chain_details['course']   = $log->course_id == null ? null : Course::whereIn('id', $log->course_id)->first()->name;      
+        $chain_details['course']   = $log->course_id == null ? null : Course::whereIn('id', $log->course_id)->groupBy('name')->pluck('name');      
 
     	$data          = $log->properties;
     	if ($log->action == 'updated') {
