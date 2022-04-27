@@ -7,10 +7,11 @@ use App\Traits\Auditable;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class quiz extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
 
     protected $fillable = ['name','course_id','is_graded','duration','created_by' , 'shuffle','grade_feedback', 'draft', 'correct_feedback','allow_edit','restricted'];
     protected $hidden = [
