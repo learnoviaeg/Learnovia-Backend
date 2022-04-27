@@ -18,8 +18,6 @@ class FetchOneLogApiController extends Controller
 {
     public function fetch_logs(AuditLog $log)
     {
-        ///return $log->id;
-
         $record_info['time']         = $log->created_at;
         $record_info['username']     = $log->user->fullname;
         $record_info['module']       = $log->subject_type;
