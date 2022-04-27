@@ -4,6 +4,8 @@ namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
+use App\Course;
+use App\Segment;
 
 class QuestionsCategory extends Model
 {

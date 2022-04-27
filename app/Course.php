@@ -180,51 +180,7 @@ class Course extends Model
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        $create_intvals = array();
-        $v1 = $new['classes'];
-        $first   = str_replace("\"", "", $v1);
-        $r       = $first;
-        $move1   = trim($r[0], "[");
-        $move2   = trim($move1, "]");
-        $v1_edit = explode(",", $move2); 
-        $intvals = array();
-        foreach ($v1_edit as $key => $value) {
-            array_push($create_intvals, intval($value));
-        }
-
-        $old_count = count($old);
-        if ($old_count == 0) {
-                /*$create_intvals = array();
-                $v1 = $new['classes'];
-                $first   = str_replace("\"", "", $v1);
-                $r       = $first;
-                $move1   = trim($r[0], "[");
-                $move2   = trim($move1, "]");
-                $v1_edit = explode(",", $move2); 
-                $intvals = array();
-                foreach ($v1_edit as $key => $value) {
-                    array_push($create_intvals, intval($value));
-                }*/
-                $classes = $create_intvals;
-        }else{
-                $new_classes = $create_intvals;
-
-                $v1      = $old['classes'];
-                $first   = str_replace("\"", "", $v1);
-                $r       = array($first);
-                $move1   = trim($r[0], "[");
-                $move2   = trim($move1, "]");
-                $v1_edit = explode(",", $move2); 
-                $intvals = array();
-                foreach ($v1_edit as $key => $value) {
-                    array_push($intvals, intval($value));
-                }
-            if ($intvals == $new_classes) {
-                $classes = $new_classes;
-            }else{
-                $classes = array_merge($intvals, $new_classes);
-            }
-        }
+        $classes = $new['classes'];
         return $classes;
     }
     // end function get name and value attribute
