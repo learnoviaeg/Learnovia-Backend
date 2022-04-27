@@ -277,6 +277,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -334,6 +336,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname;
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -384,6 +388,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -434,6 +440,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname;
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -485,6 +493,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -535,6 +545,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
@@ -586,6 +598,8 @@ class LogsFiltertionController extends Controller
             if ($value->subject_type == 'Enroll') {
               $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
               $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }elseif($value->subject_type == 'page'){
+                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->title;
             }else{
                 $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
             }
