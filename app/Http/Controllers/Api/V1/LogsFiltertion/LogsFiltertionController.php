@@ -197,25 +197,25 @@ class LogsFiltertionController extends Controller
             return $this->filter_with_year($data, $year_id, $pagination, $request);
         }
         // case serach with type
-        elseif ($year_id == null && $type_id != null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null) {
-            return $this->filter_with_type($data, $type_id, $pagination, $request);
+        elseif ($year_id != null && $type_id != null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null) {
+            return $this->filter_with_type($data, $year_id, $type_id, $pagination, $request);
         }
         // case serach with level
-        elseif ($year_id == null && $type_id == null && $level_id != null && $class_id == null && $segment_id == null && $course_id == null) {
-            return $this->filter_with_level($data, $level_id, $pagination, $request);
-        }
-        // case serach with course
-        elseif ($year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id != null) {
-            //return 'aa';
-            return $this->filter_with_course($data, $course_id, $pagination, $request);
+        elseif ($year_id != null && $type_id != null && $level_id != null && $class_id == null && $segment_id == null && $course_id == null) {
+            return $this->filter_with_level($data, $year_id, $type_id, $level_id, $pagination, $request);
         }
         // case serach with class
-        elseif ($year_id == null && $type_id == null && $level_id == null && $class_id != null && $segment_id == null && $course_id == null) {
-            return $this->filter_with_class($data, $class_id, $pagination, $request);
+        elseif ($year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id == null && $course_id == null) {
+            return $this->filter_with_class($data, $year_id, $type_id, $level_id, $class_id, $pagination, $request);
         }
         // case serach with segment
-        elseif ($year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id != null && $course_id == null) {
-            return $this->filter_with_segment($data, $segment_id, $pagination, $request);
+        elseif ($year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id == null) {
+            return $this->filter_with_segment($data, $year_id, $type_id, $level_id, $class_id, $segment_id, $pagination, $request);
+        }
+        // case serach with course
+        elseif ($year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id != null) {
+            //return 'aa';
+            return $this->filter_with_course($data, $year_id, $type_id, $level_id, $class_id, $segment_id, $course_id, $pagination, $request);
         }
         else{
             return 'another';
@@ -275,10 +275,11 @@ class LogsFiltertionController extends Controller
     }
 
      // search with type
-    public function filter_with_type($data, $type_id, $pagination, $request)
+    public function filter_with_type($data, $year_id, $type_id, $pagination, $request)
     {
         //$chain_ids = AuditLog::whereJsonContains('audit_logs.type_id', intval($type_id))->pluck('id')->toArray();
-        $chain_ids = AuditLog::where('type_id', 'like', "%{$type_id}%")->pluck('id')->toArray();
+        $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->where('type_id', 'like', "%{$type_id}%")
+                            ->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
                       ->skip(($request->paginate * ($request->page - 1)))
@@ -294,10 +295,11 @@ class LogsFiltertionController extends Controller
     }
 
      // search with level
-    public function filter_with_level($data, $level_id, $pagination, $request)
+    public function filter_with_level($data, $year_id, $type_id, $level_id, $pagination, $request)
     {
        // $chain_ids = AuditLog::whereJsonContains('audit_logs.level_id', intval($level_id))->pluck('id')->toArray();
-        $chain_ids = AuditLog::where('level_id', 'like', "%{$level_id}%")->pluck('id')->toArray();
+        $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->where('type_id', 'like', "%{$type_id}%")
+                            ->where('level_id', 'like', "%{$level_id}%")->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
                       ->skip(($request->paginate * ($request->page - 1)))
@@ -313,10 +315,12 @@ class LogsFiltertionController extends Controller
     }
 
     // search with class
-    public function filter_with_class($data, $class_id, $pagination, $request)
+    public function filter_with_class($data, $year_id, $type_id, $level_id, $class_id, $pagination, $request)
     {
         // $chain_ids = AuditLog::whereJsonContains('audit_logs.class_id', intval($class_id))->pluck('id')->toArray();
-        $chain_ids = AuditLog::where('class_id', 'like', "%{$class_id}%")->pluck('id')->toArray();
+        $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->where('type_id', 'like', "%{$type_id}%")
+                            ->where('level_id', 'like', "%{$level_id}%")->where('class_id', 'like', "%{$class_id}%")
+                            ->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
                       ->skip(($request->paginate * ($request->page - 1)))
@@ -332,10 +336,12 @@ class LogsFiltertionController extends Controller
     }
 
      // search with segment
-    public function filter_with_segment($data, $segment_id, $pagination, $request)
+    public function filter_with_segment($data, $year_id, $type_id, $level_id, $class_id, $segment_id, $pagination, $request)
     {
         // $chain_ids = AuditLog::whereJsonContains('audit_logs.segment_id', intval($segment_id))->pluck('id')->toArray();
-        $chain_ids = AuditLog::where('segment_id', 'like', "%{$segment_id}%")->pluck('id')->toArray();
+        $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->where('type_id', 'like', "%{$type_id}%")
+                            ->where('level_id', 'like', "%{$level_id}%")->where('class_id', 'like', "%{$class_id}%")
+                            ->where('segment_id', 'like', "%{$segment_id}%")->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
                       ->skip(($request->paginate * ($request->page - 1)))
@@ -351,10 +357,13 @@ class LogsFiltertionController extends Controller
     }
 
     // search with course
-    public function filter_with_course($data, $course_id, $pagination, $request)
+    public function filter_with_course($data, $year_id, $type_id, $level_id, $class_id, $segment_id, $course_id, $pagination, $request)
     {
         // $chain_ids  = AuditLog::whereJsonContains('audit_logs.course_id', intval($course_id))->pluck('id')->toArray();
-        $chain_ids  = AuditLog::where('course_id', 'like', "%{$course_id}%")->pluck('id')->toArray();
+        $chain_ids  = AuditLog::where('year_id', 'like', "%{$year_id}%")->where('type_id', 'like', "%{$type_id}%")
+                            ->where('level_id', 'like', "%{$level_id}%")->where('class_id', 'like', "%{$class_id}%")
+                            ->where('segment_id', 'like', "%{$segment_id}%")->where('course_id', 'like', "%{$course_id}%")
+                            ->pluck('id')->toArray();
         $chain_data = $data->whereIn('id', $chain_ids)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
