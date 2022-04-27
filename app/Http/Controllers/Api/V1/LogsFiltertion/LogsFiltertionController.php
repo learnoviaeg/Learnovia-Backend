@@ -260,7 +260,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -312,7 +317,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname;
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -357,7 +367,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -402,7 +417,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname;
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;    
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -448,7 +468,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -493,7 +518,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
 
             $value->makeHidden('user');
@@ -539,7 +569,12 @@ class LogsFiltertionController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$value->subject_type; 
             }
-            $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name; 
+            if ($value->subject_type == 'Enroll') {
+              $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->user->fullname; 
+              $value['item_id']     = $model::withTrashed()->where('id', $value->subject_id)->first()->user->id;   
+            }else{
+                $value['item_name']   = $model::withTrashed()->where('id', $value->subject_id)->first()->name;    
+            }
             // end item name
             $value->makeHidden('user');
         }
