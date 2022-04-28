@@ -122,5 +122,12 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'single_choice', 'language' => 2, 'value' => 'اجابة واحدة']);
         Dictionary::firstOrCreate(['key' => 'fully_answer', 'language' => 2, 'value' => 'اجابة اكنر من متعدد']);
         Dictionary::firstOrCreate(['key' => 'partial_answer', 'language' => 2, 'value' => 'اجابة جزئية']);
+
+        Dictionary::firstOrCreate(['key' => 'settings/general', 'language' => 2, 'value' => ' الاعدادات العامة']);
+        Dictionary::firstOrCreate(['key' => 'settings/general', 'language' => 1, 'value' => 'General Settings']);
+        Dictionary::firstOrCreate(['key' => 'settings', 'language' => 2, 'value' => ' الاعدادات']);
+        Dictionary::firstOrCreate(['key' => 'settings', 'language' => 1, 'value' => 'Settings']);
+        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 2, 'value' => 'مجموع درجات الاسئلة']);
+        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum Question Marks']);
     }
 }
