@@ -91,7 +91,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 2, 'value' => ' ولماذا']);
         Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 1, 'value' => 'and Why?']);
 
-        Dictionary::updateOrCreate(['key' => '1', 'language' => 2],[ 'value' => 'صح']);
+        Dictionary::where('key','1')->where('language', 2)->update(['value'=>'صح']);
 
         Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 2, 'value' => 'استثناء الدرجة']);
         Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 1, 'value' => 'Exclude Mark']);
@@ -100,7 +100,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'start_quiz', 'language' => 1, 'value' => 'Start Quiz']);
         Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 2, 'value' => 'لقد وصلت للحد الأقصى للمحاولات']);
         Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 1, 'value' => 'You have reached max attempts']);
-        Dictionary::firstOrCreate(['key' => 'out_of ', 'language' => 2, 'value' => 'من']);
+        Dictionary::firstOrCreate(['key' => 'out_of', 'language' => 2, 'value' => 'من']);
         Dictionary::firstOrCreate(['key' => 'out_of', 'language' => 1, 'value' => 'Out of']);
         Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 2, 'value' => 'انتهى الاختبار']);
         Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 1, 'value' => 'َQuiz has been ended']);
@@ -122,5 +122,12 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'single_choice', 'language' => 2, 'value' => 'اجابة واحدة']);
         Dictionary::firstOrCreate(['key' => 'fully_answer', 'language' => 2, 'value' => 'اجابة اكنر من متعدد']);
         Dictionary::firstOrCreate(['key' => 'partial_answer', 'language' => 2, 'value' => 'اجابة جزئية']);
+
+        Dictionary::firstOrCreate(['key' => 'settings/general', 'language' => 2, 'value' => ' الاعدادات العامة']);
+        Dictionary::firstOrCreate(['key' => 'settings/general', 'language' => 1, 'value' => 'General Settings']);
+        Dictionary::firstOrCreate(['key' => 'settings', 'language' => 2, 'value' => ' الاعدادات']);
+        Dictionary::firstOrCreate(['key' => 'settings', 'language' => 1, 'value' => 'Settings']);
+        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 2, 'value' => 'مجموع درجات الاسئلة']);
+        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum of Question Marks']);
     }
 }

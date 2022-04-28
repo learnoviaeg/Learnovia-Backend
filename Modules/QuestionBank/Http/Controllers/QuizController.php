@@ -834,23 +834,23 @@ class QuizController extends Controller
         $total = [
             [
                 'id' => 1,
-                'name' =>__('messages.grading.First')
+                'name' =>'First'
             ],
             [
                 'id' => 2,
-                'name' =>__('messages.grading.Last')
+                'name' =>'Last'
             ],
             [
                 'id' => 3,
-                'name' =>__('messages.grading.Average')
+                'name' =>'Average'
             ],
             [
                 'id' => 4,
-                'name' =>__('messages.grading.Highest')
+                'name' =>'Highest'
             ],
             [
                 'id' => 5,
-                'name' =>__('messages.grading.Lowest')
+                'name' =>'Lowest'
             ]
         ];
         return HelperController::api_response_format(200, $total, __('messages.grade.grading_method_list'));

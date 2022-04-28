@@ -350,13 +350,13 @@ return [
         'Done' => 'تم',
         'reArrange' => 'لا يمكن ترتيبه',
     ],
-    'grading' => [
-        'First' => 'First',
-        'Last' => 'Last',
-        'Average' => 'Average',
-        'Highest' => 'Highest',
-        'Lowest' => 'Lowest',
-    ],
+    // 'grading' => [
+    //     'First' => 'First',
+    //     'Last' => 'Last',
+    //     'Average' => 'Average',
+    //     'Highest' => 'Highest',
+    //     'Lowest' => 'Lowest',
+    // ],
     'grade_item' => [
         'add' => 'تم اضافة بنجاح',
         'update' => 'تم تعديل بنجاح',

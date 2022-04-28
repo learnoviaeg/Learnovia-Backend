@@ -35,13 +35,13 @@ return [
         'assigned_before' => 'Assigned before',
         'extension_error' => 'This extension is not valid'
     ],
-    'grading' => [
-        'First' => 'الأولى',
-        'Last' => 'الأخيرة',
-        'Average' => 'المنوسط',
-        'Highest' => 'الأعلى',
-        'Lowest' => 'الأقل',
-    ],
+    // 'grading' => [
+    //     'First' => 'الأولى',
+    //     'Last' => 'الأخيرة',
+    //     'Average' => 'المنوسط',
+    //     'Highest' => 'الأعلى',
+    //     'Lowest' => 'الأقل',
+    // ],
     'success' => [
         'submit_success' => 'Answer submitted successfully',
         'toggle' => 'Item toggle successfully',
