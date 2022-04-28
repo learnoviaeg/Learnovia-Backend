@@ -30,7 +30,7 @@ trait Auditable
     protected static function audit($description, $model)
     {
         $subject_model = substr(get_class($model),strripos(get_class($model),'\\')+1);
-        if ($subject_model == 'Enroll') {
+        if ($subject_model == 'Course') {
             $created_at = Carbon::now()->addSeconds(1);
         }else{
             $created_at = Carbon::now();
