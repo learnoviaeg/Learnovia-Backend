@@ -100,7 +100,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'start_quiz', 'language' => 1, 'value' => 'Start Quiz']);
         Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 2, 'value' => 'لقد وصلت للحد الأقصى للمحاولات']);
         Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 1, 'value' => 'You have reached max attempts']);
-        Dictionary::firstOrCreate(['key' => 'out_of ', 'language' => 2, 'value' => 'من']);
+        Dictionary::firstOrCreate(['key' => 'out_of', 'language' => 2, 'value' => 'من']);
         Dictionary::firstOrCreate(['key' => 'out_of', 'language' => 1, 'value' => 'Out of']);
         Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 2, 'value' => 'انتهى الاختبار']);
         Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 1, 'value' => 'َQuiz has been ended']);
