@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\ChainRepositoryInterface;
 use Carbon\Carbon;
 use App\Course;
+use App\attachment;
 use App\LastAction;
 use App\User;
 use App\GradeCategory;

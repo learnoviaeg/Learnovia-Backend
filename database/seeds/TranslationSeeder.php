@@ -80,5 +80,47 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'quiz_grade', 'language' => 1, 'value' => 'Grade of Quiz']);
         Dictionary::firstOrCreate(['key' => 'mark', 'language' => 2, 'value' => 'درجة']);
         Dictionary::firstOrCreate(['key' => 'mark', 'language' => 1, 'value' => 'Mark']);
+        Dictionary::firstOrCreate(['key' => 'and', 'language' => 2, 'value' => 'و']);
+        Dictionary::firstOrCreate(['key' => 'and', 'language' => 1, 'value' => 'and']);
+        Dictionary::firstOrCreate(['key' => 'correct_feedback', 'language' => 2, 'value' => 'الإجابات الصحيحة']);
+        Dictionary::firstOrCreate(['key' => 'correct_feedback', 'language' => 1, 'value' => 'Correct Feedback']);
+        Dictionary::firstOrCreate(['key' => 'grade_feedback', 'language' => 2, 'value' => 'اظهار الدرجة']);
+        Dictionary::firstOrCreate(['key' => 'grade_feedback', 'language' => 1, 'value' => 'Grade Feedback']);
+        Dictionary::firstOrCreate(['key' => 'grade_to_pass', 'language' => 2, 'value' => ' درجة النجاح']);
+        Dictionary::firstOrCreate(['key' => 'grade_to_pass', 'language' => 1, 'value' => 'Grade To Pass']);
+        Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 2, 'value' => ' ولماذا']);
+        Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 1, 'value' => 'and Why?']);
+
+        Dictionary::updateOrCreate(['key' => '1', 'language' => 2],[ 'value' => 'صح']);
+
+        Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 2, 'value' => 'استثناء الدرجة']);
+        Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 1, 'value' => 'Exclude Mark']);
+
+        Dictionary::firstOrCreate(['key' => 'start_quiz', 'language' => 2, 'value' => 'ابدأ الاحتبار']);
+        Dictionary::firstOrCreate(['key' => 'start_quiz', 'language' => 1, 'value' => 'Start Quiz']);
+        Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 2, 'value' => 'لقد وصلت للحد الأقصى للمحاولات']);
+        Dictionary::firstOrCreate(['key' => 'you_reached_max_attempts', 'language' => 1, 'value' => 'You have reached max attempts']);
+        Dictionary::firstOrCreate(['key' => 'out_of ', 'language' => 2, 'value' => 'من']);
+        Dictionary::firstOrCreate(['key' => 'out_of', 'language' => 1, 'value' => 'Out of']);
+        Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 2, 'value' => 'انتهى الاختبار']);
+        Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 1, 'value' => 'َQuiz has been ended']);
+
+        Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 2, 'value' => 'انتهى الاختبار']);
+        Dictionary::firstOrCreate(['key' => 'quiz_ended', 'language' => 1, 'value' => 'َQuiz has been ended']);
+        Dictionary::firstOrCreate(['key' => 'quiz_doesnt_started_yet', 'language' => 2, 'value' => 'الاختبار لم يبدأ بعد']);
+        Dictionary::firstOrCreate(['key' => 'quiz_doesnt_started_yet', 'language' => 1, 'value' => 'َQuiz hasnot started yet']);
+
+        Dictionary::firstOrCreate(['key' => 'continue_last_attempt', 'language' => 2, 'value' => 'استكمل المحاولة الأخيرة']);
+        Dictionary::firstOrCreate(['key' => 'continue_last_attempt', 'language' => 1, 'value' => 'َContiue Last Attempt']);
+        Dictionary::firstOrCreate(['key' => 'exclude_shuffle', 'language' => 2, 'value' => 'استثناء تغيير الترتيب']);
+        Dictionary::firstOrCreate(['key' => 'exclude_shuffle', 'language' => 1, 'value' => 'َExclude Shuffle']);
+
+        Dictionary::firstOrCreate(['key' => 'single_choice', 'language' => 1, 'value' => 'Single Choice']);
+        Dictionary::firstOrCreate(['key' => 'fully_answer', 'language' => 1, 'value' => 'Fully Answer']);
+        Dictionary::firstOrCreate(['key' => 'partial_answer', 'language' => 1, 'value' => 'Partial Answer']);
+
+        Dictionary::firstOrCreate(['key' => 'single_choice', 'language' => 2, 'value' => 'اجابة واحدة']);
+        Dictionary::firstOrCreate(['key' => 'fully_answer', 'language' => 2, 'value' => 'اجابة اكنر من متعدد']);
+        Dictionary::firstOrCreate(['key' => 'partial_answer', 'language' => 2, 'value' => 'اجابة جزئية']);
     }
 }
