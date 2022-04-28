@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\AuditLog;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 trait Auditable
 {
@@ -28,6 +29,12 @@ trait Auditable
 
     protected static function audit($description, $model)
     {
+        $subject_model = substr(get_class($model),strripos(get_class($model),'\\')+1);
+        if ($subject_model == 'Enroll') {
+            $created_at = Carbon::now()->addSeconds(1);
+        }else{
+            $created_at = Carbon::now();
+        }
         AuditLog::create([
             'action'       => $description,
             'subject_id'   => $model->id ?? null,
@@ -43,6 +50,7 @@ trait Auditable
             'segment_id'   => $model->get_segment_name($model->getOriginal(), $model), 
             'course_id'    => $model->get_course_name($model->getOriginal(), $model),
             'before'       => $model->getOriginal(),
+            'created_at'   => $created_at,
         ]);
     }
 }
