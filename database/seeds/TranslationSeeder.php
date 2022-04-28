@@ -91,7 +91,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 2, 'value' => ' ولماذا']);
         Dictionary::firstOrCreate(['key' => 'AndWhy', 'language' => 1, 'value' => 'and Why?']);
 
-        Dictionary::updateOrCreate(['key' => '1', 'language' => 2],[ 'value' => 'صح']);
+        Dictionary::where('key','1')->where('language', 2)->update(['value'=>'صح']);
 
         Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 2, 'value' => 'استثناء الدرجة']);
         Dictionary::firstOrCreate(['key' => 'exclude_mark', 'language' => 1, 'value' => 'Exclude Mark']);
@@ -128,6 +128,6 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'settings', 'language' => 2, 'value' => ' الاعدادات']);
         Dictionary::firstOrCreate(['key' => 'settings', 'language' => 1, 'value' => 'Settings']);
         Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 2, 'value' => 'مجموع درجات الاسئلة']);
-        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum Question Marks']);
+        Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum of Question Marks']);
     }
 }
