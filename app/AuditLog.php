@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+// use Spatie\Permission\Models\Role;
 
 class AuditLog extends Model
 {
@@ -51,4 +52,9 @@ class AuditLog extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+   /* public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }*/
 }

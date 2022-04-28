@@ -13,6 +13,7 @@ use App\Level;
 use App\Classes;
 use App\Segment;
 use App\Course;
+use Spatie\Permission\Models\Role;
 
 class FetchOneLogApiController extends Controller
 {
@@ -38,13 +39,50 @@ class FetchOneLogApiController extends Controller
                                                                       ->groupBy('name')->pluck('name');      
 
     	$data          = $log->properties;
+
+        $headlines['description'] = 'Item in module ( '. $log->subject_type .' ) has been ( '. $log->action .' ) by ( '. $log->user->fullname. ' )';
+        $headlines['username']    = $log->user->fullname;
+        $headlines['role']        = Role::whereIn('id', $log->role_id)->pluck('name');
+        $headlines['since']       = $log->created_at->diffForHumans();
+
+        // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($log->subject_type, $names_array)) {
+              $model = $names_array[$log->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$log->subject_type; 
+            }
+            if ($log->subject_type == 'Enroll') {
+              $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->user->fullname; 
+              $headlines['item_id']     = $model::withTrashed()->where('id', $log->subject_id)->first()->user->id;    
+            }elseif($log->subject_type == 'page'){
+                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->title;
+            }else{
+                $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
+            }
+            // end item name
+
     	if ($log->action == 'updated') {
     		$before = $log->before;
     		//$diff = array_diff_assoc( array($before), array($data) );
     		//$diff->makeHidden(['created_at', 'updted_at', 'deleted_at']); // hide some attrs
-    		return response()->json(['record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'before' => $before, 'status_code' => 200], 200);
+    		return response()->json(['headlines' => $headlines, 'record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'before' => $before, 'status_code' => 200], 200);
     	}else{
-    		return response()->json(['record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'status_code' => 200], 200);
+    		return response()->json(['headlines' => $headlines, 'record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'status_code' => 200], 200);
     	}
     }
 }
