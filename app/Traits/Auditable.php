@@ -33,6 +33,7 @@ trait Auditable
             'subject_id'   => $model->id ?? null,
             'subject_type' => substr(get_class($model),strripos(get_class($model),'\\')+1),//get_class($model) ?? null,
             'user_id'      => auth()->id() ?? null,
+            'role_id'      => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
             'properties'   => $model ?? null,
             'host'         => request()->ip() ?? null,
             'year_id'      => $model->get_year_name($model->getOriginal(), $model),

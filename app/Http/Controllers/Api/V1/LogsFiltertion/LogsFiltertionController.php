@@ -186,10 +186,10 @@ class LogsFiltertionController extends Controller
         // case 17
         if ($user_id == null && $action == null && $model == null && $start_date == null && $end_date == null && $role_id != null) {
             // fetch logs related with this period
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->whereHas('user', function($q)
+            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->whereHas('user', function($q) use ($role_id)
               {
-                $q->whereHas('roles', function($query){
-                  $query->where('id', $role_id);
+                $q->whereHas('roles', function($query) use ($role_id){
+                  $query->whereIn('id', [$role_id]);
                 });
               })->orderBy('created_at', 'DESC')
                 ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');

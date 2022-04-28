@@ -26,6 +26,7 @@ class AuditLog extends Model
         'segment_id', 
         'course_id',
         'created_at',
+        'role_id', 
     ];
 
     protected $dates = [
@@ -43,6 +44,7 @@ class AuditLog extends Model
         'class_id'   => 'array',
         'segment_id' => 'array', 
         'course_id'  => 'array',
+        'role_id'    => 'array',
     ];
 
     public function user()
