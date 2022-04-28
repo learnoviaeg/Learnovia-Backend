@@ -42,7 +42,7 @@ class QuizzesController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:quiz/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:quiz/get','ParentCheck'],   ['only' => ['index','show']]);
         $this->middleware('ParentCheck',   ['only' => ['show']]);
         $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
         $this->middleware(['permission:quiz/update'],   ['only' => ['update']]);
