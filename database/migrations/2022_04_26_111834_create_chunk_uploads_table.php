@@ -16,11 +16,11 @@ class CreateChunkUploadsTable extends Migration
         Schema::create('chunk_uploads', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->text('name')->nullable();
-            $table->longtext('data');
             $table->longtext('path')->nullable();
-            $table->boolean('uploaded')->default(0);
             $table->text('type')->nullable();
+            $table->boolean('uploaded')->default(0);
             $table->timestamps();
+
         });
     }
 
