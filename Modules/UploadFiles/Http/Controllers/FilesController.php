@@ -223,8 +223,12 @@ class FilesController extends Controller
 
         $rules = [
             'name' => 'string|min:1',
-            'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            // 'Imported_file' => 'required|array',
+            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+
+            'file_id' => 'required|array',
+            'file_id.*' => 'required|',
+
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
@@ -233,11 +237,11 @@ class FilesController extends Controller
             'users_ids.*' => 'exists:users,id'
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
-        ];
+        // $customMessages = [
+        //     'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
+        // ];
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -248,23 +252,23 @@ class FilesController extends Controller
             $publishdate = Carbon::now();
         }
 
-        foreach ($request->Imported_file as $singlefile) {
-            $extension = $singlefile->getClientOriginalExtension();
-            $fileName = $singlefile->getClientOriginalName();
-            $size = $singlefile->getSize();
-            $name = uniqid() . '.' . $extension;
-            $file = new file;
-            $file->type = $extension;
-            $file->description = $name;
-            $file->name = ($request->filled('name')) ? $request->name : $fileName;
-            $file->size = $size;
-            $file->attachment_name = $fileName;
-            $file->user_id = Auth::user()->id;
-            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-            $file->url2 = 'files/' . $name;
-            $check = $file->save();
-
-            if ($check) {
+        foreach ($request->file_id as $singlefile) {
+            // $extension = $singlefile->getClientOriginalExtension();
+            // $fileName = $singlefile->getClientOriginalName();
+            // $size = $singlefile->getSize();
+            // $name = uniqid() . '.' . $extension;
+            // $file = new file;
+            // $file->type = $extension;
+            // $file->description = $name;
+            // $file->name = ($request->filled('name')) ? $request->name : $fileName;
+            // $file->size = $size;
+            // $file->attachment_name = $fileName;
+            // $file->user_id = Auth::user()->id;
+            // $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+            // $file->url2 = 'files/' . $name;
+            // $check = $file->save();
+            $file = file::find($singlefile);
+            if ($file) {
                 if(isset($request->users_ids))
                     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 

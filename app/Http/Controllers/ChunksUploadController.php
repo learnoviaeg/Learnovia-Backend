@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\ChunkUploads;
 use Illuminate\Support\Facades\Storage;
 use App\attachment;
-use File;
+// use File;
+use Modules\UploadFiles\Entities\file;
+
+use Illuminate\Support\Facades\Auth;
 
 class ChunksUploadController extends Controller
 {
@@ -59,13 +62,44 @@ class ChunksUploadController extends Controller
             $ext = substr($extension,strrpos($extension,"/")+1);            
             Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name .'.'. $ext, $base64_encoded_string);
             ///////////////////moving file to attachment table 
-            $attachment = new attachment;
-            $attachment->name = $uploaded_file->name.'.'. $ext;
-            $attachment->path = $uploaded_file->getOriginal('path').'.'. $ext;
-            $attachment->type =  $uploaded_file->type;
-            $attachment->extension = $ext;
-            $attachment->mime_type = $extension;
-            $attachment->save();
+            if($uploaded_file->type == 'assignment'){
+                $attachment = new attachment;
+                $attachment->name = $uploaded_file->name.'.'. $ext;
+                $attachment->path = $uploaded_file->getOriginal('path').'.'. $ext;
+                $attachment->type =  $uploaded_file->type;
+                $attachment->extension = $ext;
+                $attachment->mime_type = $extension;
+                $attachment->save();
+            }
+            ///////////////////moving file to files table 
+            if($uploaded_file->type == 'files'){
+                $name = $uploaded_file->name.'.'. $ext;
+                $attachment = new file;
+                $attachment->type = $ext;
+                $attachment->description = $name;
+                $attachment->name = $uploaded_file->name;
+                $attachment->attachment_name = $fileName;
+                $attachment->user_id = Auth::user()->id;
+                $attachment->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+                $attachment->url2 = 'files/' . $name;
+                $attachment->save();
+            }
+
+                  ///////////////////moving file to media table 
+                //   if($uploaded_file->type == 'files'){
+                //     $name = $uploaded_file->name.'.'. $ext;
+                //     $attachment = new file;
+                //     $attachment->type = $ext;
+                //     $attachment->description = $name;
+                //     $attachment->name = $uploaded_file->name;
+                //     $attachment->attachment_name = $fileName;
+                //     $attachment->user_id = Auth::user()->id;
+                //     $attachment->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+                //     $attachment->url2 = 'files/' . $name;
+                //     $attachment->save();
+                // }
+    
+
             //////////////////////////////////////////////////
             //removing db record and text file after moving uploaded file to the proper table
             ChunkUploads::whereId($uploaded_file->id)->delete();
