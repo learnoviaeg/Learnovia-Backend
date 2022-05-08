@@ -165,7 +165,7 @@ class AssignmentLesson extends Model
     {
         $lesson_id    = $new->lesson_id;
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-        $segment_id = Course::where('id', $course_id)->first()->segment_id;
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
 
         AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
             'segment_id' => $segment_id
