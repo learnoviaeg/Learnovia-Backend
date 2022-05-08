@@ -299,16 +299,18 @@ class AssignmentController extends Controller
             'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'grade_category' => 'exists:grade_categories,id',
             // 'updated_lesson_id' =>'nullable|exists:lessons,id'
+            'file_id' => 'exists:attachments,id',
         ]);
 
-        if ($request->hasFile('file')) {
+        // if ($request->hasFile('file')) {
 
-            $settings = $this->setting->get_value('create_assignment_extensions');
+        //     $settings = $this->setting->get_value('create_assignment_extensions');
 
-            $request->validate([
-                'file' => 'file|distinct|mimes:'.$settings,
-            ]);
-        }
+        //     $request->validate([
+        //         'file' => 'file|distinct|mimes:'.$settings,
+        //     ]);
+        // }
+        
 
         $assignment = assignment::find($id);
 
@@ -349,7 +351,7 @@ class AssignmentController extends Controller
                 $assignment->update([
                     'content' => isset($request->content) ? $request->content : $assignment->content,
                     'name' => isset($request->name) ? $request->name : $assignment->name,
-                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
+                    'attachment_id' => $request->filled('file_id') ? $request->file_id : null,
                 ]);
                 $assigmentLesson->update([
                     'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
