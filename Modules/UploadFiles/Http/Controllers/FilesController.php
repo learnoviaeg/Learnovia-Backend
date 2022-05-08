@@ -411,7 +411,10 @@ class FilesController extends Controller
 
         $file = file::find($request->id);
 
-        $file->update (['name' => isset($request->name) ? $request->name :$file->name]);
+        $file_name = isset($request->name) ? $request->name : $file->name;
+        $file->name = $file_name;
+        //$file->update (['name' => isset($request->name) ? $request->name : $file->name]);
+        
         if (isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $name = uniqid() . '.' . $extension;

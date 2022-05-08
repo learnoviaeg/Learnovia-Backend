@@ -8,5 +8,7 @@ return [
       'academic_year_id'   => 'Year',
       'course_id'          => 'Course',
       'shared_classes'     => 'Classes',
+      'classes'            => 'Classes',
+      'class_id'           => 'Classes',
 
 ];
