@@ -178,10 +178,9 @@ class QuizLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $segment_id   = Course::where('id', $course_id)->first()->segment_id;
         $segment      = Segment::where('id', $segment_id)->first();
-        $academic_year_id[] = $segment->academic_year_id;
+        $academic_year_id = $segment->academic_year_id;
 
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'year_id' => $academic_year_id
         ]);
 
@@ -196,10 +195,9 @@ class QuizLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $segment_id   = Course::where('id', $course_id)->first()->segment_id;
         $segment      = Segment::where('id', $segment_id)->first();
-        $academic_type_id[] = $segment->academic_type_id;
+        $academic_type_id = $segment->academic_type_id;
 
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'type_id' => $academic_type_id
         ]);
 
@@ -212,10 +210,9 @@ class QuizLesson extends Model
     {
         $lesson_id    = $new->lesson_id;
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-        $level_id[]   = Course::where('id', $course_id)->first()->level_id;
+        $level_id   = Course::where('id', $course_id)->first()->level_id;
 
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'level_id' => $level_id
         ]);
 
@@ -230,8 +227,7 @@ class QuizLesson extends Model
         $lesson       = Lessonmodel::where('id', $lesson_id)->first();
         $classes      = $lesson['shared_classes']->pluck('id');
 
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'class_id' => $classes
         ]);
 
@@ -244,10 +240,9 @@ class QuizLesson extends Model
     {
         $lesson_id    = $new->lesson_id;
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-        $segment_id[] = Course::where('id', $course_id)->first()->segment_id;
+        $segment_id = Course::where('id', $course_id)->first()->segment_id;
 
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'segment_id' => $segment_id
         ]);
         return $segment_id;
@@ -259,9 +254,8 @@ class QuizLesson extends Model
     {
        // $lessons_id   = QuizLesson::where('quiz_id', $new->quiz_id)->pluck('lesson_id');
         $lesson_id    = $new->lesson_id;
-        $course_id[]  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-        $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->first();
-        $audit_log_quiz_course_id->update([
+        $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
+        AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->quiz_id])->update([
             'course_id' => $course_id
         ]);
         return $course_id;
