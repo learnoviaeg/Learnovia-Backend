@@ -9,7 +9,7 @@ use App\Traits\AuditableView;
 
 class AuditLog extends Model
 {
-    use SoftDeletes, AuditableView;
+    use SoftDeletes;
 
     public $table = 'audit_logs';
 

@@ -9,7 +9,7 @@ use App\Traits\YearsView;
 
 class AcademicYear extends Model
 {
-    use SoftDeletes, Auditable, YearsView;
+    use SoftDeletes, Auditable;
 
     protected $fillable = ['id','name','current'];
     public function AC_Type()
