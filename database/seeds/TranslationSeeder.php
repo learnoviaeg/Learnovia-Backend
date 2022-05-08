@@ -112,8 +112,8 @@ class TranslationSeeder extends Seeder
 
         Dictionary::firstOrCreate(['key' => 'continue_last_attempt', 'language' => 2, 'value' => 'استكمل المحاولة الأخيرة']);
         Dictionary::firstOrCreate(['key' => 'continue_last_attempt', 'language' => 1, 'value' => 'َContiue Last Attempt']);
-        Dictionary::firstOrCreate(['key' => 'exclude_shuffle', 'language' => 2, 'value' => 'استثناء تغيير الترتيب']);
-        Dictionary::firstOrCreate(['key' => 'exclude_shuffle', 'language' => 1, 'value' => 'َExclude Shuffle']);
+        Dictionary::firstOrCreate(['key' => 'Exclude_shuffle', 'language' => 2, 'value' => 'استثناء تغيير الترتيب']);
+        Dictionary::firstOrCreate(['key' => 'Exclude_shuffle', 'language' => 1, 'value' => 'َExclude Shuffle']);
 
         Dictionary::firstOrCreate(['key' => 'single_choice', 'language' => 1, 'value' => 'Single Choice']);
         Dictionary::firstOrCreate(['key' => 'fully_answer', 'language' => 1, 'value' => 'Fully Answer']);
@@ -129,5 +129,11 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'settings', 'language' => 1, 'value' => 'Settings']);
         Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 2, 'value' => 'مجموع درجات الاسئلة']);
         Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum of Question Marks']);
+
+        Dictionary::firstOrCreate(['key' => 'you_must_check_at_least_two', 'language' => 2, 'value' => 'يحب ان تختار على الأقل اجابتين صحيحتين']);
+        Dictionary::firstOrCreate(['key' => 'you_must_check_at_least_two', 'language' => 1, 'value' => 'You must check at least two']);
+
+        Dictionary::firstOrCreate(['key' => 'check_mark', 'language' => 2, 'value' => 'اختار اجابة']);
+        Dictionary::firstOrCreate(['key' => 'check_mark', 'language' => 1, 'value' => 'Check Answer']);
     }
 }
