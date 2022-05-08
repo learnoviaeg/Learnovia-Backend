@@ -34,7 +34,7 @@ class ChunksUploadController extends Controller
 
             $uploaded_file  = ChunkUploads::create([
                 'name' => $fileName,
-                'data'=> $request->content,
+                // 'data'=> $request->content,
                 'type' => $request->type,
             ]);
             //creating text file to save base64 chunks  
