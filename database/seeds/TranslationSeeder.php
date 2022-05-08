@@ -129,5 +129,35 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'settings', 'language' => 1, 'value' => 'Settings']);
         Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 2, 'value' => 'مجموع درجات الاسئلة']);
         Dictionary::firstOrCreate(['key' => 'collect_marks', 'language' => 1, 'value' => 'Sum of Question Marks']);
+
+        Dictionary::firstOrCreate(['key' => 'you_must_check_at_least_two', 'language' => 2, 'value' => 'يحب ان تختار على الأقل اجابتين صحيحتين']);
+        Dictionary::firstOrCreate(['key' => 'you_must_check_at_least_two', 'language' => 1, 'value' => 'You must check at least two']);
+
+        Dictionary::firstOrCreate(['key' => 'check_mark', 'language' => 2, 'value' => 'اختار اجابة']);
+        Dictionary::firstOrCreate(['key' => 'check_mark', 'language' => 1, 'value' => 'Check Answer']);
+
+        Dictionary::firstOrCreate(['key' => 'Classes', 'language' => 2, 'value' => 'فصول']);
+        Dictionary::firstOrCreate(['key' => 'Classes', 'language' => 1, 'value' => 'Classes']);
+        Dictionary::firstOrCreate(['key' => 'edit_extentions', 'language' => 2, 'value' => 'تعديل الصيغ']);
+        Dictionary::firstOrCreate(['key' => 'edit_extentions', 'language' => 1, 'value' => 'Edit Extension']);
+        Dictionary::firstOrCreate(['key' => 'mark_required', 'language' => 2, 'value' => 'يجب ادخال الدرجة']);
+        Dictionary::firstOrCreate(['key' => 'mark_required', 'language' => 1, 'value' => 'Mark is required']);
+        Dictionary::firstOrCreate(['key' => 'assignment_name', 'language' => 2, 'value' => 'اسم الواجب']);
+        Dictionary::firstOrCreate(['key' => 'assignment_name', 'language' => 1, 'value' => 'Assignment Name']);
+        Dictionary::firstOrCreate(['key' => 'chain_filter', 'language' => 2, 'value' => 'تصفيه بالهيكل المدرسي']);
+        Dictionary::firstOrCreate(['key' => 'chain_filter', 'language' => 1, 'value' => 'Chain Filter']);
+
+        Dictionary::firstOrCreate(['key' => 'save_as_draft', 'language' => 2, 'value' => 'حفظ كمسودة']);
+        Dictionary::firstOrCreate(['key' => 'save_as_draft', 'language' => 1, 'value' => 'Save as draft']);
+        Dictionary::firstOrCreate(['key' => 'Drafted', 'language' => 2, 'value' => 'مسودة']);
+        Dictionary::firstOrCreate(['key' => 'Drafted', 'language' => 1, 'value' => 'Drafted']);
+        Dictionary::firstOrCreate(['key' => 'teacher_view', 'language' => 2, 'value' => 'عرض المحتوى']);
+        Dictionary::firstOrCreate(['key' => 'teacher_view', 'language' => 1, 'value' => 'Teacher View']);
+        Dictionary::firstOrCreate(['key' => 'view_as_student', 'language' => 2, 'value' => 'عرض المحتوى كطالب']);
+        Dictionary::firstOrCreate(['key' => 'view_as_student', 'language' => 1, 'value' => 'View As Student']);
+        Dictionary::firstOrCreate(['key' => 'grading_method', 'language' => 2, 'value' => 'طرق التصحيح']);
+        Dictionary::firstOrCreate(['key' => 'grading_method', 'language' => 1, 'value' => 'Grading Method']);
+        Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 2, 'value' => 'إضافة الاسئلة']);
+        Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 1, 'value' => 'Add Questions']);
     }
 }
