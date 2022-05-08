@@ -26,18 +26,29 @@ class FetchOneLogApiController extends Controller
         $record_info['action']       = $log->action;
         $record_info['ipAdress']     = $log->host;
 
-        $chain_details['year']     = $log->year_id == null ? null : AcademicYear::whereIn('id', $log->year_id)
-                                                                      ->groupBy('name')->pluck('name');
-        $chain_details['type']     = $log->type_id == null ? null :  AcademicType::whereIn('id', $log->type_id)
-                                                                      ->groupBy('name')->pluck('name');
-        $chain_details['level']    = $log->level_id == null ? null :  Level::whereIn('id', $log->level_id)
-                                                                      ->groupBy('name')->pluck('name');
-        $chain_details['class']    = $log->class_id == null ? null :  Classes::whereIn('id', $log->class_id)
-                                                                      ->groupBy('name')->pluck('name');
-        $chain_details['segment']  = $log->segment_id == null ? null :  Segment::whereIn('id', $log->segment_id)
-                                                                        ->groupBy('name')->pluck('name');
-        $chain_details['course']   = $log->course_id == null ? null : Course::whereIn('id', $log->course_id)
-                                                                      ->groupBy('name')->pluck('name');      
+        $yearID    =  $log->year_id == null ? null : (is_int($log->year_id) ? [$log->year_id] : [$log->year_id]);
+        $typeID    =  $log->type_id == null ? null : (is_int($log->type_id) ? [$log->type_id] : [$log->type_id]);
+        $levelID   =  $log->level_id == null ? null : (is_int($log->level_id) ? [$log->level_id] : [$log->level_id]);
+        $classID   =  $log->class_id == null ? null : (is_int($log->class_id) ? [$log->class_id] : [$log->class_id]);
+        $segmentID =  $log->segment_id == null ? null : (is_int($log->segment_id) ? [$log->segment_id] : [$log->segment_id]);
+        $courseID  =  $log->course_id == null ? null : (is_int($log->course_id) ? [$log->course_id] : [$log->course_id]);
+
+        $chain_details['year'] = $yearID == null ? null : AcademicYear::whereIn('id', $yearID)->groupBy('name')->pluck('name');
+        $chain_details['type'] = $typeID == null ? null : AcademicType::whereIn('id', $typeID)->groupBy('name')->pluck('name');
+        $chain_details['level'] = $levelID == null ? null : Level::whereIn('id', $levelID)->groupBy('name')->pluck('name');
+        $chain_details['class'] = $classID == null ? null : Classes::whereIn('id', $classID)->groupBy('name')->pluck('name');
+        $chain_details['segment'] = $segmentID == null ? null : Segment::whereIn('id', $segmentID)->groupBy('name')->pluck('name');
+        $chain_details['course'] = $courseID == null ? null : Course::whereIn('id', $courseID)->groupBy('name')->pluck('name');
+
+        /*$chain_details['type']     = $log->type_id == null ? null : (is_int($log->type_id) ? AcademicType::whereIn('id', [$log->type_id])->groupBy('name')->pluck('name') : AcademicType::whereIn('id', [$log->type_id])->groupBy('name')->pluck('name') );
+
+        $chain_details['level']     = $log->level_id == null ? null : (is_int($log->level_id) ? Level::whereIn('id', [$log->level_id])->groupBy('name')->pluck('name') : Level::whereIn('id', [$log->level_id])->groupBy('name')->pluck('name') );
+
+        $chain_details['class']     = $log->class_id == null ? null : (is_int($log->class_id) ? Classes::whereIn('id', [$log->class_id])->groupBy('name')->pluck('name') : Classes::whereIn('id', [$log->class_id])->groupBy('name')->pluck('name') );
+
+        $chain_details['segment']     = $log->segment_id == null ? null : (is_int($log->segment_id) ? Segment::whereIn('id', [$log->segment_id])->groupBy('name')->pluck('name') : Segment::whereIn('id', [$log->segment_id])->groupBy('name')->pluck('name') );
+
+        $chain_details['course']     = $log->course_id == null ? null : (is_int($log->course_id) ? Course::whereIn('id', [$log->course_id])->groupBy('name')->pluck('name') : Course::whereIn('id', [$log->course_id])->groupBy('name')->pluck('name') );  */ 
 
     	$data          = $log->properties;
 
