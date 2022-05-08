@@ -412,7 +412,8 @@ class FilesController extends Controller
         $file = file::find($request->id);
 
         $file_name = isset($request->name) ? $request->name : $file->name;
-        $file->name = $file_name;
+        $file->name    = $file_name;
+        $file->user_id = Auth::user()->id;
         //$file->update (['name' => isset($request->name) ? $request->name : $file->name]);
         
         if (isset($request->Imported_file)) {
