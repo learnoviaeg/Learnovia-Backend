@@ -268,6 +268,8 @@ class FilesController extends Controller
             // $file->url2 = 'files/' . $name;
             // $check = $file->save();
             $file = file::find($singlefile);
+            $file->name = ($request->filled('name')) ? $request->name : $file->name;
+            $file->save();
             if ($file) {
                 if(isset($request->users_ids))
                     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
@@ -282,7 +284,7 @@ class FilesController extends Controller
                     $fileLesson->publish_date = $publishdate;
                     $fileLesson->visible = isset($request->visible)?$request->visible:1;
                     $fileLesson->save();
-                    
+
                     // Storage::disk('public')->putFileAs(
                     //     'files/' . $request->$lesson,
                     //     $singlefile,
