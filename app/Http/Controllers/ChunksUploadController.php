@@ -78,7 +78,7 @@ class ChunksUploadController extends Controller
                 $attachment->type = $ext;
                 $attachment->description = $name;
                 $attachment->name = $uploaded_file->name;
-                $attachment->attachment_name = $fileName;
+                $attachment->attachment_name = $uploaded_file->name;
                 $attachment->user_id = Auth::user()->id;
                 $attachment->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
                 $attachment->url2 = 'files/' . $name;
