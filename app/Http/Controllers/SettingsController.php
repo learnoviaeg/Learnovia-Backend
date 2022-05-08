@@ -112,7 +112,7 @@ class SettingsController extends Controller
             if($setting->key == 'upload_file_extensions'){
 
                 //all the extensions that our system support for the file upload
-                $all_create_extensions = collect(explode(',','pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
+                $all_create_extensions = collect(explode(',','bin,pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,txt,TXT,odt,rtf,tex,wpd,rpm,z,ods,xlsm,pps,odp,7z,bdoc,cdoc,ddoc,gtar,tgz,gz,gzip,hqx,sit,tar,epub,gdoc,ott,oth,vtt,gslides,otp,pptm,potx,potm,ppam,ppsx,ppsm,pub,sxi,sti,csv,gsheet,ots,css,html,xhtml,htm,js,scss,docm,dot,dotm,odt,wps,dbf,dif,ods,xlsb,xlsm,xlt,xlw,bmp,odp,pot,potm,potx,ppa,ppam,pps,ppsm,ppsx,pptm,thmx,wmv,emf,dotx'));
                 
                 //the extensions that the admin choose to use
                 $values = explode(',',$setting->value);
