@@ -14,11 +14,12 @@ use App\Classes;
 use App\Segment;
 use App\Course;
 use Spatie\Permission\Models\Role;
+use Route;
 
 class FetchOneLogApiController extends Controller
 {
     public function fetch_logs(AuditLog $log)
-    {
+    {    
         $record_info['time']         = $log->created_at;
         $record_info['username']     = $log->user->fullname;
         $record_info['module']       = $log->subject_type;
@@ -76,13 +77,126 @@ class FetchOneLogApiController extends Controller
             }
             // end item name
 
+            $foreign_keys = [
+              'type_id'            => '\App\AcademicType',
+              'academic_type_id'   => '\App\AcademicType',
+              'year_id'            => '\App\AcademicYear',
+              'academic_year_id'   => '\App\AcademicYear',
+              'course_id'          => '\App\Course',
+              'shared_classes'     => '\App\Classes',
+            ];
+
     	if ($log->action == 'updated') {
-    		$before = $log->before;
-    		//$diff = array_diff_assoc( array($before), array($data) );
-    		//$diff->makeHidden(['created_at', 'updted_at', 'deleted_at']); // hide some attrs
-    		return response()->json(['headlines' => $headlines, 'record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'before' => $before, 'status_code' => 200], 200);
+
+    		    $before             = $log->before;
+            $diff_before        = $before->toArray();
+            $diff_after         = $data->toArray();
+          
+          // case updated subject is lesson
+          if ($log->subject_type = 'Lesson') {
+                $diff_after['shared_classes']  = implode(',', $log->class_id);
+          }
+          // case updated subject is lesson
+
+            $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
+            $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
+
+            foreach ($get_diff_before as $before_key => $before_value) {
+              if (array_key_exists($before_key, $foreign_keys)) {
+                // $get_diff_before[$before_key] = $foreign_keys[$before_key]::find(intval($before_value))->name;
+                if (!is_array($before_value)) {
+                  $before_value = [$before_value];
+                }
+               
+              // case lesson fetch classes  before
+              if ($log->subject_type = 'Lesson') {
+                 $diff_before['shared_classes'] = str_replace('["', '', $diff_before['shared_classes']);
+                 $diff_before['shared_classes'] = str_replace('"]', '', $diff_before['shared_classes']);
+                 $diff_before['shared_classes'] = str_replace('"', '', $diff_before['shared_classes']);
+                 $lesson_old_classes = explode(',', $diff_before['shared_classes']);
+                 $before_value = $lesson_old_classes;
+              }
+                // case lesson fetch classes before
+
+                $new_name = __('ahmed.'.$before_key.'');
+                $get_diff_before[$new_name] = $foreign_keys[$before_key]::whereIn('id', $before_value)
+                                                                      ->groupBy('name')->pluck('name');
+                unset($get_diff_before[$before_key]);
+              }
+            } // end foreach
+
+
+            foreach ($get_diff_after as $after_key => $after_value) {
+              if (array_key_exists($after_key, $foreign_keys)) {
+                if (!is_array($after_value)) {
+                  $after_value = [$after_value];
+                }
+                // case lesson fetch classes  before
+              if ($log->subject_type = 'Lesson') {
+                 $lesson_new_classes = explode(',', $diff_after['shared_classes']);
+                 $after_value = $lesson_new_classes;
+              }
+                // case lesson fetch classes before
+                $new_name = __('ahmed.'.$after_key.'');
+                $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                      ->groupBy('name')->pluck('name');
+                unset($get_diff_after[$after_key]);
+
+              }
+            } // end foreach
+
+            unset($get_diff_before['created_at']);
+            unset($get_diff_before['updated_at']);
+            unset($get_diff_before['deleted_at']);
+      
+      // response case update
+    		return response()->json([
+                    'headlines'            => $headlines, 
+                    'record_info'          => $record_info, 
+                    'chain_details'        => $chain_details, 
+                    //'data'                 => $data,      
+                    //'before'               => $before, 
+                    'get_diff_before'      => $get_diff_before, 
+                    'get_diff_after'       => $get_diff_after, 
+                    'status_code'          => 200,
+                  ], 200);
     	}else{
-    		return response()->json(['headlines' => $headlines, 'record_info' => $record_info, 'chain_details' => $chain_details, 'data' => $data, 'status_code' => 200], 200);
+        // response case create || delete
+           $only_one_data         = $data->toArray();
+            foreach ($only_one_data as $only_one_data_key => $only_one_data_value) {
+              if (array_key_exists($only_one_data_key, $foreign_keys)) {
+                if (!is_array($only_one_data_value)) {
+                  $only_one_data_value = [$only_one_data_value];
+                }
+                if ( array_key_exists($only_one_data_key, $foreign_keys) && $only_one_data_key == 'shared_classes' && $log->subject_type == 'Lesson' ) {
+                  $only_one_data_value = $log->class_id;
+                }
+                $new_name = __('ahmed.'.$only_one_data_key.'');
+                $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::whereIn('id', $only_one_data_value)
+                                                                      ->groupBy('name')->pluck('name');
+                unset($only_one_data[$only_one_data_key]);
+              }
+            } // end foreach
+    		return response()->json([
+          'headlines'      => $headlines, 
+          'record_info'    => $record_info, 
+          'chain_details'  => $chain_details, 
+          'data'           => $only_one_data, 
+          'status_code'    => 200,
+        ], 200);
     	}
     }
+
+  /*  public function array_key_replace($item, $replace_with, array $array){
+        $updated_array = [];
+        foreach ($array as $key => $value) {
+            if (!is_array($value) && $key == $item) {
+                $updated_array = array_merge($updated_array, [$replace_with => $value]);
+            }else{
+              continue;
+            }
+            $updated_array = array_merge($updated_array, [$key => $value]);
+        }
+        return $updated_array;
+    }*/
 }

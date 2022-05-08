@@ -42,10 +42,10 @@ class LogsFiltertionController extends Controller
 
     	// $start_date = isset($request->start_date) ? $request->start_date : $first_created_at;
     	// $end_date   = isset($request->end_date) ? $request->end_date : $right_now;
-    	$user_id    = isset($request->user_id) ? $request->user_id : null;
-    	$action     = isset($request->action) ? $request->action : null;
-      $model      = isset($request->model) ? $request->model : null;
-      $role_id    = isset($request->role_id) ? $request->role_id : null;
+    	$user_id      = isset($request->user_id) ? $request->user_id : null;
+    	$action       = isset($request->action) ? $request->action : null;
+      $model        = isset($request->model) ? $request->model : null;
+      $role_id      = isset($request->role_id) ? $request->role_id : null;
         // chain attributes
         $year_id    = isset($request->year_id) ? $request->year_id : null;
         $type_id    = isset($request->type_id) ? $request->type_id : null;

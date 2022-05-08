@@ -13,6 +13,7 @@ use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
+use Route;
 
 class TypesController extends Controller
 {

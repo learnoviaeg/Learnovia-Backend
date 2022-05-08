@@ -12,7 +12,8 @@ class Lesson extends Model
 {
     use Auditable, SoftDeletes;
 
-    protected $fillable = ['name','course_segment_id','index' , 'image' , 'description','shared_lesson','course_id' ,'shared_classes'];
+    protected $fillable = ['name', 'course_segment_id', 'index' , 'image' , 'description', 'shared_lesson', 'course_id' , 
+    'shared_classes'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\LessonCreatedEvent::class,

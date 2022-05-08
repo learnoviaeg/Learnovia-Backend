@@ -5,10 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
+use App\Traits\YearsView;
 
 class AcademicYear extends Model
 {
-    use SoftDeletes, Auditable;
+    use SoftDeletes, Auditable, YearsView;
 
     protected $fillable = ['id','name','current'];
     public function AC_Type()
