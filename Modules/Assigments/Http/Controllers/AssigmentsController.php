@@ -519,7 +519,7 @@ class AssigmentsController extends Controller
             }
         }
 
-        if ($request->filled('file')) {
+        if ($request->filled('file_id')) {
             $userassigment->attachment_id =  $request->file_id;
         }
         if($request->file == 'No_file')
