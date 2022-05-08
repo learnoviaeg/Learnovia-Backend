@@ -93,7 +93,7 @@ class FetchOneLogApiController extends Controller
             $diff_after         = $data->toArray();
           
           // case updated subject is lesson
-          if ($log->subject_type = 'Lesson') {
+          if ($log->subject_type == 'Lesson') {
                 $diff_after['shared_classes']  = implode(',', $log->class_id);
           }
           // case updated subject is lesson
