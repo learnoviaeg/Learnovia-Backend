@@ -281,13 +281,13 @@ class FilesController extends Controller
                     $fileLesson->index = FileLesson::getNextIndex($lesson);
                     $fileLesson->publish_date = $publishdate;
                     $fileLesson->visible = isset($request->visible)?$request->visible:1;
-
                     $fileLesson->save();
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->$lesson,
-                        $singlefile,
-                        $name
-                    );
+                    
+                    // Storage::disk('public')->putFileAs(
+                    //     'files/' . $request->$lesson,
+                    //     $singlefile,
+                    //     $name
+                    // );
                 }
             }
         }
