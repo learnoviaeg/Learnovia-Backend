@@ -120,6 +120,26 @@ class FetchOneLogApiController extends Controller
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
+           if (!isset($get_diff_before['url']) && ($get_diff_after['url'] == null) ) {
+             unset($get_diff_after['url']);
+           }
+           if ( !isset($get_diff_before['url2']) && ($get_diff_after['url2'] == null) ) {
+             unset($get_diff_after['url2']);
+           }
+           if ( !isset($get_diff_before['attachment']) && ($get_diff_after['attachment'] == null) ) {
+             unset($get_diff_after['attachment']);
+           }
+
+            if ($log->subject_type == 'assignment') {
+                 unset($get_diff_after['updated_at']);
+              // restricted trace
+                if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
+                  unset($get_diff_before['restricted']);
+                  unset($get_diff_after['restricted']);
+                }
+                // count number trace
+            }
+
             foreach ($get_diff_before as $before_key => $before_value) {
               if (array_key_exists($before_key, $foreign_keys)) {
                 // $get_diff_before[$before_key] = $foreign_keys[$before_key]::find(intval($before_value))->name;
@@ -185,6 +205,9 @@ class FetchOneLogApiController extends Controller
             unset($get_diff_before['created_at']);
             unset($get_diff_before['updated_at']);
             unset($get_diff_before['deleted_at']);
+            unset($get_diff_after['created_at']);
+            unset($get_diff_after['updated_at']);
+            unset($get_diff_after['deleted_at']);
       
       // response case update
     		return response()->json([
