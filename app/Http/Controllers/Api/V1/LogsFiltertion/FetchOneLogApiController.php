@@ -162,7 +162,7 @@ class FetchOneLogApiController extends Controller
                 }
             }
 
-            // quiz assignment cases
+            // media assignment cases
             if ($log->subject_type == 'media') {
                  // user id trace
                  if ( isset($get_diff_before['user_id']) && !isset($get_diff_after['user_id']) ) {
@@ -282,17 +282,4 @@ class FetchOneLogApiController extends Controller
         ], 200);
     	}
     }
-
-  /*  public function array_key_replace($item, $replace_with, array $array){
-        $updated_array = [];
-        foreach ($array as $key => $value) {
-            if (!is_array($value) && $key == $item) {
-                $updated_array = array_merge($updated_array, [$replace_with => $value]);
-            }else{
-              continue;
-            }
-            $updated_array = array_merge($updated_array, [$key => $value]);
-        }
-        return $updated_array;
-    }*/
 }
