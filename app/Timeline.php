@@ -10,9 +10,15 @@ use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Carbon\Carbon;
+use App\Traits\Auditable;
+use App\Course;
+use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Timeline extends Model
 {
+    use Auditable, SoftDeletes;
+    
     protected $fillable = [
         'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible','overwrite_user_id'
     ];
@@ -106,4 +112,56 @@ class Timeline extends Model
     public function item(){
         return $this->morphTo('item' , 'type', 'item_id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_year_id[] = $segment->academic_year_id;
+        return $academic_year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_type_id[] = $segment->academic_type_id;
+        return $academic_type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $level_id[] = Course::where('id', intval($new['course_id']))->first()->level_id;
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $class_id = [intval($new['class_id'])];
+        return $class_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $segment_id[] = Course::where('id', intval($new['course_id']))->first()->segment_id;
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $course_id = [intval($new['course_id'])];
+        return $course_id;
+    }
+    // end function get name and value attribute
 }

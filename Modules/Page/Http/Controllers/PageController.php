@@ -204,7 +204,8 @@ class PageController extends Controller
             $pagelesson = PageLesson::where('page_id', $request->page_id)->get();
 
             if(count($pagelesson) == 0 ){
-                Page::whereId($request->page_id)->delete();
+                $target_page = Page::whereId($request->page_id)->first();
+                $target_page->delete();
             }
 
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();

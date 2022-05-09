@@ -33,6 +33,9 @@ class PageLessonObserver
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
+                // added ahmed
+                'link'        => 'no-url',
+                'mime_type'   => 'no-mime-type',
             ]);
             $courseItem=CourseItem::where('item_id',$pageLesson->page_id)->where('type','page')->first();
             if(isset($courseItem))

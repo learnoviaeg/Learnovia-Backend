@@ -8,11 +8,24 @@ use  Modules\Page\Entities\page;
 use Modules\UploadFiles\Entities\media;
 use Auth;
 use App\UserSeen;
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Course;
+use App\Segment;
+use App\Lesson as Lessonmodel;
 
 class Material extends Model
 {
+   use Auditable, SoftDeletes;
+    
     protected $fillable = [
         'item_id', 'name','publish_date','course_id','lesson_id','type','link','visible','mime_type','seen_number','created_by','restricted'
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     protected $appends = ['media_type','attachment_name','user_seen_number','main_link'];
@@ -29,9 +42,9 @@ class Material extends Model
 
     public function getAttachmentNameAttribute(){
         if($this->type == 'file')
-            return file::find($this->item_id)->attachment_name;
+            return file::whereNull('deleted_at')->find($this->item_id)->attachment_name;
         if($this->type == 'media' && $this->media_type!='Link' && $this->media_type!='media link')
-            return media::find($this->item_id)->attachment_name;
+            return media::whereNull('deleted_at')->find($this->item_id)->attachment_name;
     }
 
     public function getUserSeenNumberAttribute(){
@@ -47,8 +60,12 @@ class Material extends Model
         return $url;
     }
 
-    public function getMainLinkAttribute(){
-        return $this->getOriginal()['link'];
+   public function getMainLinkAttribute()
+   {
+        if ($this->getOriginal() != null) 
+        {
+            return $this->getOriginal()['link'];
+        }
     }
 
     public function course(){
@@ -73,5 +90,60 @@ class Material extends Model
             return True;
         return False;
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_year_id[] = $segment->academic_year_id;
+        return $academic_year_id;
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $course   = Course::where('id', intval($new['course_id']))->first();
+        $segment  = Segment::where('id', $course->segment_id)->first();
+        $academic_type_id[] = $segment->academic_type_id;
+        return $academic_type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $level_id[] = Course::where('id', intval($new['course_id']))->first()->level_id;
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $lesson_id    = $new->lesson_id;
+        $lesson       = Lessonmodel::where('id', $lesson_id)->first();
+        $classes      = $lesson['shared_classes']->pluck('id');
+        return $classes;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $segment_id[] = Course::where('id', intval($new['course_id']))->first()->segment_id;
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $course_id = [intval($new['course_id'])];
+        return $course_id;
+    }
+    // end function get name and value attribute
 }
 
