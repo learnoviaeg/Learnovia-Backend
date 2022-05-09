@@ -123,7 +123,9 @@ class FetchOneLogApiController extends Controller
             // model assignment cases
             if ($log->subject_type == 'assignment') {
                  unset($get_diff_after['updated_at']);
-                 $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
+                 if (isset($get_diff_after['content'])) {
+                   $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
+                 }
               // restricted trace
                 if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
                   unset($get_diff_before['restricted']);
