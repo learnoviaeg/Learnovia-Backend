@@ -120,16 +120,6 @@ class FetchOneLogApiController extends Controller
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
-           if (!isset($get_diff_before['url']) && ($get_diff_after['url'] == null) ) {
-             unset($get_diff_after['url']);
-           }
-           if ( !isset($get_diff_before['url2']) && ($get_diff_after['url2'] == null) ) {
-             unset($get_diff_after['url2']);
-           }
-           if ( !isset($get_diff_before['attachment']) && ($get_diff_after['attachment'] == null) ) {
-             unset($get_diff_after['attachment']);
-           }
-
             if ($log->subject_type == 'assignment') {
                  unset($get_diff_after['updated_at']);
               // restricted trace
@@ -138,6 +128,15 @@ class FetchOneLogApiController extends Controller
                   unset($get_diff_after['restricted']);
                 }
                 // count number trace
+                 if (!isset($get_diff_before['url']) && ($get_diff_after['url'] == null) ) {
+                   unset($get_diff_after['url']);
+                 }
+                 if ( !isset($get_diff_before['url2']) && ($get_diff_after['url2'] == null) ) {
+                   unset($get_diff_after['url2']);
+                 }
+                 if ( !isset($get_diff_before['attachment']) && ($get_diff_after['attachment'] == null) ) {
+                   unset($get_diff_after['attachment']);
+                 }
             }
 
             foreach ($get_diff_before as $before_key => $before_value) {
