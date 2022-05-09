@@ -409,7 +409,9 @@ class MediaController extends Controller
         $media->delete();
         
         $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
-        $file->delete();
+        if ($file != null) {
+            $file->delete();
+        }
 
         Material::where('item_id',$request->mediaId)->where('type','media')->delete();
         $lesson = Lesson::find($request->lesson_id);
