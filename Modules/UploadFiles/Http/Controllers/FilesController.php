@@ -480,13 +480,14 @@ class FilesController extends Controller
             'lesson_id' => 'required|exists:file_lessons,lesson_id'
         ]);
 
-        $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
-        $file->delete();
+        
         $lesson = Lesson::find($request->lesson_id);
         // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         LastAction::lastActionInCourse($lesson->course_id);
         $target_file = File::whereId($request->fileID)->first();
         $target_file->delete();
+        $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
+        $file->delete();
         /*$material = Material::where('item_id',$request->fileID)->where('type','file')->first();
         $material->delete();*/
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
