@@ -126,6 +126,9 @@ class FetchOneLogApiController extends Controller
                  if (isset($get_diff_after['content'])) {
                    $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
                  }
+                 if (isset($get_diff_before['content'])) {
+                   $get_diff_before['content'] = stripslashes(strip_tags($get_diff_before['content']));
+                 }
               // restricted trace
                 if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
                   unset($get_diff_before['restricted']);
