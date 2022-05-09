@@ -146,11 +146,10 @@ class UserController extends Controller
                 catch(\Exception $e){
                     throw new \Exception($e->getMessage());
                 } 
-            }
-
                 $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
                 $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
                 $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
+            }
 
             foreach ($optionals as $optional){
                 if($request->filled($optional[$i])){

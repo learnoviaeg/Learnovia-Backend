@@ -164,10 +164,13 @@ class FetchOneLogApiController extends Controller
 
             // quiz assignment cases
             if ($log->subject_type == 'media') {
-                // user id trace
                  // user id trace
                  if ( isset($get_diff_before['user_id']) && !isset($get_diff_after['user_id']) ) {
                    unset($get_diff_before['user_id']);
+                 }
+                if ( empty($get_diff_before['description']) && isset($get_diff_after['description']) && $get_diff_after['description'] == 'undefined') {
+                   unset($get_diff_before['description']);
+                   unset($get_diff_after['description']);
                  }
                  //unset($get_diff_before['user_id']);
                  unset($get_diff_after['media_type']);
