@@ -120,6 +120,7 @@ class FetchOneLogApiController extends Controller
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
+            // model assignment cases
             if ($log->subject_type == 'assignment') {
                  unset($get_diff_after['updated_at']);
                  $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
@@ -139,6 +140,20 @@ class FetchOneLogApiController extends Controller
                    unset($get_diff_after['attachment']);
                  }
             }
+            // file assignment cases
+            if ($log->subject_type == 'file') {
+                // user id trace
+                 if ( isset($get_diff_before['user_id']) && !isset($get_diff_after['user_id']) ) {
+                   unset($get_diff_before['user_id']);
+                 }
+                 if ( !isset($get_diff_before['url2']) && ($get_diff_after['url2'] == null) ) {
+                   unset($get_diff_after['url2']);
+                 }
+                 if ( !isset($get_diff_before['attachment']) && ($get_diff_after['attachment'] == null) ) {
+                   unset($get_diff_after['attachment']);
+                 }
+            }
+
 
             foreach ($get_diff_before as $before_key => $before_value) {
               if (array_key_exists($before_key, $foreign_keys)) {
