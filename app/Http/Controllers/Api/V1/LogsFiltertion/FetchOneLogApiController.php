@@ -146,12 +146,6 @@ class FetchOneLogApiController extends Controller
                  if ( isset($get_diff_before['user_id']) && !isset($get_diff_after['user_id']) ) {
                    unset($get_diff_before['user_id']);
                  }
-                 if ( !isset($get_diff_before['url2']) && ($get_diff_after['url2'] == null) ) {
-                   unset($get_diff_after['url2']);
-                 }
-                 if ( !isset($get_diff_before['attachment']) && ($get_diff_after['attachment'] == null) ) {
-                   unset($get_diff_after['attachment']);
-                 }
             }
 
 
