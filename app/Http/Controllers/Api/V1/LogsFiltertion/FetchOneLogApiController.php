@@ -157,6 +157,17 @@ class FetchOneLogApiController extends Controller
                 }
             }
 
+            // quiz assignment cases
+            if ($log->subject_type == 'media') {
+                // user id trace
+                 // user id trace
+                 if ( isset($get_diff_before['user_id']) && !isset($get_diff_after['user_id']) ) {
+                   unset($get_diff_before['user_id']);
+                 }
+                 //unset($get_diff_before['user_id']);
+                 unset($get_diff_after['media_type']);
+            }
+
             foreach ($get_diff_before as $before_key => $before_value) {
               if (array_key_exists($before_key, $foreign_keys)) {
                 // $get_diff_before[$before_key] = $foreign_keys[$before_key]::find(intval($before_value))->name;
