@@ -148,6 +148,14 @@ class FetchOneLogApiController extends Controller
                  }
             }
 
+            // quiz assignment cases
+            if ($log->subject_type == 'quiz') {
+                // user id trace
+                 if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
+                  unset($get_diff_before['restricted']);
+                  unset($get_diff_after['restricted']);
+                }
+            }
 
             foreach ($get_diff_before as $before_key => $before_value) {
               if (array_key_exists($before_key, $foreign_keys)) {
