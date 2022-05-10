@@ -66,7 +66,7 @@ class LogsFiltertionController extends Controller
     	// default case 1
         if ($user_id == null && $action == null && $model == null && $role_id == null) {
             // fetch logs default time (1 day from now)
-            $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
                                       //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -77,7 +77,7 @@ class LogsFiltertionController extends Controller
         // case 2
         if ($user_id != null && $action == null && $model == null && $role_id == null) {
             // fetch logs related with this user
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
                                       //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -89,7 +89,7 @@ class LogsFiltertionController extends Controller
     	// case 4
         if ($user_id == null && $action != null && $model == null && $role_id == null) {
     		// fetch logs related with this action
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -101,7 +101,7 @@ class LogsFiltertionController extends Controller
         // case 6
         if ($user_id == null && $action == null && $model != null && $role_id == null) {
             // fetch logs related with this model
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
             ->where('created_at', '>=', $start_date)
@@ -114,7 +114,7 @@ class LogsFiltertionController extends Controller
     	// case 8
         if ($user_id != null && $action != null && $model == null && $role_id == null) {
     		// fetch logs related with this user and this action
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -126,7 +126,7 @@ class LogsFiltertionController extends Controller
         // case 9
         if ($user_id != null && $action == null && $model != null && $role_id == null) {
             // fetch logs related with this user and this model
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -138,7 +138,7 @@ class LogsFiltertionController extends Controller
         // search with role only
         if ($user_id == null && $action == null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
           
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
@@ -151,7 +151,7 @@ class LogsFiltertionController extends Controller
         // search with role and user
         if ($user_id != null && $action == null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -163,7 +163,7 @@ class LogsFiltertionController extends Controller
         // search with role and model
         if ($user_id == null && $action == null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -175,7 +175,7 @@ class LogsFiltertionController extends Controller
         // search with role and action
         if ($user_id == null && $action != null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -187,7 +187,7 @@ class LogsFiltertionController extends Controller
         // search with role and action and model
         if ($user_id == null && $action != null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
@@ -199,7 +199,7 @@ class LogsFiltertionController extends Controller
         // search with role and action and user
         if ($user_id != null && $action != null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -211,7 +211,7 @@ class LogsFiltertionController extends Controller
         // search with role and model and user
         if ($user_id != null && $action == null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -224,7 +224,7 @@ class LogsFiltertionController extends Controller
         // search with role and model and user and action
         if ($user_id != null && $action != null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -236,7 +236,7 @@ class LogsFiltertionController extends Controller
         // case 10
         if ($user_id == null && $action != null && $model != null && $role_id == null) {
             // fetch logs related with this action and this model
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
@@ -248,7 +248,7 @@ class LogsFiltertionController extends Controller
         // case 14
         if ($user_id != null && $action != null && $model != null && $role_id == null) {
             //fetch logs related with this user and this model and this action 
-          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
             //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)

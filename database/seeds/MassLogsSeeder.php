@@ -15,12 +15,10 @@ class MassLogsSeeder extends Seeder
      */
     public function run()
     {
-
         // comment
         for($i=1; $i>=0; $i++)
-
+// insert some data
         {
-
             $quiz=Quiz::find(16);
             
             AuditLog:: create([
