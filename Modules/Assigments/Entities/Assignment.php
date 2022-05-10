@@ -145,7 +145,7 @@ class assignment extends Model
             $course_id = null;
         }else{
             $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();}
+                                    ->where('action', 'created')->first();
             $course_id = $first_created->course_id;
         }
         return $course_id;
