@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Timeline extends Model
 {
-    use Auditable, SoftDeletes;
+    use SoftDeletes;
     
     protected $fillable = [
         'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible','overwrite_user_id'
