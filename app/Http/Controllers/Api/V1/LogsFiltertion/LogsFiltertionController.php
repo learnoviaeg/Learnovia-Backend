@@ -45,7 +45,7 @@ class LogsFiltertionController extends Controller
           $end_date   = $right_now;
         }
         
-        if ( $request->start_date == null && $request->end_date == null && $user_id != null && $action != null && $model != null && $role_id != null && $year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id != null ) {
+        if ( $request->start_date == null && $request->end_date == null && ($user_id != null || $action != null || $model != null || $role_id != null || $year_id != null || $type_id != null || $level_id != null || $class_id != null || $segment_id != null || $course_id != null) ) {
           $start_date = $first_created_at;
           $end_date   = date("Y-m-d H:i:s");
         }
@@ -244,6 +244,7 @@ class LogsFiltertionController extends Controller
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
         }
+
 
         // case 14
         if ($user_id != null && $action != null && $model != null && $role_id == null) {
