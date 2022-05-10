@@ -599,8 +599,9 @@ Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
-
+    
     // added ahmed
+    
     Route::group(['prefix' => 'v1'], function () {
     // logs filter with user and action 
         Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFiltertionController@logs_filteration')->name('logs_filteration');
@@ -627,6 +628,9 @@ Route::group(['middleware' => ['auth:api']], function () {
         */
     });
     // added ahmed
+
+    Route::post('upload-chunks', 'ChunksUploadController@uploads');
+
 });
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {

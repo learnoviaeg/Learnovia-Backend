@@ -8,7 +8,7 @@ use App\AcademicType;
 use App\AcademicYear;
 use App\Level;
 use App\Enroll;
-use App\Segment;
+use App\Segment;  
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -18,7 +18,7 @@ use Validator;
 use App\Exports\TypesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\YearLevel;
-
+use App\SystemSetting;
 class AC_year_type extends Controller
 {
     /**
@@ -212,4 +212,43 @@ class AC_year_type extends Controller
         $file = url(Storage::url('Type'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
+
+    public function uploads(Request $request)
+    {
+        $request->validate([
+            'content' => 'required',
+            // 'id' => 'exists:.....,id',
+        ]);
+  
+        if(!$request->filled('id')){            
+            $setting  = SystemSetting::create([
+                'key' => uniqid(),
+                'data'=> $request->content,
+            ]);
+        }
+
+        if($request->filled('id')){
+            $setting = SystemSetting::whereId($request->id)->first();
+            $array = ($setting->content) ;
+            $setting->data =  ($setting->data.$request->content);
+            $setting->save();
+        }
+
+        if($request->filled('last') && $request->last == 1){
+            $base64_encoded_string = base64_decode(($setting->data));
+            $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
+            $ext = substr($extension,strrpos($extension,"/")+1);
+            // Storage::append($setting->key.'.'.$ext ,$base64_encoded_string);
+            
+            Storage::put('files/'.$setting->key.'.'.$ext, $base64_encoded_string);
+
+            // Storage::disk('public')->putFileAs('files', $base64_encoded_string, $setting->key.'.'.$ext);
+
+            return response()->json(['message' =>null, 'body' => url(Storage::url('files/'.$setting->key.'.'.$ext)) ], 200);
+        }
+        return response()->json(['message' =>null, 'body' => $setting ], 200);
+
+    }
+
+
 }
