@@ -42,7 +42,9 @@ trait Auditable
         // start to exclude refresh tokens of firebase
         if ($subject_model == 'User') {
             $diff_before        = $model->getOriginal();
+            $diff_before['profile_fields'] = null;
             $diff_after         = $model->toArray();
+            $diff_after['profile_fields'] = null;
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after);
 
             $tracked = [

@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     { 
-        $this->call(ContractSeeder::class);
+        $this->call(MassLogsSeeder::class);
+        /*$this->call(ContractSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(UserSeeder::class);
@@ -48,6 +49,6 @@ class DatabaseSeeder extends Seeder
         \App::call('Modules\Bigbluebutton\Http\Controllers\BigbluebuttonController@install');
         \App::call('App\Http\Controllers\H5PLessonController@install');
         
-        \Artisan::call('storage:link', ['--env' => 'local']);
+        \Artisan::call('storage:link', ['--env' => 'local']);*/
     }
 }
