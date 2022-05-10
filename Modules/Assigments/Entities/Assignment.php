@@ -64,60 +64,42 @@ class assignment extends Model
       // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $year_id = $first_created->year_id;
-        return $year_id;
+        return null;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $type_id = $first_created->type_id;
-        return $type_id;
+        return null;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $level_id = $first_created->level_id;
-        return $level_id;
+        return null;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $class_id = $first_created->class_id;
-        return $class_id;
+        return null;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $segment_id = $first_created->segment_id;
-        return $segment_id;
+        return null;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-        $course_id = $first_created->course_id;
-        return $course_id;
+        return null;
     }
     // end function get name and value attribute
 }

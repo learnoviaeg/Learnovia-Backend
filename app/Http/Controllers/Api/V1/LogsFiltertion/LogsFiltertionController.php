@@ -13,6 +13,7 @@ use App\Paginate;
 use App\Exports\AuditlogExport;
 use Excel;
 use Illuminate\Support\Facades\Storage;
+use App\AcademicYear;
 
 class LogsFiltertionController extends Controller
 {
@@ -311,7 +312,8 @@ class LogsFiltertionController extends Controller
     {
         $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
         $right_now =  date("Y-m-d H:i:s");
-        $year_id   = 2;
+        // search with current year
+        $year_id   = AcademicYear::Get_current()->id;
         $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->pluck('id')->toArray();
 
         $data =  $data->whereIn('id', $chain_ids)
