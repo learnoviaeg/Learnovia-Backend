@@ -951,7 +951,7 @@ class ReportCardsController extends Controller
 
                             if($olFound == true){
                                 if($enroll->courses->gradeCategory != null)
-                                    $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
+                                    $total += $second_term->enrolls[$key]->courses->gradeCategory[0]->max;
                     
                                 if($enroll->courses->gradeCategory[0]->userGrades != null)
                                     $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
