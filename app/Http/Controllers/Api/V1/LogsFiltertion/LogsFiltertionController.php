@@ -24,25 +24,6 @@ class LogsFiltertionController extends Controller
         $first_created = AuditLog::first()->created_at;
         $first_created_at = $first_created != null ? $first_created : User::first()->created_at;
 
-        if ($request->start_date == null && $request->end_date == null) {
-          $start_date = $first_created_at;
-          $end_date   = $right_now =  date("Y-m-d H:i:s");
-        }
-        if ($request->start_date != null && $request->end_date != null) {
-          $start_date = $request->start_date;
-          $end_date   = $request->end_date;
-        }
-        if ($request->start_date == null && $request->end_date != null) {
-          $start_date = $first_created_at;
-          $end_date   = $request->end_date;
-        }
-        if ($request->start_date != null && $request->end_date == null) {
-          $start_date = $request->start_date;
-          $end_date   = $right_now =  date("Y-m-d H:i:s");
-        }
-
-    	// $start_date = isset($request->start_date) ? $request->start_date : $first_created_at;
-    	// $end_date   = isset($request->end_date) ? $request->end_date : $right_now;
     	$user_id      = isset($request->user_id) ? $request->user_id : null;
     	$action       = isset($request->action) ? $request->action : null;
       $model        = isset($request->model) ? $request->model : null;
@@ -57,16 +38,34 @@ class LogsFiltertionController extends Controller
         $pagination = isset($request->paginate) ? $request->paginate : 50;
         // chain attributes
 
+        if ( $request->start_date == null && $request->end_date == null && $user_id == null && $action == null && $model == null && $role_id == null && $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
+          $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
+          $right_now =  date("Y-m-d H:i:s");
+          $start_date = $yesterday;
+          $end_date   = $right_now;
+        }
+        
+        if ( $request->start_date == null && $request->end_date == null && $user_id != null && $action != null && $model != null && $role_id != null && $year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id != null ) {
+          $start_date = $first_created_at;
+          $end_date   = date("Y-m-d H:i:s");
+        }
+
+        if ($request->start_date != null && $request->end_date != null) {
+          $start_date = $request->start_date;
+          $end_date   = $request->end_date;
+        }
+        if ($request->start_date == null && $request->end_date != null) {
+          $start_date = $first_created_at;
+          $end_date   = $request->end_date;
+        }
+        if ($request->start_date != null && $request->end_date == null) {
+          $start_date = $request->start_date;
+          $end_date   = date("Y-m-d H:i:s");
+        }
+
     	// default case 1
         if ($user_id == null && $action == null && $model == null && $role_id == null) {
             // fetch logs default time (1 day from now)
-           /* $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')
-                                      ->orderBy('created_at', 'DESC')
-                                      ->where('created_at', '>=', $start_date)
-                                      ->where('created_at', '<=', $end_date)
-                                      ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');*/
-                                                                //->get();
-                                                                //->paginate(Paginate::GetPaginate($request));
             $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
                                       //->orderBy('created_at', 'DESC')
@@ -301,6 +300,7 @@ class LogsFiltertionController extends Controller
     // no chain filter selected
     public function filter_with_none($data, $pagination, $request, $start_date, $end_date)
     {
+        // return $start_date;
         $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
         $right_now =  date("Y-m-d H:i:s");
         // search with current year

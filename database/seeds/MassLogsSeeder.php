@@ -1,5 +1,7 @@
 <?php
 
+namespace database\seeds;
+
 use Illuminate\Database\Seeder;
 use App\AuditLog;
 
@@ -12,6 +14,7 @@ class MassLogsSeeder extends Seeder
      */
     public function run()
     {
+        AuditLog::truncate();
         for($i=3; $i>=0; $i++)
         {
             AuditLog:: create([
