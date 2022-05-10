@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\attachment;
 // use File;
 use Modules\UploadFiles\Entities\file;
+use Modules\UploadFiles\Entities\media;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -76,28 +77,27 @@ class ChunksUploadController extends Controller
                 $name = $uploaded_file->name.'.'. $ext;
                 $attachment = new file;
                 $attachment->type = $ext;
-                $attachment->description = $name;
+                // $attachment->description = $name;
                 $attachment->name = $uploaded_file->name;
-                $attachment->attachment_name = $uploaded_file->name;
+                $attachment->attachment_name = $name;
                 $attachment->user_id = Auth::user()->id;
                 $attachment->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
                 $attachment->url2 = 'files/' . $name;
                 $attachment->save();
             }
 
-                  ///////////////////moving file to media table 
-                //   if($uploaded_file->type == 'files'){
-                //     $name = $uploaded_file->name.'.'. $ext;
-                //     $attachment = new file;
-                //     $attachment->type = $ext;
-                //     $attachment->description = $name;
-                //     $attachment->name = $uploaded_file->name;
-                //     $attachment->attachment_name = $fileName;
-                //     $attachment->user_id = Auth::user()->id;
-                //     $attachment->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-                //     $attachment->url2 = 'files/' . $name;
-                //     $attachment->save();
-                // }
+                  /////////////////moving file to media table 
+                  if($uploaded_file->type == 'media'){
+                    $name = $uploaded_file->name.'.'. $ext;
+                    $attachment = new media;
+                    $attachment->type = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
+                    // $attachment->description = $name;
+                    $attachment->name = $uploaded_file->name;
+                    $attachment->attachment_name = $name;
+                    $attachment->user_id = Auth::user()->id;
+                    $attachment->link = url('storage/media/' . $name);
+                    $attachment->save();
+                }
     
 
             //////////////////////////////////////////////////
