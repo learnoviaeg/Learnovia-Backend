@@ -186,7 +186,7 @@ class MediaController extends Controller
             // $media = new media;
             // $media->user_id = Auth::user()->id;
             if ($request->type == 0) {
-                $media = media::whereId($request->file_id)->first();
+                $media = media::whereId($item)->first();
                 $media->update([
                     'name' => $request->name,
                     'description' => isset($request->description) ?? null,
@@ -296,7 +296,7 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:'.$settings,
+            // 'Imported_file' => 'nullable|file|mimes:'.$settings,
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
@@ -306,14 +306,14 @@ class MediaController extends Controller
             'visible' => 'in:0,1',
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
-        ];
-        if(isset($request->Imported_file)){
-            $customMessages = [
-                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
-            ];
-        }
+        // $customMessages = [
+        //     'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        // ];
+        // if(isset($request->Imported_file)){
+        //     $customMessages = [
+        //         'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
+        //     ];
+        // }
 
         $this->validate($request, $rules, $customMessages);
 
@@ -325,16 +325,18 @@ class MediaController extends Controller
         if(isset($request->Imported_file) && $request->filled('url'))
             return HelperController::api_response_format(400, null, __('messages.media.only_url_or_media'));
 
-        if (isset($request->Imported_file)) {
-            $extension = $request->Imported_file->getClientOriginalExtension();
-            $fileName = $request->Imported_file->getClientOriginalName();
-            $size = $request->Imported_file->getSize();
-            $name = uniqid() . '.' . $extension;
+        if (isset($request->file_id)) {
+
+            // $extension = $request->Imported_file->getClientOriginalExtension();
+            // $fileName = $request->Imported_file->getClientOriginalName();
+            // $size = $request->Imported_file->getSize();
+            // $name = uniqid() . '.' . $extension;
             $media->type = $request->Imported_file->getClientMimeType();
             $media->size = $size;
             $media->attachment_name = $fileName;
             $media->link = url('storage/media/' . $name);
             Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+
         }
 
         if ($request->filled('url')){
