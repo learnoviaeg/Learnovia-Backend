@@ -120,6 +120,8 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
+                $firstUser = User::find(1);
+
                 $user = new User;
                 $user->firstname               = $firstname;
                 $user->lastname                = $request->lastname[$key];
@@ -128,7 +130,11 @@ class UserController extends Controller
                 $user->real_password           = $request->password[$key];
                 $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
 
-            $env  = env('APP_LOGTEST');
+                $user->chat_uid                = $firstUser->chat_uid;
+                $user->chat_token              = $firstUser->chat_token;
+                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
+
+            /*$env  = env('APP_LOGTEST');
             if ($env == true) {
                 $firstUser = User::find(1);
                 $user->chat_uid                = $firstUser->chat_uid;
@@ -149,7 +155,7 @@ class UserController extends Controller
                 $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
                 $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
                 $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
-            }
+            }*/
 
             foreach ($optionals as $optional){
                 if($request->filled($optional[$i])){
