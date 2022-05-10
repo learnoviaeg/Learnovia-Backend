@@ -1,6 +1,6 @@
 <?php
 
-namespace database\seeds;
+// namespace
 
 use Illuminate\Database\Seeder;
 use App\AuditLog;
@@ -16,10 +16,13 @@ class MassLogsSeeder extends Seeder
     public function run()
     {
 
+        // comment
         for($i=1; $i>=0; $i++)
 
         {
+
             $quiz=Quiz::find(16);
+            
             AuditLog:: create([
                 'action' => 'updated',
                 'subject_id' => 16 ,
@@ -37,6 +40,7 @@ class MassLogsSeeder extends Seeder
                 'role_id' => [1], 
                 'notes' => 'script',
             ]);
+
         }
     }
 }
