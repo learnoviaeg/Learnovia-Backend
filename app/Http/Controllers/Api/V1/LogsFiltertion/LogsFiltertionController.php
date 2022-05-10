@@ -69,7 +69,7 @@ class LogsFiltertionController extends Controller
                                                                 //->paginate(Paginate::GetPaginate($request));
             $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
             $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
-                                      ->orderBy('created_at', 'DESC')
+                                      //->orderBy('created_at', 'DESC')
                                       ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -78,8 +78,10 @@ class LogsFiltertionController extends Controller
         // case 2
         if ($user_id != null && $action == null && $model == null && $role_id == null) {
             // fetch logs related with this user
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->orderBy('created_at', 'DESC')
-            ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+                                      //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
             //->get();
@@ -88,8 +90,10 @@ class LogsFiltertionController extends Controller
     	// case 4
         if ($user_id == null && $action != null && $model == null && $role_id == null) {
     		// fetch logs related with this action
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('action', $action)->orderBy('created_at', 'DESC')
-            ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
             //->get();
@@ -98,11 +102,12 @@ class LogsFiltertionController extends Controller
         // case 6
         if ($user_id == null && $action == null && $model != null && $role_id == null) {
             // fetch logs related with this model
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('subject_type', $model)->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
             ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
-
-                                               ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+                                      ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                //->get();
                                               // ->paginate(Paginate::GetPaginate($request));
         }
@@ -110,8 +115,9 @@ class LogsFiltertionController extends Controller
     	// case 8
         if ($user_id != null && $action != null && $model == null && $role_id == null) {
     		// fetch logs related with this user and this action
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->where('action', $action)
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -121,8 +127,9 @@ class LogsFiltertionController extends Controller
         // case 9
         if ($user_id != null && $action == null && $model != null && $role_id == null) {
             // fetch logs related with this user and this model
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -132,10 +139,10 @@ class LogsFiltertionController extends Controller
         // search with role only
         if ($user_id == null && $action == null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
           
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')
-            ->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -145,8 +152,9 @@ class LogsFiltertionController extends Controller
         // search with role and user
         if ($user_id != null && $action == null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -156,9 +164,9 @@ class LogsFiltertionController extends Controller
         // search with role and model
         if ($user_id == null && $action == null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')
-            ->where('subject_type', $model)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -168,8 +176,9 @@ class LogsFiltertionController extends Controller
         // search with role and action
         if ($user_id == null && $action != null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('action', $action)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -179,8 +188,9 @@ class LogsFiltertionController extends Controller
         // search with role and action and model
         if ($user_id == null && $action != null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('action', $action)->where('subject_type', $model)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
                                                    ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
@@ -190,10 +200,10 @@ class LogsFiltertionController extends Controller
         // search with role and action and user
         if ($user_id != null && $action != null && $model == null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')
-            ->where('action', $action)->where('user_id', $user_id)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
-                                                   ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
@@ -202,9 +212,10 @@ class LogsFiltertionController extends Controller
         // search with role and model and user
         if ($user_id != null && $action == null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('subject_type', $model)->where('user_id', $user_id)->where('role_id', 'like', "%{$role_id}%")
-                                                   ->orderBy('created_at', 'DESC')
-                                                   ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
@@ -214,11 +225,10 @@ class LogsFiltertionController extends Controller
         // search with role and model and user and action
         if ($user_id != null && $action != null && $model != null && $role_id != null) {
             // fetch logs related with this user and this role
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')
-            ->where('subject_type', $model)->where('action', $action)->where('user_id', $user_id)
-            ->where('role_id', 'like', "%{$role_id}%")
-            ->orderBy('created_at', 'DESC')
-            ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
@@ -227,9 +237,10 @@ class LogsFiltertionController extends Controller
         // case 10
         if ($user_id == null && $action != null && $model != null && $role_id == null) {
             // fetch logs related with this action and this model
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('action', $action)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')
-                                                   ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
@@ -238,9 +249,10 @@ class LogsFiltertionController extends Controller
         // case 14
         if ($user_id != null && $action != null && $model != null && $role_id == null) {
             //fetch logs related with this user and this model and this action 
-            $data = AuditLog::where('subject_type', '!=', 'userQuizAnswer')->where('subject_type', '!=', 'userQuiz')->where('subject_type', '!=', 'Material')->where('subject_type', '!=', 'CourseItem')->where('subject_type', '!=', 'UserCourseItem')->where('subject_type', '!=', 'FileLesson')->where('subject_type', '!=', 'pageLesson')->where('subject_type', '!=', 'MediaLesson')->where('subject_type', '!=', 'QuizLesson')->where('subject_type', '!=', 'AssignmentLesson')->where('user_id', $user_id)->where('action', $action)->where('subject_type', $model)
-                                                   ->orderBy('created_at', 'DESC')
-                                                   ->where('created_at', '>=', $start_date)
+          $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson'];
+            $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+            //->orderBy('created_at', 'DESC')
+                                      ->where('created_at', '>=', $start_date)
                                       ->where('created_at', '<=', $end_date)
                                       ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
                                                    //->get();
@@ -299,6 +311,7 @@ class LogsFiltertionController extends Controller
                       //->where('created_at', '>=', $yesterday)->where('created_at', '<=', $right_now)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -356,10 +369,11 @@ class LogsFiltertionController extends Controller
         $chain_ids = AuditLog::where('year_id', 'like', "%{$year_id}%")->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($chain_data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -410,10 +424,11 @@ class LogsFiltertionController extends Controller
                             ->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($chain_data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -464,10 +479,11 @@ class LogsFiltertionController extends Controller
                             ->where('level_id', 'like', "%{$level_id}%")->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($chain_data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -519,10 +535,11 @@ class LogsFiltertionController extends Controller
                             ->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($chain_data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -574,10 +591,11 @@ class LogsFiltertionController extends Controller
                             ->where('segment_id', 'like', "%{$segment_id}%")->pluck('id')->toArray();
         //$chain_data = $data->whereIn('id', $chain_ids)->unique()->paginate($pagination);
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         foreach ($chain_data as $key => $value) {
             $value['description'] = 'Item in module ( '. $value->subject_type .' ) has been ( '. $value->action .' ) by ( '. $value->user->firstname. ' )';
@@ -628,10 +646,11 @@ class LogsFiltertionController extends Controller
                             ->where('segment_id', 'like', "%{$segment_id}%")->where('course_id', 'like', "%{$course_id}%")
                             ->pluck('id')->toArray();
         $chain_data = $data->whereIn('id', $chain_ids)
-                      ->where('created_at', '>=', $start_date)
-                      ->where('created_at', '<=', $end_date)
+                      //->where('created_at', '>=', $start_date)
+                      //->where('created_at', '<=', $end_date)
                       ->skip(($request->paginate * ($request->page - 1)))
                       ->take($request->paginate)
+                      ->orderBy('created_at', 'DESC')
                       ->paginate($request->paginate);
         //$chain_data = $data->whereIn('id', $chain_ids)->unique();
         foreach ($chain_data as $key => $value) {
