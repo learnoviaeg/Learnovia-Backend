@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Topic;
 use App\user;
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Announcement extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['title','description','attached_file','start_date','due_date','assign','class_id','level_id','course_id',
         'year_id','type_id','segment_id','publish_date','created_by', 'topic',
