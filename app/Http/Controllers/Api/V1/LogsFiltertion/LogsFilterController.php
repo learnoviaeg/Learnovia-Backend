@@ -38,13 +38,15 @@ class LogsFilterController extends Controller
         $segment_id = isset($request->segment_id) ? $request->segment_id : null;
         $course_id  = isset($request->course_id) ? $request->course_id : null;
         $pagination = isset($request->paginate) ? $request->paginate : 15;
+        $limit      =  isset($request->paginate) ? $request->paginate : 15;
+        $skip       = ($request->page -1) * $limit;
         // chain attributes
 
         // time start
 		        $start_date = isset($request->start_date) ? $request->start_date  : $first_created_at;
 		        $end_date   = isset($request->end_date) ? $request->end_date  : date("Y-m-d H:i:s");
         // time end
-		        
+
         // no time detected , no filter selected case
         if ( $user_id == null && $action == null && $model == null && $role_id == null && $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
 	          $start_date =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
@@ -60,9 +62,11 @@ class LogsFilterController extends Controller
 	    // none
 	    if( $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ){
 	    	$chainIDS = $this->yearFilterLast24($currentYear);
+	    	//$chainIDS = $chainIDS->skip($skip)->take($limit)->pluck('id')->toArray();
 	    	$chainIDS = $chainIDS->pluck('id')->toArray();
 	    }
 
+	   //return $chainIDS;
 	    // year
 	    if( $year_id != null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
 	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
@@ -110,8 +114,7 @@ class LogsFilterController extends Controller
 	    /*$data = DB::table('audit_logs')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 
 	    	'host')->whereIn('id', $chainIDS);*/
 
-	    $data = AuditLog::select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 
-	    	'host')->whereIn('id', $chainIDS);
+	    $data = AuditLog::whereIn('id', $chainIDS)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
 
 	    $defaultFilters = array(
 	    	'user_id'      => $user_id,
@@ -126,8 +129,8 @@ class LogsFilterController extends Controller
 	    	}
 	    }
 
-	    $data = $data->orderBy('created_at', 'DESC');
-	    $collection = $data->paginate($pagination);
+	    $data = $data->orderBy('id', 'ASC');
+	    $collection = $data->skip($skip)->take($limit)->paginate($pagination);
 	    $data = LogsFilterResource::collection($collection);
 	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
     }

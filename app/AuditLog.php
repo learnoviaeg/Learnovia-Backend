@@ -13,9 +13,9 @@ class AuditLog extends Model
 
     public $table = 'audit_logs';
 
-    protected $appends = [
+    /*protected $appends = [
         'description', 'since', 'username'
-    ];
+    ];*/
 
     protected $fillable = [
         'action',
