@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 // use Spatie\Permission\Models\Role;
-use App\Traits\AuditableView;
+// use App\Traits\AuditableView;
 
 class AuditLog extends Model
 {
@@ -35,6 +35,8 @@ class AuditLog extends Model
         'role_id', 
         'notes',
         'item_name',
+        'item_id',
+        'hole_description',
     ];
 
     protected $dates = [
@@ -76,7 +78,7 @@ class AuditLog extends Model
         return $this->user->fullname;
     }*/
 
-    public function item_name()
+    /*public function item_name()
     {
         // start item name
             $names_array = [
@@ -114,5 +116,5 @@ class AuditLog extends Model
 
             $item_array = array('item_name' => $item_name, 'item_id' => $item_id);
             return $item_array;
-    }
+    }*/
 }

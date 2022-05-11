@@ -22,11 +22,11 @@ class LogsFilterResource extends JsonResource
             'user_id'         => $this->user_id,
             'created_at'      => $this->created_at,
             'host'            => $this->host,
-            'description'     => 'Item in module ( '. $this->subject_type .' ) has been ( '. $this->action .' ) by ( '. $this->user->firstname,
+            'description'     => $this->hole_description,
             'since'           => \Carbon\Carbon::parse($this->created_at)->diffForHumans(),
             'username'        => $this->user_id,
-            'item_name'       => $this->item_name()['item_name'],
-            'item_id'         => $this->item_name()['item_id'],
+            'item_name'       => $this->item_name,
+            'item_id'         => $this->item_id,
        ];
     }
 }

@@ -30,6 +30,9 @@ trait Auditable
     protected static function audit($description, $model)
     {
         $subject_model = substr(get_class($model),strripos(get_class($model),'\\')+1);
+        $user_fullname = auth()->user()->fullname;
+
+        $hole_description = 'Item in module ( '. $subject_model .' ) has been ( '. $description .' ) by ( '. $user_fullname. ' )';
        
        // start to ensure order of course and enrolls
         if ($subject_model == 'Course') {
@@ -80,6 +83,7 @@ trait Auditable
                         'notes'        => $notes,
                         'item_name'    => $model->firstname,
                         'item_id'      => null,
+                        'hole_description' => $hole_description,
                     ]);
                 }
         }else{  // end to exclude refresh tokens of firebase*/
@@ -114,6 +118,7 @@ trait Auditable
                 'notes'        => null,
                 'item_name'    => $item_name,
                 'item_id'      => $item_id,
+                'hole_description' => $hole_description,
             ]);
         }
     }
