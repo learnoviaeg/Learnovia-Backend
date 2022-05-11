@@ -599,6 +599,7 @@ Route::get('download-assignment', 'MaterialsController@downloadAssignment');
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
+    Route::post('upload-chunks', 'ChunksUploadController@uploads');
 });
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {
