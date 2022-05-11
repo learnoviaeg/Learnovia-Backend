@@ -126,12 +126,14 @@ class LogsFilterController extends Controller
 	    		$data = $data->where($key, $value);
 	    	}
 	    }
+	    $vv = $data->count();
 
-	    $data = $data->skip($skip)->take($limit)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
-	    $collection = $data->simplePaginate($pagination);
-	    $data = LogsFilterResource::collection($collection);
+	    $collect_data = $data->skip($skip)->take($limit)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
+	    $collection = $collect_data->simplePaginate($pagination);
+	    // $collection->count();
+	    $collect_data = LogsFilterResource::collection($collection);
 
-	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
+	    return response()->json(['total' => $vv, 'data' => $collection, 'status_code' => 200], 200);
     }
 
     // no chain filter selected

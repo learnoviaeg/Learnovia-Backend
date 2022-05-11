@@ -63,11 +63,11 @@ class AuditLog extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function getUserIdAttribute($value)
+    /*public function getUserIdAttribute($value)
     {
       $name = User::find($value)->fullname;
       return $name;
-    }
+    }*/
 
    /* public function role()
     {
