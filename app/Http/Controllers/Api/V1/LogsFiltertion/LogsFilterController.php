@@ -37,26 +37,14 @@ class LogsFilterController extends Controller
         $class_id   = isset($request->class_id) ? $request->class_id : null;
         $segment_id = isset($request->segment_id) ? $request->segment_id : null;
         $course_id  = isset($request->course_id) ? $request->course_id : null;
-        $pagination = isset($request->paginate) ? $request->paginate : 50;
+        $pagination = isset($request->paginate) ? $request->paginate : 15;
         // chain attributes
 
         // time start
-                if ($request->start_date != null && $request->end_date != null) {
-		          $start_date = $request->start_date;
-		          $end_date   = $request->end_date;
-		        }
-		        elseif ($request->start_date == null && $request->end_date != null) {
-		          $start_date = $first_created_at;
-		          $end_date   = $request->end_date;
-		        }
-		        elseif ($request->start_date != null && $request->end_date == null) {
-		          $start_date = $request->start_date;
-		          $end_date   = date("Y-m-d H:i:s");
-		        }else{
-		        	$start_date = $first_created_at;
-		        	$end_date   = date("Y-m-d H:i:s");
-		        }
+		        $start_date = isset($request->start_date) ? $request->start_date  : $first_created_at;
+		        $end_date   = isset($request->end_date) ? $request->end_date  : date("Y-m-d H:i:s");
         // time end
+		        
         // no time detected , no filter selected case
         if ( $user_id == null && $action == null && $model == null && $role_id == null && $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
 	          $start_date =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
