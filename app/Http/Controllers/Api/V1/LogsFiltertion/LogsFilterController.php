@@ -147,7 +147,7 @@ class LogsFilterController extends Controller
     // no chain filter selected
     public function yearFilterLast24($currentYear)
     {
-    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
+    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
         $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
         $right_now =  date("Y-m-d H:i:s");
         $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)
@@ -169,7 +169,7 @@ class LogsFilterController extends Controller
     // search with year
     public function yearFilter($currentYear, $start_date, $end_date)
     {
-    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
+    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
         $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('year_id', 'like', "%{$year_id}%")
                        ->where('created_at', '>=', $start_date)
                        ->where('created_at', '<=', $end_date);
