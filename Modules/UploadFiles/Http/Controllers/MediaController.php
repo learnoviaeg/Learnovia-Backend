@@ -183,7 +183,6 @@ class MediaController extends Controller
         else if ($request->type == 1)
             $array = $request->url;
         foreach ($array as $item) {
-            return $item;
             // $media = new media;
             // $media->user_id = Auth::user()->id;
             if ($request->type == 0) {
