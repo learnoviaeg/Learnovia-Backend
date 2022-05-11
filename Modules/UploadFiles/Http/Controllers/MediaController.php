@@ -337,7 +337,7 @@ class MediaController extends Controller
 
             $media->type = $newly_created_media->type;
             // $media->size = $size;
-            $media->attachment_name = $newly_created_media->$attachment_name;
+            $media->attachment_name = $newly_created_media->attachment_name;
             $media->link = $newly_created_media->link; // url('storage/media/' . $name);
             // Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
 
