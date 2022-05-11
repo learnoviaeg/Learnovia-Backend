@@ -965,8 +965,8 @@ class ReportCardsController extends Controller
  
             $second_term->add_total = false;
             if(count($total_check) > 0){
-                $second_term->student_total_mark = $student_mark;
-                $second_term->total = $total;
+                $second_term->student_total_mark = round($student_mark, 2);
+                $second_term->total = round($total,2);
                 if($total == 0)
                     $second_term->total_mark_evaluation ='Failed';
                     else
