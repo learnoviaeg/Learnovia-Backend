@@ -99,7 +99,7 @@ class AuditLog extends Model
               $model     = $nameSpace.$this->subject_type; 
             }
             if ($this->subject_type == 'Enroll') {
-              $enroll = $model::withTrashed()->where('id', $this->subject_id)->select('id, user_id')->first();
+              $enroll = $model::withTrashed()->where('id', $this->subject_id)->select('id', 'user_id')->first();
               $item_name  = $enroll->user->fullname; 
               $item_id    = $enroll->user->id;    
             }elseif($this->subject_type == 'page' || $this->subject_type == 'Announcement'){
