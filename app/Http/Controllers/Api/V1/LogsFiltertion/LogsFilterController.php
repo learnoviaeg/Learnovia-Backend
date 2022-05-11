@@ -111,10 +111,8 @@ class LogsFilterController extends Controller
                             ->where('course_id', 'like', "%{$course_id}%")->pluck('id')->toArray();
 	    }
 
-	    /*$data = DB::table('audit_logs')->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 
-	    	'host')->whereIn('id', $chainIDS);*/
-
-	    $data = AuditLog::whereIn('id', $chainIDS)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host');
+	    //$data = DB::table('audit_logs')->whereIn('id', $chainIDS);
+	    $data = AuditLog::whereIn('id', $chainIDS);
 
 	    $defaultFilters = array(
 	    	'user_id'      => $user_id,
@@ -129,10 +127,11 @@ class LogsFilterController extends Controller
 	    	}
 	    }
 
-	    $data = $data->orderBy('id', 'ASC');
-	    $collection = $data->skip($skip)->take($limit)->paginate($pagination);
-	    $data = LogsFilterResource::collection($collection);
-	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
+	    $data = $data->skip($skip)->take($limit)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
+	    $data = $data->paginate($pagination);
+	    
+	    // $data = LogsFilterResource::collection($collection);
+	    return response()->json(['data' => $data, 'status_code' => 200], 200);
     }
 
     // no chain filter selected

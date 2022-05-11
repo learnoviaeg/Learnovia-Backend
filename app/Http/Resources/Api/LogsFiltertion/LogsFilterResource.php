@@ -19,7 +19,7 @@ class LogsFilterResource extends JsonResource
             'action'          => $this->action,
             'subject_type'    => $this->subject_type,
             'subject_id'      => $this->subject_id,
-            'user_id'         => $this->user_id,
+            'user_id'         => $this->user->fullname,
             'created_at'      => $this->created_at,
             'host'            => $this->host,
             'description'     => $this->hole_description,

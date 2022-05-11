@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 // use Spatie\Permission\Models\Role;
 // use App\Traits\AuditableView;
+use App\User;
 
 class AuditLog extends Model
 {
@@ -60,6 +61,12 @@ class AuditLog extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getUserIdAttribute($value)
+    {
+      $name = User::find($value)->fullname;
+      return $name;
     }
 
    /* public function role()
