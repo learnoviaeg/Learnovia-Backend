@@ -78,9 +78,23 @@ trait Auditable
                         'before'       => $model->getOriginal(),
                         'created_at'   => $created_at,
                         'notes'        => $notes,
+                        'item_name'    => $model->firstname,
+                        'item_id'      => null,
                     ]);
                 }
         }else{  // end to exclude refresh tokens of firebase*/
+            if ($subject_model == 'page' || $subject_model == 'Announcement') {
+                $item_name = $model->title;
+                $item_id = null;
+            }
+            elseif ($subject_model == 'Enroll') {
+                $item_name = $model->user->fullname;
+                $item_id   = $model->user->id;
+            }else{
+                $item_name = $model->name;
+                $item_id   = null;   
+            }
+
                 AuditLog::create([
                 'action'       => $description,
                 'subject_id'   => $model->id ?? null,
@@ -98,6 +112,8 @@ trait Auditable
                 'before'       => $model->getOriginal(),
                 'created_at'   => $created_at,
                 'notes'        => null,
+                'item_name'    => $item_name,
+                'item_id'      => $item_id,
             ]);
         }
     }

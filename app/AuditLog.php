@@ -34,6 +34,7 @@ class AuditLog extends Model
         'created_at',
         'role_id', 
         'notes',
+        'item_name',
     ];
 
     protected $dates = [
