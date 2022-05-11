@@ -605,7 +605,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     
     Route::group(['prefix' => 'v1'], function () {
     // logs filter with user and action 
-        Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFiltertionController@logs_filteration')->name('logs_filteration');
+        Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFilterController@logs_filteration')->name('logs_filteration');
 
         Route::get('logs/models/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_models_dropdown')->name('logs_models_dropdown');
         

@@ -13,6 +13,10 @@ class AuditLog extends Model
 
     public $table = 'audit_logs';
 
+    protected $appends = [
+        'description', 'since', 'username'
+    ];
+
     protected $fillable = [
         'action',
         'subject_id',
@@ -59,4 +63,54 @@ class AuditLog extends Model
     {
         return $this->belongsTo(Role::class, 'role_id');
     }*/
+
+    /*public function getDescriptionAttribute()
+    {
+        $description = 'Item in module ( '. $this->subject_type .' ) has been ( '. $this->action .' ) by ( '. $this->user->firstname. ' )';
+        return $description;
+    }*/
+
+    /*public function userfullname()
+    {
+        return $this->user->fullname;
+    }*/
+
+    public function item_name()
+    {
+        // start item name
+            $names_array = [
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'assignment'        => '\Modules\Assigments\Entities\assignment',
+              'page'              => '\Modules\Page\Entities\page',
+              'Questions'         => '\Modules\QuestionBank\Entities\Questions',
+              'QuestionsAnswer'   => '\Modules\QuestionBank\Entities\QuestionsAnswer',
+              'QuestionsCategory' => '\Modules\QuestionBank\Entities\QuestionsCategory',
+              'QuestionsType'     => '\Modules\QuestionBank\Entities\QuestionsType',
+              'quiz'              => '\Modules\QuestionBank\Entities\quiz',
+              'quiz_questions'    => '\Modules\QuestionBank\Entities\quiz_questions',
+              'file'              => '\Modules\UploadFiles\Entities\file',
+              'media'             => '\Modules\UploadFiles\Entities\media',
+            ];
+
+            if (array_key_exists($this->subject_type, $names_array)) {
+              $model = $names_array[$this->subject_type];
+            }else{
+              $nameSpace = '\\app\\';
+              $model     = $nameSpace.$this->subject_type; 
+            }
+            if ($this->subject_type == 'Enroll') {
+              $item_name   = $model::withTrashed()->where('id', $this->subject_id)->first()->user->fullname; 
+              $item_id    = $model::withTrashed()->where('id', $this->subject_id)->first()->user->id;    
+            }elseif($this->subject_type == 'page'){
+                 $item_name   = $model::withTrashed()->where('id', $this->subject_id)->first()->title;
+                 $item_id = null;
+            }else{
+                $item_name   = $model::withTrashed()->where('id', $this->subject_id)->first()->name;
+                $item_id = null;  
+            }
+            // end item name
+
+            $item_array = array('item_name' => $item_name, 'item_id' => $item_id);
+            return $item_array;
+    }
 }

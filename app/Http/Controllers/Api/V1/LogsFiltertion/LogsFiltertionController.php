@@ -63,7 +63,7 @@ class LogsFiltertionController extends Controller
           $end_date   = date("Y-m-d H:i:s");
         }
 
-    	// default case 1
+  	// default case 1
         if ($user_id == null && $action == null && $model == null && $role_id == null) {
             // fetch logs default time (1 day from now)
             $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain'];
