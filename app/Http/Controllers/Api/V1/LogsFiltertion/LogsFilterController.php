@@ -128,10 +128,10 @@ class LogsFilterController extends Controller
 	    }
 
 	    $data = $data->skip($skip)->take($limit)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
-	    $data = $data->paginate($pagination);
-	    
-	    // $data = LogsFilterResource::collection($collection);
-	    return response()->json(['data' => $data, 'status_code' => 200], 200);
+	    $collection = $data->simplePaginate($pagination);
+	    $data = LogsFilterResource::collection($collection);
+
+	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
     }
 
     // no chain filter selected
