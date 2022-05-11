@@ -183,6 +183,7 @@ class MediaController extends Controller
         else if ($request->type == 1)
             $array = $request->url;
         foreach ($array as $item) {
+            return $item;
             // $media = new media;
             // $media->user_id = Auth::user()->id;
             if ($request->type == 0) {
@@ -315,7 +316,7 @@ class MediaController extends Controller
         //     ];
         // }
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
@@ -326,16 +327,22 @@ class MediaController extends Controller
             return HelperController::api_response_format(400, null, __('messages.media.only_url_or_media'));
 
         if (isset($request->file_id)) {
+            $newly_created_media = media::find($request->file_id);
+    
 
-            // $extension = $request->Imported_file->getClientOriginalExtension();
-            // $fileName = $request->Imported_file->getClientOriginalName();
-            // $size = $request->Imported_file->getSize();
-            // $name = uniqid() . '.' . $extension;
-            $media->type = $request->Imported_file->getClientMimeType();
-            $media->size = $size;
-            $media->attachment_name = $fileName;
-            $media->link = url('storage/media/' . $name);
-            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+            // $file->url = $newly_created_file->url;
+            // $file->url2 = $newly_created_file->url2;
+            // $file->type =  $newly_created_file->type;
+            // $file->description =  $request->description ?? $newly_created_file->description;
+            // $file->attachment_name = $request->attachment_name ?? $newly_created_file->attachment_name;
+
+            $media->type = $newly_created_media->type;
+            // $media->size = $size;
+            $media->attachment_name = $newly_created_media->$attachment_name;
+            $media->link = $newly_created_media->link; // url('storage/media/' . $name);
+            // Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+
+            $newly_created_media->delete();
 
         }
 
