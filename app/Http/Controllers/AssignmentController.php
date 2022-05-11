@@ -149,14 +149,23 @@ class AssignmentController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
-        $assignment = Assignment::firstOrCreate([
-            'name' => $request->name,
-            'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
-            'content' => isset($request->content) ? $request->content : null,
-            'created_by' => Auth::id(),
-        ]);
-
         foreach($request->lesson_id as $key => $lesson){
+
+            $lesson_obj = Lesson::find($lesson);
+
+            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $segment = Segment::find($secondary_chain->Enroll->segment);
+                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+            }
+
+            $assignment = Assignment::firstOrCreate([
+                'name' => $request->name,
+                'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
+                'content' => isset($request->content) ? $request->content : null,
+                'created_by' => Auth::id(),
+            ]);
 
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
@@ -173,17 +182,9 @@ class AssignmentController extends Controller
                 'is_graded' => $request->is_graded,
                 'allow_attachment' => $request->allow_attachment,
             ]);
-
-            $lesson_obj = Lesson::find($lesson);
+            
             $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();
             $assignment_lesson->grade_category=$pp->id;
-
-            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
-            foreach($secondary_chains as $secondary_chain){
-                $segment = Segment::find($secondary_chain->Enroll->segment);
-                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
-                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
-            }
 
             if($request->is_graded)
             {
