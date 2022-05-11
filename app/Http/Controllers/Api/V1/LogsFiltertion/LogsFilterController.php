@@ -62,7 +62,7 @@ class LogsFilterController extends Controller
 	    // none
 	    if( $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ){
 	    	$chainIDS = $this->yearFilterLast24($currentYear);
-	    	//$chainIDS = $chainIDS->skip($skip)->take($limit)->pluck('id')->toArray();
+	    	//$chainIDS = $chainIDS->skip($skip)->take($limit)->select('id')->pluck('id')->toArray();
 	    	$chainIDS = $chainIDS->pluck('id')->toArray();
 	    }
 
@@ -161,7 +161,7 @@ class LogsFilterController extends Controller
     public function yearFilter($currentYear, $start_date, $end_date)
     {
     	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
-        $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('year_id', 'like', "%{$year_id}%")
+        $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('year_id', 'like', "%{$currentYear}%")
                        ->where('created_at', '>=', $start_date)
                        ->where('created_at', '<=', $end_date);
         return $chain_ids;
