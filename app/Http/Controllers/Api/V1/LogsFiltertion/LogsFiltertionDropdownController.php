@@ -46,63 +46,41 @@ class LogsFiltertionDropdownController extends Controller
         ], 200);
     }
 
-    public function logs_years_dropdown()
+    public function seed_logs(Request $request)
     {
-      $ids    =  AuditLog::whereNotNull('year_id')->groupBy('year_id')->pluck('year_id');
-       $data   = AcademicYear::whereIn('id', $ids)->select('id', 'name', 'current')->get();
-        return response()->json([
-            'status_code' => 200,
-            'data'        => $data, 
-        ], 200);
-    }
+        $created_at = $request->created_at;
+        for ($i=0; $i < 100000; $i++) 
+        { 
+            AuditLog:: create([
+                        'action' => 'created',
+                        'subject_id' => 17,
+                        'subject_type' => 'Announcement',
+                        'user_id' => 1,
+                        // 
+                        'properties' => '{"id":17,"attachment_name":"dummy.txt","name":"file to be deleted","description":"6279124039572.txt","size":"5","type":"txt","url":"https:\/\/docs.google.com\/viewer?url=https:\/\/loggapi.learnovia.com\/storage\/files\/6279124039572.txt","url2":"https:\/\/loggapi.learnovia.com\/storage\/files\/6279124039572.txt","deleted_at":"2022-05-09 15:49:38"}',
+                       
+                        'before' => '{"id":17,"attachment_name":"dummy.txt","name":"file to be deleted","description":"6279124039572.txt","size":"5","type":"txt","url":"https:\/\/docs.google.com\/viewer?url=https:\/\/loggapi.learnovia.com\/storage\/files\/6279124039572.txt","url2":"files\/6279124039572.txt","user_id":1,"created_at":"2022-05-09 15:08:16","updated_at":"2022-05-09 15:27:02","deleted_at":null}',
 
-    public function logs_types_dropdown()
-    {
-      $ids    =  AuditLog::whereNotNull('type_id')->groupBy('type_id')->pluck('type_id');
-       $data   = AcademicType::whereIn('id', $ids)->select('id', 'name')->get();
+                        'host' => request()->ip() ?? null,
+        // chain
+                        'year_id' => [2],
+                        'type_id' => [1],
+                        'level_id' => [1],
+                        'class_id' => [1],
+                        'segment_id' => [1], 
+                        'course_id' => [5],
+                        'role_id' => [1], 
+                        'notes' => 'script',
+                        'item_name' => 'Dummy',
+                        'item_id' => null,
+                        'hole_description' => 'Item in module Announcement has been created by name',
+                        'created_at' => $created_at,
+            ]);
+        }
+       
         return response()->json([
             'status_code' => 200,
-            'data'        => $data, 
-        ], 200);
-    }
-
-    public function logs_levels_dropdown()
-    {
-      $ids    =  AuditLog::whereNotNull('level_id')->groupBy('level_id')->pluck('level_id');
-       $data   = Level::whereIn('id', $ids)->select('id', 'name')->get();
-        return response()->json([
-            'status_code' => 200,
-            'data'        => $data, 
-        ], 200);
-    }
-
-    public function logs_classes_dropdown()
-    {
-      $ids     =  AuditLog::whereNotNull('class_id')->groupBy('class_id')->pluck('class_id');
-       $data   = Classes::whereIn('id', $ids)->select('id', 'name')->get();
-        return response()->json([
-            'status_code' => 200,
-            'data'        => $data, 
-        ], 200);
-    }
-
-    public function logs_segments_dropdown()
-    {
-      $ids    =  AuditLog::whereNotNull('segment_id')->groupBy('segment_id')->pluck('segment_id');
-       $data   = Segment::whereIn('id', $ids)->select('id', 'name')->get();
-        return response()->json([
-            'status_code' => 200,
-            'data'        => $data, 
-        ], 200);
-    }
-
-    public function logs_courses_dropdown()
-    {
-      $ids    =  AuditLog::whereNotNull('course_id')->groupBy('course_id')->pluck('course_id');
-       $data   = Course::whereIn('id', $ids)->select('id', 'name')->get();
-        return response()->json([
-            'status_code' => 200,
-            'data'        => $data, 
+            'data'        => 'done', 
         ], 200);
     }
 }

@@ -615,18 +615,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
         
-       /* Route::get('logs/years/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_years_dropdown')->name('logs_years_dropdown');
-        
-        Route::get('logs/types/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_types_dropdown')->name('logs_types_dropdown');
-
-        Route::get('logs/levels/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_levels_dropdown')->name('logs_levels_dropdown');
-
-        Route::get('logs/classes/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_classes_dropdown')->name('logs_classes_dropdown');
-
-        Route::get('logs/segments/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_segments_dropdown')->name('logs_segments_dropdown');
-
-        Route::get('logs/courses/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_courses_dropdown')->name('logs_courses_dropdown');
-        */
+       Route::get('logs/seed', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@seed_logs')
+       ->name('seed_logs');
     });
     // added ahmed
 });
