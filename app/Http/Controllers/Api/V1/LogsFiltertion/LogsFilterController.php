@@ -42,7 +42,7 @@ class LogsFilterController extends Controller
         $skip       = ($request->page -1) * $limit;
         // chain attributes
 
-        $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
+        $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'quiz_questions'];
 
         // time start
 		        $start_date = isset($request->start_date) ? $request->start_date  : $first_created_at;
@@ -102,8 +102,9 @@ class LogsFilterController extends Controller
 	    		$whereStart = $start_date;
 		        $whereEnd   = $end_date;
 	    	}
-	    	$data = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd);
-	    	return response()->json(['data' => $data, 'status_code' => 200], 200);
+	    	$collection = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd);
+	        LogsFilterResource::collection($collection);
+	    	return response()->json(['data' => $collection, 'status_code' => 200], 200);
 		} 
 		// end first hit
 
