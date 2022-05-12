@@ -38,81 +38,43 @@ class LogsFilterController extends Controller
         $segment_id = isset($request->segment_id) ? $request->segment_id : null;
         $course_id  = isset($request->course_id) ? $request->course_id : null;
         $pagination = isset($request->paginate) ? $request->paginate : 15;
-        $limit      =  isset($request->paginate) ? $request->paginate : 15;
+        $limit      = isset($request->paginate) ? $request->paginate : 15;
         $skip       = ($request->page -1) * $limit;
         // chain attributes
+
+        $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
 
         // time start
 		        $start_date = isset($request->start_date) ? $request->start_date  : $first_created_at;
 		        $end_date   = isset($request->end_date) ? $request->end_date  : date("Y-m-d H:i:s");
         // time end
 
-        // no time detected , no filter selected case
-        if ( $user_id == null && $action == null && $model == null && $role_id == null && $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
-	          $start_date =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
-	          $end_date =  date("Y-m-d H:i:s");
+		 $first_hit      = 0;
+		 $default_filter = 0;
+
+		 // start default
+		 if ( $user_id == null && $action == null && $model == null && $role_id == null ) {
+        	  $default_filter = 0;
+        }else{
+        	$default_filter = 1;
         }
-        else{
-		        $start_date = $start_date;
-		        $end_date   = $end_date;
-	    } // end one filter at least selected
+		 // end default 
+
+        // start chain
+		 if ( $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
+        	  $chain_filter = 0;
+        }else{
+        	$chain_filter = 1;
+        }
+		 // end chain 
+
+        // no time detected , no filter selected case
+        if ( $default_filter == 0 && $chain_filter == 0 ) {
+        	  $first_hit   = 1;
+        }
+        // end one filter at least selected
 
 	    $currentYear = AcademicYear::Get_current()->id;
-
-	    // none
-	    if( $year_id == null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ){
-	    	$chainIDS = $this->yearFilterLast24($currentYear);
-	    	//$chainIDS = $chainIDS->skip($skip)->take($limit)->select('id')->pluck('id')->toArray();
-	    	$chainIDS = $chainIDS->pluck('id')->toArray();
-	    }
-
-	   //return $chainIDS;
-	    // year
-	    if( $year_id != null && $type_id == null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ) {
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->pluck('id')->toArray();
-	    }
-
-	    // type
-	    if( $year_id != null && $type_id != null && $level_id == null && $class_id == null && $segment_id == null && $course_id == null ){
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->where('type_id', 'like', "%{$type_id}%")->pluck('id')->toArray();
-	    }
-        
-        // level
-	    if( $year_id != null && $type_id != null && $level_id != null && $class_id == null && $segment_id == null && $course_id == null ){
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->where('type_id', 'like', "%{$type_id}%")
-                            ->where('level_id', 'like', "%{$level_id}%")->pluck('id')->toArray();
-	    }
-
-	    // class
-	    if( $year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id == null && $course_id == null ){
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->where('type_id', 'like', "%{$type_id}%")
-                            ->where('level_id', 'like', "%{$level_id}%")
-                            ->where('class_id', 'like', "%{$class_id}%")->pluck('id')->toArray();
-	    } 
-
-	    // segment
-	    if( $year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id == null ){
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->where('type_id', 'like', "%{$type_id}%")
-                            ->where('level_id', 'like', "%{$level_id}%")->where('class_id', 'like', "%{$class_id}%")
-                            ->where('segment_id', 'like', "%{$segment_id}%")->pluck('id')->toArray();
-	    } 
-
-	    // course
-	    if( $year_id != null && $type_id != null && $level_id != null && $class_id != null && $segment_id != null && $course_id != null ){
-	    	$chainIDS = $this->yearFilter($currentYear, $start_date, $end_date);
-	    	$chainIDS = $chainIDS->where('type_id', 'like', "%{$type_id}%")
-                            ->where('level_id', 'like', "%{$level_id}%")->where('class_id', 'like', "%{$class_id}%")
-                            ->where('segment_id', 'like', "%{$segment_id}%")
-                            ->where('course_id', 'like', "%{$course_id}%")->pluck('id')->toArray();
-	    }
-
-	    //$data = DB::table('audit_logs')->whereIn('id', $chainIDS);
-	    $data = AuditLog::whereIn('id', $chainIDS);
 
 	    $defaultFilters = array(
 	    	'user_id'      => $user_id,
@@ -121,51 +83,102 @@ class LogsFilterController extends Controller
 	    	'role_id'      => $role_id,
 	    );
 
-	    foreach ($defaultFilters as $key => $value) {
-	    	if ($value != null) {
-	    		$data = $data->where($key, $value);
+	    $chainFilters = array(
+	    	'year_id'       => $year_id,
+	    	'type_id'       => $type_id,
+	    	'level_id'      => $level_id,
+	    	'class_id'      => $class_id,
+	    	'segment_id'    => $segment_id,
+	    	'course_id'     => $course_id,
+	    );
+
+	    // start first hit
+	    if ($first_hit == 1) {
+	    	// get last 24 
+	    	if ($request->start_date  == null && $request->end_date == null) {
+	    		$whereStart  =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
+	            $whereEnd    =  date("Y-m-d H:i:s");
+	    	}else{
+	    		$whereStart = $start_date;
+		        $whereEnd   = $end_date;
 	    	}
-	    }
-	    // $vv = $data->count();
+	    	$data = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd);
+	    	return response()->json(['data' => $data, 'status_code' => 200], 200);
+		} 
+		// end first hit
 
-	    $collection = $data->skip($skip)->take($limit)->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC')
-	                    ->simplePaginate($pagination);
-	    //$collection   = $collect_data->paginate(Paginate::GetPaginate($request));
-	    $collect_data = LogsFilterResource::collection($collection);
+	    ///// start case default filter 1
+	    if ($default_filter == 1) {
+		    $data = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('created_at', '>=', $start_date)
+		                            ->where('created_at', '<=', $end_date)
+		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')
+		            ->orderBy('id', 'DESC')
+		            ->Where(function($query) use ($defaultFilters)
+					{
+					    foreach($defaultFilters as $key => $value) {
+					    	if ($value != null) {
+					    		$query->where($key, $value);
+					    	}
+					    }
+					});
 
+				if ($chain_filter == 1) 
+			    {
+				    $data = $data->Where(function($query2) use ($chainFilters)
+							{
+							    foreach($chainFilters as $key2 => $value2) {
+							    	if ($value2 != null) {
+							    		$query2->where($key2, 'like', "%{$value2}%");
+							    	}
+							    }
+							});
+				}
+		} ////// end case default filter 1
+		else{
+			if ($chain_filter == 1) 
+			    {
+				    $data = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('created_at', '>=', $start_date)
+		                            ->where('created_at', '<=', $end_date)
+		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')
+				            ->orderBy('id', 'DESC')
+				            ->Where(function($query2) use ($chainFilters)
+							{
+							    foreach($chainFilters as $key2 => $value2) {
+							    	if ($value2 != null) {
+							    		$query2->where($key2, 'like', "%{$value2}%");
+							    	}
+							    }
+							});
+				}
+		}
+
+	    //$collection = $data->simplePaginate($pagination);
+	    $collection = $data->paginate($pagination);
+	    LogsFilterResource::collection($collection);
 	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
     }
 
-    // no chain filter selected
-    public function yearFilterLast24($currentYear)
-    {
-    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
-        $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
-        $right_now =  date("Y-m-d H:i:s");
-        $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)
-                             ->where('year_id', 'like', "%{$currentYear}%")
-                            ->where('created_at', '>=', $yesterday)
-                            ->where('created_at', '<=', $right_now);
-        return $chain_ids;
+		public function checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd)
+		{
+			// return $whereEnd;
+			$chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)
+		                            ->where('year_id', 'like', "%{$currentYear}%")
+		                            ->where('created_at', '>=', $whereStart)
+		                            ->where('created_at', '<=', $whereEnd)
+		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')
+		                            ->orderBy('id', 'DESC')
+		                            ->paginate($pagination);
 
+		    return $chain_ids;
+		}
+    // export section
         /*if ($request->has('export') && $request->export == 1) {
             //return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
             $filename = uniqid();
             $file     = Excel::store(new AuditlogExport($data), 'AuditLog'.$filename.'.xlsx','public');
             $file     = url(Storage::url('AuditLog'.$filename.'.xlsx'));
             return HelperController::api_response_format(201,$file, __('messages.success.link_to_file')); 
+    
         }*/
-        return response()->json(['data' => $data, 'status_code' => 200], 200);
-    }
 
-    // search with year
-    public function yearFilter($currentYear, $start_date, $end_date)
-    {
-    	$notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'userQuiz', 'quiz_questions', 'userQuizAnswer'];
-        $chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)->where('year_id', 'like', "%{$currentYear}%")
-                       ->where('created_at', '>=', $start_date)
-                       ->where('created_at', '<=', $end_date);
-        return $chain_ids;
-    } 
-     
 }

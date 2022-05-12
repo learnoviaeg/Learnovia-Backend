@@ -23,7 +23,7 @@ class LogsFilterResource extends JsonResource
             'created_at'      => $this->created_at,
             'host'            => $this->host,
             'description'     => $this->hole_description,
-            'since'           => \Carbon\Carbon::parse($this->created_at)->diffForHumans(),
+            // 'since'           => \Carbon\Carbon::parse($this->created_at)->diffForHumans(),
             'username'        => $this->user->fullname,
             'item_name'       => $this->item_name,
             'item_id'         => $this->item_id,
