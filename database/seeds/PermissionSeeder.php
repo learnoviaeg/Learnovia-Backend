@@ -382,7 +382,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
 
         //logs
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
+        /*Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);*/
 
         //system settings
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);

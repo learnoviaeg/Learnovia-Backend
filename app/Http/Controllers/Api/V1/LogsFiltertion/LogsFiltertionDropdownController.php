@@ -49,12 +49,12 @@ class LogsFiltertionDropdownController extends Controller
     public function seed_logs(Request $request)
     {
         $created_at = $request->created_at;
-        for ($i=0; $i < 100000; $i++) 
+        for ($i=0; $i < 500000; $i++) 
         { 
             AuditLog:: create([
                         'action' => 'created',
                         'subject_id' => 17,
-                        'subject_type' => 'Announcement',
+                        'subject_type' => 'file',
                         'user_id' => 1,
                         // 
                         'properties' => '{"id":17,"attachment_name":"dummy.txt","name":"file to be deleted","description":"6279124039572.txt","size":"5","type":"txt","url":"https:\/\/docs.google.com\/viewer?url=https:\/\/loggapi.learnovia.com\/storage\/files\/6279124039572.txt","url2":"https:\/\/loggapi.learnovia.com\/storage\/files\/6279124039572.txt","deleted_at":"2022-05-09 15:49:38"}',
