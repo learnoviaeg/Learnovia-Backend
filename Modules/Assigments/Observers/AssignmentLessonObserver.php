@@ -152,10 +152,10 @@ class AssignmentLessonObserver
     public function deleted(AssignmentLesson $assignmentLesson)
     {
         //for log event
-        $logsbefore=Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->get();
-        $all = Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'deleted'));
+        // $logsbefore=Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->get();
+        // $all = Timeline::where('lesson_id',$assignmentLesson->lesson_id)->where('item_id',$assignmentLesson->assignment_id)->where('type','assignment')->delete();
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'deleted'));
 
         $LessonComponent =  LessonComponent::where('comp_id',$assignmentLesson->assignment_id)
                             ->where('lesson_id',$assignmentLesson->lesson_id)->where('model' , 'assignment')->first();
