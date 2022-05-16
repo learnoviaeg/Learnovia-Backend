@@ -118,21 +118,19 @@ class AppServiceProvider extends ServiceProvider
         ->getDatabasePlatform()
         ->registerDoctrineTypeMapping('enum', 'string');
 
-        h5pLesson::observe(LogsObserver::class);
+        // h5pLesson::observe(LogsObserver::class);
 
-        AcademicType::observe(LogsObserver::class);
-        AcademicYear::observe(LogsObserver::class);
-        Classes::observe(LogsObserver::class);
-        Course::observe(LogsObserver::class);
-        Level::observe(LogsObserver::class);
-        Lesson::observe(LogsObserver::class);
-        Segment::observe(LogsObserver::class);
-        // AcademicYearType::observe(LogsObserver::class);
-        // ClassLevel::observe(LogsObserver::class);
-        // YearLevel::observe(LogsObserver::class);
-        User::observe(LogsObserver::class);
-        Parents::observe(LogsObserver::class);
-        // CourseSegment::observe(LogsObserver::class);
+        // AcademicType::observe(LogsObserver::class);
+        // AcademicYear::observe(LogsObserver::class);
+        // Classes::observe(LogsObserver::class);
+        // Course::observe(LogsObserver::class);
+        // Level::observe(LogsObserver::class);
+        // Lesson::observe(LogsObserver::class);
+        // Segment::observe(LogsObserver::class);
+
+        // User::observe(LogsObserver::class);
+        // Parents::observe(LogsObserver::class);
+
         Enroll::observe(EnrollObserver::class);
 
         Enroll::observe(SecodaryChainObserver::class);
@@ -141,9 +139,11 @@ class AppServiceProvider extends ServiceProvider
         // GradeItems::observe(GradeItemObserver::class);
         // GradeCategory::observe(LogsObserver::class);
         // UserGrader::observe(LogsObserver::class);
-        Announcement::observe(LogsObserver::class);
-        Timeline::observe(LogsObserver::class);
-        Material::observe(LogsObserver::class);
+
+        // Announcement::observe(LogsObserver::class);
+        // Timeline::observe(LogsObserver::class);
+        // Material::observe(LogsObserver::class);
+        
         // AttendanceSession::observe(LogsObserver::class);
         Announcement::observe(Announcements::class);
         Material::observe(MaterialsObserver::class);
