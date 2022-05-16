@@ -40,17 +40,8 @@ class FetchOneLogApiController extends Controller
         $chain_details['segment'] = $segmentID == null ? null : Segment::whereIn('id', $segmentID)->groupBy('name')->pluck('name');
         $chain_details['course'] = $courseID == null ? null : Course::whereIn('id', $courseID)->groupBy('name')->pluck('name');
 
-        /*$chain_details['type']     = $log->type_id == null ? null : (is_int($log->type_id) ? AcademicType::whereIn('id', [$log->type_id])->groupBy('name')->pluck('name') : AcademicType::whereIn('id', [$log->type_id])->groupBy('name')->pluck('name') );
 
-        $chain_details['level']     = $log->level_id == null ? null : (is_int($log->level_id) ? Level::whereIn('id', [$log->level_id])->groupBy('name')->pluck('name') : Level::whereIn('id', [$log->level_id])->groupBy('name')->pluck('name') );
-
-        $chain_details['class']     = $log->class_id == null ? null : (is_int($log->class_id) ? Classes::whereIn('id', [$log->class_id])->groupBy('name')->pluck('name') : Classes::whereIn('id', [$log->class_id])->groupBy('name')->pluck('name') );
-
-        $chain_details['segment']     = $log->segment_id == null ? null : (is_int($log->segment_id) ? Segment::whereIn('id', [$log->segment_id])->groupBy('name')->pluck('name') : Segment::whereIn('id', [$log->segment_id])->groupBy('name')->pluck('name') );
-
-        $chain_details['course']     = $log->course_id == null ? null : (is_int($log->course_id) ? Course::whereIn('id', [$log->course_id])->groupBy('name')->pluck('name') : Course::whereIn('id', [$log->course_id])->groupBy('name')->pluck('name') );  */ 
-
-    	$data          = $log->properties;
+       	$data          = $log->properties;
 
         $headlines['description'] = 'Item in module ( '. $log->subject_type .' ) has been ( '. $log->action .' ) by ( '. $log->user->fullname. ' )';
         $headlines['username']    = $log->user->fullname;
@@ -76,7 +67,7 @@ class FetchOneLogApiController extends Controller
               $model = $names_array[$log->subject_type];
             }else{
               $nameSpace = '\\app\\';
-              $model     = $nameSpace.$log->subject_type; 
+              $model     = $nameSpace.$log->subject_type;
             }
             if ($log->subject_type == 'Enroll') {
               $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->user->fullname; 
