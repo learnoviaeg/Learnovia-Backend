@@ -80,8 +80,8 @@ class EnrollController extends Controller
         $chains=Enroll::whereIn('id',$request->enroll_ids);
 
         //for logs
-        $logsbefore=$chains->get();
-        event(new MassLogsEvent($logsbefore,'deleted'));
+        // $logsbefore=$chains->get();
+        // event(new MassLogsEvent($logsbefore,'deleted'));
 
         foreach($logsbefore as $enroll){
             $parent = Parents::where('child_id',$enroll->user_id)->pluck('parent_id');

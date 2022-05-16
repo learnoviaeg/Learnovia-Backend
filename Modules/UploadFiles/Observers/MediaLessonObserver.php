@@ -110,8 +110,8 @@ class MediaLessonObserver
     { 
         //for log event
         // dd($mediaLesson);
-        $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
-        $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
+        // $logsbefore=Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->get();
+        // $all = Material::where('lesson_id',$mediaLesson->lesson_id)->where('item_id',$mediaLesson->media_id)->where('type','media')->first()->delete();
 
         $LessonComponent = LessonComponent::where('comp_id',$mediaLesson->media_id)->where('lesson_id',$mediaLesson->lesson_id)->where('model' , 'media')->first();
         // if($LessonComponent != null){
@@ -134,8 +134,8 @@ class MediaLessonObserver
         //     $LessonComponent->delete();
         // }
 
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'deleted'));
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'deleted'));
 
         LessonComponent::where('comp_id',$mediaLesson->media_id)
             ->where('lesson_id',$mediaLesson->lesson_id)

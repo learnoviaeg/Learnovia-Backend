@@ -847,10 +847,10 @@ class UserController extends Controller
         ]);
 
         //for log event
-        $logsbefore=Parents::where('parent_id',Auth::id())->get();
-        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        // $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $current_child=null;
         if(isset($request->child_id)){
