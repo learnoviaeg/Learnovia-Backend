@@ -37,17 +37,17 @@ class QuestionBankServiceProvider extends ServiceProvider
 
         // UserQuizAnswer::observe(UserQuizAnswerObserver::class);
         
-        // Questions::observe(LogsObserver::class);
-        // QuestionsAnswer::observe(LogsObserver::class);
-        // QuestionsCategory::observe(LogsObserver::class);
-        // QuestionsType::observe(LogsObserver::class);
-        // Quiz::observe(LogsObserver::class);
-        // quiz_questions::observe(LogsObserver::class);
+        Questions::observe(LogsObserver::class);
+        QuestionsAnswer::observe(LogsObserver::class);
+        QuestionsCategory::observe(LogsObserver::class);
+        QuestionsType::observe(LogsObserver::class);
+        Quiz::observe(LogsObserver::class);
+        quiz_questions::observe(LogsObserver::class);
 
         QuizLesson::observe(QuizLessonObserver::class);
 
-        // UserQuiz::observe(LogsObserver::class);
-        // UserQuizAnswer::observe(LogsObserver::class);
+        UserQuiz::observe(LogsObserver::class);
+        UserQuizAnswer::observe(LogsObserver::class);
 
         QuizOverride::observe(QuizOverwrite::class);
     }
