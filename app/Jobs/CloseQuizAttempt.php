@@ -39,8 +39,13 @@ class CloseQuizAttempt implements ShouldQueue
             if($quiz_time > Carbon::parse( $this->userQuiz->quiz_lesson->due_date)->format('Y-m-d H:i:s'))
                 $quiz_time= $this->userQuiz->quiz_lesson->due_date;
 
-            UserQuizAnswer::where('user_quiz_id', $this->userQuiz->id)->update(['force_submit'=>'1','answered' => 1]);
-            userQuiz::find( $this->userQuiz->id)->update(['submit_time'=>$quiz_time]);
+            $userQuizAnswer = UserQuizAnswer::where('user_quiz_id', $this->userQuiz->id)->first();
+            // added ahmed
+            $userQuizAnswer->update(['force_submit'=>'1','answered' => 1]);
+
+            $user_Quiz = userQuiz::find( $this->userQuiz->id);
+            // added ahmed
+            $user_Quiz->update(['submit_time'=>$quiz_time]);
         }
     }
 }

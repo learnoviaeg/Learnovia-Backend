@@ -159,5 +159,11 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'grading_method', 'language' => 1, 'value' => 'Grading Method']);
         Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 2, 'value' => 'إضافة الاسئلة']);
         Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 1, 'value' => 'Add Questions']);
+
+        // added ahmed
+        Dictionary::firstOrCreate(['key' => 'logs/logs', 'language' => 1, 'value' => 'Logs']);
+        Dictionary::firstOrCreate(['key' => 'logs/logs', 'language' => 2, 'value' => 'السجلات']);
+
+
     }
 }
