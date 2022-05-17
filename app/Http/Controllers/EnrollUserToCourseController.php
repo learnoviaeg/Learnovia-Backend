@@ -29,6 +29,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ChainRepositoryInterface;
 use App\LastAction;
+
 class EnrollUserToCourseController extends Controller
 {
         /**
@@ -133,10 +134,14 @@ class EnrollUserToCourseController extends Controller
             'segment' => 'exists:segments,id',
             'courses' => 'array|exists:courses,id'
         ]);
-        $enrolls = $this->chain->getEnrollsByChain($request)->whereIn('user_id',$request->user_id);
+        $enrolls = $this->chain->getEnrollsByChain($request)->whereIn('user_id',$request->user_id)->get();
         if(isset($enrolls))
-            $enrolls->delete();
-                
+        {
+            foreach ($enrolls as $key => $enroll) {
+                $enroll->delete();
+            }
+            //$enrolls->delete();
+        }
         return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
     }
 
@@ -767,7 +772,10 @@ class EnrollUserToCourseController extends Controller
             'user_id' => 'required|array|exists:users,id'
         ]);
 
-        $enroll=Enroll::whereIn('user_id',$request->user_id)->delete();
+        $enrolls = Enroll::whereIn('user_id', $request->user_id)->get();
+        foreach ($enrolls as $key => $enroll) {
+            $enroll->delete();
+        }
 
         return HelperController::api_response_format(200, null, __('messages.enroll.delete'));
     }

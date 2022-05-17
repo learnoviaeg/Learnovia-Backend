@@ -382,7 +382,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'material/get', 'title' => 'Get Materials']);
 
         //logs
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);
+        /*Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/logs', 'title' => 'Logs', 'dashboard' => 1 , 'icon'=> 'User']);*/
 
         //system settings
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'settings/general', 'title' => 'General Settings', 'dashboard' => 1 , 'icon'=> 'Settings']);
@@ -535,6 +535,11 @@ class PermissionSeeder extends Seeder
 
         //parent permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/parent', 'title' => 'set as parent']);
+
+        // added ahmed
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/logs', 'title' => 'ststistics', 'dashboard' => 1, 'icon'=> 'statistics']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/log', 'title' => 'log details', 'dashboard' => 0]);
+
 
         //create status
         Status::firstOrCreate(['name' => 'Graded']);

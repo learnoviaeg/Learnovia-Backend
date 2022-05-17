@@ -235,10 +235,10 @@ class segment_class_Controller extends Controller
         SegmentClass::where('segment_id',$req->id)->first()->delete();
 
         //for log event
-        $logsbefore=Enroll::where('segment',$req->id)->get();
-        $returnValue=Enroll::where('segment',$req->id)->update(['segment' => null]);
-        if($returnValue > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // $logsbefore=Enroll::where('segment',$req->id)->get();
+        // $returnValue=Enroll::where('segment',$req->id)->update(['segment' => null]);
+        // if($returnValue > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $req['id'] = null;
         $req['returnmsg'] = 'delete';
