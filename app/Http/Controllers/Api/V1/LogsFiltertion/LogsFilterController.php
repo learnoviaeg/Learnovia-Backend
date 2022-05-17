@@ -19,43 +19,45 @@ use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 
 class LogsFilterController extends Controller
 {
+	public function checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd)
+		{
+			// return $whereEnd;
+			$data = AuditLog::whereNotIn('subject_type', $notNeeeded)
+			                        ->where('year_id', 'like', "%{$currentYear}%")
+			                        ->where('created_at', '>=', $whereStart)
+		                            ->where('created_at', '<=', $whereEnd)
+		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 
+		                            'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
+		    return $data;
+		}
+
     public function logs_filteration(Request $request)
     {
         $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
         $right_now =  date("Y-m-d H:i:s");
+
         $first_created = AuditLog::first()->created_at;
         $first_created_at = $first_created != null ? $first_created : User::first()->created_at;
 
-    	$user_id      = isset($request->user_id) ? $request->user_id : null;
-    	$action       = isset($request->action) ? $request->action : null;
-        $model        = isset($request->model) ? $request->model : null;
-        $role_id      = isset($request->role_id) ? $request->role_id : null;
-        // chain attributes
-        $year_id    = isset($request->year_id) ? $request->year_id : null;
-        $type_id    = isset($request->type_id) ? $request->type_id : null;
-        $level_id   = isset($request->level_id) ? $request->level_id : null;
-        $class_id   = isset($request->class_id) ? $request->class_id : null;
-        $segment_id = isset($request->segment_id) ? $request->segment_id : null;
-        $course_id  = isset($request->course_id) ? $request->course_id : null;
+        /*$limit      = isset($request->paginate) ? $request->paginate : 15;
+        $skip       = ($request->page -1) * $limit;*/
+
         $pagination = isset($request->paginate) ? $request->paginate : 15;
-        $limit      = isset($request->paginate) ? $request->paginate : 15;
-        $skip       = ($request->page -1) * $limit;
-        // chain attributes
 
         $defaultFilters = array(
-	    	'subject_type' => $model,
-	    	'action'       => $action,
-	    	'role_id'      => $role_id,
-	    	'user_id'      => $user_id,
+	    	'subject_type' => $request->model,
+	    	'action'       => $request->action,
+	    	'role_id'      => $request->role_id,
+	    	'user_id'      => $request->user_id,
 	    );
 
 	    $chainFilters = array(
-	    	'year_id'       => $year_id,
-	    	'type_id'       => $type_id,
-	    	'level_id'      => $level_id,
-	    	'class_id'      => $class_id,
-	    	'segment_id'    => $segment_id,
-	    	'course_id'     => $course_id,
+	    	'year_id'       => $request->year_id,
+	    	'type_id'       => $request->type_id,
+	    	'level_id'      => $request->level_id,
+	    	'class_id'      => $request->class_id,
+	    	'segment_id'    => $request->segment_id,
+	    	'course_id'     => $request->course_id,
 	    );
 
 	    $defaultFilters = array_filter($defaultFilters);
@@ -70,47 +72,43 @@ class LogsFilterController extends Controller
 		        $end_date   = isset($request->end_date) ? $request->end_date  : date("Y-m-d H:i:s");
         // time end
 
-		 $first_hit      = 0;
+		 // $first_hit      = 0;
 		 $default_filter = 0;
+		 $chain_filter   = 0;
 
 		 // start default
-		if(count($defaultFilters) <= 0){
-        	$default_filter = 0;
-        }else{
+		if(count($defaultFilters) > 0){
         	$default_filter = 1;
         }
 		 // end default 
 
         // start chain
-		if(count($chainFilters) <= 0){
-        	$chain_filter = 0;
-        }else{
+		if(count($chainFilters) > 0){
         	$chain_filter = 1;
         }
 		 // end chain 
 
         // no time detected , no filter selected case
         if ( $default_filter == 0 && $chain_filter == 0 ) {
-        	  $first_hit   = 1;
+        	  //$first_hit   = 1;
         	  // get last 24 
 		    	if ($request->start_date  == null && $request->end_date == null) {
-		    		$whereStart  =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
-		            $whereEnd    =  date("Y-m-d H:i:s");
-		    	}else{
-		    		$whereStart = $start_date;
-			        $whereEnd   = $end_date;
+		    		$start_date  = $yesterday;
+		            $end_date    = $right_now;
 		    	}
-		    	$collection = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd);
+		    	$data = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $start_date, $end_date);
+		    	$collection = $data->paginate($pagination);
 		        LogsFilterResource::collection($collection);
 		    	return response()->json(['data' => $collection, 'status_code' => 200], 200);
         }
+
+        $common = AuditLog::whereNotIn('subject_type', $notNeeeded)
+		                  ->where('created_at', '>=', $start_date)
+		                  ->where('created_at', '<=', $end_date);
       
 	    ///// start case default filter 1
 	    if ($default_filter == 1) {
-		    $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
-		                            ->where('created_at', '>=', $start_date)
-		                            ->where('created_at', '<=', $end_date)
-		            ->Where(function($query) use ($defaultFilters)
+		    $data = $common->where(function($query) use ($defaultFilters)
 					{
 					    foreach($defaultFilters as $key => $value) 
 					    {
@@ -120,7 +118,7 @@ class LogsFilterController extends Controller
 
 				if ($chain_filter == 1) 
 			    {
-				    $data = $data->Where(function($query2) use ($chainFilters)
+				    $data = $data->where(function($query2) use ($chainFilters)
 							{
 							    foreach($chainFilters as $key2 => $value2) 
 							    {
@@ -132,10 +130,7 @@ class LogsFilterController extends Controller
 		else{
 			if ($chain_filter == 1) 
 			{
-				    $data = AuditLog::whereNotIn('subject_type', $notNeeeded)
-				                    ->where('created_at', '>=', $start_date)
-		                            ->where('created_at', '<=', $end_date)
-		                    ->Where(function($query2) use ($chainFilters)
+				    $data = $common->where(function($query2) use ($chainFilters)
 							{
 							    foreach($chainFilters as $key2 => $value2) 
 							    {
@@ -152,19 +147,6 @@ class LogsFilterController extends Controller
 	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
     }
 
-		public function checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd)
-		{
-			// return $whereEnd;
-			$chain_ids = AuditLog::whereNotIn('subject_type', $notNeeeded)
-			                        ->where('created_at', '>=', $whereStart)
-		                            ->where('created_at', '<=', $whereEnd)
-		                            ->where('year_id', 'like', "%{$currentYear}%")
-		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')
-		                            ->orderBy('id', 'DESC')
-		                            ->paginate($pagination);
-
-		    return $chain_ids;
-		}
     // export section
         /*if ($request->has('export') && $request->export == 1) {
             //return Excel::download(new AuditlogExport($data), 'auditlogs.xlsx');
