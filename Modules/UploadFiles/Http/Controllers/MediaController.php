@@ -403,11 +403,16 @@ class MediaController extends Controller
 
         $media_type = media::whereId($request->mediaId)->pluck('type')->first();
         $media_show = media::whereId($request->mediaId)->pluck('show')->first();
-        $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
-        $file->delete();
+
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
         $media->delete();
+        
+        $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
+        if ($file != null) {
+            $file->delete();
+        }
+
         Material::where('item_id',$request->mediaId)->where('type','media')->delete();
         $lesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($lesson->course_id);

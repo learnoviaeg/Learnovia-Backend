@@ -7,9 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\quiz_questions;
+use App\Traits\Auditable;
+use App\Lesson as Lessonmodel;
 
 class userQuiz extends Model
 {
+    use Auditable;
+    
     protected $fillable = [
         'quiz_lesson_id','user_id','status_id', 'status',
         'override','feedback','grade','attempt_index',
@@ -119,4 +123,48 @@ class userQuiz extends Model
             return round($value , 2);
         return $value;
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $QuizLesson   = QuizLesson::find($new->quiz_lesson_id);
+        $course_id[]  = Lessonmodel::where('id', $QuizLesson->lesson_id)->first()->course_id;
+        return $course_id;
+    }
+    // end function get name and value attribute
 }

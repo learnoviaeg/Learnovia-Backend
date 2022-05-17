@@ -194,10 +194,10 @@ class AuthController extends Controller
         $user->save();
         $request->user()->token()->revoke();
         //for log event
-        $logsbefore=Parents::where('parent_id',Auth::id())->get();
-        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        // $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200, [], __('messages.auth.logout'));
     }

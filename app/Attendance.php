@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Attendance extends Model
 {
+    use Auditable;
+
     protected $fillable = ['name','attendance_type','year_id', 'type_id', 'segment_id', 'level_id', 'course_id',
         'is_graded','grade_cat_id','start_date','end_date','min_grade','gradeToPass','max_grade', 'created_by', 'attendance_status'
     ];
@@ -54,4 +57,51 @@ class Attendance extends Model
     {
         return $this->belongsTo('App\AttendanceStatus', 'attendance_status', 'id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $year_id   = $new->year_id;
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $type_id   = $new->type_id;
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $level_id   = $new->level_id;
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $segment_id   = $new->segment_id;
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        $course_id   = $new->course_id;
+        return $course_id;
+    }
+    // end function get name and value attribute
 }

@@ -18,13 +18,13 @@ class LanguageController extends Controller
             'name' => 'required|string',
             'default' => 'boolean',
         ]);
-        if($request->default == 1 ){
-            //for log event
-            $logsbefore=Language::where('default' , '1')->get();
-            $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
-            if($returnValue > 0)
-                event(new MassLogsEvent($logsbefore,'updated'));
-        }
+        // if($request->default == 1 ){
+        //     //for log event
+        //     $logsbefore=Language::where('default' , '1')->get();
+        //     $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
+        //     if($returnValue > 0)
+        //         event(new MassLogsEvent($logsbefore,'updated'));
+        // }
         Language::create([
             'name' => $request->name,
             'default' => (isset($request->default) && $request->default == 1) ? 1 : 0,
@@ -43,13 +43,13 @@ class LanguageController extends Controller
         if(isset($request->default) && $request->default == 0 && $lang->default == 1)
             return HelperController::api_response_format(200, [] , 'This is the default language and cannot be toggled unless you choose a default one instead');
 
-        if($request->default == 1 && $lang->default != 1){
-            //for log event
-            $logsbefore=Language::where('default' , '1')->get();
-            $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
-            if($returnValue > 0)
-                event(new MassLogsEvent($logsbefore,'updated'));
-        }
+        // if($request->default == 1 && $lang->default != 1){
+        //     //for log event
+        //     $logsbefore=Language::where('default' , '1')->get();
+        //     $returnValue=Language::where('default' , '1')->update(['default'=> 0]);
+        //     if($returnValue > 0)
+        //         event(new MassLogsEvent($logsbefore,'updated'));
+        // }
         
         if(isset($request->name ))
             $lang->name = $request->name;
