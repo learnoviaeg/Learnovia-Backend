@@ -116,12 +116,12 @@ class AcademicYearController extends Controller
         //     return HelperController::api_response_format(400, [], __('messages.error.cannot_delete'));
         // }
         
-        //for log event
-        // $logsbefore=Enroll::where('year',$request->id)->get();
+        // for log event
+        $logsbefore=Enroll::where('year',$request->id)->get();
         
-        // $check=Enroll::where('year',$request->id)->update(["year"=>null]);
-        // if($check > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
+        $check=Enroll::where('year',$request->id)->update(["year"=>null]);
+        if($check > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         if ($year->delete()) {
             return HelperController::api_response_format(200, AcademicYear::get()->paginate(HelperController::GetPaginate($request)), __('messages.year.delete'));            
@@ -142,12 +142,12 @@ class AcademicYearController extends Controller
         else
             $year->update(['current' => 1]);
         
-        //for log event
-        // $logsbefore=AcademicYear::where('id', '!=', $request->id)->get();
+        // for log event
+        $logsbefore=AcademicYear::where('id', '!=', $request->id)->get();
 
         $all = AcademicYear::where('id', '!=', $request->id)->update(['current' => 0]);
-        // if($all > 0)
-        //     event(new MassLogsEvent($logsbefore,'updated'));
+        if($all > 0)
+            event(new MassLogsEvent($logsbefore,'updated'));
 
         return HelperController::api_response_format(200, $year , __('messages.success.toggle'));
     }
