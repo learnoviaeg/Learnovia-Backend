@@ -33,8 +33,8 @@ class PageServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         Page::observe(PageObserver::class);
-        // Page::observe(LogsObserver::class);
-        // PageLesson::observe(LogsObserver::class);
+        Page::observe(LogsObserver::class);
+        PageLesson::observe(LogsObserver::class);
         PageLesson::observe(PageLessonObserver::class);
     }
 
