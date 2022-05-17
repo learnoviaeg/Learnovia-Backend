@@ -559,6 +559,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('settings', SettingsController::class);
 
     Route::Resource('grade-category', GradeCategoriesController::class);
+    Route::Resource('grading-schema', GradingSchemaController::class);
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
     Route::get('grader-setup', 'GraderReportController@grade_setup');
