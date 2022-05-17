@@ -21,7 +21,6 @@ class LogsFilterController extends Controller
 {
 	public function checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd)
 		{
-			// return $whereEnd;
 			$data = AuditLog::whereNotIn('subject_type', $notNeeeded)
 			                        ->where('year_id', 'like', "%{$currentYear}%")
 			                        ->where('created_at', '>=', $whereStart)
