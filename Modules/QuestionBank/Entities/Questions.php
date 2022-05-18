@@ -94,42 +94,55 @@ class Questions extends Model
         // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $course_id    = $new->course_id;
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        $type_id      = Segment::where('id', $segment_id)->first()->academic_year_id;
+        return $year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $course_id    = $new->course_id;
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        $type_id      = Segment::where('id', $segment_id)->first()->academic_type_id;
+        return $type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        return null;
+        $course_id  = $new->course_id;
+        $level_id   = Course::where('id', $course_id)->first()->level_id;
+        return $level_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        return null;
+        $course_id = $new->course_id;
+        $classes   = Course::where('id', $course_id)->first()->classes;
+        return $classes;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        return null;
+        $course_id = $new->course_id;
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        return $segment_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        return null;
+        $course_id = $new->course_id;
+        return $course_id;
     }
     // end function get name and value attribute
 }
