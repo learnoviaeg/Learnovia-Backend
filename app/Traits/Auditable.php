@@ -94,6 +94,12 @@ trait Auditable
             elseif ($subject_model == 'Enroll') {
                 $item_name = $model->user->fullname;
                 $item_id   = $model->user->id;
+            }elseif ($subject_model == 'media') {
+                    if ($model->type == null) {
+                        $subject_model = 'link';
+                    }else{
+                        $subject_model = 'media';
+                    }
             }else{
                 $item_name = $model->name;
                 $item_id   = null;   
@@ -102,7 +108,7 @@ trait Auditable
                 AuditLog::create([
                 'action'       => $description,
                 'subject_id'   => $model->id ?? null,
-                'subject_type' => substr(get_class($model),strripos(get_class($model),'\\')+1),//get_class($model) ?? null,
+                'subject_type' => $subject_model,
                 'user_id'      => auth()->id() ?? null,
                 'role_id'      => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
                 'properties'   => $model ?? null,
