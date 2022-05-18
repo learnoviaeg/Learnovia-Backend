@@ -5,6 +5,8 @@ namespace Modules\QuestionBank\Entities;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Segment;
+use App\Course;
 
 class Questions extends Model
 {
