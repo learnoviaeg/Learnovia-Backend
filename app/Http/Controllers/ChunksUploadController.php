@@ -17,7 +17,6 @@ class ChunksUploadController extends Controller
     public function __construct(SettingsReposiotryInterface $setting)
     {
         $this->setting = $setting;
-        // $this->middleware('auth');
     }
 
     public function uploads(Request $request)
@@ -85,7 +84,7 @@ class ChunksUploadController extends Controller
             $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
             $ext = substr($extension,strrpos($extension,"/")+1);            
             Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name .'.'. $ext, $base64_encoded_string);
-            
+
             ///////////////////moving file to attachment table 
             if($uploaded_file->type == 'create_assignment' || $uploaded_file->type == 'submit_assignment' ){
                 $attachment = new attachment;
