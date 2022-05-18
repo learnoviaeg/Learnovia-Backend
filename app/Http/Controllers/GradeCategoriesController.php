@@ -275,6 +275,9 @@ class GradeCategoriesController extends Controller
         if(!isset($category->parent))
             return response()->json(['message' => __('messages.grade_category.reArrange'), 'body' => null ], 400);
 
+        if($request->grade_cat_id == $request->parent)
+            return response()->json(['message' => __('messages.grade_category.reArrange'), 'body' => null ], 400);
+
         $oldIndex=$category->index;
 
         if(isset($request->parent))
