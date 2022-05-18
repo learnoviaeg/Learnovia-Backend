@@ -45,7 +45,8 @@ class GradingSchemaController extends Controller
 
         $gradingSchemaService = new GradingSchemaService();
 
-        $results = $gradingSchemaService->importGradeSchema($gradingSchemaRequest['grade_categories'],$courses);
+        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
+        $results = $gradingSchemaService->importGradeSchema($gradingSchemaRequest['grade_categories'],$courses,null,true);
 
         dd($results);
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
