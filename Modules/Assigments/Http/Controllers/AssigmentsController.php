@@ -439,21 +439,22 @@ class AssigmentsController extends Controller
     public function submitAssigment(Request $request)
     {
         //to get the allowed extensions for submission
-        // $settings = $this->setting->get_value('submit_assignment_extensions');
+        $settings = $this->setting->get_value('submit_assignment_extensions');
 
         $rules = [
             'assignment_id' => 'required|exists:assignment_lessons,assignment_id',
             'lesson_id' => 'required|exists:assignment_lessons,lesson_id',
         ];
-        // $customMessages = [
-        //     'file.mimes' => __('messages.error.extension_not_supported')
-        // ];
 
-        // if ($request->hasFile('file')) {
-        //     $customMessages = [
-        //         'file.mimes' => $request->file->extension() . ' ' . __('messages.error.extension_not_supported')
-        //     ];
-        // }
+        $customMessages = [
+            'file.mimes' => __('messages.error.extension_not_supported')
+        ];
+
+        if ($request->hasFile('file')) {
+            $customMessages = [
+                'file.mimes' => $request->file->extension() . ' ' . __('messages.error.extension_not_supported')
+            ];
+        }
 
         $this->validate($request, $rules);
         $roles = Auth::user()->roles->pluck('name');
@@ -479,14 +480,14 @@ class AssigmentsController extends Controller
             2===================>can submit content or file
         */
 
-        if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) && (!isset($request->file)))) {
+        if ((($assilesson->allow_attachment == 2)) && ( (!isset($request->content)) && (!isset($request->file)) && (!isset($request->file_id)) )) {
             return HelperController::api_response_format(400, null, $message = __('messages.assignment.content_or_file'));
         }
-        if ((($assilesson->allow_attachment == 0)) && ((!isset($request->content)) || (isset($request->file)))) {
+        if ((($assilesson->allow_attachment == 0)) && ((!isset($request->content)) || ((isset($request->file) || (isset($request->file_id))) ))) {
             return HelperController::api_response_format(400, null, $message = __('messages.assignment.content_only'));
         }
 
-        if ((($assilesson->allow_attachment == 1)) && ((isset($request->content)) || (!isset($request->file)))) {
+        if ((($assilesson->allow_attachment == 1)) && ((isset($request->content)) || ((!isset($request->file) && (!isset($request->file_id)))))) {
             return HelperController::api_response_format(400, null, $message = __('messages.assignment.file_only'));
         }
         // if ((($assilesson->allow_attachment == 2)) && ((!isset($request->content)) || (!isset($request->file)))) { // both
@@ -522,6 +523,21 @@ class AssigmentsController extends Controller
         if ($request->filled('file_id')) {
             $userassigment->attachment_id =  $request->file_id;
         }
+
+
+        if ($request->hasFile('file')) {
+            $request->validate([
+                // 'file' => 'file|distinct|mimes:txt,pdf,docs,jpg,doc,docx,mp4,avi,flv,mpga,ogg,ogv,oga,jpg,jpeg,png,gif,mpeg,rtf,odt,TXT,xls,xlsx,ppt,pptx,zip,rar',
+                'file' => 'file|distinct|mimes:'.$settings,
+                ]);
+            if (isset($request->file_description)) {
+                $description = $request->file_description;
+            } else {
+                $description = Null;
+            }
+            $userassigment->attachment_id = attachment::upload_attachment($request->file, 'assigment', $description)->id;
+        }
+
         if($request->file == 'No_file')
             $userassigment->attachment_id=null;
 
