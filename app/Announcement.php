@@ -48,7 +48,8 @@ class Announcement extends Model
     public static function get_year_name($old, $new)
     {
         // comment
-        return null;
+        $year_id = $new->year_id;
+        return $year_id;
     }
     // end function get name and value attribute
 
@@ -56,7 +57,8 @@ class Announcement extends Model
     public static function get_type_name($old, $new)
     {
         // comment
-        return null;
+        $type_id = $new->type_id;
+        return $type_id;
     }
     // end function get name and value attribute
 
@@ -64,7 +66,8 @@ class Announcement extends Model
     public static function get_level_name($old, $new)
     {
         // comment
-        return null;
+        $level_id = $new->level_id;
+        return $level_id;
     }
     // end function get name and value attribute
 
@@ -72,7 +75,8 @@ class Announcement extends Model
     public static function get_class_name($old, $new)
     {
         // comment
-        return null;
+        $class_id = $new->class_id;
+        return $class_id;
     }
     // end function get name and value attribute
 
@@ -80,7 +84,8 @@ class Announcement extends Model
     public static function get_segment_name($old, $new)
     {
         // comment
-        return null;
+        $segment_id = $new->segment_id;
+        return $segment_id;
     }
     // end function get name and value attribute
 
@@ -88,7 +93,8 @@ class Announcement extends Model
     public static function get_course_name($old, $new)
     {
         // comment
-        return null;
+        $course_id = $new->course_id;
+        return $course_id;
     }
     // end function get name and value attribute
 
