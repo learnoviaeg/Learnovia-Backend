@@ -10,6 +10,7 @@ use DB;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
+use App\Enroll;
 
 class User extends Authenticatable
 {
@@ -214,30 +215,23 @@ class User extends Authenticatable
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $year_id = Enroll::where('user_id', $new->id)->groupBy('year')->pluck('year')->toArray();
+        return $year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $type_id = Enroll::where('user_id', $new->id)->groupBy('type')->pluck('type')->toArray();
+        return $type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $level_id = [intval($new['level'])];
-        }else{
-            if ($old['level'] == $new['level']) {
-                $level_id = [intval($new['level'])];
-            }else{
-                $level_id = [intval($old['level']), intval($new['level'])];
-            }
-        }
+        $level_id = Enroll::where('user_id', $new->id)->groupBy('level')->pluck('level')->toArray();
         return $level_id;
     }
     // end function get name and value attribute
@@ -245,16 +239,7 @@ class User extends Authenticatable
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        $old_count = count($old);
-        if ($old_count == 0) {
-            $class_id = [intval($new['class_id'])];
-        }else{
-            if ($old['class_id'] == $new['class_id']) {
-                $class_id = [intval($new['class_id'])];
-            }else{
-                $class_id = [intval($old['class_id']), intval($new['class_id'])];
-            }
-        }
+        $class_id = Enroll::where('user_id', $new->id)->groupBy('group')->pluck('group')->toArray();
         return $class_id;
     }
     // end function get name and value attribute
@@ -262,14 +247,16 @@ class User extends Authenticatable
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        return null;
+        $segment_id = Enroll::where('user_id', $new->id)->groupBy('segment')->pluck('segment')->toArray();
+        return $segment_id;
     }
     // end function get name and value attribute
 
     // start function get name and value attribute
     public static function get_course_name($old, $new)
     {
-        return null;
+        $course_id = Enroll::where('user_id', $new->id)->groupBy('course')->pluck('course')->toArray();
+        return $course_id;
     }
     // end function get name and value attribute
 }
