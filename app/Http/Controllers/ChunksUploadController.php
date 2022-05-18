@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\ChunkUploads;
 use Illuminate\Support\Facades\Storage;
 use App\attachment;
-// use File;
+use App\Repositories\SettingsReposiotryInterface;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 
@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ChunksUploadController extends Controller
 {
-    // public function __construct(SettingsReposiotryInterface $setting)
-    // {
-    //     $this->setting = $setting;
-    //     $this->middleware('auth');
-    // }
+    public function __construct(SettingsReposiotryInterface $setting)
+    {
+        $this->setting = $setting;
+        // $this->middleware('auth');
+    }
 
     public function uploads(Request $request)
     {
@@ -31,14 +31,37 @@ class ChunksUploadController extends Controller
             $request->validate([
                 //file name
                 'name' => 'required',
-                'type' => 'required|in:assignment,files,media',
-                // 'assignment_type' => 'required_if:type,==,assignment',
+                'type' => 'required|in:files,media,create_assignment,submit_assignment',
             ]);
-            $fileName = $request->name.uniqid();
 
+            ///extension validation
+            $extension = finfo_buffer(finfo_open(), base64_decode($request->content), FILEINFO_MIME_TYPE);
+            $ext = substr($extension,strrpos($extension,"/")+1);  
+
+            if($request->type == 'file')
+                $settings = $this->setting->get_value('upload_file_extensions');
+            if($request->type == 'media')
+                $settings = $this->setting->get_value('upload_media_extensions');
+            if($request->type == 'submit_assignment')
+                $settings = $this->setting->get_value('submit_assignment_extensions');
+            if($request->type == 'create_assignment')
+                $settings = $this->setting->get_value('create_assignment_extensions');
+
+            $input = new Request([
+                'extension' => $ext,
+            ]);
+            $rules= [
+                'extension' => 'required|in:'.$settings,
+            ];         
+            $customMessages = [
+                'extension' => $ext . ' ' . __('messages.error.extension_not_supported')
+            ];
+    
+            $this->validate($input, $rules,$customMessages);
+
+            $fileName = $request->name.uniqid();
             $uploaded_file  = ChunkUploads::create([
                 'name' => $fileName,
-                // 'data'=> $request->content,
                 'type' => $request->type,
             ]);
             //creating text file to save base64 chunks  
@@ -62,8 +85,9 @@ class ChunksUploadController extends Controller
             $extension = finfo_buffer(finfo_open(), $base64_encoded_string, FILEINFO_MIME_TYPE);
             $ext = substr($extension,strrpos($extension,"/")+1);            
             Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name .'.'. $ext, $base64_encoded_string);
+            
             ///////////////////moving file to attachment table 
-            if($uploaded_file->type == 'assignment'){
+            if($uploaded_file->type == 'create_assignment' || $uploaded_file->type == 'submit_assignment' ){
                 $attachment = new attachment;
                 $attachment->name = $uploaded_file->name.'.'. $ext;
                 $attachment->path = $uploaded_file->getOriginal('path').'.'. $ext;
