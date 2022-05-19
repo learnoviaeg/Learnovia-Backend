@@ -16,10 +16,11 @@ use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use App\Course;
 use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuizLesson extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
 
     protected $fillable = [
         'quiz_id',

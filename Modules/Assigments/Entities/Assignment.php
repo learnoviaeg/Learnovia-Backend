@@ -71,7 +71,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $year_id = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
             $segment_id = Course::where('id', $course_id)->first()->segment_id;
@@ -89,7 +89,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $type_id = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
             $segment_id = Course::where('id', $course_id)->first()->segment_id;
@@ -107,7 +107,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $level_id = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
             $level_id   = Course::where('id', $course_id)->first()->level_id;
@@ -123,7 +123,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $classes = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
             $classes    = Course::where('id', $course_id)->first()->classes;
@@ -139,7 +139,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $segment_id = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
             $segment_id = Course::where('id', $course_id)->first()->segment_id;
@@ -155,7 +155,7 @@ class assignment extends Model
         if ($old_count == 0) {
             $course_id = null;
         }else{
-            $lessons = AssignmentLesson::where('assignment_id', $new->id)->groupBy('lesson_id')
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
                                        ->pluck('lesson_id');
             $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
         }
