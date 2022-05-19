@@ -8,6 +8,8 @@ use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Course;
+use App\Segment;
 
 class quiz extends Model
 {
@@ -77,57 +79,99 @@ class quiz extends Model
       // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $year_id = null;
+        }else{
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
+            $segment    = Segment::where('id', $segment_id)->first();
+            $year_id    = $segment->academic_year_id;
+        }
+        return $year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $type_id = null;
+        }else{
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
+            $segment    = Segment::where('id', $segment_id)->first();
+            $type_id    = $segment->academic_type_id;
+        }
+        return $type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        return null;
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $level_id = null;
+        }else{
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $level_id   = Course::where('id', $course_id)->first()->level_id;
+        }
+        return $level_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        return null;
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $classes = null;
+        }else{
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $classes    = Course::where('id', $course_id)->first()->classes;
+        }
+        return $classes;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        return null;
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $segment_id = null;
+        }else{
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
+        }
+        return $segment_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        // get lessons sent with with create quiz request 
-        // get course id that thses lessons belongs to 
-        // these lessons is under one course 
-        // save this course into audit_log
-        /*$lessons_id   = QuizLesson::where('quiz_id', $new->id)->pluck('lesson_id');
-        if (count($lessons_id) <= 0) {
+        $old_count = count($old);
+        if ($old_count == 0) {
             $course_id = null;
         }else{
-            $course_id[]  = Lessonmodel::whereIn('id', $lessons_id)->first()->course_id;
-            $audit_log_quiz_course_id = AuditLog::where(['subject_type' => 'quiz', 'subject_id' => $new->id])->first();
-            $audit_log_quiz_course_id->update([
-                'course_id' => $course_id
-            ]);
+            $lessons = QuizLesson::withTrashed()->where('quiz_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
         }
-        return $course_id;*/
-        return null;
+        return $course_id;
     }
     // end function get name and value attribute
 }

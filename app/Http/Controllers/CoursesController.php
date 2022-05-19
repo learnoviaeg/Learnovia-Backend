@@ -156,7 +156,7 @@ class CoursesController extends Controller
                             if($request->shared_lesson == 1){
                                 $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
-                                    'index' => $i,
+                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                     'shared_lesson' => 1,
                                     'course_id' => $course->id,
                                     'shared_classes' => json_encode($chain['class']),
@@ -164,7 +164,7 @@ class CoursesController extends Controller
                             }else{
                                 $lesson=lesson::create([
                                     'name' => 'Lesson ' . $i,
-                                    'index' => $i,
+                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                     'shared_lesson' => 0,
                                     'course_id' => $course->id,
                                     'shared_classes' => json_encode([$class]),
@@ -172,10 +172,7 @@ class CoursesController extends Controller
                             }
                         }
                     }
-        ////rearranging lessons
-                    foreach(Lesson::where('course_id',$course->id)->cursor() as $key => $lesson){
-                        $lesson->update([ 'index' => $key+1 ]);;
-                    }
+
                     //Creating defult question category
                     $quest_cat = QuestionsCategory::firstOrCreate([
                         'name' => $course->name . ' Category',

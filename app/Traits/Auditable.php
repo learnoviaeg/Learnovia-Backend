@@ -87,6 +87,7 @@ trait Auditable
                     ]);
                 }
         }else{  // end to exclude refresh tokens of firebase*/
+            $notes = null;
             if ($subject_model == 'page' || $subject_model == 'Announcement') {
                 $item_name = $model->title;
                 $item_id = null;
@@ -94,6 +95,14 @@ trait Auditable
             elseif ($subject_model == 'Enroll') {
                 $item_name = $model->user->fullname;
                 $item_id   = $model->user->id;
+            }elseif ($subject_model == 'media') {
+                    $item_name = $model->name;
+                    $item_id   = null; 
+                    if ($model->type == null) {
+                        $notes = 'link';
+                    }else{
+                        $notes = 'media';
+                    }
             }else{
                 $item_name = $model->name;
                 $item_id   = null;   
@@ -102,7 +111,7 @@ trait Auditable
                 AuditLog::create([
                 'action'       => $description,
                 'subject_id'   => $model->id ?? null,
-                'subject_type' => substr(get_class($model),strripos(get_class($model),'\\')+1),//get_class($model) ?? null,
+                'subject_type' => $subject_model,
                 'user_id'      => auth()->id() ?? null,
                 'role_id'      => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
                 'properties'   => $model ?? null,
@@ -115,7 +124,7 @@ trait Auditable
                 'course_id'    => $model->get_course_name($model->getOriginal(), $model),
                 'before'       => $model->getOriginal(),
                 'created_at'   => $created_at,
-                'notes'        => null,
+                'notes'        => $notes,
                 'item_name'    => $item_name,
                 'item_id'      => $item_id,
                 'hole_description' => $hole_description,

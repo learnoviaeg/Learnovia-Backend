@@ -57,7 +57,8 @@ class AcademicYear extends Model
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $year_id = $new->id;
+        return $year_id;
     }
     // end function get name and value attribute
 

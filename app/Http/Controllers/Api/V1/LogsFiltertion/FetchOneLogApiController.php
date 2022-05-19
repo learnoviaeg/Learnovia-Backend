@@ -74,6 +74,8 @@ class FetchOneLogApiController extends Controller
               $headlines['item_id']     = $model::withTrashed()->where('id', $log->subject_id)->first()->user->id;    
             }elseif($log->subject_type == 'page'){
                  $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->title;
+            }elseif($log->subject_type == 'Attendance'){
+                 $headlines['item_name']   = \App\Attendance::withTrashed()->where('id', $log->subject_id)->first()->name;
             }else{
                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
             }
@@ -112,7 +114,8 @@ class FetchOneLogApiController extends Controller
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
             // model assignment cases
-            if ($log->subject_type == 'assignment') {
+            if ($log->subject_type == 'assignment') 
+            {
                  unset($get_diff_after['updated_at']);
                  if (isset($get_diff_after['content'])) {
                    $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
@@ -147,9 +150,11 @@ class FetchOneLogApiController extends Controller
             // quiz assignment cases
             if ($log->subject_type == 'quiz') {
                 // user id trace
-                 if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
-                  unset($get_diff_before['restricted']);
-                  unset($get_diff_after['restricted']);
+                if ( isset($get_diff_before['restricted']) && isset($get_diff_after['restricted']) ) {
+                    if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
+                      unset($get_diff_before['restricted']);
+                      unset($get_diff_after['restricted']);
+                    }
                 }
             }
 
