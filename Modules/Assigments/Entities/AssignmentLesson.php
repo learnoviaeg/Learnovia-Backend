@@ -12,10 +12,11 @@ use App\AuditLog;
 use App\Traits\Auditable;
 use App\Course;
 use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AssignmentLesson extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
 

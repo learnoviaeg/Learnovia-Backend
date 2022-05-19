@@ -87,6 +87,7 @@ trait Auditable
                     ]);
                 }
         }else{  // end to exclude refresh tokens of firebase*/
+            $notes = null;
             if ($subject_model == 'page' || $subject_model == 'Announcement') {
                 $item_name = $model->title;
                 $item_id = null;
@@ -95,10 +96,12 @@ trait Auditable
                 $item_name = $model->user->fullname;
                 $item_id   = $model->user->id;
             }elseif ($subject_model == 'media') {
+                    $item_name = $model->name;
+                    $item_id   = null; 
                     if ($model->type == null) {
-                        $subject_model = 'link';
+                        $notes = 'link';
                     }else{
-                        $subject_model = 'media';
+                        $notes = 'media';
                     }
             }else{
                 $item_name = $model->name;
@@ -121,7 +124,7 @@ trait Auditable
                 'course_id'    => $model->get_course_name($model->getOriginal(), $model),
                 'before'       => $model->getOriginal(),
                 'created_at'   => $created_at,
-                'notes'        => null,
+                'notes'        => $notes,
                 'item_name'    => $item_name,
                 'item_id'      => $item_id,
                 'hole_description' => $hole_description,

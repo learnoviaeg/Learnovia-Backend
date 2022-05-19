@@ -98,7 +98,7 @@ class Questions extends Model
     {
         $course_id    = $new->course_id;
         $segment_id   = Course::where('id', $course_id)->first()->segment_id;
-        $type_id      = Segment::where('id', $segment_id)->first()->academic_year_id;
+        $year_id      = Segment::where('id', $segment_id)->first()->academic_year_id;
         return $year_id;
     }
     // end function get name and value attribute
@@ -143,7 +143,7 @@ class Questions extends Model
     // start function get name and value f attribute
     public static function get_course_name($old, $new)
     {
-        $course_id = $new->course_id;
+        $course_id = intval($new->course_id);
         return $course_id;
     }
     // end function get name and value attribute

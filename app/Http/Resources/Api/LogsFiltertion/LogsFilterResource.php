@@ -17,7 +17,7 @@ class LogsFilterResource extends JsonResource
         return [
             'id'              => $this->id,
             'action'          => $this->action,
-            'subject_type'    => $this->subject_type,
+            'subject_type'    => $this->notes = "link" ? 'link' : $this->subject_type,
             'subject_id'      => $this->subject_id,
             'user_id'         => $this->user_id,
             'created_at'      => $this->created_at,
