@@ -452,6 +452,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'zoom/app','title' => 'Zoom App']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'zoom/browser','title' => 'Zoom Browser']);
 
         //Page permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/add', 'title' => 'add page']);
