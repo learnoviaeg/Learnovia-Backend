@@ -480,7 +480,9 @@ class ScriptsController extends Controller
 
     public function delete_duplicated_grades(Request $request)
     {
-
+        $request->validate([
+            'course_id'  => 'required|integer|exists:courses,id',
+        ]);
         $course = Course::select('id')->whereId($request->course_id)->first();
         foreach ($course->gradeCategory as $cats){
              $cats->userGrades()->whereNull('grade')->delete();
