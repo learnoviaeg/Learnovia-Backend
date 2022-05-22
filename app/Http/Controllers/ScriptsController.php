@@ -478,15 +478,14 @@ class ScriptsController extends Controller
         return 'Done';
     }
 
-    public function delete_wrong_course(Request $request)
+    public function delete_duplicated_grades(Request $request)
     {
-        $courses=Enroll::select('course','segment')->where('segment',$request->segment_id)->get();
-        foreach($courses as $course)
-        {
-            if(Course::find($course->course)->segment_id != $course->segment)
-                Enroll::where('course',$course->course)->where('segment',$request->segment_id)->delete();
-        }
 
+        $course = Course::select('id')->whereId($request->course_id)->first();
+        foreach ($course->gradeCategory as $cats){
+             $cats->userGrades()->whereNull('grade')->delete();
+        }
+        
         return 'Done';
     }
 }
