@@ -27,7 +27,7 @@ class LogsFilterController extends Controller
 			                        ->where('created_at', '>=', $whereStart)
 		                            ->where('created_at', '<=', $whereEnd)
 		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 
-		                            'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC');
+		                            'hole_description', 'item_name', 'item_id', 'notes')->orderBy('id', 'DESC');
 		        return $data;
 		}
 
@@ -141,7 +141,7 @@ class LogsFilterController extends Controller
 		}  // end else
 
 	    //$collection = $data->simplePaginate($pagination);
-	    $collection = $data->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id')->orderBy('id', 'DESC')->paginate($pagination);
+	    $collection = $data->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id', 'notes')->orderBy('id', 'DESC')->paginate($pagination);
 
 	    LogsFilterResource::collection($collection);
 	    return response()->json(['data' => $collection, 'status_code' => 200], 200);
