@@ -112,6 +112,20 @@ class FetchOneLogApiController extends Controller
           }
           // case updated subject is course
 
+          // case updated subject is Announcement
+          if ($log->subject_type == 'Announcement') {
+              $diff_after['created_by']  = $diff_after['created_by']['id']; 
+              $diff_after['topic']       = $diff_after['topic']['id']; 
+              $diff_after['attachment']  = $diff_after['attachment']['id']; 
+          }
+          // case updated subject is Announcement
+
+          // case updated subject is Announcement
+          if ($log->subject_type == 'Questions') {
+              $diff_after['content']  = json_encode($diff_after['content']);
+          }
+          // case updated subject is Announcement
+
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
@@ -130,6 +144,22 @@ class FetchOneLogApiController extends Controller
                   }
               }
                  // end handle user
+
+               // start handle announcement
+                if ($log->subject_type == 'Announcement') {
+                    if (!isset($get_diff_before['attachment']) && isset($get_diff_after['attachment']) && $get_diff_after['attachment'] != null) {
+                      $get_diff_before['attachment'] = null;
+                    }
+                }
+                 // end handle announcement
+
+                // start handle questions
+                if ($log->subject_type == 'Questions') {
+                    if (!isset($get_diff_before['count_quizzes']) && isset($get_diff_after['count_quizzes']) && $get_diff_after['count_quizzes'] == null) {
+                      unset($get_diff_after['count_quizzes']);
+                    }
+                }
+                 // end handle questions
 
             // model assignment cases
             if ($log->subject_type == 'assignment') 
