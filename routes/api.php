@@ -617,6 +617,10 @@ Route::group(['middleware' => ['auth:api']], function () {
         
        Route::get('logs/seed', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@seed_logs')
        ->name('seed_logs');
+
+       Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
+       Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
+
     });
     // added ahmed
 });

@@ -4,10 +4,11 @@ namespace Modules\QuestionBank\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class quiz_questions extends Model
 {
-    use Auditable;
+    use Auditable, SoftDeletes;
     
     protected $fillable = ['question_id','quiz_id','grade_details'];
     protected $hidden = [
