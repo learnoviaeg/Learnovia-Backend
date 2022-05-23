@@ -13,10 +13,7 @@ trait Auditable
         static::created(function (Model $model) {
             self::audit('created', $model);
         });
-
-        /*static::index(function (Model $model) {
-            self::audit('index', $model);
-        });*/
+    
 
         static::updated(function (Model $model) {
             self::audit('updated', $model);
@@ -33,6 +30,10 @@ trait Auditable
         $user_fullname = auth()->user()->fullname;
 
         $hole_description = 'Item in module ( '. $subject_model .' ) has been ( '. $description .' ) by ( '. $user_fullname. ' )';
+
+        $quiz_related = [
+                            'QuizLesson', 'quiz_questions', 
+                        ];
        
        // start to ensure order of course and enrolls
         if ($subject_model == 'Course') {
@@ -103,6 +104,9 @@ trait Auditable
                     }else{
                         $notes = 'media';
                     }
+            }elseif ( in_array($subject_model, $quiz_related) ) {
+                $item_name = 'quiz';
+                $item_id   = $model->quiz_id;
             }else{
                 $item_name = $model->name;
                 $item_id   = null;   
