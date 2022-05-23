@@ -115,6 +115,22 @@ class FetchOneLogApiController extends Controller
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
+            // start handle user
+              if ($log->subject_type == 'User') {
+                unset($get_diff_before['remember_token']);
+                unset($get_diff_before['chat_uid']);
+                unset($get_diff_before['refresh_chat_token']); 
+                unset($get_diff_after['lastaction']); 
+                unset($get_diff_after['fullname']); 
+                  foreach ($get_diff_before as $key => $value) {
+                    if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
+                      unset($get_diff_after[$key]);
+                      unset($get_diff_before[$key]);
+                    }
+                  }
+              }
+                 // end handle user
+
             // model assignment cases
             if ($log->subject_type == 'assignment') 
             {

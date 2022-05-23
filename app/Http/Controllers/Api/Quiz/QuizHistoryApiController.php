@@ -12,6 +12,7 @@ use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 
 class QuizHistoryApiController extends Controller
 {
+	// select all records related with quiz
     public function quiz_history($id)
     {
     	$pagination = isset($request->paginate) ? $request->paginate : 15;
@@ -35,6 +36,7 @@ class QuizHistoryApiController extends Controller
     	]);
     }
 
+    // view details of log 
     public function history_view_details(Auditlog $log)
     {
     	$data = $log->properties;
