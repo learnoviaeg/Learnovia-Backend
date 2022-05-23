@@ -112,7 +112,7 @@ class LogsFilterController extends Controller
 					{
 					    foreach($defaultFilters as $key => $value) 
 					    {
-					    	$query->where($key, $value);
+					    	$query->where($key, $value)->orWhere('item_name', $value);
 					    }
 					});
 

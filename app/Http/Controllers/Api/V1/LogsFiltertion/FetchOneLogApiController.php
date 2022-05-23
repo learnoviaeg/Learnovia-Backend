@@ -90,6 +90,8 @@ class FetchOneLogApiController extends Controller
               'shared_classes'     => '\App\Classes',
               'classes'            => '\App\Classes',
               'class_id'           => '\App\Classes',
+              'question_id'        => '\Modules\QuestionBank\Entities\Questions',
+              'quiz_id'            => 'Modules\QuestionBank\Entities\quiz',
             ];
 
     	if ($log->action == 'updated') {
@@ -255,19 +257,36 @@ class FetchOneLogApiController extends Controller
     	}else{
         // response case create || delete
            $only_one_data         = $data->toArray();
-            foreach ($only_one_data as $only_one_data_key => $only_one_data_value) {
-              if (array_key_exists($only_one_data_key, $foreign_keys)) {
-                if (!is_array($only_one_data_value)) {
-                  $only_one_data_value = [$only_one_data_value];
-                }
-                if ( array_key_exists($only_one_data_key, $foreign_keys) && $only_one_data_key == 'shared_classes' && $log->subject_type == 'Lesson' ) {
-                  $only_one_data_value = $log->class_id;
-                }
-                $new_name = __('ahmed.'.$only_one_data_key.'');
-                $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::whereIn('id', $only_one_data_value)
-                                                                      ->groupBy('name')->pluck('name');
-                unset($only_one_data[$only_one_data_key]);
-              }
+            foreach ($only_one_data as $only_one_data_key => $only_one_data_value) 
+            {
+                 // start first if
+                  if ( array_key_exists($only_one_data_key, $foreign_keys) && ($only_one_data_key == 'question_id' && $only_one_data_key == 'quiz_id') ) {
+                        if (!is_array($only_one_data_value)) {
+                          $only_one_data_value = [$only_one_data_value];
+                        }
+                        if ( array_key_exists($only_one_data_key, $foreign_keys) && $only_one_data_key == 'shared_classes' && $log->subject_type == 'Lesson' ) {
+                          $only_one_data_value = $log->class_id;
+                        }
+                      $new_name = __('ahmed.'.$only_one_data_key.'');
+                      $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::whereIn('id', $only_one_data_value)
+                                                                          ->groupBy('name')->pluck('name');
+                    unset($only_one_data[$only_one_data_key]);
+                  } // end first if
+                  
+                  if (array_key_exists($only_one_data_key, $foreign_keys) && ($only_one_data_key == 'question_id' || $only_one_data_key == 'quiz_id')) 
+                  {
+                      $new_name = __('ahmed.'.$only_one_data_key.'');
+
+                        if ($only_one_data_key == 'question_id') {
+                          $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::where('id', $only_one_data_value)->groupBy('text')->pluck('text');
+                        }
+                        if ($only_one_data_key == 'quiz_id') {
+                          $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::where('id', $only_one_data_value)->groupBy('name')->pluck('name');
+                        }
+
+                    unset($only_one_data[$only_one_data_key]);
+                  }
+
             } // end foreach
     		return response()->json([
           'headlines'      => $headlines, 
