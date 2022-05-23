@@ -302,6 +302,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/printAll-final', 'title' => 'print all final boys(mfisb)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/printAll-final', 'title' => 'print all final girls(mfisg)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/printAll', 'title' => 'print all boys','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/printAll-final', 'title' => 'print all final boys','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisb-final', 'title' => 'print all final boys','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/printAll', 'title' => 'print all girls','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/all', 'title' => 'print all haramain','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/all', 'title' => 'print all forsan','icon' => 'Report-Card','dashboard'=>1]);
@@ -452,6 +454,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/export','title' => 'Bigbluebutton Export Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/get-all','title' => 'Bigbluebutton Get All']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'bigbluebutton/session-moderator','title' => 'Bigbluebutton session moderator']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'zoom/app','title' => 'Zoom App']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'zoom/browser','title' => 'Zoom Browser']);
 
         //Page permessions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'page/add', 'title' => 'add page']);
