@@ -76,9 +76,12 @@ class FetchOneLogApiController extends Controller
                  $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->title;
             }elseif($log->subject_type == 'Attendance'){
                  $headlines['item_name']   = \App\Attendance::withTrashed()->where('id', $log->subject_id)->first()->name;
+            }elseif($log->subject_type == 'h5pLesson'){
+                 $headlines['item_name']   = \App\h5pLesson::withTrashed()->where('id', $log->subject_id)->first()->getNameAttribute();
             }else{
                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
             }
+
             // end item name
 
             $foreign_keys = [

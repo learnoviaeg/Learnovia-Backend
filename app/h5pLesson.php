@@ -16,6 +16,8 @@ class h5pLesson extends Model
     // log trait right here
       use Auditable, SoftDeletes;
 
+      public $table = 'h5p_lessons';
+
       protected $fillable = ['content_id',
         'lesson_id',
         'visible',
@@ -26,14 +28,7 @@ class h5pLesson extends Model
         'seen_number',
         'restricted'
     ];
-    protected $appends = ['user_seen_number'];
-
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-    ];
-
+    protected $appends = ['user_seen_number'];   
 
     public function getUserSeenNumberAttribute(){
 
@@ -49,7 +44,7 @@ class h5pLesson extends Model
     }
 
     public function getNameAttribute(){
-        return DB::table('h5p_contents')->whereId($this->content_id)->first()->title;
+        return DB::table('h5p_contents')->withTrashed()->whereId($this->content_id)->first()->title;
     }
 
     public function lesson()
