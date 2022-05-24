@@ -16,6 +16,25 @@ use App\Http\Requests\GradingSchemaRequest;
 class GradingSchemaController extends Controller
 {
 
+    /**
+     * list grading schema
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(){
+
+        return response()->json(['message' => __('messages.grade_schema.list'), 'body' => GradingSchema::get() ], 200);
+    }
+
+    public function show($id){
+        $gradingSchema = GradingSchema::with(['gradeCategoryParents'])->find($id);
+
+        if($gradingSchema)
+            return response()->json(['message' => __('messages.grade_schema.list'), 'body' => $gradingSchema ], 200);
+        else
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+
+    }
 
     /**
      * Create grading schema
@@ -27,6 +46,16 @@ class GradingSchemaController extends Controller
             'name'=>$gradingSchemaRequest->name
         ]);
 
+
+
+        $gradingSchemaService = new GradingSchemaService();
+
+        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
+
+        return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
+    }
+
+    public function applyGradingSchema(Request $gradingSchemaRequest){
         if(!empty($gradingSchemaRequest->courses)){
             $courses = Course::with('level')->whereIn('id',$gradingSchemaRequest->courses)->get();
         }
@@ -43,12 +72,14 @@ class GradingSchemaController extends Controller
             ]);
         }
 
-        $gradingSchemaService = new GradingSchemaService();
-
-        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
         $results = $gradingSchemaService->importGradeSchema($gradingSchemaRequest['grade_categories'],$courses,null,true);
+    }
 
-        dd($results);
-        return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
+    /**
+    * update grading schema
+    * @return \Illuminate\Http\Response
+    */
+    public function update(GradingSchemaRequest $gradingSchemaRequest){
+        
     }
 }

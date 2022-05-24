@@ -27,7 +27,7 @@ class RefreshGraderSetupListener
      */
     public function handle(GraderSetupEvent $event)
     {
-        if(is_array($event->grade_category->calculation_type)){    
+        if(is_array($event->grade_category->calculation_type)){
             foreach($event->grade_category->calculation_type as $calculation_type){
                 if($event->grade_category->instance_id === null)
                 {

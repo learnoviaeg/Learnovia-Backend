@@ -2,7 +2,7 @@
 
 // resources/lang/en/messages.php
 
-return [
+return [ 
     'error' => [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
@@ -349,6 +349,10 @@ return [
         'graded' => 'Graded',
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
+    ],
+    'grading_schema' => [
+        'add'    => 'Grading schema added successfully',
+        'list' => 'grading schema list'
     ],
     'grade_category' => [
         'add'    => 'Grade category added successfully',

@@ -52,6 +52,11 @@ class GradeCategory extends Model
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
     }
 
+    public function schemaCategory()
+    {
+        return $this->hasMany('App\GradeCategory', 'reference_category_id', 'id');
+    }
+
     public function userGrades()
     {
         return $this->hasMany('App\UserGrader', 'item_id', 'id')->where('item_type','category');

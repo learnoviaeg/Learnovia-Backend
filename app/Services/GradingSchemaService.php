@@ -8,6 +8,7 @@ use App\Course;
 use App\Level;
 use App\GradeCategory;
 use App\GradeItems;
+use App\Events\GraderSetupEvent;
 
 class GradingSchemaService {
 
@@ -34,6 +35,8 @@ class GradingSchemaService {
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                     'reference_category_id' => $this->categoriesData[$this->pointer] 
                 ]);
+                if($parent_id==null && isset($category['weight']) && isset($category['weight_adjust']) && $category['weight'] && $category['weight_adjust'])
+                   event(new GraderSetupEvent($cat));
                 $this->pointer++;
                 if(isset($category['grade_items']) && count($category['grade_items']) > 0){
                     foreach($category['grade_items'] as $item){
