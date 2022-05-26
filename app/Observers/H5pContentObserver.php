@@ -128,7 +128,7 @@ class H5pContentObserver
      * @param  \App\h5pLesson  $h5pLesson
      * @return void
      */
-    public function deleted(h5pLesson $h5pLesson)
+    public function deleted(H5pContent $h5pLesson)
     {
         $user_fullname = auth()->user()->fullname;
     	$action           = 'deleted';
