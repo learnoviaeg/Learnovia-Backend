@@ -13,15 +13,18 @@ use App\Events\GraderSetupEvent;
 class GradingSchemaService {
 
     private $categoriesData = [];
-    private $pointer = 0;
 
     public function importGradeSchema($data,$courses,$parent_id = null,$main_data = false){
         foreach($courses as $course){
             $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course->id)->first();
             foreach($data as $category){
-                $cat = GradeCategory::create([
+                $cat = GradeCategory::updateOrCreate(
+                    [
+                        'course_id' => $course->id,
+                        'reference_category_id' => $category['id']
+                    ]
+                    ,[
                     'name' => $category['name'],
-                    'course_id' => $course->id,
                     'parent' => $parent_id?$parent_id:$course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
                     'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
@@ -33,17 +36,18 @@ class GradingSchemaService {
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
                     'weights' =>isset($category['weight']) ? $category['weight'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
-                    'reference_category_id' => $this->categoriesData[$this->pointer] 
+                    
                 ]);
                 if($parent_id==null && isset($category['weight']) && isset($category['weight_adjust']) && $category['weight'] && $category['weight_adjust'])
                    event(new GraderSetupEvent($cat));
-                $this->pointer++;
-                if(isset($category['grade_items']) && count($category['grade_items']) > 0){
-                    foreach($category['grade_items'] as $item){
-                        $item = GradeCategory::create([
-                            "parent"=>$cat->id,
-                            "type" => "item",
+                if(isset($category['GradeItems']) && count($category['GradeItems']) > 0){
+                    foreach($category['GradeItems'] as $item){
+                        $item = GradeCategory::updateOrCreate([
                             'course_id' => $course->id,
+                            'reference_category_id' => $item['id']
+                        ],[
+                            "parent"=>$cat->id,
+                            "type" => $item['type'],
                             "locked"=> $item['locked'],
                             "hidden"=> $item['hidden'],
                             "weight_adjust"=> $item['weight_adjust'],
@@ -51,18 +55,15 @@ class GradingSchemaService {
                             "name"=> $item['name'],
                             "min"=>$item['min'],
                             "max"=> $item['max'],
-                            "aggregation"=> $item['aggregation'],
-                            'reference_category_id' => $this->categoriesData[$this->pointer]
+                            "aggregation"=> $item['aggregation']
                         ]);
-                        $this->pointer++;
                     }
                 }
 
-                if(isset($category['categories']) && count($category['categories']) > 0){
-                    Self::importGradeSchema($category['categories'],[$course],$cat->id);
+                if(isset($category['Children']) && count($category['Children']) > 0){
+                    Self::importGradeSchema($category['Children'],[$course],$cat->id);
                 }
             }
-            $this->pointer = 0;
         }
 
         return true;
