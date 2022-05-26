@@ -289,12 +289,23 @@ class UserController extends Controller
                 if($optional == 'nickname' && $request->$optional == 'null')
                     $user->$optional = null;
             }
-        }
-        $user->save();
+        } 
 
         // role is in all system
         $role = Role::find($request->role);
-        $user->assignRole($role);
+        
+        // added
+        if ([$request->role] != $user->roles->pluck('id')->toArray()) {
+            $user->role_id = $request->role;
+            $assignRoles = [$request->role];
+            DB::table('model_has_roles')->where('model_id',$user->id)->delete();
+            $user->assignRole($assignRoles); 
+        }
+        // added
+
+        $user->save();
+
+        // $user->assignRole($role);
         if($request->role ==1)
         {
             $request_user = new Request(['user_id' => $user->id]);
