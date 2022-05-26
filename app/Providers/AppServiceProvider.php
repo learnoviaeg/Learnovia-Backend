@@ -49,6 +49,9 @@ use App\Observers\SecodaryChainObserver;
 use App\Timeline;
 use App\Material;
 use DB;
+// added ahmed
+use Djoudi\LaravelH5p\Eloquents\H5pContent;
+use App\Observers\H5pContentObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -149,5 +152,9 @@ class AppServiceProvider extends ServiceProvider
         Material::observe(MaterialsObserver::class);
         UserSeen::observe(UserSeenObserver::class);
         h5pLesson::observe(H5pObserver::class);
+
+        // added ahmed
+        H5pContent::observe(H5pContentObserver::class);
+        h5pLesson::observe(H5pContentObserver::class);
     }
 }
