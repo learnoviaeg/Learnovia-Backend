@@ -155,6 +155,6 @@ class AppServiceProvider extends ServiceProvider
 
         // added ahmed
         H5pContent::observe(H5pContentObserver::class);
-        h5pLesson::observe(H5pContentObserver::class);
+       // h5pLesson::observe(H5pContentObserver::class);
     }
 }
