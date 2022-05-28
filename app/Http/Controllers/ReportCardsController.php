@@ -47,7 +47,7 @@ class ReportCardsController extends Controller
         }
 
         if($request->term == 'final'){
-            $allowed_levels=Permission::where('name','report_card/haramain/all-final')->pluck('allowed_levels')->first();
+            $allowed_levels=Permission::where('name','report_card/haramain/final')->pluck('allowed_levels')->first();
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {
                     $query->where('name', 'LIKE' , "%Second term%")
