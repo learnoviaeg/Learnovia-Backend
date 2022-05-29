@@ -11,6 +11,10 @@ class UserCourseItem extends Model
 
     protected $fillable = ['user_id', 'course_item_id', 'can_view'];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\CreateCourseItemEvent::class,
+    ];
+
     public function courseItem(){
         return $this->belongsTo('App\CourseItem', 'course_item_id', 'id');
     }

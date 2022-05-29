@@ -28,5 +28,10 @@ class BackendServiceProvider extends ServiceProvider
             'App\Repositories\SettingsReposiotryInterface',
             'App\Repositories\SettingsReposiotry'
         ); 
+
+        $this->app->bind(
+            'App\Repositories\NotificationRepoInterface',
+            'App\Repositories\NotificationRepo'
+        ); 
     }
 }

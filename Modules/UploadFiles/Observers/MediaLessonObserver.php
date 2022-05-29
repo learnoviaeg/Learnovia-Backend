@@ -7,12 +7,18 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 use App\SecondaryChain;
 use App\LessonComponent;
 use App\CourseItem;
 
 class MediaLessonObserver
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
     /**
      * Handle the media lesson "created" event.
      *
@@ -34,6 +40,7 @@ class MediaLessonObserver
                 'lesson_id' => $mediaLesson->lesson_id,
                 'type' => 'media',
                 'visible' => $mediaLesson->visible,
+                'restricted' => 0,
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);
@@ -51,6 +58,11 @@ class MediaLessonObserver
             {
                 $material->restricted=1;
                 $material->save();
+            }
+            if($courseItem == null)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
             }
         }
     }

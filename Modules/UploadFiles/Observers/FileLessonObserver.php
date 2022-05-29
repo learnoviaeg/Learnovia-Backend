@@ -7,12 +7,18 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 use App\CourseItem;
 use App\SecondaryChain;
 use App\LessonComponent;
 
 class FileLessonObserver
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
     /**
      * Handle the file lesson "created" event.
      *
@@ -33,6 +39,7 @@ class FileLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
+                'restricted' => 0,
                 'visible' => $fileLesson->visible,
                 'link' => $file->url,
                 'mime_type'=> $file->type,
@@ -52,6 +59,11 @@ class FileLessonObserver
             {
                 $material->restricted=1;
                 $material->save();
+            }
+            if($courseItem == null)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
             }
         }
     }

@@ -13,6 +13,7 @@ use App\Classes;
 use App\Paginate;
 use App\attachment;
 use App\CourseItem;
+use App\Repositories\NotificationRepoInterface;
 use App\Helpers\CoursesHelper;
 use Modules\Assigments\Entities\assignment;
 use DB;
@@ -28,9 +29,10 @@ class MaterialsController extends Controller
 {
     protected $chain;
 
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware(['permission:material/get','ParentCheck'],   ['only' => ['index' , 'getMaterials']]);
     }
 
@@ -395,8 +397,10 @@ class MaterialsController extends Controller
         ]);
 
         $material = Material::find($request->id);
-        if(isset($request->users_ids))
+        if(isset($request->users_ids)){
             Material::where('type',$material->type)->where('item_id',$material->item_id)->update(['restricted'=>1]);
+            $this->notification->sendNotify($request->users_ids,$material->name." ".$material->type.' is updated',$material->item_id,'notification',$material->type);    
+        }
 
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);
         return response()->json(['message' => 'Updated successfully'], 200);

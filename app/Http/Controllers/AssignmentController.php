@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\NotificationRepoInterface;
 use App\Lesson;
 use App\Timeline;
 use App\Level;
@@ -32,10 +33,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class AssignmentController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain,SettingsReposiotryInterface $setting)
+    public function __construct(ChainRepositoryInterface $chain,SettingsReposiotryInterface $setting,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
         $this->setting = $setting;
+        $this->notification = $notification;
 
         $this->middleware('auth');
         $this->middleware(['permission:assignment/get', 'ParentCheck'],   ['only' => ['index','show']]);
@@ -212,8 +214,12 @@ class AssignmentController extends Controller
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
             //sending notifications
-            $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
-            $notification->send();
+            // $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
+            // $notification->send();
+
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+            if(!isset($request->users_ids))
+                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is created',$assignment->id,'notification','assignment');
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
@@ -368,6 +374,7 @@ class AssignmentController extends Controller
                 $assigmentLesson->allow_attachment = $request->allow_attachment;
     
             $assigmentLesson->save();
+
             // $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
             // if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
             //     $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
@@ -500,6 +507,8 @@ class AssignmentController extends Controller
         $assignment->restricted=1;
         if(!isset($request->users_ids))
             $assignment->restricted=0;
+        else
+            $this->notification->sendNotify($request->users_ids,$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');            
         
         $assignment->save();
 
