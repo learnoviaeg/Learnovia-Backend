@@ -110,7 +110,7 @@ class H5pContentObserver
      * @param  \App\h5pLesson  $h5pLesson
      * @return void
      */
-    public function updated(h5pLesson $h5pLesson)
+    public function updated(H5pContent $h5pLesson)
     {
     	$user = User::find(Auth::id());
         $user_fullname = $user->fullname;
@@ -131,7 +131,7 @@ class H5pContentObserver
      * @param  \App\h5pLesson  $h5pLesson
      * @return void
      */
-    public function deleted(h5pLesson $h5pLesson)
+    public function deleted(H5pContent $h5pLesson)
     {
         $user = User::find(Auth::id());
         $user_fullname = $user->fullname;
