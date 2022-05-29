@@ -69,7 +69,7 @@ class FetchOneLogApiController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$log->subject_type;
             }
-            if ($log->subject_type == 'Enroll') {
+            /*if ($log->subject_type == 'Enroll') {
               $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->user->fullname; 
               $headlines['item_id']     = $model::withTrashed()->where('id', $log->subject_id)->first()->user->id;    
             }elseif($log->subject_type == 'page'){
@@ -80,7 +80,10 @@ class FetchOneLogApiController extends Controller
                  $headlines['item_name']   = \App\h5pLesson::withTrashed()->where('id', $log->subject_id)->first()->getNameAttribute();
             }else{
                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
-            }
+            }*/
+
+            $headlines['item_name']   = $log->item_name; 
+            $headlines['item_id']     = $log->item_id;
 
             // end item name
             // case h5pcontent should be handled but it is gonna be fetched from item_name
@@ -118,9 +121,15 @@ class FetchOneLogApiController extends Controller
 
           // case updated subject is Announcement
           if ($log->subject_type == 'Announcement') {
-              $diff_after['created_by']  = $diff_after['created_by']['id']; 
-              $diff_after['topic']       = $diff_after['topic']['id']; 
-              $diff_after['attachment']  = $diff_after['attachment']['id']; 
+              //$diff_after['created_by']  = $diff_after['created_by']['id']; 
+              //$diff_after['topic']       = $diff_after['topic']['id']; 
+              //$diff_after['attachment']  = $diff_after['attachment']['id']; 
+                unset($diff_after['attachment']);
+                unset($diff_after['topic']);
+                unset($diff_after['created_by']);
+                unset($diff_before['attachment']);
+                unset($diff_before['topic']);
+                unset($diff_before['created_by']);
           }
           // case updated subject is Announcement
 
