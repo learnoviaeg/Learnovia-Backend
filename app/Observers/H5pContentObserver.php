@@ -10,6 +10,7 @@ use App\Lesson as Lessonmodel;
 use App\Course;
 use App\Segment;
 use Auth;
+use App\User;
 
 class H5pContentObserver
 {
