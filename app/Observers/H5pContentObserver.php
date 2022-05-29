@@ -54,7 +54,7 @@ class H5pContentObserver
 
     public static function get_course_name($subject_id)
     {
-        $lesson_id  = 4;//h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
+        $lesson_id  = h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         return $course_id;
     }
