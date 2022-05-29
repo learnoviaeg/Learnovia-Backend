@@ -9,6 +9,8 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use App\Lesson as Lessonmodel;
 use App\Course;
 use App\Segment;
+use Auth;
+use App\User;
 
 class H5pContentObserver
 {
@@ -90,7 +92,8 @@ class H5pContentObserver
      */
     public function created(H5pContent $h5pLesson)
     {
-    	$user_fullname = auth()->user()->fullname;
+        $user = User::find(Auth::id());
+    	$user_fullname = $user->fullname;
     	$action           = 'created';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -110,7 +113,8 @@ class H5pContentObserver
      */
     public function updated(H5pContent $h5pLesson)
     {
-    	$user_fullname = auth()->user()->fullname;
+    	$user = User::find(Auth::id());
+        $user_fullname = $user->fullname;
     	$action           = 'updated';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -130,7 +134,8 @@ class H5pContentObserver
      */
     public function deleted(H5pContent $h5pLesson)
     {
-        $user_fullname = auth()->user()->fullname;
+        $user = User::find(Auth::id());
+        $user_fullname = $user->fullname;
     	$action           = 'deleted';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
