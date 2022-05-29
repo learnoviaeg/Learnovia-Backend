@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
+use GuzzleHttp\Client;
 use App\Classes;
 use App\Level;
 use App\Enroll;
@@ -129,14 +130,36 @@ class AuthController extends Controller
         $user->last_login = Carbon::now();
         $user->api_token = $tokenResult->accessToken;
         $user->save();
-       LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
-            'user_id' => $request->user()->id 
-            ,'name' => 'login'
-            ,'method'=>$request->route()->methods[0]
-            ,'uri' =>  $request->route()->uri
-            ,'resource' =>  $request->route()->action['controller']
-            ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
-            ]);
+
+        $fcm_tokens=[
+            'fcm_token' => $request->fcm_tokens[0],
+        ];
+        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+        $data=[
+            'user_id' => $user->id,
+            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            'school_domain'=>'test',
+            'fcm_tokens'=> array($fcm_tokens)
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/register', [
+            'headers'   => [
+                'username' => 'test',
+                'password' => 'api_test_5eOiG7CTC',
+            ], 
+            'form_params' => $data
+        ]);
+        // return $res;
+
+    //    LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
+    //         'user_id' => $request->user()->id 
+    //         ,'name' => 'login'
+    //         ,'method'=>$request->route()->methods[0]
+    //         ,'uri' =>  $request->route()->uri
+    //         ,'resource' =>  $request->route()->action['controller']
+    //         ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
+    //         ]);
+
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
