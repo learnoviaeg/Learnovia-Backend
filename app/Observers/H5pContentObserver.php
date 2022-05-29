@@ -91,9 +91,9 @@ class H5pContentObserver
      * @return void
      */
     public function created(H5pContent $h5pLesson)
-    {
+    {  
         $user_fullname = User::find(Auth::guard('api')->id());
-    	//$user_fullname = $user->fullname;
+    	//$user_fullname = $user->fullname;  
     	$action           = 'created';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -112,9 +112,9 @@ class H5pContentObserver
      * @return void
      */
     public function updated(H5pContent $h5pLesson)
-    {
-    	$user_fullname = User::find(Auth::guard('api')->id());
-        //$user_fullname = $user->fullname;
+    {  
+        $user_fullname = User::find(Auth::guard('api')->id());
+        //$user_fullname = $user->fullname;   
     	$action           = 'updated';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -133,9 +133,9 @@ class H5pContentObserver
      * @return void
      */
     public function deleted(H5pContent $h5pLesson)
-    {
+    {  
         $user_fullname = User::find(Auth::guard('api')->id());
-        // $user_fullname = $user->fullname;
+        // $user_fullname = $user->fullname;  
     	$action           = 'deleted';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
