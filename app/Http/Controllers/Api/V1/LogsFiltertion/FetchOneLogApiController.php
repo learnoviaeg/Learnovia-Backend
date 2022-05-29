@@ -76,9 +76,12 @@ class FetchOneLogApiController extends Controller
                  $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->title;
             }elseif($log->subject_type == 'Attendance'){
                  $headlines['item_name']   = \App\Attendance::withTrashed()->where('id', $log->subject_id)->first()->name;
+            }elseif($log->subject_type == 'h5pLesson'){
+                 $headlines['item_name']   = \App\h5pLesson::withTrashed()->where('id', $log->subject_id)->first()->getNameAttribute();
             }else{
                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
             }
+
             // end item name
 
             $foreign_keys = [
@@ -135,6 +138,7 @@ class FetchOneLogApiController extends Controller
                 unset($get_diff_before['chat_uid']);
                 unset($get_diff_before['refresh_chat_token']); 
                 unset($get_diff_after['lastaction']); 
+                unset($get_diff_after['roles']); 
                 unset($get_diff_after['fullname']); 
                   foreach ($get_diff_before as $key => $value) {
                     if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
