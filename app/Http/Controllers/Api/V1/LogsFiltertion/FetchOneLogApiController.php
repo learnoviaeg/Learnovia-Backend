@@ -83,6 +83,7 @@ class FetchOneLogApiController extends Controller
             }
 
             // end item name
+            // case h5pcontent should be handled but it is gonna be fetched from item_name
 
             $foreign_keys = [
               'type_id'            => '\App\AcademicType',

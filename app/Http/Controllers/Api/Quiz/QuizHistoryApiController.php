@@ -12,6 +12,14 @@ use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 
 class QuizHistoryApiController extends Controller
 {
+    public function testh()
+    {
+        //return $fff = DB::table('h5p_contents')->where('id', 18)->update(['title' => 'gggg']);
+        $fff = DB::table('h5p_lessons')->where('id', 31)->get();//(['visible' => 1]);
+        foreach ($fff as $key => $value) {
+           return $value->delete();// $value->delete();
+        }
+    }
 	// select all records related with quiz
     public function quiz_history($id)
     {

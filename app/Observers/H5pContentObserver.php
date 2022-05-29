@@ -9,6 +9,7 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use App\Lesson as Lessonmodel;
 use App\Course;
 use App\Segment;
+use Auth;
 
 class H5pContentObserver
 {
@@ -53,7 +54,7 @@ class H5pContentObserver
 
     public static function get_course_name($subject_id)
     {
-        $lesson_id  = h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
+        $lesson_id  = 4;//h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         return $course_id;
     }
@@ -90,7 +91,8 @@ class H5pContentObserver
      */
     public function created(H5pContent $h5pLesson)
     {
-    	$user_fullname = auth()->user()->fullname;
+        $user = User::find(Auth::id());
+    	$user_fullname = $user->fullname;
     	$action           = 'created';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -108,9 +110,10 @@ class H5pContentObserver
      * @param  \App\h5pLesson  $h5pLesson
      * @return void
      */
-    public function updated(H5pContent $h5pLesson)
+    public function updated(h5pLesson $h5pLesson)
     {
-    	$user_fullname = auth()->user()->fullname;
+    	$user = User::find(Auth::id());
+        $user_fullname = $user->fullname;
     	$action           = 'updated';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
@@ -128,9 +131,10 @@ class H5pContentObserver
      * @param  \App\h5pLesson  $h5pLesson
      * @return void
      */
-    public function deleted(H5pContent $h5pLesson)
+    public function deleted(h5pLesson $h5pLesson)
     {
-        $user_fullname = auth()->user()->fullname;
+        $user = User::find(Auth::id());
+        $user_fullname = $user->fullname;
     	$action           = 'deleted';
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
