@@ -83,14 +83,10 @@ class H5pContentObserver
                 'item_id'          => $item_id,
                 'hole_description' => $hole_description,
             ]);
-	}
-    /**
-     * Handle the h5p lesson "created" event.
-     *
-     * @param  \App\h5pLesson  $h5pLesson
-     * @return void
-     */
-    /*public function created(H5pContent $h5pLesson)
+	} 
+
+    /*
+    public function created(H5pContent $h5pLesson)  
     {  
         $user_fullname = User::find(Auth::guard('api')->id());
     	//$user_fullname = $user->fullname;  
@@ -105,6 +101,7 @@ class H5pContentObserver
     	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }*/
 
+    
     /**
      * Handle the h5p lesson "updated" event.
      *
@@ -125,14 +122,9 @@ class H5pContentObserver
     	$now    = $h5pLesson;
     	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
-
-    /**
-     * Handle the h5p lesson "deleted" event.
-     *
-     * @param  \App\h5pLesson  $h5pLesson
-     * @return void
-     */
-    /*public function deleted(H5pContent $h5pLesson)
+ 
+    
+    /*public function deleted(H5pContent $h5pLesson)  
     {  
         $user_fullname = User::find(Auth::guard('api')->id());
         // $user_fullname = $user->fullname;  
@@ -145,5 +137,7 @@ class H5pContentObserver
     	$before = $h5pLesson->getOriginal();
     	$now    = $h5pLesson;
     	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
-    }*/
+    }
+    */
+
 }
