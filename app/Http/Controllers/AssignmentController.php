@@ -387,6 +387,12 @@ class AssignmentController extends Controller
             //         $userassigment->save();
             //     }
             // }
+
+            if(!$assigmentLesson->restricted)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
+            }
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));

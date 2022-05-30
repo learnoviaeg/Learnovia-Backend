@@ -985,7 +985,7 @@ class UserController extends Controller
         }
 
         $fields = array_merge($fields, [ 'religion', 'created_at',
-        'class_id','level', 'type','second language','role','last_action'] );
+            'class_id','level', 'type','second language','role','last_action','profile_fields'] );
 
         $userIDs = self::list($request,1);
         if(isset($request->user_ids))

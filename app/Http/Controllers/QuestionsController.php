@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\SecondaryChain;
 use Illuminate\Http\Request;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsType;
+use App\Repositories\NotificationRepoInterface;
 use App\Repositories\ChainRepositoryInterface;
 use App\Notifications\QuizNotification;
 use App\Enroll;
@@ -21,9 +23,10 @@ use Carbon\Carbon;
 
 class QuestionsController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware('auth');
         // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
         // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
@@ -206,25 +209,26 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
-                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-                $notification->send();
+                // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
+                // $notification->send();
+                if(!$quiz->restricted)
+                {
+                    $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is created',$quiz->id,'notification','quiz');
+                }
             }
            
             //calculte time
             $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
-                
-            if($endDate < Carbon::today()){
+            if($endDate < Carbon::today())
                 $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
-            }
  
             $seconds = $endDate->diffInSeconds(Carbon::now());
 
-            if($seconds < 0) {
+            if($seconds < 0)
                 $seconds = 0 ;
-            }
 
             $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
-
             dispatch($job);
 
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));

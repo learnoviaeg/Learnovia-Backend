@@ -226,14 +226,6 @@ class QuizzesController extends Controller
                 'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
-
-            // //sending notifications
-            // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-            // $notification->send();
-
-            $users=SecondaryChain::select('user_id')->where('course_id',$request->course_id)->where('lesson_id',$lesson->id)->pluck('user_id');
-            if(!isset($request->users_ids))
-                $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is created',$quiz->id,'notification','quiz');
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -335,6 +327,13 @@ class QuizzesController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz->id));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
+
+            if(!$quiz->restricted)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                // dd($users);
+                $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
+            }
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }

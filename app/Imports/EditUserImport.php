@@ -17,7 +17,7 @@ class EditUserImport implements ToModel, WithHeadingRow
     {
         Validator::make($row,[
             // 'id' => 'required|exists:users,id',
-            'email' => 'unique:users,email,' . $row['username'],
+            'email' => 'unique:users,email,' . $row['email'],
             // 'class_id' => 'exists:classes,id',
             // 'level' => 'exists:levels,id',
             // 'type' => 'exists:academic_types,id',

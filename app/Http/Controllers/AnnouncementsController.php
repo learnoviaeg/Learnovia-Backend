@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Input;
+use App\Repositories\NotificationRepoInterface;
 
 class AnnouncementsController extends Controller
 {
@@ -25,9 +26,11 @@ class AnnouncementsController extends Controller
      *
      * @param ChainRepositoryInterface $post
      */
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
+
         $this->middleware('auth');
         $this->middleware(['permission:announcements/get'],   ['only' => ['index','show']]);
         $this->middleware(['permission:announcements/update'],   ['only' => ['update']]);
@@ -211,8 +214,10 @@ class AnnouncementsController extends Controller
             userAnnouncement::insert($data);
         
             //sending Notification
-            $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
-            $notification->send();
+            // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
+            // $notification->send();
+
+            $this->notification->sendNotify($users,$announcement->title.' announcement is created',$announcement->id,'announcement','announcement');
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);

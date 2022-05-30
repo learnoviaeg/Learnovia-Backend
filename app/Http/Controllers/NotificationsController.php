@@ -117,18 +117,43 @@ class NotificationsController extends Controller
         {
             $data['user_id']=$user;
             $data['school_domain']='test';
+            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             $us['users'][]=$data;
         }
 
-        $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications', [
-            'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
-            ], 
-            'form_params' => $us
-        ]);
-        return $res;
+        // $clientt = new Client();
+        // // return $us;
+        // $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications', [
+        //     'headers'   => [
+        //         'username' => 'test',
+        //         'password' => 'api_test_5eOiG7CTC',
+        //     ], 
+        //     "form_params" => $us
+        // ]);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>json_encode($us),
+        CURLOPT_HTTPHEADER => array(
+                'username: test',
+                'password: api_test_5eOiG7CTC',
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        return response()->json(json_decode($response));
     }
 
     /**
