@@ -7,10 +7,10 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use Djoudi\LaravelH5p\Events\H5pEvent;
 use Djoudi\LaravelH5p\LaravelH5p;
 use Djoudi\LaravelH5p\Exceptions\H5PException;
+use Auth;
 use H5pCore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use App\Helpers\CoursesHelper;
 
 class H5pController extends Controller

@@ -58,32 +58,7 @@ class H5pContentObserver
         $lesson_id  = h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         return $course_id;
-    }
-
-	public function common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description)
-	{
-		AuditLog::create([
-                'action'           => $action,
-                'subject_id'       => $subject_id,
-                'subject_type'     => 'H5pContent',
-                'user_id'          => $user_id,
-                'role_id'          => $roles,
-                'properties'       => $now,
-                'host'             => request()->ip() ?? null,
-                'year_id'          => Self::get_year_name($subject_id), 
-                'type_id'          => Self::get_type_name($subject_id), 
-                'level_id'         => Self::get_level_name($subject_id), 
-                'class_id'         => Self::get_class_name($subject_id), 
-                'segment_id'       => Self::get_segment_name($subject_id), 
-                'course_id'        => Self::get_course_name($subject_id), 
-                'before'           => $before,
-                'created_at'       => Carbon::now(),
-                'notes'            => null,
-                'item_name'        => $item_name,
-                'item_id'          => $item_id,
-                'hole_description' => $hole_description,
-            ]);
-	} 
+    }  
 
     /*
     public function created(H5pContent $h5pLesson)  
@@ -122,7 +97,28 @@ class H5pContentObserver
     	$item_name = $h5pLesson->title;
     	$before = $h5pLesson->getOriginal();
     	$now    = $h5pLesson;
-    	Self::common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
+        AuditLog::create([
+                'action'           => $action,
+                'subject_id'       => $subject_id,
+                'subject_type'     => 'H5pContent',
+                'user_id'          => $user_id,
+                'role_id'          => $roles,
+                'properties'       => $now,
+                'host'             => request()->ip() ?? null,
+                'year_id'          => Self::get_year_name($subject_id), 
+                'type_id'          => Self::get_type_name($subject_id), 
+                'level_id'         => Self::get_level_name($subject_id), 
+                'class_id'         => Self::get_class_name($subject_id), 
+                'segment_id'       => Self::get_segment_name($subject_id), 
+                'course_id'        => Self::get_course_name($subject_id), 
+                'before'           => $before,
+                'created_at'       => Carbon::now(),
+                'notes'            => null,
+                'item_name'        => $item_name,
+                'item_id'          => $item_id,
+                'hole_description' => $hole_description,
+            ]);
+    	// Self::common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
  
     
