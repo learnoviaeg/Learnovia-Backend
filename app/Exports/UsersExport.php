@@ -25,31 +25,15 @@ class UsersExport implements FromCollection, WithHeadings
         $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
 
         foreach ($users as $value) {
-
             $role_id = DB::table('model_has_roles')->where('model_id',$value->id)->pluck('role_id')->first();
             $role_name='';
             if(isset($role_id))
                 $role_name = DB::table('roles')->where('id',$role_id)->first()->name;
             $value['role'] = $role_name;
             $value['last_action'] = '_';
-
             $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
             if(isset($last))
                 $value['last_action'] = $last->date;
-
-                $value['profile_fields'] = '-';
-                // dd(array($value->profile_fields));
-                if(isset($value->profile_fields)){
-                    // foreach($value->profile_fields as $key=>$val){
-                    // // dd($val);
-                    //     $value[$key] = $val;
-                    //     dd($value[$key]);
-                    // }
-
-                $value['profile_fields'] = get_object_vars($value->profile_fields);
-
-                    
-                }
                 
             $value->setHidden([])->setVisible($this->fields);
         }
