@@ -15,9 +15,8 @@ class QuizHistoryApiController extends Controller
 {
     public function testh()
     {
-        return Auth::id();
         $target_content = H5pContent::where('id', 19)->first();
-        $target_content->update(['title' => 'tres']);
+        $target_content->update(['title' => 'qwevfd']);
         return 'bvc';
     }
 

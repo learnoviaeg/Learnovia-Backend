@@ -15,6 +15,11 @@ use App\Helpers\CoursesHelper;
 
 class H5pController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api')->only(['update']);
+    }
+
     public function index(Request $request)
     {
         $where = H5pContent::orderBy('h5p_contents.id', 'desc');
