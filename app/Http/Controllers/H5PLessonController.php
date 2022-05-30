@@ -194,7 +194,7 @@ class H5PLessonController extends Controller
     }
 
     public function edit(Request $request){
-        dd('here');
+        print_r('tete');
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
