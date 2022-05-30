@@ -99,6 +99,7 @@ class FetchOneLogApiController extends Controller
               'class_id'           => '\App\Classes',
               'question_id'        => '\Modules\QuestionBank\Entities\Questions',
               'quiz_id'            => 'Modules\QuestionBank\Entities\quiz',
+              'role_id'            => 'Spatie\Permission\Models\Role',
             ];
 
     	if ($log->action == 'updated') {
