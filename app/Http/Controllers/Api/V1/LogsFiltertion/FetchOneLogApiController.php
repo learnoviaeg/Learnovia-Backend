@@ -109,7 +109,9 @@ class FetchOneLogApiController extends Controller
           
           // case updated subject is lesson
           if ($log->subject_type == 'Lesson') {
-                $diff_after['shared_classes']  = implode(',', $log->class_id);
+                //$diff_after['shared_classes']  = implode(',', $log->class_id);
+                unset($diff_before['shared_classes']);
+                unset($diff_after['shared_classes']);
           }
           // case updated subject is lesson
 
@@ -242,13 +244,13 @@ class FetchOneLogApiController extends Controller
                 }
                
               // case lesson fetch classes  before
-              if ($log->subject_type == 'Lesson') {
+              /*if ($log->subject_type == 'Lesson') {
                  $diff_before['shared_classes'] = str_replace('["', '', $diff_before['shared_classes']);
                  $diff_before['shared_classes'] = str_replace('"]', '', $diff_before['shared_classes']);
                  $diff_before['shared_classes'] = str_replace('"', '', $diff_before['shared_classes']);
                  $lesson_old_classes = explode(',', $diff_before['shared_classes']);
                  $before_value = $lesson_old_classes;
-              }
+              }*/
                 // case lesson fetch classes before
                 
                 // case course fetch classes before
@@ -275,10 +277,10 @@ class FetchOneLogApiController extends Controller
                   $after_value = [$after_value];
                 }
                 // case lesson fetch classes  before
-              if ($log->subject_type == 'Lesson') {
+             /* if ($log->subject_type == 'Lesson') {
                  $lesson_new_classes = explode(',', $diff_after['shared_classes']);
                  $after_value = $lesson_new_classes;
-              }
+              }*/
                 // case lesson fetch classes before
 
               // case lesson fetch classes  before
