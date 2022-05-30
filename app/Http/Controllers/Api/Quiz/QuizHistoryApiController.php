@@ -13,6 +13,13 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 
 class QuizHistoryApiController extends Controller
 {
+    public function testh()
+    {
+        $target_content = H5pContent::where('id', 19)->first();
+        $target_content->update(['title' => 'bvgtrrr']);
+        return 'bvc';
+    }
+
 	// select all records related with quiz
     public function quiz_history($id)
     {
