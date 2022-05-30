@@ -60,14 +60,14 @@ class H5pContentObserver
         return $course_id;
     }
 
-	public function common($action, $user_id, $subject_id, $now, $before, $item_name, $item_id, $hole_description)
+	public function common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description)
 	{
 		AuditLog::create([
                 'action'           => $action,
                 'subject_id'       => $subject_id,
                 'subject_type'     => 'H5pContent',
                 'user_id'          => $user_id,
-                'role_id'          => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
+                'role_id'          => $roles,
                 'properties'       => $now,
                 'host'             => request()->ip() ?? null,
                 'year_id'          => Self::get_year_name($subject_id), 
@@ -114,6 +114,7 @@ class H5pContentObserver
         //$user_fullname = $user->fullname;   
     	$action           = 'updated';
         $user_id          = auth()->id() ?? null;
+        $roles = auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null;
     	$subject_id       = $h5pLesson->id;
     	$hole_description = 'Item in module H5pContent has been 
                 updated by ( '. $user_fullname. ' )';
@@ -121,7 +122,7 @@ class H5pContentObserver
     	$item_name = $h5pLesson->title;
     	$before = $h5pLesson->getOriginal();
     	$now    = $h5pLesson;
-    	Self::common($action, $user_id, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
+    	Self::common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
  
     
