@@ -193,8 +193,8 @@ class H5PLessonController extends Controller
         return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
     }
 
-    public function edit (Request $request){
-
+    public function edit(Request $request){
+        dd('here');
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
