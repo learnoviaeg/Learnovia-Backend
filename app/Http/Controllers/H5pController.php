@@ -289,7 +289,8 @@ class H5pController extends Controller
         }*/
 
         // start update action to serve logs 
-        $target_content = H5pContent::where('id', $id)->first();
+        $target_content     = H5pContent::where('id', $id)->first();
+        $request['user_id'] = Auth::id();
         $target_content->update($request->all());
         // end update action to serve logs 
 

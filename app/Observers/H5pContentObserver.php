@@ -85,8 +85,9 @@ class H5pContentObserver
      */
     public function updated(H5pContent $h5pLesson)
     {  
-        $user_fullname = User::find(Auth::guard('api')->id());
-        //$user_fullname = $user->fullname;   
+        $user = User::find(Auth::guard('api')->id());
+        $user_fullname = $user->fullname;   
+
     	$action           = 'updated';
         $user_id          = auth()->id() ?? null;
         $roles = auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null;

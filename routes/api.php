@@ -28,7 +28,14 @@ Route::get('h5p_protect', function(Request $request)
     $stream->start();
 
 })->name('h5p_protect');
-Route::resource('h5p', "H5pController");
+
+// added ahmed 
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::resource('h5p', "H5pController");
+    Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
+});
+// added ahmed
+
 Route::get('config', "AuthController@config");
 Route::group(['middleware' => ['auth:api','LastAction']], function () {
     //user main routes without permissions
@@ -619,11 +626,8 @@ Route::group(['middleware' => ['auth:api']], function () {
        ->name('seed_logs');
 
        Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
-       Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
+       Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');  
 
-    Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
-
-  
     });
     // added ahmed
 });
