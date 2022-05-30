@@ -204,6 +204,7 @@ class H5pController extends Controller
 
     public function update(Request $request, $id,$editting_done='true')
     {
+        dd($id);
         /*$h5p = App::make('LaravelH5p');
         $core = $h5p::$core;
         $editor = $h5p::$h5peditor;
