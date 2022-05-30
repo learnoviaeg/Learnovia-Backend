@@ -9,6 +9,7 @@ use DB;
 use App\AuditLog;
 use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
+use Djoudi\LaravelH5p\Eloquents\H5pContent;
 
 class QuizHistoryApiController extends Controller
 {
