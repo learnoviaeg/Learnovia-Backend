@@ -9,9 +9,17 @@ use DB;
 use App\AuditLog;
 use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
+use Djoudi\LaravelH5p\Eloquents\H5pContent;
 
 class QuizHistoryApiController extends Controller
 {
+    /*public function testh()
+    {
+       $g =  H5pContent::where('id', 19)->first();
+       $g->update(['title' => 'cfd']);
+       return 'vf';
+    }*/
+    
 	// select all records related with quiz
     public function quiz_history($id)
     {

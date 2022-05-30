@@ -153,6 +153,9 @@ class FetchOneLogApiController extends Controller
                 unset($get_diff_after['roles']); 
                 unset($get_diff_after['fullname']); 
                   foreach ($get_diff_before as $key => $value) {
+                    /*if( ($get_diff_before[$key] == null)  && !isset($get_diff_after[$key]) ){
+                      continue;
+                    }*/
                     if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
                       unset($get_diff_after[$key]);
                       unset($get_diff_before[$key]);
