@@ -288,6 +288,11 @@ class H5pController extends Controller
                 ->with('fail', trans('laravel-h5p.content.can_not_updated'));
         }*/
 
+        // start update action to serve logs 
+        $target_content = H5pContent::where('id', $id)->first();
+        $target_content->update($request->all());
+        // end update action to serve logs 
+
         $return_id = LaravelH5p::controllerUpdate($request, $this, $id);
         \Log::info('in update '.$editting_done);
         $editting_done = 'true';
