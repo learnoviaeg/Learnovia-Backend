@@ -27,6 +27,8 @@ use Carbon\Carbon;
 use App\SecondaryChain;
 use App\GradeCategory;
 use App\GradeItems;
+use App\CourseItem;
+use App\UserCourseItem;
 use App\Repositories\SettingsReposiotryInterface;
 use App\Events\GraderSetupEvent;
 use Illuminate\Database\Eloquent\Builder;
@@ -388,11 +390,12 @@ class AssignmentController extends Controller
             //     }
             // }
 
-            if(!$assigmentLesson->restricted)
-            {
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
-                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
-            }
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+
+            $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));

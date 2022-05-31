@@ -27,6 +27,7 @@ use Modules\Page\Entities\pageLesson;
 use App\Repositories\SettingsReposiotryInterface;
 use App\SecondaryChain;
 use App\Helpers\CoursesHelper;
+use App\Repositories\NotificationRepoInterface;
 use App\UserCourseItem;
 
 class MediaController extends Controller
@@ -38,9 +39,10 @@ class MediaController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
+    public function __construct(SettingsReposiotryInterface $setting, NotificationRepoInterface $notification)
     {
         $this->setting = $setting;
+        $this->notification = $notification;
     }
 
     public function getAllMedia(Request $request)
@@ -224,9 +226,10 @@ class MediaController extends Controller
                 $media->show = $request->show;
             $media->save();
 
+            //bra l foreach beta3et l lesson 3l4an tarteb l observers
             if(isset($request->users_ids))
                 CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
-
+            
             foreach ($request->lesson_id as $lesson) {
 
                 $tempLesson = Lesson::find($lesson);
@@ -241,6 +244,12 @@ class MediaController extends Controller
 
                 if ($request->type == 0) {
                     Storage::disk('public')->putFileAs('media/', $item, $name);
+                }
+
+                // dd($request->users_ids);
+                if(!isset($request->users_ids)){
+                    $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$media->name. ' media is created',$media->id,'notification','media');    
                 }
             }
         }
@@ -358,6 +367,15 @@ class MediaController extends Controller
         ]);
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
+
+        //send notification
+        $users=SecondaryChain::select('user_id')->whereIn('lesson_id',$request->lesson_id)->pluck('user_id');
+        $courseItem = CourseItem::where('item_id', $media->id)->where('type', 'media')->first();
+        if(isset($courseItem))
+            $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            // dd($users);
+        $this->notification->sendNotify($users->toArray(),$media->name. ' media is updated',$media->id,'notification','media');    
+        
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = $lesson->course_id;

@@ -280,6 +280,9 @@ class AnnouncementsController extends Controller
 
         $announcement->save();
 
+        $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
+        $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
+
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }
 

@@ -328,12 +328,13 @@ class QuizzesController extends Controller
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
 
-            if(!$quiz->restricted)
-            {
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
-                // dd($users);
-                $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
-            }
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            
+            $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
+            
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
@@ -569,7 +570,7 @@ class QuizzesController extends Controller
         if(!isset($request->users_ids))
             $quiz->restricted=0;
         else
-            return $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
+            $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);
