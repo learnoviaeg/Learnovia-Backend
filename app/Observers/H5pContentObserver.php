@@ -11,6 +11,7 @@ use App\Course;
 use App\Segment;
 use Auth;
 use App\User;
+use App\TempLog;
 
 class H5pContentObserver
 {
@@ -85,20 +86,21 @@ class H5pContentObserver
      */
     public function updated(H5pContent $h5pLesson)
     {  
-        $user          = User::find($h5pLesson->user_id);
-        $user_fullname = $user->fullname;   
+        // $user          = User::find($h5pLesson->user_id);
+        // $user_fullname = $user->fullname;   
 
     	$action           = 'updated';
-        $user_id          = $h5pLesson->user_id; // auth()->id() ?? null;
-        $roles            = $user->roles->pluck('id')->toArray();
+        $user_id          = null; //$h5pLesson->user_id; // auth()->id() ?? null;
+        $roles            = null; //$user->roles->pluck('id')->toArray();
     	$subject_id       = $h5pLesson->id;
-    	$hole_description = 'Item in module H5pContent has been 
-                updated by ( '. $user_fullname. ' )';
+    	$hole_description = null; 
+        /*'Item in module H5pContent has been 
+                updated by ( '. $user_fullname. ' )'; */
     	$item_id   = null;
     	$item_name = $h5pLesson->title;
     	$before = $h5pLesson->getOriginal();
     	$now    = $h5pLesson;
-        AuditLog::create([
+        TempLog::create([
                 'action'           => $action,
                 'subject_id'       => $subject_id,
                 'subject_type'     => 'H5pContent',
@@ -137,6 +139,5 @@ class H5pContentObserver
     	$now    = $h5pLesson;
     	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
-    */
-
+    */  
 }
