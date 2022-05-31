@@ -15,10 +15,10 @@ use App\Helpers\CoursesHelper;
 
 class H5pController extends Controller
 {
-    public function __construct()
+   /* public function __construct()
     {
         $this->middleware('auth:api')->only(['update']);
-    }
+    }*/
 
     public function index(Request $request)
     {
@@ -295,7 +295,8 @@ class H5pController extends Controller
 
         // start update action to serve logs 
         $target_content     = H5pContent::where('id', $id)->first();
-        $request['user_id'] = Auth::id();
+        $user_id            = $request->user('api')->id;
+        $request['user_id'] = $user_id;
         $target_content->update($request->all());
         // end update action to serve logs 
 

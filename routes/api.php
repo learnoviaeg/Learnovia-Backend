@@ -1,4 +1,7 @@
 <?php
+
+Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
+
 Route::get('/' , 'AuthController@site');
 Route::get('testNotification' , 'NotificationController@testNotification');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
@@ -620,9 +623,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
        Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
        Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
-
-    Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
-  
+   
     });
     // added ahmed
 });
