@@ -40,6 +40,7 @@ use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
 use App\Exports\ParentChildExport;
+use App\Exports\UserDetailsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
@@ -967,8 +968,9 @@ class UserController extends Controller
     public function export(Request $request)
     {
         $request->validate([
-            'user_ids' => 'array',
+            'user_ids'   => 'array',
             'user_ids.*' => 'exists:users,id',
+            'type'       =>  'nullable|details',
         ]);
 
         $fields = ['id', 'firstname', 'lastname'];
@@ -992,7 +994,12 @@ class UserController extends Controller
             $userIDs=$request->user_ids;
 
         $filename = uniqid();
-        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+
+        if($request->filled('type') && $request->type == 'details')
+            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+        else
+        $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
+
         $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }
