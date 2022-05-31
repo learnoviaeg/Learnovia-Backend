@@ -85,15 +85,14 @@ class H5pContentObserver
      * @return void
      */
     public function updated(H5pContent $h5pLesson)
-    {  
+    {    
         // $user          = User::find($h5pLesson->user_id);
-        // $user_fullname = $user->fullname;   
-
+        // $user_fullname = $user->fullname;     
     	$action           = 'updated';
         $user_id          = null; //$h5pLesson->user_id; // auth()->id() ?? null;
-        $roles            = null; //$user->roles->pluck('id')->toArray();
-    	$subject_id       = $h5pLesson->id;
-    	$hole_description = null; 
+        $roles            = null; //$user->roles->pluck('id')->toArray();  
+        $hole_description = null;   
+    	$subject_id       = $h5pLesson->id; 
         /*'Item in module H5pContent has been 
                 updated by ( '. $user_fullname. ' )'; */
     	$item_id   = null;

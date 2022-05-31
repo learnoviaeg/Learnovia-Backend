@@ -15,11 +15,11 @@ use App\TempLog;
 class QuizHistoryApiController extends Controller
 {
     public function testh(Request $request)
-    {
+    {  
        $fff = TempLog::first();
        $arr = $fff->toArray();
        Auditlog::firstOrCreate($arr);
-       return 'done';
+       return 'done';  
     }
 
 	// select all records related with quiz
