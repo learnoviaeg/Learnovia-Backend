@@ -147,6 +147,10 @@ class FetchOneLogApiController extends Controller
 
             // start handle user
               if ($log->subject_type == 'User') {
+                if ( (!isset($get_diff_before['real_password'])) && (!isset($get_diff_after['real_password'])) ) {
+                  unset($get_diff_before['password']);
+                  unset($get_diff_after['password']);
+                }
                 unset($get_diff_before['remember_token']);
                 unset($get_diff_before['chat_uid']);
                 unset($get_diff_before['refresh_chat_token']); 
