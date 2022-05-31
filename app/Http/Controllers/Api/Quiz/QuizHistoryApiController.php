@@ -10,22 +10,16 @@ use App\AuditLog;
 use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
+use App\TempLog;
 
 class QuizHistoryApiController extends Controller
 {
     public function testh(Request $request)
-    {
-       // return Auth::guard('api')->id();
-        if( empty($request->user('api')) ){
-            return 'no-token';
-        }else{
-            $user_id = $request->user('api')->username;
-            return $user_id;
-        }
-        return auth('api')->user();
-        $target_content = H5pContent::where('id', 19)->first();
-        $target_content->update(['title' => 'qwevfd']);
-        return 'bvc';
+    {  
+       $fff = TempLog::first();
+       $arr = $fff->toArray();
+       Auditlog::firstOrCreate($arr);
+       return 'done';  
     }
 
 	// select all records related with quiz
