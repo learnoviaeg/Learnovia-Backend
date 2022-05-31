@@ -295,7 +295,11 @@ class H5pController extends Controller
 
         // start update action to serve logs 
         $target_content     = H5pContent::where('id', $id)->first();
-        $user_id            = $request->user('api')->id;
+        if( empty($request->user('api')) ){
+            $user_id = 1;
+        }else{
+            $user_id = $request->user('api')->id;
+        }
         $request['user_id'] = $user_id;
         $target_content->update($request->all());
         // end update action to serve logs 
