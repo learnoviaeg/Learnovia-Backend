@@ -13,8 +13,11 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 
 class QuizHistoryApiController extends Controller
 {
-    public function testh()
+    public function testh(Request $request)
     {
+       // return Auth::guard('api')->id();
+        $user_id = $request->user('api')->id;
+        return auth('api')->user();
         $target_content = H5pContent::where('id', 19)->first();
         $target_content->update(['title' => 'qwevfd']);
         return 'bvc';
