@@ -16,7 +16,12 @@ class QuizHistoryApiController extends Controller
     public function testh(Request $request)
     {
        // return Auth::guard('api')->id();
-        $user_id = $request->user('api')->id;
+        if( empty($request->user('api')) ){
+            return 'no-token';
+        }else{
+            $user_id = $request->user('api')->username;
+            return $user_id;
+        }
         return auth('api')->user();
         $target_content = H5pContent::where('id', 19)->first();
         $target_content->update(['title' => 'qwevfd']);
