@@ -10,25 +10,26 @@ use App\AuditLog;
 use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
+use App\TempLog;
+use Modules\QuestionBank\Entities\QuizLesson;
 
-class QuizHistoryApiController extends Controller
-{
-    public function testh(Request $request)
+class QuizHistoryApiController extends Controller  
+{        
+    public function testh()
     {
-       // return Auth::guard('api')->id();
-        if( empty($request->user('api')) ){
-            return 'no-token';
-        }else{
-            $user_id = $request->user('api')->username;
-            return $user_id;
+        $quizlesson = QuizLesson::where('quiz_id', 17)->get();
+        //if( count($quizlesson) >= 0)
+        if(!isset($quizlesson))
+        {
+            //$targetQuiz = Quiz::where('id',$id)->first();
+            return 'zero';
+            $targetQuiz->delete();
         }
-        return auth('api')->user();
-        $target_content = H5pContent::where('id', 19)->first();
-        $target_content->update(['title' => 'qwevfd']);
-        return 'bvc';
+        else{
+            return 'count';
+        }
     }
-
-	// select all records related with quiz
+	// select all records related with quiz   
     public function quiz_history($id)
     {
     	$pagination = isset($request->paginate) ? $request->paginate : 15;
@@ -81,4 +82,6 @@ class QuizHistoryApiController extends Controller
     		'status_code'  => 200,
     	]);
     }
+
 }
+
