@@ -11,9 +11,24 @@ use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use App\TempLog;
+use Modules\QuestionBank\Entities\QuizLesson;
 
 class QuizHistoryApiController extends Controller  
 {        
+    public function testh()
+    {
+        $quizlesson = QuizLesson::where('quiz_id', 17)->get();
+        //if( count($quizlesson) >= 0)
+        if(!isset($quizlesson))
+        {
+            //$targetQuiz = Quiz::where('id',$id)->first();
+            return 'zero';
+            $targetQuiz->delete();
+        }
+        else{
+            return 'count';
+        }
+    }
 	// select all records related with quiz   
     public function quiz_history($id)
     {
