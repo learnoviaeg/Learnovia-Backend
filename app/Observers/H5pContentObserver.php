@@ -11,6 +11,7 @@ use App\Course;
 use App\Segment;
 use Auth;
 use App\User;
+use App\TempLog;
 
 class H5pContentObserver
 {
@@ -58,16 +59,52 @@ class H5pContentObserver
         $lesson_id  = h5pLesson::where('content_id', $subject_id)->first()->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         return $course_id;
-    }
+    }  
 
-	public function common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description)
-	{
-		AuditLog::create([
+    /*
+    public function created(H5pContent $h5pLesson)  
+    {  
+        $user_fullname = User::find(Auth::guard('api')->id());
+    	//$user_fullname = $user->fullname;  
+    	$action           = 'created';
+    	$subject_id       = $h5pLesson->id;
+    	$hole_description = 'Item in module H5pContent has been 
+                created by ( '. $user_fullname. ' )';
+    	$item_id   = null;
+    	$item_name = $h5pLesson->title;
+    	$before = $h5pLesson->getOriginal();
+    	$now    = $h5pLesson;
+    	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
+    }*/
+
+    
+    /**
+     * Handle the h5p lesson "updated" event.
+     *
+     * @param  \App\h5pLesson  $h5pLesson
+     * @return void
+     */
+    public function updated(H5pContent $h5pLesson)
+    {    
+        // $user          = User::find($h5pLesson->user_id);
+        // $user_fullname = $user->fullname;     
+    	$action           = 'updated';
+        $user_id          = null; //$h5pLesson->user_id; // auth()->id() ?? null;
+        $roles            = null; //$user->roles->pluck('id')->toArray();  
+        $hole_description = null;   
+    	$subject_id       = $h5pLesson->id; 
+        /*'Item in module H5pContent has been 
+                updated by ( '. $user_fullname. ' )'; */
+    	$item_id   = null;
+    	$item_name = $h5pLesson->title;
+    	$before = $h5pLesson->getOriginal();
+    	$now    = $h5pLesson;
+        TempLog::create([
                 'action'           => $action,
                 'subject_id'       => $subject_id,
                 'subject_type'     => 'H5pContent',
-                'user_id'          => auth()->id() ?? null,
-                'role_id'          => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
+                'user_id'          => $user_id,
+                'role_id'          => $roles,
                 'properties'       => $now,
                 'host'             => request()->ip() ?? null,
                 'year_id'          => Self::get_year_name($subject_id), 
@@ -83,56 +120,11 @@ class H5pContentObserver
                 'item_id'          => $item_id,
                 'hole_description' => $hole_description,
             ]);
-	}
-    /**
-     * Handle the h5p lesson "created" event.
-     *
-     * @param  \App\h5pLesson  $h5pLesson
-     * @return void
-     */
-    public function created(H5pContent $h5pLesson)
-    {  
-        $user_fullname = User::find(Auth::guard('api')->id());
-    	//$user_fullname = $user->fullname;  
-    	$action           = 'created';
-    	$subject_id       = $h5pLesson->id;
-    	$hole_description = 'Item in module H5pContent has been 
-                created by ( '. $user_fullname. ' )';
-    	$item_id   = null;
-    	$item_name = $h5pLesson->title;
-    	$before = $h5pLesson->getOriginal();
-    	$now    = $h5pLesson;
-    	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
+    	// Self::common($action, $user_id, $roles, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
-
-    /**
-     * Handle the h5p lesson "updated" event.
-     *
-     * @param  \App\h5pLesson  $h5pLesson
-     * @return void
-     */
-    public function updated(H5pContent $h5pLesson)
-    {  
-        $user_fullname = User::find(Auth::guard('api')->id());
-        //$user_fullname = $user->fullname;   
-    	$action           = 'updated';
-    	$subject_id       = $h5pLesson->id;
-    	$hole_description = 'Item in module H5pContent has been 
-                updated by ( '. $user_fullname. ' )';
-    	$item_id   = null;
-    	$item_name = $h5pLesson->title;
-    	$before = $h5pLesson->getOriginal();
-    	$now    = $h5pLesson;
-    	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
-    }
-
-    /**
-     * Handle the h5p lesson "deleted" event.
-     *
-     * @param  \App\h5pLesson  $h5pLesson
-     * @return void
-     */
-    public function deleted(H5pContent $h5pLesson)
+ 
+    
+    /*public function deleted(H5pContent $h5pLesson)  
     {  
         $user_fullname = User::find(Auth::guard('api')->id());
         // $user_fullname = $user->fullname;  
@@ -146,4 +138,5 @@ class H5pContentObserver
     	$now    = $h5pLesson;
     	Self::common($action, $subject_id, $now, $before, $item_name, $item_id, $hole_description);
     }
+    */  
 }

@@ -99,6 +99,7 @@ class FetchOneLogApiController extends Controller
               'class_id'           => '\App\Classes',
               'question_id'        => '\Modules\QuestionBank\Entities\Questions',
               'quiz_id'            => 'Modules\QuestionBank\Entities\quiz',
+              'role_id'            => 'Spatie\Permission\Models\Role',
             ];
 
     	if ($log->action == 'updated') {
@@ -110,6 +111,8 @@ class FetchOneLogApiController extends Controller
           // case updated subject is lesson
           if ($log->subject_type == 'Lesson') {
                 $diff_after['shared_classes']  = implode(',', $log->class_id);
+                //unset($diff_before['shared_classes']);
+                //unset($diff_after['shared_classes']);
           }
           // case updated subject is lesson
 
@@ -144,6 +147,10 @@ class FetchOneLogApiController extends Controller
 
             // start handle user
               if ($log->subject_type == 'User') {
+                if ( (!isset($get_diff_before['real_password'])) && (!isset($get_diff_after['real_password'])) ) {
+                  unset($get_diff_before['password']);
+                  unset($get_diff_after['password']);
+                }
                 unset($get_diff_before['remember_token']);
                 unset($get_diff_before['chat_uid']);
                 unset($get_diff_before['refresh_chat_token']); 
@@ -151,6 +158,9 @@ class FetchOneLogApiController extends Controller
                 unset($get_diff_after['roles']); 
                 unset($get_diff_after['fullname']); 
                   foreach ($get_diff_before as $key => $value) {
+                    /*if( ($get_diff_before[$key] == null)  && !isset($get_diff_after[$key]) ){
+                      continue;
+                    }*/
                     if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
                       unset($get_diff_after[$key]);
                       unset($get_diff_before[$key]);
@@ -275,9 +285,10 @@ class FetchOneLogApiController extends Controller
                   $after_value = [$after_value];
                 }
                 // case lesson fetch classes  before
-              if ($log->subject_type == 'Lesson') {
+             if ($log->subject_type == 'Lesson') {
                  $lesson_new_classes = explode(',', $diff_after['shared_classes']);
-                 $after_value = $lesson_new_classes;
+                 $after_value        = $lesson_new_classes;
+                 $before_value       = explode(',', $diff_before['shared_classes']);
               }
                 // case lesson fetch classes before
 
@@ -288,12 +299,31 @@ class FetchOneLogApiController extends Controller
               }
                 // case lesson fetch classes before
 
-                $new_name = __('ahmed.'.$after_key.'');
-                $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
-                                                                      ->groupBy('name')->pluck('name');
-                unset($get_diff_after[$after_key]);
+                    $new_name = __('ahmed.'.$after_key.'');
+                    $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                    unset($get_diff_after[$after_key]);
 
-              }
+                    // exclude classes if it is same
+                    if ($log->subject_type == 'Lesson') {
+                          if ($after_value != $before_value) {
+                            $new_name = __('ahmed.'.$after_key.'');
+                            $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                            unset($get_diff_after[$after_key]);
+                          }else{
+                            //return 'nn';
+                            unset($get_diff_after['Classes']);
+                            unset($get_diff_before['Classes']);
+                          }
+                    }else{  // exclude classes if it is same
+                      $new_name = __('ahmed.'.$after_key.'');
+                      $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                      unset($get_diff_after[$after_key]);
+                    }
+
+              } // end key exists
             } // end foreach
 
             unset($get_diff_before['created_at']);

@@ -9,9 +9,19 @@ use DB;
 use App\AuditLog;
 use Modules\QuestionBank\Entities\quiz;
 use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
+use Djoudi\LaravelH5p\Eloquents\H5pContent;
+use App\TempLog;
 
 class QuizHistoryApiController extends Controller
 {
+    public function testh(Request $request)
+    {  
+       $fff = TempLog::first();
+       $arr = $fff->toArray();
+       Auditlog::firstOrCreate($arr);
+       return 'done';  
+    }
+
 	// select all records related with quiz
     public function quiz_history($id)
     {

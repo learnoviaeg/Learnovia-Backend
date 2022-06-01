@@ -55,7 +55,7 @@ trait Auditable
                             'firstname', 'email', 'password', 'real_password', 'lastname', 'username', 'suspend', 
                             'class_id','picture', 'level', 'type', 'arabicname', 'country', 'birthdate', 'gender', 
                             'phone', 'address', 'nationality', 'notes', 'language', 'timezone', 'religion', 'second language', 
-                            'profile_fields', 'nickname', 'token', 'last_login', 'api_token'
+                            'profile_fields', 'nickname'
                         ];
 
             $arrayKeys       = array_keys($get_diff_before);
