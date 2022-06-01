@@ -226,20 +226,24 @@ class H5PLessonController extends Controller
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
         // $content->pivot = [
-        //     'lesson_id' =>  $h5pLesson->lesson_id,
-        //     'content_id' =>  $h5pLesson->content_id,
-        //     'publish_date' => $h5pLesson->publish_date,
-        //     'created_at' =>  $h5pLesson->created_at,
+        //     'lesson_id'     =>  $h5pLesson->lesson_id,
+        //     'content_id'    =>  $h5pLesson->content_id,
+        //     'publish_date'  => $h5pLesson->publish_date,
+        //     'created_at'    =>  $h5pLesson->created_at,
         // ];
 
         $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();
-            $temp_log->user_id = $request->user('api')->id;
-            $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
-            $temp_log->hole_description = 'Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
+        $temp_log->user_id = $request->user('api')->id;
+        $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
+        $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
         $temp_log->save();
         
         $arr = $temp_log->toArray();
-        Auditlog::firstOrCreate($arr); 
+        $result = Auditlog::firstOrCreate($arr);
+        if ($result) {
+            $temp_log->delete();
+        }
+
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
