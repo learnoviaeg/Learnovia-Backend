@@ -12,9 +12,9 @@ use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use App\TempLog;
 
-class QuizHistoryApiController extends Controller
-{   
-    // select all records related with quiz
+class QuizHistoryApiController extends Controller  
+{        
+	// select all records related with quiz   
     public function quiz_history($id)
     {
     	$pagination = isset($request->paginate) ? $request->paginate : 15;
@@ -67,4 +67,6 @@ class QuizHistoryApiController extends Controller
     		'status_code'  => 200,
     	]);
     }
+
 }
+

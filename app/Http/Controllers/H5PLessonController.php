@@ -232,7 +232,8 @@ class H5PLessonController extends Controller
         //     'created_at'    =>  $h5pLesson->created_at,
         // ];
 
-        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();
+        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();  
+        // update some data
         $temp_log->user_id = $request->user('api')->id;
         $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
         $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
@@ -242,8 +243,8 @@ class H5PLessonController extends Controller
         $result = Auditlog::firstOrCreate($arr);
         if ($result) {
             $temp_log->delete();
-        }
-
+        }    
+        
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
