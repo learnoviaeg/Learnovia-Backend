@@ -368,13 +368,13 @@ class MediaController extends Controller
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
 
-        //send notification
-        $users=SecondaryChain::select('user_id')->whereIn('lesson_id',$request->lesson_id)->pluck('user_id');
-        $courseItem = CourseItem::where('item_id', $media->id)->where('type', 'media')->first();
-        if(isset($courseItem))
-            $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
-            // dd($users);
-        $this->notification->sendNotify($users->toArray(),$media->name. ' media is updated',$media->id,'notification','media');    
+        // //send notification
+        // $users=SecondaryChain::select('user_id')->whereIn('lesson_id',$request->lesson_id)->pluck('user_id');
+        // $courseItem = CourseItem::where('item_id', $media->id)->where('type', 'media')->first();
+        // if(isset($courseItem))
+        //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+        //     // dd($users);
+        // $this->notification->sendNotify($users->toArray(),$media->name. ' media is updated',$media->id,'notification','media');    
         
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);

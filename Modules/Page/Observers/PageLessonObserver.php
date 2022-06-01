@@ -39,7 +39,7 @@ class PageLessonObserver
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
-                'retricted' => 0,
+                'restricted' => 0,
                 // added ahmed
                 'link'        => 'no-url',
                 'mime_type'   => 'no-mime-type',
