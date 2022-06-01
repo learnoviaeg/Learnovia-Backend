@@ -88,6 +88,7 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByChain($request);
+        // dd($enrolls->pluck('user_id'));
 
         if($my_chain=='count'){
             $count = [];
@@ -164,7 +165,8 @@ class UsersController extends Controller
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 
-        $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['user.attachment','user.roles', 'classes'])->get()->pluck('user')->filter()->values();
+        $enrolls =  $enrolls->groupBy('user_id')->distinct()->with(['user.attachment','user.roles', 'classes'])->get()->pluck('user');
+        // dd($enrolls->pluck('user'));
         if($request->filled('search'))
         {
             $enrolls = collect($enrolls)->filter(function ($item) use ($request) {
