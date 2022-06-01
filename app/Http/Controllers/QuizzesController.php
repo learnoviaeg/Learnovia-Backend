@@ -399,7 +399,8 @@ class QuizzesController extends Controller
 
         $quizLesson->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
-        if(!isset($quizlesson))
+        // if(!isset($quizlesson))
+        if( count($quizlesson) <= 0)
         {
             $targetQuiz = Quiz::where('id',$id)->first();
             $targetQuiz->delete();
