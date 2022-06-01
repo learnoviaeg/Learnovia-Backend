@@ -970,7 +970,6 @@ class UserController extends Controller
         $request->validate([
             'user_ids'   => 'array',
             'user_ids.*' => 'exists:users,id',
-            'type'       =>  'nullable|details',
         ]);
 
         $fields = ['id', 'firstname', 'lastname'];
@@ -996,9 +995,9 @@ class UserController extends Controller
         $filename = uniqid();
 
         if($request->filled('type') && $request->type == 'details')
-            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+            $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
         else
-        $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
+            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
 
         $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
