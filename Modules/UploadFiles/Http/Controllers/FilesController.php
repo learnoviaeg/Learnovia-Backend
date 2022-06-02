@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 // use Illuminate\Routing\Controller;
 use App\Http\Controllers\Controller;
-use Modules\UploadFiles\Entities\file;
+use Modules\UploadFiles\Entities\file as File;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
@@ -409,7 +409,7 @@ class FilesController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
-        $file = file::find($request->id);
+        $file = File::find($request->id);
 
         $file_name = isset($request->name) ? $request->name : $file->name;
         $file->name    = $file_name;
@@ -484,7 +484,7 @@ class FilesController extends Controller
         $lesson = Lesson::find($request->lesson_id);
         // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         LastAction::lastActionInCourse($lesson->course_id);
-        $target_file = file::whereId($request->fileID)->first();
+        $target_file = File::whereId($request->fileID)->first();
 
         $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
@@ -603,7 +603,7 @@ class FilesController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        $File = file::with(['FileLesson','courseItem.courseItemUsers'])->find($request->id);
+        $File = File::with(['FileLesson','courseItem.courseItemUsers'])->find($request->id);
 
         if( $request->user()->can('site/course/student')){
             $courseItem = CourseItem::where('item_id', $File->id)->where('type', 'file')->first();
@@ -657,7 +657,7 @@ class FilesController extends Controller
             $Allmaterials[] =  $material;
         }
         foreach($materials['files'] as $file){
-            $fileObj=file::find($file->file_id);
+            $fileObj=File::find($file->file_id);
             $material = collect([]);
             $material['item_id'] = $file->file_id;
             $material['name'] =$fileObj->name;
