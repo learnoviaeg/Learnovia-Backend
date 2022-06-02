@@ -15,6 +15,7 @@ use App\LastAction;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
+use App\SecondaryChain;
 use App\UserSeen;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -450,7 +451,6 @@ class ReportsController extends Controller
             'search'=> 'string',
         ]);
 
-    
         $enrolls = $this->chain->getEnrollsByManyChain($request);
 
         $usersIds = [];
@@ -459,7 +459,12 @@ class ReportsController extends Controller
             $usersIds = $usersEnroll->where('role_id',3)->select('user_id')->distinct()->pluck('user_id');
         }
 
-        $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        if(isset($request->lesson_id))
+            $lessons = $request->lesson_id;
+        else
+            $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        
+        $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id')->toArray())->pluck('lesson_id')->toArray();
 
         //starting report  query
         $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
@@ -538,24 +543,20 @@ class ReportsController extends Controller
                                 }
                             ]);
 
-        if($request->has('quiz_id')){
+        if($request->has('quiz_id'))
             $quizLessons->where('quiz_id',$request->quiz_id);
-        }
 
-        if($request->has('lesson_id')){
+        if($request->has('lesson_id'))
             $quizLessons->where('lesson_id',$request->lesson_id);
-        }
 
-        if($request->has('from') && $request->has('to')){
+        if($request->has('from') && $request->has('to'))
             $quizLessons->whereBetween('created_at', [$request->from,$request->to]);
-        }
 
         $allQuizzes = clone $quizLessons;
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
 
         if($request->has('export')){
-
             $filename = uniqid();
             $file = Excel::store(new QuizAttemptReport($quizLessons->get()), 'reports'.$filename.'.xlsx','public');
             $file = url(Storage::url('reports'.$filename.'.xlsx'));
