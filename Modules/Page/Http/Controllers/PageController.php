@@ -211,6 +211,10 @@ class PageController extends Controller
 
             $page->delete();
         }
+        $material = Material::where('item_id',$request->page_id)->where('type','page')->first();
+        if ($material != null) {
+            $material->delete();
+        }
         $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
         $TempLesson = Lesson::find($request->lesson_id);
         LastAction::lastActionInCourse($TempLesson->course_id);
