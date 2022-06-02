@@ -213,9 +213,9 @@ class PageController extends Controller
             $tempReturn = Lesson::find($request->lesson_id)->module('Page', 'page')->get();
             $TempLesson = Lesson::find($request->lesson_id);
             LastAction::lastActionInCourse($TempLesson->course_id);
-            return HelperController::api_response_format(200, $tempReturn, __('messages.page.delete'));
         }
-        return HelperController::api_response_format(404, [], __('messages.error.not_found'));
+        return HelperController::api_response_format(200, $tempReturn, __('messages.page.delete'));
+        // return HelperController::api_response_format(404, [], __('messages.error.not_found'));
     }
 
 
