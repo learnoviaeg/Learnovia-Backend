@@ -491,7 +491,8 @@ class FilesController extends Controller
         if($target_file != null)
             $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
-        $file->delete();
+        if($file != null)
+            $file->delete();
         $material = Material::where('item_id',$request->fileID)->where('type','file')->first();
         if ($material != null) {
             $material->delete();
