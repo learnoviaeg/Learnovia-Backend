@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 use App\Component;
 use App\CourseItem;
 use App\LastAction;
+use App\Material;
 use Exception;
 use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
