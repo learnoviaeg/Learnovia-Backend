@@ -32,11 +32,11 @@ class UploadFilesServiceProvider extends ServiceProvider
         Media::observe(MediaObserver::class);
         File::observe(FileObserver::class);
 
-        // File::observe(LogsObserver::class);
-        // FileLesson::observe(LogsObserver::class);
+        File::observe(LogsObserver::class);
+        FileLesson::observe(LogsObserver::class);
         
-        // Media::observe(LogsObserver::class);
-        // MediaLesson::observe(LogsObserver::class);
+        Media::observe(LogsObserver::class);
+        MediaLesson::observe(LogsObserver::class);
 
         FileLesson::observe(FileLessonObserver::class);
         MediaLesson::observe(MediaLessonObserver::class);

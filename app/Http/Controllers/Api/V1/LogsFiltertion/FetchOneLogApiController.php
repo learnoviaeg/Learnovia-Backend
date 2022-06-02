@@ -69,15 +69,24 @@ class FetchOneLogApiController extends Controller
               $nameSpace = '\\app\\';
               $model     = $nameSpace.$log->subject_type;
             }
-            if ($log->subject_type == 'Enroll') {
+            /*if ($log->subject_type == 'Enroll') {
               $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->user->fullname; 
               $headlines['item_id']     = $model::withTrashed()->where('id', $log->subject_id)->first()->user->id;    
             }elseif($log->subject_type == 'page'){
                  $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->title;
+            }elseif($log->subject_type == 'Attendance'){
+                 $headlines['item_name']   = \App\Attendance::withTrashed()->where('id', $log->subject_id)->first()->name;
+            }elseif($log->subject_type == 'h5pLesson'){
+                 $headlines['item_name']   = \App\h5pLesson::withTrashed()->where('id', $log->subject_id)->first()->getNameAttribute();
             }else{
                 $headlines['item_name']   = $model::withTrashed()->where('id', $log->subject_id)->first()->name;    
-            }
+            }*/
+
+            $headlines['item_name']   = $log->item_name; 
+            $headlines['item_id']     = $log->item_id;
+
             // end item name
+            // case h5pcontent should be handled but it is gonna be fetched from item_name
 
             $foreign_keys = [
               'type_id'            => '\App\AcademicType',
@@ -88,6 +97,9 @@ class FetchOneLogApiController extends Controller
               'shared_classes'     => '\App\Classes',
               'classes'            => '\App\Classes',
               'class_id'           => '\App\Classes',
+              'question_id'        => '\Modules\QuestionBank\Entities\Questions',
+              'quiz_id'            => 'Modules\QuestionBank\Entities\quiz',
+              'role_id'            => 'Spatie\Permission\Models\Role',
             ];
 
     	if ($log->action == 'updated') {
@@ -99,6 +111,8 @@ class FetchOneLogApiController extends Controller
           // case updated subject is lesson
           if ($log->subject_type == 'Lesson') {
                 $diff_after['shared_classes']  = implode(',', $log->class_id);
+                //unset($diff_before['shared_classes']);
+                //unset($diff_after['shared_classes']);
           }
           // case updated subject is lesson
 
@@ -108,11 +122,72 @@ class FetchOneLogApiController extends Controller
           }
           // case updated subject is course
 
+          // case updated subject is Announcement
+          if ($log->subject_type == 'Announcement') {
+              //$diff_after['created_by']  = $diff_after['created_by']['id']; 
+              //$diff_after['topic']       = $diff_after['topic']['id']; 
+              //$diff_after['attachment']  = $diff_after['attachment']['id']; 
+                unset($diff_after['attachment']);
+                unset($diff_after['topic']);
+                unset($diff_after['created_by']);
+                unset($diff_before['attachment']);
+                unset($diff_before['topic']);
+                unset($diff_before['created_by']);
+          }
+          // case updated subject is Announcement
+
+          // case updated subject is Announcement
+          if ($log->subject_type == 'Questions') {
+              $diff_after['content']  = json_encode($diff_after['content']);
+          }
+          // case updated subject is Announcement
+
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
             $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
+            // start handle user
+              if ($log->subject_type == 'User') {
+                if ( (!isset($get_diff_before['real_password'])) && (!isset($get_diff_after['real_password'])) ) {
+                  unset($get_diff_before['password']);
+                  unset($get_diff_after['password']);
+                }
+                unset($get_diff_before['remember_token']);
+                unset($get_diff_before['chat_uid']);
+                unset($get_diff_before['refresh_chat_token']); 
+                unset($get_diff_after['lastaction']); 
+                unset($get_diff_after['roles']); 
+                unset($get_diff_after['fullname']); 
+                  foreach ($get_diff_before as $key => $value) {
+                    /*if( ($get_diff_before[$key] == null)  && !isset($get_diff_after[$key]) ){
+                      continue;
+                    }*/
+                    if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
+                      unset($get_diff_after[$key]);
+                      unset($get_diff_before[$key]);
+                    }
+                  }
+              }
+                 // end handle user
+
+               // start handle announcement
+                if ($log->subject_type == 'Announcement') {
+                    if (!isset($get_diff_before['attachment']) && isset($get_diff_after['attachment']) && $get_diff_after['attachment'] != null) {
+                      $get_diff_before['attachment'] = null;
+                    }
+                }
+                 // end handle announcement
+
+                // start handle questions
+                if ($log->subject_type == 'Questions') {
+                    if (!isset($get_diff_before['count_quizzes']) && isset($get_diff_after['count_quizzes']) && $get_diff_after['count_quizzes'] == null) {
+                      unset($get_diff_after['count_quizzes']);
+                    }
+                }
+                 // end handle questions
+
             // model assignment cases
-            if ($log->subject_type == 'assignment') {
+            if ($log->subject_type == 'assignment') 
+            {
                  unset($get_diff_after['updated_at']);
                  if (isset($get_diff_after['content'])) {
                    $get_diff_after['content'] = stripslashes(strip_tags($get_diff_after['content']));
@@ -147,9 +222,11 @@ class FetchOneLogApiController extends Controller
             // quiz assignment cases
             if ($log->subject_type == 'quiz') {
                 // user id trace
-                 if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
-                  unset($get_diff_before['restricted']);
-                  unset($get_diff_after['restricted']);
+                if ( isset($get_diff_before['restricted']) && isset($get_diff_after['restricted']) ) {
+                    if( ($get_diff_before['restricted']  == 0) && ($get_diff_after['restricted']  == false) ){
+                      unset($get_diff_before['restricted']);
+                      unset($get_diff_after['restricted']);
+                    }
                 }
             }
 
@@ -208,9 +285,10 @@ class FetchOneLogApiController extends Controller
                   $after_value = [$after_value];
                 }
                 // case lesson fetch classes  before
-              if ($log->subject_type == 'Lesson') {
+             if ($log->subject_type == 'Lesson') {
                  $lesson_new_classes = explode(',', $diff_after['shared_classes']);
-                 $after_value = $lesson_new_classes;
+                 $after_value        = $lesson_new_classes;
+                 $before_value       = explode(',', $diff_before['shared_classes']);
               }
                 // case lesson fetch classes before
 
@@ -221,12 +299,31 @@ class FetchOneLogApiController extends Controller
               }
                 // case lesson fetch classes before
 
-                $new_name = __('ahmed.'.$after_key.'');
-                $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
-                                                                      ->groupBy('name')->pluck('name');
-                unset($get_diff_after[$after_key]);
+                    $new_name = __('ahmed.'.$after_key.'');
+                    $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                    unset($get_diff_after[$after_key]);
 
-              }
+                    // exclude classes if it is same
+                    if ($log->subject_type == 'Lesson') {
+                          if ($after_value != $before_value) {
+                            $new_name = __('ahmed.'.$after_key.'');
+                            $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                            unset($get_diff_after[$after_key]);
+                          }else{
+                            //return 'nn';
+                            unset($get_diff_after['Classes']);
+                            unset($get_diff_before['Classes']);
+                          }
+                    }else{  // exclude classes if it is same
+                      $new_name = __('ahmed.'.$after_key.'');
+                      $get_diff_after[$new_name] = $foreign_keys[$after_key]::whereIn('id', $after_value)
+                                                                          ->groupBy('name')->pluck('name');
+                      unset($get_diff_after[$after_key]);
+                    }
+
+              } // end key exists
             } // end foreach
 
             unset($get_diff_before['created_at']);
@@ -250,19 +347,36 @@ class FetchOneLogApiController extends Controller
     	}else{
         // response case create || delete
            $only_one_data         = $data->toArray();
-            foreach ($only_one_data as $only_one_data_key => $only_one_data_value) {
-              if (array_key_exists($only_one_data_key, $foreign_keys)) {
-                if (!is_array($only_one_data_value)) {
-                  $only_one_data_value = [$only_one_data_value];
-                }
-                if ( array_key_exists($only_one_data_key, $foreign_keys) && $only_one_data_key == 'shared_classes' && $log->subject_type == 'Lesson' ) {
-                  $only_one_data_value = $log->class_id;
-                }
-                $new_name = __('ahmed.'.$only_one_data_key.'');
-                $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::whereIn('id', $only_one_data_value)
-                                                                      ->groupBy('name')->pluck('name');
-                unset($only_one_data[$only_one_data_key]);
-              }
+            foreach ($only_one_data as $only_one_data_key => $only_one_data_value) 
+            {
+                 // start first if
+                  if ( array_key_exists($only_one_data_key, $foreign_keys) && ($only_one_data_key == 'question_id' && $only_one_data_key == 'quiz_id') ) {
+                        if (!is_array($only_one_data_value)) {
+                          $only_one_data_value = [$only_one_data_value];
+                        }
+                        if ( array_key_exists($only_one_data_key, $foreign_keys) && $only_one_data_key == 'shared_classes' && $log->subject_type == 'Lesson' ) {
+                          $only_one_data_value = $log->class_id;
+                        }
+                      $new_name = __('ahmed.'.$only_one_data_key.'');
+                      $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::whereIn('id', $only_one_data_value)
+                                                                          ->groupBy('name')->pluck('name');
+                    unset($only_one_data[$only_one_data_key]);
+                  } // end first if
+                  
+                  if (array_key_exists($only_one_data_key, $foreign_keys) && ($only_one_data_key == 'question_id' || $only_one_data_key == 'quiz_id')) 
+                  {
+                      $new_name = __('ahmed.'.$only_one_data_key.'');
+
+                        if ($only_one_data_key == 'question_id') {
+                          $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::where('id', $only_one_data_value)->groupBy('text')->pluck('text');
+                        }
+                        if ($only_one_data_key == 'quiz_id') {
+                          $only_one_data[$new_name] = $foreign_keys[$only_one_data_key]::where('id', $only_one_data_value)->groupBy('name')->pluck('name');
+                        }
+
+                    unset($only_one_data[$only_one_data_key]);
+                  }
+
             } // end foreach
     		return response()->json([
           'headlines'      => $headlines, 

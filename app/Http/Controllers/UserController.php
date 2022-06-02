@@ -40,6 +40,7 @@ use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
 use App\Exports\ParentChildExport;
+use App\Exports\UserDetailsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
@@ -289,12 +290,23 @@ class UserController extends Controller
                 if($optional == 'nickname' && $request->$optional == 'null')
                     $user->$optional = null;
             }
-        }
-        $user->save();
+        } 
 
         // role is in all system
         $role = Role::find($request->role);
-        $user->assignRole($role);
+        
+        // added
+        if ([$request->role] != $user->roles->pluck('id')->toArray()) {
+            $user->role_id = $request->role;
+            $assignRoles = [$request->role];
+            DB::table('model_has_roles')->where('model_id',$user->id)->delete();
+            $user->assignRole($assignRoles); 
+        }
+        // added
+
+        $user->save();
+
+        // $user->assignRole($role);
         if($request->role ==1)
         {
             $request_user = new Request(['user_id' => $user->id]);
@@ -956,7 +968,7 @@ class UserController extends Controller
     public function export(Request $request)
     {
         $request->validate([
-            'user_ids' => 'array',
+            'user_ids'   => 'array',
             'user_ids.*' => 'exists:users,id',
         ]);
 
@@ -981,7 +993,12 @@ class UserController extends Controller
             $userIDs=$request->user_ids;
 
         $filename = uniqid();
-        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+
+        if($request->filled('type') && $request->type == 'details')
+            $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
+        else
+            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+
         $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }

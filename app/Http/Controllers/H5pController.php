@@ -7,14 +7,19 @@ use Djoudi\LaravelH5p\Eloquents\H5pContent;
 use Djoudi\LaravelH5p\Events\H5pEvent;
 use Djoudi\LaravelH5p\LaravelH5p;
 use Djoudi\LaravelH5p\Exceptions\H5PException;
+use Auth;
 use H5pCore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use App\Helpers\CoursesHelper;
 
 class H5pController extends Controller
 {
+   /* public function __construct()
+    {
+        $this->middleware('auth:api')->only(['update']);
+    }*/
+
     public function index(Request $request)
     {
         $where = H5pContent::orderBy('h5p_contents.id', 'desc');
@@ -287,6 +292,12 @@ class H5pController extends Controller
                 ->back()
                 ->with('fail', trans('laravel-h5p.content.can_not_updated'));
         }*/
+
+        // start update action to serve logs 
+        $target_content     = H5pContent::where('id', $id)->first();  
+        $request['user_id'] = null;  
+        $target_content->update($request->all());
+        // end update action to serve logs 
 
         $return_id = LaravelH5p::controllerUpdate($request, $this, $id);
         \Log::info('in update '.$editting_done);

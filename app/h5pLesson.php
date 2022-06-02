@@ -8,11 +8,15 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Lesson as Lessonmodel;
+use App\Course;
+use App\Segment;
 
 class h5pLesson extends Model
 {
     // log trait right here
       use Auditable, SoftDeletes;
+
+      public $table = 'h5p_lessons';
 
       protected $fillable = ['content_id',
         'lesson_id',
@@ -24,14 +28,7 @@ class h5pLesson extends Model
         'seen_number',
         'restricted'
     ];
-    protected $appends = ['user_seen_number'];
-
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-    ];
-
+    protected $appends = ['user_seen_number'];   
 
     public function getUserSeenNumberAttribute(){
 
@@ -70,38 +67,53 @@ class h5pLesson extends Model
         return False;
     }
 
+
      // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
-        return null;
+        $course_id    = Self::get_course_name($old, $new);
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        $segment      = Segment::where('id', $segment_id)->first();
+        $year_id      = $segment->academic_year_id;
+        return $year_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_type_name($old, $new)
     {
-        return null;
+        $course_id    = Self::get_course_name($old, $new);
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        $segment      = Segment::where('id', $segment_id)->first();
+        $type_id      = $segment->academic_type_id;
+        return $type_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_level_name($old, $new)
     {
-        return null;
+        $course_id    = Self::get_course_name($old, $new);
+        $level_id     = Course::where('id', $course_id)->first()->level_id;
+        return $level_id;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_class_name($old, $new)
     {
-        return null;
+        $course_id    = Self::get_course_name($old, $new);
+        $classes      = Course::where('id', $course_id)->first()->classes;
+        return $classes;
     }
     // end function get name and value attribute
 
     // start function get name and value f attribute
     public static function get_segment_name($old, $new)
     {
-        return null;
+        $course_id    = Self::get_course_name($old, $new);
+        $segment_id   = Course::where('id', $course_id)->first()->segment_id;
+        return $segment_id;
     }
     // end function get name and value attribute
 
@@ -109,9 +121,12 @@ class h5pLesson extends Model
     public static function get_course_name($old, $new)
     {
         //$lessons_id   = pageLesson::where('page_id', $new->page_id)->pluck('lesson_id');
-        $lesson_id   = $new->lesson_id;
-        $course_id[]  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
+        $lesson_id    = $new->lesson_id;
+        $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         return $course_id;
     }
     // end function get name and value attribute
+
+
+
 }

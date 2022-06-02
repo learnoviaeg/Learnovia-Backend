@@ -8,6 +8,8 @@ use Modules\Assigments\Entities\AssignmentLesson;
 use App\Lesson as Lessonmodel;
 use App\AuditLog;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Course;
+use App\Segment;
 
 class assignment extends Model
 {
@@ -69,9 +71,12 @@ class assignment extends Model
         if ($old_count == 0) {
             $year_id = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                ->where('action', 'created')->first();
-            $year_id = $first_created->year_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
+            $segment    = Segment::where('id', $segment_id)->first();
+            $year_id    = $segment->academic_year_id;
         }
         return $year_id;
     }
@@ -84,9 +89,12 @@ class assignment extends Model
         if ($old_count == 0) {
             $type_id = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();
-            $type_id = $first_created->type_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
+            $segment    = Segment::where('id', $segment_id)->first();
+            $type_id    = $segment->academic_type_id;
         }
         return $type_id;
     }
@@ -99,9 +107,10 @@ class assignment extends Model
         if ($old_count == 0) {
             $level_id = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();
-            $level_id = $first_created->level_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $level_id   = Course::where('id', $course_id)->first()->level_id;
         }
         return $level_id;
     }
@@ -112,13 +121,14 @@ class assignment extends Model
     {
         $old_count = count($old);
         if ($old_count == 0) {
-            $class_id = null;
+            $classes = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();
-            $class_id = $first_created->class_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $classes    = Course::where('id', $course_id)->first()->classes;
         }
-        return $class_id;
+        return $classes;
     }
     // end function get name and value attribute
 
@@ -129,9 +139,10 @@ class assignment extends Model
         if ($old_count == 0) {
             $segment_id = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();
-            $segment_id = $first_created->segment_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
+            $segment_id = Course::where('id', $course_id)->first()->segment_id;
         }
         return $segment_id;
     }
@@ -144,9 +155,9 @@ class assignment extends Model
         if ($old_count == 0) {
             $course_id = null;
         }else{
-            $first_created = AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->id])
-                                    ->where('action', 'created')->first();
-            $course_id = $first_created->course_id;
+            $lessons = AssignmentLesson::withTrashed()->where('assignment_id', $new->id)->groupBy('lesson_id')
+                                       ->pluck('lesson_id');
+            $course_id  = Lessonmodel::whereIn('id', $lessons)->first()->course_id;
         }
         return $course_id;
     }

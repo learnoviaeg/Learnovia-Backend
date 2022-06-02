@@ -27,8 +27,9 @@ class AssigmentsServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        // Assignment::observe(LogsObserver::class);
-        // UserAssigment::observe(LogsObserver::class);
+        Assignment::observe(LogsObserver::class);
+        UserAssigment::observe(LogsObserver::class);
+        
         AssignmentLesson::observe(AssignmentLessonObserver::class);
         assignmentOverride::observe(AssignmentOverwrite::class);
     }

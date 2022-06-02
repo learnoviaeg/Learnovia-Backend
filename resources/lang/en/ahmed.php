@@ -10,5 +10,8 @@ return [
       'shared_classes'     => 'Classes',
       'classes'            => 'Classes',
       'class_id'           => 'Classes',
+      'question_id'        => 'Question',
+      'quiz_id'            => 'Quiz',
+      'role_id'            => 'Role',
 
 ];

@@ -13,10 +13,7 @@ trait Auditable
         static::created(function (Model $model) {
             self::audit('created', $model);
         });
-
-        /*static::index(function (Model $model) {
-            self::audit('index', $model);
-        });*/
+    
 
         static::updated(function (Model $model) {
             self::audit('updated', $model);
@@ -33,6 +30,10 @@ trait Auditable
         $user_fullname = auth()->user()->fullname;
 
         $hole_description = 'Item in module ( '. $subject_model .' ) has been ( '. $description .' ) by ( '. $user_fullname. ' )';
+
+        $quiz_related = [
+                            'QuizLesson', 'quiz_questions', 
+                        ];
        
        // start to ensure order of course and enrolls
         if ($subject_model == 'Course') {
@@ -54,7 +55,7 @@ trait Auditable
                             'firstname', 'email', 'password', 'real_password', 'lastname', 'username', 'suspend', 
                             'class_id','picture', 'level', 'type', 'arabicname', 'country', 'birthdate', 'gender', 
                             'phone', 'address', 'nationality', 'notes', 'language', 'timezone', 'religion', 'second language', 
-                            'profile_fields', 'nickname', 'token', 'last_login', 'api_token'
+                            'profile_fields', 'nickname'
                         ];
 
             $arrayKeys       = array_keys($get_diff_before);
@@ -87,6 +88,7 @@ trait Auditable
                     ]);
                 }
         }else{  // end to exclude refresh tokens of firebase*/
+            $notes = null;
             if ($subject_model == 'page' || $subject_model == 'Announcement') {
                 $item_name = $model->title;
                 $item_id = null;
@@ -94,6 +96,17 @@ trait Auditable
             elseif ($subject_model == 'Enroll') {
                 $item_name = $model->user->fullname;
                 $item_id   = $model->user->id;
+            }elseif ($subject_model == 'media') {
+                    $item_name = $model->name;
+                    $item_id   = null; 
+                    if ($model->type == null) {
+                        $notes = 'link';
+                    }else{
+                        $notes = 'media';
+                    }
+            }elseif ( in_array($subject_model, $quiz_related) ) {
+                $item_name = 'quiz';
+                $item_id   = $model->quiz_id;
             }else{
                 $item_name = $model->name;
                 $item_id   = null;   
@@ -102,7 +115,7 @@ trait Auditable
                 AuditLog::create([
                 'action'       => $description,
                 'subject_id'   => $model->id ?? null,
-                'subject_type' => substr(get_class($model),strripos(get_class($model),'\\')+1),//get_class($model) ?? null,
+                'subject_type' => $subject_model,
                 'user_id'      => auth()->id() ?? null,
                 'role_id'      => auth()->id() ? auth()->user()->roles->pluck('id')->toArray() : null,
                 'properties'   => $model ?? null,
@@ -115,7 +128,7 @@ trait Auditable
                 'course_id'    => $model->get_course_name($model->getOriginal(), $model),
                 'before'       => $model->getOriginal(),
                 'created_at'   => $created_at,
-                'notes'        => null,
+                'notes'        => $notes,
                 'item_name'    => $item_name,
                 'item_id'      => $item_id,
                 'hole_description' => $hole_description,

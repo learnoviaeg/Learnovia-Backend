@@ -399,9 +399,12 @@ class QuizzesController extends Controller
 
         $quizLesson->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
-        if(!isset($quizlesson))
-            $quiz=Quiz::where('id',$id)->delete();
-
+        // if(!isset($quizlesson))
+        if( count($quizlesson) <= 0)
+        {
+            $targetQuiz = Quiz::where('id',$id)->first();
+            $targetQuiz->delete();
+        }
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
 
