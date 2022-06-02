@@ -486,7 +486,8 @@ class FilesController extends Controller
         LastAction::lastActionInCourse($lesson->course_id);
         // $target_file = file::whereId($request->fileID)->first();
         
-        $target_file = new file();
+        $fileIns = new file();
+        $target_file = $fileIns->find($request->fileID);
         print_r($target_file);
         $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
