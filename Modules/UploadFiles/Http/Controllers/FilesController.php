@@ -487,9 +487,9 @@ class FilesController extends Controller
         // $target_file = file::whereId($request->fileID)->first();
         
         $fileIns = new file();
-        $target_file = $fileIns->find(1);
-        print_r($target_file);
-        $target_file->delete();
+        $target_file = $fileIns->find($request->fileID);
+        if($target_file != null)
+            $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
         $file->delete();
         $material = Material::where('item_id',$request->fileID)->where('type','file')->first();
