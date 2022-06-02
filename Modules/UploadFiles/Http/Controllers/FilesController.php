@@ -482,10 +482,9 @@ class FilesController extends Controller
 
         
         $lesson = Lesson::find($request->lesson_id);
-        print_r($lesson);
         // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         LastAction::lastActionInCourse($lesson->course_id);
-        $target_file = File::find($request->fileID);
+        $target_file = file::find($request->fileID);
 
         $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
