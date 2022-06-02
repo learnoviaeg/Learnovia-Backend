@@ -217,7 +217,7 @@ class AnnouncementsController extends Controller
             // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
             // $notification->send();
 
-            $this->notification->sendNotify($users,$announcement->title.' announcement is created',$announcement->id,'announcement','announcement');
+            // $this->notification->sendNotify($users,$announcement->title.' announcement is created',$announcement->id,'announcement','announcement');
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -280,8 +280,9 @@ class AnnouncementsController extends Controller
 
         $announcement->save();
 
-        $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
-        $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
+        // send notification
+        // $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
+        // $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }
