@@ -624,11 +624,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
        Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
        Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
-<<<<<<< HEAD
-
-=======
-   
->>>>>>> 6d88d8d208f8f9b6e50bb14b61ac65c1e157091b
     });
     // added ahmed
 });
