@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Spatie\Permission\Models\Role;
 use App\Parents;
 use App\Dictionary;
+use App\AcademicYear;
 use App\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -192,7 +193,8 @@ class AuthController extends Controller
         $user->token=null;
         $user->save();
         $request->user()->token()->revoke();
-        //for log event
+
+        // for log event
         $logsbefore=Parents::where('parent_id',Auth::id())->get();
         $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
         if($all > 0)
@@ -231,8 +233,13 @@ class AuthController extends Controller
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
 
-        $user['level']=Level::find(Enroll::where('user_id',Auth::id())->pluck('level')->first());  
-        $user['class']=Classes::find(Enroll::where('user_id',Auth::id())->pluck('group')->first());  
+        $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
+        $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
+        $user['level']=$level->id;
+        $user['level_']=$level;
+        $user['class']=$class->id;  
+        $user['class_']=$class;  
+
         $user->setHidden(['password']);
 
         return HelperController::api_response_format(200, $user);

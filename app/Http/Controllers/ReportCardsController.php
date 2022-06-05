@@ -787,7 +787,7 @@ class ReportCardsController extends Controller
 
                     if($olFound == true){
                         if($enroll->courses->gradeCategory != null)
-                            $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
+                            $total += $second_term->enrolls[$key]->courses->gradeCategory[0]->max;
             
                         if($enroll->courses->gradeCategory[0]->userGrades != null)
                             $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
@@ -810,7 +810,7 @@ class ReportCardsController extends Controller
         }
         $second_term->add_total = false;
         if(count($total_check) > 0){
-            $second_term->student_total_mark = $student_mark;
+            $second_term->student_total_mark = round($student_mark,2);
             $second_term->total = $total;
 
             if($total == 0)
@@ -930,16 +930,16 @@ class ReportCardsController extends Controller
                     }
                 }
                     
-                    if(isset($second_term->enrolls[$key+1]->courses->gradeCategory[1])){
-                        $factor = $second_term->enrolls[$key+1]->courses->gradeCategory[1]->max;
+                    if(isset($second_term->enrolls[$key]->courses->gradeCategory[1])){
+                        $factor = $second_term->enrolls[$key]->courses->gradeCategory[1]->max;
         
-                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade =
-                            ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
+                        $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade =
+                            ($enroll->courses->gradeCategory[0]->userGrades[0]->grade + $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade) * $factor;
         
-                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max=
-                            ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * $factor;
+                        $second_term->enrolls[$key]->courses->gradeCategory[0]->max=
+                            ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key]->courses->gradeCategory[0]->max) * $factor;
         
-                            $percentage =($second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade /$second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * 100;
+                            $percentage =($second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade /$second_term->enrolls[$key]->courses->gradeCategory[0]->max) * 100;
                         $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
                                     ->where('higher_boundary', '>', $percentage)->first();
                 
@@ -947,16 +947,16 @@ class ReportCardsController extends Controller
                             $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
                             ->where('higher_boundary', '>=', $percentage)->first();
             
-                        $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->letter = $evaluation->evaluation;
+                        $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->letter = $evaluation->evaluation;
 
                             if($olFound == true){
                                 if($enroll->courses->gradeCategory != null)
-                                    $total += ($enroll->courses->gradeCategory[0]->max + $second_term->enrolls[$key+1]->courses->gradeCategory[0]->max) * $factor;
+                                    $total += $second_term->enrolls[$key]->courses->gradeCategory[0]->max;
                     
                                 if($enroll->courses->gradeCategory[0]->userGrades != null)
-                                    $student_mark += $second_term->enrolls[$key+1]->courses->gradeCategory[0]->userGrades[0]->grade;
+                                    $student_mark += $second_term->enrolls[$key]->courses->gradeCategory[0]->userGrades[0]->grade;
                             }
-                            unset($second_term->enrolls[$key+1]->courses->gradeCategory[1]);
+                            unset($second_term->enrolls[$key]->courses->gradeCategory[1]);
                             if(str_contains($enroll->courses->name, 'O.L'))
                                 $olFound = false;
                     }
@@ -965,8 +965,8 @@ class ReportCardsController extends Controller
  
             $second_term->add_total = false;
             if(count($total_check) > 0){
-                $second_term->student_total_mark = $student_mark;
-                $second_term->total = $total;
+                $second_term->student_total_mark = round($student_mark, 2);
+                $second_term->total = round($total,2);
                 if($total == 0)
                     $second_term->total_mark_evaluation ='Failed';
                     else

@@ -29,6 +29,7 @@ class AssigmentsServiceProvider extends ServiceProvider
 
         Assignment::observe(LogsObserver::class);
         UserAssigment::observe(LogsObserver::class);
+        
         AssignmentLesson::observe(AssignmentLessonObserver::class);
         assignmentOverride::observe(AssignmentOverwrite::class);
     }

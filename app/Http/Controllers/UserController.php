@@ -40,6 +40,7 @@ use App\attachment;
 use App\SegmentClass;
 use App\Exports\UsersExport;
 use App\Exports\ParentChildExport;
+use App\Exports\UserDetailsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
@@ -120,30 +121,42 @@ class UserController extends Controller
             );    
             $data = json_encode($data);
 
-            try{
-                $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-                    'headers'   => [
-                        'Content-Type' => 'application/json'
-                    ], 
-                    'body' => $data
-                ]);
-            }
-            catch(\Exception $e){
-                throw new \Exception($e->getMessage());
-            }
-            
-            $user = User::create([
-                'firstname' => $firstname,
-                'lastname' => $request->lastname[$key],
-                'username' => $request->username[$key],
-                'password' => bcrypt($request->password[$key]),
-                'real_password' => $request->password[$key],
-                'suspend' =>  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0,
-                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
-                'chat_token' => json_decode($res->getBody(),true)['custom_token'],
-                'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
+                $firstUser = User::find(1);
 
-            ]);
+                $user = new User;
+                $user->firstname               = $firstname;
+                $user->lastname                = $request->lastname[$key];
+                $user->username                = $request->username[$key];
+                $user->password                = bcrypt($request->password[$key]);
+                $user->real_password           = $request->password[$key];
+                $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
+
+                $user->chat_uid                = $firstUser->chat_uid;
+                $user->chat_token              = $firstUser->chat_token;
+                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
+
+            /*$env  = env('APP_LOGTEST');
+            if ($env == true) {
+                $firstUser = User::find(1);
+                $user->chat_uid                = $firstUser->chat_uid;
+                $user->chat_token              = $firstUser->chat_token;
+                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
+            }else{
+                try{
+                    $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
+                        'headers'   => [
+                            'Content-Type' => 'application/json'
+                        ], 
+                        'body' => $data
+                    ]);
+                }
+                catch(\Exception $e){
+                    throw new \Exception($e->getMessage());
+                } 
+                $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
+                $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
+                $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
+            }*/
 
             foreach ($optionals as $optional){
                 if($request->filled($optional[$i])){
@@ -159,11 +172,11 @@ class UserController extends Controller
             }
             $i++;
 
-            $user->save();
             if(!isset($user->language)){
                 $user->language = Language::where('default', 1)->first()->id;
-                $user->save();
+                //$user->save();
             }
+            $user->save();
             $role = Role::find($request->role);
             $user->assignRole($role);
             if($request->role ==1)
@@ -244,10 +257,13 @@ class UserController extends Controller
             Parents::where('parent_id',$user->id)->update(['current'=> 0]);
         }
 
-        $check = $user->update([
+       /* $check = $user->update([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
-        ]);
+        ]);*/
+
+            $user->firstname = $request->firstname;
+            $user->lastname  = $request->lastname;
 
         if (isset($request->picture))
             $user->picture = attachment::upload_attachment($request->picture, 'User')->id;
@@ -274,12 +290,23 @@ class UserController extends Controller
                 if($optional == 'nickname' && $request->$optional == 'null')
                     $user->$optional = null;
             }
-        }
-        $user->save();
+        } 
 
         // role is in all system
         $role = Role::find($request->role);
-        $user->assignRole($role);
+        
+        // added
+        if ([$request->role] != $user->roles->pluck('id')->toArray()) {
+            $user->role_id = $request->role;
+            $assignRoles = [$request->role];
+            DB::table('model_has_roles')->where('model_id',$user->id)->delete();
+            $user->assignRole($assignRoles); 
+        }
+        // added
+
+        $user->save();
+
+        // $user->assignRole($role);
         if($request->role ==1)
         {
             $request_user = new Request(['user_id' => $user->id]);
@@ -342,7 +369,7 @@ class UserController extends Controller
 
         foreach($request->users_id as $user_id)
         {
-            $user=User::find($user_id);
+            $user = User::find($user_id);
 
             // user can't delete himself
             if(Auth::id() == $user_id)
@@ -353,10 +380,17 @@ class UserController extends Controller
                 if(in_array(1,$user->roles->pluck('id')->toArray()))
                     return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
         }
-        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
-
-        $user = User::whereIn('id',$request->users_id)->delete();
-
+        //$all=Enroll::whereIn('user_id',$request->users_id)->delete();
+        //$user = User::whereIn('id', $request->users_id)->delete();
+        foreach($request->users_id as $user_id)
+        {
+            $enroll  = Enroll::where('user_id',$user_id)->first();
+            if ($enroll != null) {
+                $enroll->delete();
+            }
+            $user    = User::find($user_id);
+            $user->delete();
+        }
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
 
@@ -825,10 +859,10 @@ class UserController extends Controller
         ]);
 
         //for log event
-        $logsbefore=Parents::where('parent_id',Auth::id())->get();
-        $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'updated'));
+        // $logsbefore=Parents::where('parent_id',Auth::id())->get();
+        // $all = Parents::where('parent_id',Auth::id())->update(['current'=> 0]);
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'updated'));
 
         $current_child=null;
         if(isset($request->child_id)){
@@ -934,7 +968,7 @@ class UserController extends Controller
     public function export(Request $request)
     {
         $request->validate([
-            'user_ids' => 'array',
+            'user_ids'   => 'array',
             'user_ids.*' => 'exists:users,id',
         ]);
 
@@ -959,7 +993,12 @@ class UserController extends Controller
             $userIDs=$request->user_ids;
 
         $filename = uniqid();
-        $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+
+        if($request->filled('type') && $request->type == 'details')
+            $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
+        else
+            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+
         $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
     }

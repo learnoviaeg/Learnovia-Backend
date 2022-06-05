@@ -10,9 +10,15 @@ use Modules\QuestionBank\Entities\userQuizAnswer;
 use Modules\QuestionBank\Entities\userQuiz;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Carbon\Carbon;
+use App\Traits\Auditable;
+use App\Course;
+use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Timeline extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = [
         'item_id', 'name','start_date','due_date','publish_date','course_id','class_id','level_id','lesson_id','type','visible','overwrite_user_id'
     ];
@@ -106,4 +112,5 @@ class Timeline extends Model
     public function item(){
         return $this->morphTo('item' , 'type', 'item_id');
     }
+    
 }

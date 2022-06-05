@@ -19,6 +19,8 @@ use App\Notifications\H5PNotification;
 use App\UserCourseItem;
 use App\Helpers\CoursesHelper;
 use Illuminate\Database\Eloquent\Builder;
+use App\TempLog;
+use App\AuditLog;
 
 class H5PLessonController extends Controller
 {
@@ -189,12 +191,11 @@ class H5PLessonController extends Controller
 
         $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
-
+        
         return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
     }
 
-    public function edit (Request $request){
-
+    public function edit(Request $request){
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
@@ -220,9 +221,7 @@ class H5PLessonController extends Controller
             $h5pLesson->update([
                 'visible' => $request->visible
             ]);
-        }
-
-
+        }  
 
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
@@ -233,6 +232,14 @@ class H5PLessonController extends Controller
         //     'created_at' =>  $h5pLesson->created_at,
         // ];
 
+        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();
+            $temp_log->user_id = $request->user('api')->id;
+            $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
+            $temp_log->hole_description = 'Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
+        $temp_log->save();
+        
+        $arr = $temp_log->toArray();
+        Auditlog::firstOrCreate($arr); 
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
