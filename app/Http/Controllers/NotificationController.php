@@ -192,7 +192,7 @@ class NotificationController extends Controller
             "item_id" => $item_id,
         ];
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/update/notifications', [
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',

@@ -105,8 +105,10 @@ class PageController extends Controller
         $page->content = $request->content;
         $page->save();
 
-        if(isset($request->users_ids))
-            CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+        if(isset($request->users_ids)){
+            $CoursesHelper= new CoursesHelper($this->notification);
+            $CoursesHelper->giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+        }
 
         foreach($request->lesson_id as $lesson){
             pageLesson::firstOrCreate([

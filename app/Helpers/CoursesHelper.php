@@ -4,10 +4,18 @@ namespace App\Helpers;
 use App\CourseItem;
 use App\UserCourseItem;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 
 class CoursesHelper{
 
-    public static function giveUsersAccessToViewCourseItem($itemId, $type , array $usersIds){
+    public $notification;
+
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
+    public function giveUsersAccessToViewCourseItem($itemId, $type , array $usersIds,$lesson=null,$publish_date=null){
         $item = CourseItem::create([
             'item_id' => $itemId,
             'type' => $type
@@ -19,6 +27,18 @@ class CoursesHelper{
                 'course_item_id' => $item->id,
             ]);
         }
+
+        //send notification
+        $reqNot=[
+            'title' => $item->item->name . ' ' . $type.' is created',
+            'item_id' => $itemId,
+            'item_type' => 'notification',
+            'type' => $type,
+            'course_name' => $lesson->course->name,
+            'lesson_id' => $lesson->id,
+            'publish_date' => $publish_date
+        ];
+        $this->notification->sendNotify($usersIds , $reqNot);
     }
 
     public static function updateCourseItem($itemId, $type, $usersIds){

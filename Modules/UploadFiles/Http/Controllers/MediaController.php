@@ -227,8 +227,10 @@ class MediaController extends Controller
             $media->save();
 
             //bra l foreach beta3et l lesson 3l4an tarteb l observers
-            if(isset($request->users_ids))
-                CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
+            if(isset($request->users_ids)){
+                $CoursesHelper= new CoursesHelper($this->notification);
+                $CoursesHelper->giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
+            }
             
             foreach ($request->lesson_id as $lesson) {
 

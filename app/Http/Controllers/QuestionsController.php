@@ -213,8 +213,18 @@ class QuestionsController extends Controller
                 // $notification->send();
                 if(!$quiz->restricted)
                 {
+                    $reqNot=[
+                        'title' => $quiz->name.' quiz is updated',
+                        'item_id' => $quiz->id,
+                        'item_type' => 'notification',
+                        'type' => 'quiz',
+                        'course_name' => $quiz->course_id,
+                        'lesson_id' => $request->lesson_id,
+                        'publish_date' => Carbon::now()
+                    ];
+
                     $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
-                    $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is created',$quiz->id,'notification','quiz');
+                    $this->notification->sendNotify($users->toArray(),$reqNot);
                 }
             }
            

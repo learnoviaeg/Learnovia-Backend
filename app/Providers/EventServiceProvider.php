@@ -94,11 +94,6 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\GradeCalculatedEvent' => [
             'App\Listeners\LetterPercentageListener',
         ],
-
-        'App\Events\CreateCourseItemEvent' => [
-            'App\Listeners\SendNotificationListener',
-        ],
-
     ];
 
     /**

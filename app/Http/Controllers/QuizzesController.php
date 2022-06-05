@@ -192,7 +192,8 @@ class QuizzesController extends Controller
         ]);
 
         if(isset($request->users_ids)){
-            CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            $CoursesHelper= new CoursesHelper($this->notification);
+            $CoursesHelper->giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
             $quiz->restricted=1;
         }
 
@@ -332,8 +333,18 @@ class QuizzesController extends Controller
             $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+
+            $reqNot=[
+                'title' => $quiz->name.' quiz is updated',
+                'item_id' => $quiz->id,
+                'item_type' => 'notification',
+                'type' => 'quiz',
+                'course_name' => $quiz->course_id,
+                'lesson_id' => $request->lesson_id,
+                'publish_date' => Carbon::now()
+            ];
             
-            $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
+            $this->notification->sendNotify($users->toArray(),$reqNot);
             
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
@@ -564,7 +575,8 @@ class QuizzesController extends Controller
         $request->validate([
             'id' => 'required|exists:quizzes,id',
             'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
+            'users_ids.*' => 'exists:users,id',
+            // 'lesson_id' => 'exists:lessons,id'
         ]);
 
         $quiz= Quiz::find($request->id);
@@ -572,8 +584,20 @@ class QuizzesController extends Controller
 
         if(!isset($request->users_ids))
             $quiz->restricted=0;
-        else
-            $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
+        // else
+        // {
+            // $reqNot=[
+            //     'title' => $quiz->name.' quiz is updated',
+            //     'item_id' => $quiz->id,
+            //     'item_type' => 'notification',
+            //     'type' => 'quiz',
+            //     'course_name' => $quiz->course_id,
+            //     'lesson_id' => $request->lesson_id,
+            //     'publish_date' => Carbon::now()
+            // ];
+
+        //     $this->notification->sendNotify($request->users_ids,$reqNot);    
+        // }
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);

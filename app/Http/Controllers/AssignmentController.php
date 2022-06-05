@@ -208,8 +208,10 @@ class AssignmentController extends Controller
                 ]);
             }
 
+            // dd($assignment_lesson->publish_date);
             if(isset($request->users_ids)){
-                CoursesHelper::giveUsersAccessToViewCourseItem($assignment->id, 'assignment', $request->users_ids);
+                $CoursesHelper= new CoursesHelper($this->notification);
+                $CoursesHelper->giveUsersAccessToViewCourseItem($assignment->id, 'assignment', $request->users_ids,$lesson_obj,$assignment_lesson->publish_date);
                 Assignment::where('id',$assignment->id)->update(['restricted' => 1]);
             }
 
@@ -219,9 +221,19 @@ class AssignmentController extends Controller
             // $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
             // $notification->send();
 
+            $reqNot=[
+                'title' => $assignment->name.' assignment is created',
+                'item_id' => $assignment->id,
+                'item_type' => 'notification',
+                'type' => 'assignment',
+                'course_name' => $lesson_obj->course->name,
+                'lesson_id' => $lesson,
+                'publish_date' => $request->publish_date
+            ];
+
             $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
             if(!isset($request->users_ids))
-                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is created',$assignment->id,'notification','assignment');
+                $this->notification->sendNotify($users->toArray(),$reqNot);
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
@@ -390,12 +402,22 @@ class AssignmentController extends Controller
             //     }
             // }
 
+            $reqNot=[
+                'title' => $assignment->name.' assignment is updated',
+                'item_id' => $assignment->id,
+                'item_type' => 'notification',
+                'type' => 'assignment',
+                'course_name' => Lesson::find($request->lesson_id)->course->name,
+                'lesson_id' => $request->lesson_id,
+                'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            ];
+
             $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-            $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
+            $this->notification->sendNotify($users->toArray(),$reqNot);
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
@@ -508,7 +530,8 @@ class AssignmentController extends Controller
         $request->validate([
             'id' => 'required|exists:assignments,id',
             'users_ids' => 'array',
-            'users_ids.*' => 'exists:users,id'
+            'users_ids.*' => 'exists:users,id',
+            'lesson_id' => 'exists:lessons,id'
         ]);
 
         $assignment= Assignment::find($request->id);
@@ -517,7 +540,19 @@ class AssignmentController extends Controller
         if(!isset($request->users_ids))
             $assignment->restricted=0;
         else
-            $this->notification->sendNotify($request->users_ids,$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');            
+        {
+            $reqNot=[
+                'title' => $assignment->name.' assignment is updated',
+                'item_id' => $assignment->id,
+                'item_type' => 'notification',
+                'type' => 'assignment',
+                'course_name' => Lesson::find($request->lesson_id)->course->name,
+                'lesson_id' => $request->lesson_id,
+                'publish_date' => Carbon::now()->format('Y-m-d H:i:s')
+            ];
+
+            $this->notification->sendNotify($request->users_ids,$reqNot);            
+        }
         
         $assignment->save();
 

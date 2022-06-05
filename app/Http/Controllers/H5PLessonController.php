@@ -96,12 +96,13 @@ class H5PLessonController extends Controller
             ]);
 
             //user restrictions 
+            $lesson = Lesson::find($lesson_id);
             if(isset($request->users_ids)){
-                CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
+                $CoursesHelper= new CoursesHelper($this->notification);
+                $CoursesHelper->giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids,$lesson,$h5p_lesson->publish_date);
                 h5pLesson::where('id',$h5p_lesson->id)->update(['restricted' => 1]);
             }
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
-            $lesson = Lesson::find($lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
 
             //sending Notification

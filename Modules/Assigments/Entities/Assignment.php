@@ -56,6 +56,12 @@ class assignment extends Model
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'assignment');
     }
 
+    //for morph
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\Assigments\Entities\AssignmentLesson', 'assignment_id' , 'id' , 'id' , 'id' );
+    }
+
     public function getRestrictedAttribute()
     {
         if($this->attributes['restricted'])

@@ -75,9 +75,5 @@
     array (
       0 => 'App\\Listeners\\LetterPercentageListener',
     ),
-    'App\\Events\\CreateCourseItemEvent' => 
-    array (
-      0 => 'App\\Listeners\\SendNotificationListener',
-    ),
   ),
 );

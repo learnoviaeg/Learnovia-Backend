@@ -525,7 +525,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
-    Route::patch('notify/update', 'NotificationsController@update');
+    Route::post('notify/update', 'NotificationsController@update');
     Route::Resource('notify', NotificationsController::class);
     Route::post('working-days/edit', 'WorkingDayController@edit');
     Route::Resource('working-days', WorkingDayController::class);

@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 
 class NotificationRepo implements NotificationRepoInterface
 {
-    public function sendNotify($users,$message,$item_id,$type,$item_type)
+    public function sendNotify($users,$reqNot)
     {
         $data=[
             'users' => $users,
@@ -13,14 +13,17 @@ class NotificationRepo implements NotificationRepoInterface
             'school_domain'=>'test',
             // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'title'=> 'Learnovia',
-            'body'=> $message,
-            "item_type" => $item_type,
-            "type" => $type,
-            "item_id" => $item_id,
+            'body'=> $reqNot['title'],
+            "item_type" => $reqNot['item_type'],
+            "type" => $reqNot['type'],
+            "item_id" => $reqNot['item_id'],
+            'course_name' => isset($reqNot['course_name']) ? $reqNot['course_name'] : null,
+            'lesson_id' => isset($reqNot['lesson_id']) ? $reqNot['lesson_id'] : null,
+            'publish_date' => isset($reqNot['publish_date']) ? $reqNot['publish_date'] : null
         ];
 
         // $clientt = new Client();
-        // $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/send/notifications', [
+        // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/send/notifications', [
         //     'headers'   => [
         //         'username' => 'test',
         //         'password' => 'api_test_5eOiG7CTC',
@@ -31,7 +34,7 @@ class NotificationRepo implements NotificationRepoInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/send/notifications',
+        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/send/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,

@@ -267,8 +267,10 @@ class FilesController extends Controller
             $check = $file->save();
 
             if ($check) {
-                if(isset($request->users_ids))
-                    CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                if(isset($request->users_ids)){                
+                    $CoursesHelper= new CoursesHelper($this->notification);
+                    $CoursesHelper->giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                }
 
                 foreach ($request->lesson_id as $lesson) {
                     $tempLesson = Lesson::find($lesson);
