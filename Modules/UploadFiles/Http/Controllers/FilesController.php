@@ -411,7 +411,11 @@ class FilesController extends Controller
 
         $file = file::find($request->id);
 
-        $file->update (['name' => isset($request->name) ? $request->name :$file->name]);
+        $file_name = isset($request->name) ? $request->name : $file->name;
+        $file->name    = $file_name;
+        $file->user_id = Auth::user()->id;
+        //$file->update (['name' => isset($request->name) ? $request->name : $file->name]);
+        
         if (isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $name = uniqid() . '.' . $extension;
@@ -476,13 +480,23 @@ class FilesController extends Controller
             'lesson_id' => 'required|exists:file_lessons,lesson_id'
         ]);
 
-        $file = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
+        
         $lesson = Lesson::find($request->lesson_id);
         // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         LastAction::lastActionInCourse($lesson->course_id);
-        $file->delete();
-        File::whereId($request->fileID)->delete();
-        Material::where('item_id',$request->fileID)->where('type','file')->delete();
+        // $target_file = file::whereId($request->fileID)->first();
+        
+        $fileIns = new file();
+        $target_file = $fileIns->find($request->fileID);
+        if($target_file != null)
+            $target_file->delete();
+        $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
+        if($file != null)
+            $file->delete();
+        $material = Material::where('item_id',$request->fileID)->where('type','file')->first();
+        if ($material != null) {
+            $material->delete();
+        }
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'file')->get();
         return HelperController::api_response_format(200, $tempReturn, $message = __('messages.file.delete'));
     }

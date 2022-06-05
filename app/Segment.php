@@ -5,10 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
-
+use App\Traits\Auditable;
 
 class Segment extends Model
 {
+    use Auditable;
     use SoftDeletes;
 
     protected $fillable = ['name','academic_type_id','academic_year_id','start_date','end_date'];
@@ -47,4 +48,48 @@ class Segment extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $year_id = [intval($new['academic_year_id'])];
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $type_id = [intval($new['academic_type_id'])];
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

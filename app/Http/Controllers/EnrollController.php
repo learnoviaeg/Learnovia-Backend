@@ -81,14 +81,19 @@ class EnrollController extends Controller
 
         //for logs
         $logsbefore=$chains->get();
-        event(new MassLogsEvent($logsbefore,'deleted'));
+        // event(new MassLogsEvent($logsbefore,'deleted'));
 
         foreach($logsbefore as $enroll){
             $parent = Parents::where('child_id',$enroll->user_id)->pluck('parent_id');
             Enroll::whereIn('user_id',$parent)->where('role_id',7)->where('course',$enroll->course)->delete();
         }
 
-        $chains->delete();
+        // updated ahmed
+        foreach ($logsbefore as $key => $chain) {
+            $chain->delete();
+        }
+
+        // $chains->delete();
         return response()->json(['message' => __('messages.enroll.delete'), 'body' => null], 200);
     }
 }

@@ -152,7 +152,7 @@ class SegmentsController extends Controller
 
         if ($request->filled('year') && $request->filled('type'))
         {
-            Segment::whereId($id)->update([
+            $segment->update([
                 'academic_year_id' => $request->year,
                 'academic_type_id' => $request->type,
             ]);

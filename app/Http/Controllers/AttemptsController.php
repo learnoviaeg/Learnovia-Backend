@@ -284,7 +284,7 @@ class AttemptsController extends Controller
             }
 
             if((Auth::user()->can('site/quiz/unLimitedAttempts'))){
-                $empty=UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null,'correction' => null,'force_submit' =>null,'answered' =>null]);
+                $empty = UserQuizAnswer::where('user_quiz_id',$last_attempt->id)->update(['user_answers' => null,'correction' => null,'force_submit' =>null,'answered' =>null]);
 
                 foreach($quiz_lesson->quiz->Question as $question)
                 {

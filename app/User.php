@@ -9,9 +9,12 @@ use Laravel\Passport\HasApiTokens;
 use DB;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Auditable;
+use App\Enroll;
 
 class User extends Authenticatable
 {
+    use Auditable;
     use HasRoles;
     use SoftDeletes;
     use Notifiable, HasApiTokens, HasRoles;
@@ -25,8 +28,9 @@ class User extends Authenticatable
     protected $fillable = [
         'firstname', 'email', 'password', 'real_password', 'lastname', 'username','suspend','class_id','picture', 'level',
         'type', 'arabicname', 'country', 'birthdate', 'gender', 'phone', 'address', 'nationality', 'notes', 'language',
-        'timezone', 'religion', 'second language', 'profile_fields','token','chat_uid','chat_token','refresh_chat_token','last_login','nickname','api_token'
-    ];
+        'timezone', 'religion', 'second language', 'profile_fields','token','chat_uid','chat_token','refresh_chat_token','last_login','nickname','api_token', 'role_id'
+    ];  
+
 
     /**
      * The attributes that should be hidden for arrays.
@@ -208,4 +212,52 @@ class User extends Authenticatable
     { 
         return $this->hasMany('App\SessionLog','user_id','id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+        $year_id = Enroll::where('user_id', $new->id)->groupBy('year')->pluck('year')->toArray();
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $type_id = Enroll::where('user_id', $new->id)->groupBy('type')->pluck('type')->toArray();
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $level_id = Enroll::where('user_id', $new->id)->groupBy('level')->pluck('level')->toArray();
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $class_id = Enroll::where('user_id', $new->id)->groupBy('group')->pluck('group')->toArray();
+        return $class_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $segment_id = Enroll::where('user_id', $new->id)->groupBy('segment')->pluck('segment')->toArray();
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value attribute
+    public static function get_course_name($old, $new)
+    {
+        $course_id = Enroll::where('user_id', $new->id)->groupBy('course')->pluck('course')->toArray();
+        return $course_id;
+    }
+    // end function get name and value attribute
 }
