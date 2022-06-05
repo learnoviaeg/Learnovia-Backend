@@ -9,6 +9,7 @@
     <div class="container-fluid">
         <script>
             function postData(){
+                console.log('h5p message trigger')
             let msg = JSON.stringify( {'data': {{ $id }}, 'type': 'edit' ,'editting_done':{{ $editting_done }} });
                 window.parent.postMessage( msg ,'*');
             }

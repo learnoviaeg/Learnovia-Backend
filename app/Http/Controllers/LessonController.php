@@ -128,7 +128,7 @@ class LessonController extends Controller
         if ($request->filled('description')) 
             $lesson->description = $request->description;
         
-        $course-Course::find($lesson->course_id);
+        $course = Course::find($lesson->course_id);
         if($request->filled('shared_lesson') && $course->shared_lesson == 0 && $request->shared_lesson ==1)
             return HelperController::api_response_format(400,null ,__('messages.error.not_allowed_to_edit'));
         
