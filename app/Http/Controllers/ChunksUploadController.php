@@ -49,7 +49,7 @@ class ChunksUploadController extends Controller
             $input = new Request([
                 'extension' => $ext,
             ]);
-            $rules= [
+            $rules= [ 
                 'extension' => 'required|in:'.$settings,
             ];         
             $customMessages = [
