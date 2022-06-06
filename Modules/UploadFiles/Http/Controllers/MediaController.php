@@ -251,9 +251,9 @@ class MediaController extends Controller
 
                 $mediaLesson->save();
 
-                if ($request->type == 0) {
-                    Storage::disk('public')->putFileAs('media/', $item, $name);
-                }
+                // if ($request->type == 0) {
+                //     Storage::disk('public')->putFileAs('media/', $item, $name);
+                // }
 
                 // dd($request->users_ids);
                 if(!isset($request->users_ids)){
