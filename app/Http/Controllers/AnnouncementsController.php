@@ -217,7 +217,17 @@ class AnnouncementsController extends Controller
             // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
             // $notification->send();
 
-            $this->notification->sendNotify($users,$announcement->title.' announcement is created',$announcement->id,'announcement','announcement');
+            $reqNot=[
+                'message' => $announcement->title.' announcement is created',
+                'item_id' => $announcement->id,
+                'item_type' => 'announcement',
+                'type' => 'announcement',
+                'publish_date' => $announcement->publish_date,
+                'lesson_id' => null,
+                'course_name' => null
+            ];
+//return $users;
+            $this->notification->sendNotify($users,$reqNot);
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -281,8 +291,21 @@ class AnnouncementsController extends Controller
         $announcement->save();
 
         // send notification
+
+        $reqNot=[
+            'message' => $announcement->title.' announcement is updated',
+            'item_id' => $announcement->id,
+            'item_type' => 'announcement',
+            'type' => 'announcement',
+            'publish_date' => $announcement->publish_date,
+            'lesson_id' => null,
+            'course_name' => null
+        ];
+
         $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
-        $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
+        $this->notification->sendNotify($users,$reqNot);
+
+        // $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }

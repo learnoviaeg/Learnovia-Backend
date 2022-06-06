@@ -399,7 +399,7 @@ class MaterialsController extends Controller
         $material = Material::find($request->id);
         if(isset($request->users_ids)){
             Material::where('type',$material->type)->where('item_id',$material->item_id)->update(['restricted'=>1]);
-            $this->notification->sendNotify($request->users_ids,$material->name." ".$material->type.' is updated',$material->item_id,'notification',$material->type);    
+            // $this->notification->sendNotify($request->users_ids,$material->name." ".$material->type.' is updated',$material->item_id,'notification',$material->type);    
         }
 
         CoursesHelper::updateCourseItem($material->item_id, $material->type, $request->users_ids);

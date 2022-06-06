@@ -108,10 +108,10 @@ class H5PLessonController extends Controller
             // $notification = new H5PNotification($h5p_lesson, $content->title.' interactive is added');
             // $notification->send();
             $updatedH5p=h5pLesson::find($h5p_lesson->id);
-            if($updatedH5p->restricted){
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson->id)->pluck('user_id');
-                $this->notification->sendNotify($users,$content->title.' interactive is created',$request->content_id,'interactive','interactive');
-            }
+            // if($updatedH5p->restricted){
+            //     $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson->id)->pluck('user_id');
+            //     $this->notification->sendNotify($users,$content->title.' interactive is created',$request->content_id,'interactive','interactive');
+            // }
         }
 
         return HelperController::api_response_format(200,$updatedH5p, __('messages.interactive.add'));
@@ -236,7 +236,7 @@ class H5PLessonController extends Controller
         if(isset($courseItem))
             $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-        $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
+        // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
 
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
@@ -277,8 +277,8 @@ class H5PLessonController extends Controller
 
         if(!isset($request->users_ids))
             $h5pLessons->update(['restricted' => 0]);
-        else
-            $this->notification->sendNotify($request->users_ids,$content->title.' interactive is created',$request->content_id,'interactive','interactive');  
+        // else
+        //     $this->notification->sendNotify($request->users_ids,$content->title.' interactive is created',$request->content_id,'interactive','interactive');  
 
         foreach($h5pLessons->cursor() as $h5pLesson){
             CoursesHelper::updateCourseItem($h5pLesson->id, 'h5p_content', $request->users_ids);

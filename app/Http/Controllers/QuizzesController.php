@@ -332,9 +332,18 @@ class QuizzesController extends Controller
             $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
-            
-            $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
-            
+        
+            $reqNot=[
+                'message' => $quiz->name.' quiz is updated',
+                'item_id' => $quiz->id,
+                'item_type' => 'quiz',
+                'type' => 'notification',
+                'publish_date' => $quiz_lesson->publish_date,
+                'lesson_id' => $request->lesson_id,
+                'course_name' => Course::find($quiz->course_id)->name
+            ];
+
+            $this->notification->sendNotify($users,$reqNot);
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
@@ -573,7 +582,18 @@ class QuizzesController extends Controller
         if(!isset($request->users_ids))
             $quiz->restricted=0;
         else
-            $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
+        {
+            $reqNot=[
+                'message' => $quiz->name.' quiz is updated',
+                'item_id' => $quiz->id,
+                'item_type' => 'quiz',
+                'type' => 'notification',
+                'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'lesson_id' => $request->lesson_id,
+                'course_name' => $quiz->course_id
+            ];
+            $this->notification->sendNotify($request->users_ids,$reqNot);
+        }
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);

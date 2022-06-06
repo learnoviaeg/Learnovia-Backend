@@ -8,13 +8,13 @@ use App\Material;
 class CoursesHelper{
 
     public static function giveUsersAccessToViewCourseItem($itemId, $type , array $usersIds){
-        $item = CourseItem::create([
+        $item = CourseItem::firstOrCreate([
             'item_id' => $itemId,
             'type' => $type
         ]);
 
         foreach($usersIds as $userId){
-            UserCourseItem::create([
+            UserCourseItem::firstOrCreate([
                 'user_id' => $userId,
                 'course_item_id' => $item->id,
             ]);
