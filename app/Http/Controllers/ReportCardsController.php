@@ -248,7 +248,6 @@ class ReportCardsController extends Controller
                 }]); 
             };
 
-
             if($request->term == 'first')
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {

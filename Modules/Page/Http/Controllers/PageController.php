@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use App\Enroll;
+use App\SecondaryChain;
 use App\Http\Controllers\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
@@ -19,9 +20,15 @@ use App\Material;
 use Exception;
 use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
+use App\Repositories\NotificationRepoInterface;
 
 class PageController extends Controller
 {
+    public function __construct( NotificationRepoInterface $notification)
+    {
+        $this->notification = $notification;
+    }
+
     /**
      * Display a listing of the resource.
      * @return Response
@@ -181,6 +188,15 @@ class PageController extends Controller
 
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
+
+        // //send notification
+        // $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        // $courseItem = CourseItem::where('item_id', $page->id)->where('type', 'page')->first();
+        // if(isset($courseItem))
+        //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+        //     // dd($users);
+        // $this->notification->sendNotify($users->toArray(),$page->name. ' page is updated',$page->id,'notification','page');    
+        
         $page['lesson'] =  $page->Lesson;
 
         return HelperController::api_response_format(200, $page, __('messages.page.update'));
