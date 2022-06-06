@@ -192,7 +192,7 @@ class NotificationController extends Controller
             "item_id" => $item_id,
         ];
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/update/notifications', [
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',
@@ -313,32 +313,5 @@ class NotificationController extends Controller
         $user->save();
         
         return HelperController::api_response_format(200, 'token added Done');
-    }
-
-    public function testNotification()
-    {
-        // for($i=0;$i<=10000;$i++)
-        // {
-            $notification = [
-                'type' => 'notification',
-                'item_id' => 1,
-                'item_type' => 'quiz',
-                'message' => 'quiz tested performance',
-                'publish_date' => Carbon::now(),
-                'created_by' => 1,
-                'lesson_id' => 1,
-                'course_id' => 1,
-                'classes' => json_encode([1]),
-            ];
-    
-            //assign notification to given users
-            $t=new SendNotification();
-            $createdNotification = $t->toDatabase($notification,User::pluck('id')); // User::whereId(1)->get()
-            
-            //firebase Notifications
-            $t->toFirebase($createdNotification);
-        // }
-
-        return 'Done';
     }
 }

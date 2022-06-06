@@ -108,11 +108,16 @@ class NotificationsController extends Controller
     {
         $request->validate([
             'users' => 'required|exists:users,id',
+            'type' => 'string' // announcement-notification
         ]);
 
         $data=[];
         $us=[];
         $usersAll=collect();
+        $us['page']=isset($request->page) ? $request->page : 1;
+        $us['paginate']=isset($request->paginate) ? $request->paginate : 10;
+        $us['type']=$request->type;
+        $us['seen']=isset($request->seen) ? $request->seen : null;
         foreach($request->users as $user)
         {
             $data['user_id']=$user;
@@ -123,7 +128,7 @@ class NotificationsController extends Controller
 
         // $clientt = new Client();
         // // return $us;
-        // $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications', [
+        // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications', [
         //     'headers'   => [
         //         'username' => 'test',
         //         'password' => 'api_test_5eOiG7CTC',
@@ -134,7 +139,7 @@ class NotificationsController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications',
+        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -278,20 +283,25 @@ class NotificationsController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'notification_ids' => 'required|array',
+            'notification_ids' => 'array',
+            'all' => 'in:0,1'
         ]);
 
         $data=[];
         $us=[];
         $usersAll=collect();
-        foreach($request->notification_ids as $notification_id)
-        {
-            $data['notification_id']=$notification_id;
-            $us['notifications'][]=$data;
-        }
+        $us['all']=0;
+        if(isset($request->all))
+            $us['all']=1;
+        else
+            foreach($request->notification_ids as $notification_id)
+            {
+                $data['notification_id']=$notification_id;
+                $us['notifications'][]=$data;
+            }
 
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/update/notifications', [
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',
