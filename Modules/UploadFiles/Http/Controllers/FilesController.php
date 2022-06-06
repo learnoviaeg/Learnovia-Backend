@@ -548,10 +548,15 @@ class FilesController extends Controller
         $lesson = Lesson::find($request->lesson_id);
         // $courseID = CourseSegment::where('id', $lesson->course_segment_id)->pluck('course_id')->first();
         LastAction::lastActionInCourse($lesson->course_id);
-        $target_file = File::whereId($request->fileID)->first();
-        $target_file->delete();
+        // $target_file = file::whereId($request->fileID)->first();
+        
+        $fileIns = new file();
+        $target_file = $fileIns->find($request->fileID);
+        if($target_file != null)
+            $target_file->delete();
         $file   = FileLesson::where('file_id', $request->fileID)->where('lesson_id', $request->lesson_id)->first();
-        $file->delete();
+        if($file != null)
+            $file->delete();
         $material = Material::where('item_id',$request->fileID)->where('type','file')->first();
         if ($material != null) {
             $material->delete();

@@ -423,6 +423,8 @@ class MediaController extends Controller
 
         $media = media::whereId($request->mediaId)->first();
         $tempReturn = Lesson::find($request->lesson_id)->module('UploadFiles', 'media')->get();
+        
+        if($media !=null)
         $media->delete();
         
         $file = MediaLesson::where('media_id', $request->mediaId)->where('lesson_id', $request->lesson_id)->first();
