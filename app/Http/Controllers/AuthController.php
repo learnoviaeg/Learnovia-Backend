@@ -142,7 +142,7 @@ class AuthController extends Controller
             'fcm_tokens'=> array($fcm_tokens)
         ];
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/register', [
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/register', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',

@@ -117,13 +117,16 @@ class NotificationsController extends Controller
         {
             $data['user_id']=$user;
             $data['school_domain']='test';
+            $us['page']=$request->page;
+            $us['paginate']=$request->paginate;
+            $us['type']=$request->type;
             // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             $us['users'][]=$data;
         }
 
         // $clientt = new Client();
         // // return $us;
-        // $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications', [
+        // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications', [
         //     'headers'   => [
         //         'username' => 'test',
         //         'password' => 'api_test_5eOiG7CTC',
@@ -134,7 +137,7 @@ class NotificationsController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/get/notifications',
+        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -291,7 +294,7 @@ class NotificationsController extends Controller
         }
 
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-18-212-48-229.compute-1.amazonaws.com/api/update/notifications', [
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',
