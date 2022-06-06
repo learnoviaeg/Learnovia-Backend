@@ -95,6 +95,10 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\LetterPercentageListener',
         ],
 
+        'App\Events\CreateCourseItemEvent' => [
+            'App\Listeners\SendNotificationListener',
+        ],
+
     ];
 
     /**

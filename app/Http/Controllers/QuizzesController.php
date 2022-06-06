@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
+use App\Repositories\NotificationRepoInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
@@ -38,9 +39,10 @@ use App\LessonComponent;
 
 class QuizzesController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware('auth');
         $this->middleware(['permission:quiz/get','ParentCheck'],   ['only' => ['index','show']]);
         $this->middleware('ParentCheck',   ['only' => ['show']]);
@@ -224,10 +226,6 @@ class QuizzesController extends Controller
                 'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
-
-            // //sending notifications
-            // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-            // $notification->send();
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -329,6 +327,14 @@ class QuizzesController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz->id));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
+
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            
+            $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
+            
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
@@ -405,6 +411,7 @@ class QuizzesController extends Controller
             $targetQuiz = Quiz::where('id',$id)->first();
             $targetQuiz->delete();
         }
+
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
 
@@ -565,6 +572,8 @@ class QuizzesController extends Controller
 
         if(!isset($request->users_ids))
             $quiz->restricted=0;
+        else
+            $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);
