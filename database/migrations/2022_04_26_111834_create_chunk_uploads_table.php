@@ -20,6 +20,7 @@ class CreateChunkUploadsTable extends Migration
             $table->text('type')->nullable();
             $table->boolean('uploaded')->default(0);
             $table->timestamps();
+
         });
     }
 
