@@ -421,6 +421,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
     Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
     Route::get('deleteEnrollmentInWrongClasses', 'ScriptsController@deleteEnrollmentInWrongClasses');
+    Route::get('deleteDuplicatedGrades', 'ScriptsController@delete_duplicated_grades');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -525,6 +526,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
+    Route::patch('notify/update', 'NotificationsController@update');
     Route::Resource('notify', NotificationsController::class);
     Route::post('working-days/edit', 'WorkingDayController@edit');
     Route::Resource('working-days', WorkingDayController::class);
@@ -623,7 +625,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
        Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
        Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
-   
     });
     // added ahmed
 });

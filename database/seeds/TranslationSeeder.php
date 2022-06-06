@@ -160,10 +160,18 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 2, 'value' => 'إضافة الاسئلة']);
         Dictionary::firstOrCreate(['key' => 'add_questions', 'language' => 1, 'value' => 'Add Questions']);
 
-        // added ahmed
         Dictionary::firstOrCreate(['key' => 'logs/logs', 'language' => 1, 'value' => 'Logs']);
         Dictionary::firstOrCreate(['key' => 'logs/logs', 'language' => 2, 'value' => 'السجلات']);
 
-
+        Dictionary::firstOrCreate(['key' => 'Last', 'language' => 2, 'value' => 'الأخيرة']);
+        Dictionary::firstOrCreate(['key' => 'Last', 'language' => 1, 'value' => 'Last']);
+        Dictionary::firstOrCreate(['key' => 'Average', 'language' => 2, 'value' => 'المتوسط']);
+        Dictionary::firstOrCreate(['key' => 'Average', 'language' => 1, 'value' => 'Average']);
+        Dictionary::firstOrCreate(['key' => 'First', 'language' => 2, 'value' => 'الأولى']);
+        Dictionary::firstOrCreate(['key' => 'First', 'language' => 1, 'value' => 'First']);
+        Dictionary::firstOrCreate(['key' => 'Highest', 'language' => 2, 'value' => 'الأعلى']);
+        Dictionary::firstOrCreate(['key' => 'Highest', 'language' => 1, 'value' => 'Highest']);
+        Dictionary::firstOrCreate(['key' => 'Lowest', 'language' => 2, 'value' => 'الأقل']);
+        Dictionary::firstOrCreate(['key' => 'Lowest', 'language' => 1, 'value' => 'Lowest']);
     }
 }

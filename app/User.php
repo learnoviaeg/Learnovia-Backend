@@ -31,7 +31,6 @@ class User extends Authenticatable
         'timezone', 'religion', 'second language', 'profile_fields','token','chat_uid','chat_token','refresh_chat_token','last_login','nickname','api_token', 'role_id'
     ];  
 
-
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -40,6 +39,7 @@ class User extends Authenticatable
     protected $hidden = [
         'remember_token', 'created_at', 'updated_at','chat_uid','refresh_chat_token'
     ];
+    
     /**
      * The attributes that should be cast to native types.
      *

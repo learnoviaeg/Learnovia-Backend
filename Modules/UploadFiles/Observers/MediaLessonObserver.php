@@ -7,12 +7,18 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\Media;
 use App\Lesson;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 use App\SecondaryChain;
 use App\LessonComponent;
 use App\CourseItem;
 
 class MediaLessonObserver
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
     /**
      * Handle the media lesson "created" event.
      *
@@ -34,6 +40,7 @@ class MediaLessonObserver
                 'lesson_id' => $mediaLesson->lesson_id,
                 'type' => 'media',
                 'visible' => $mediaLesson->visible,
+                'restricted' => 0,
                 'link' => $media->link,
                 'mime_type'=>($media->show&&$media->type==null )?'media link':$media->type
             ]);
