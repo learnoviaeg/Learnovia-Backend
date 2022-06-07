@@ -7,6 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Repositories\NotificationRepoInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\UserCourseItem;
+use Carbon\Carbon;
 
 class SendNotificationListener
 {
@@ -28,20 +29,21 @@ class SendNotificationListener
      */
     public function handle(CreateCourseItemEvent $event)
     {
-        $lessons=($event->usercourseItem->courseItem->item);
-        dd($lessons);
+        // $lessons=($event->usercourseItem->courseItem->item);
+        // dd($lessons);
         $reqNot=[
             'message' => $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created',
-            'item_id' => $announcement->id,
+            'item_id' => $event->usercourseItem->courseItem->item_id,
             'item_type' => $event->usercourseItem->courseItem->type,
             'type' => 'notification',
-            'publish_date' => $announcement->publish_date,
-            'lesson_id' => null,
+            'publish_date' => Carbon::now()->format('Y-m-d H:i:s'), // must be on itemLesson ... met2gela
+            'lesson_id' => null, //same publish_date
             'course_name' => $event->usercourseItem->courseItem->item->course->name
         ];
+        $users=UserCourseItem::where('course_item_id',$event->usercourseItem->courseItem->id)->pluck('user_id');
+
         $this->notification->sendNotify($users,$reqNot);
 
-        // $users=UserCourseItem::where('course_item_id',$event->usercourseItem->courseItem->id)->pluck('user_id');
         // $this->notification->sendNotify($users->toArray(), $event->usercourseItem->courseItem->type.' is created', $event->usercourseItem->courseItem->item_id, 'notification', $event->usercourseItem->courseItem->type);
     }
 }
