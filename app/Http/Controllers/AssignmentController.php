@@ -148,11 +148,8 @@ class AssignmentController extends Controller
             'users_ids.*' => 'exists:users,id'
         ];
 
-        $customMessages = [
-            'file.mimes' => __('messages.error.extension_error')
-        ];
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         $assignment = Assignment::firstOrCreate([
             'name' => $request->name,
