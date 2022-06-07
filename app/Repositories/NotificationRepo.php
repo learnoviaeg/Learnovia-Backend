@@ -5,22 +5,25 @@ use GuzzleHttp\Client;
 
 class NotificationRepo implements NotificationRepoInterface
 {
-    public function sendNotify($users,$message,$item_id,$type,$item_type)
+    public function sendNotify($users,$reqNot)
     {
+        // dd($reqNot);
         $data=[
             'users' => $users,
             // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'school_domain'=>'test',
             // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'title'=> 'Learnovia',
-            'body'=> $message,
-            "item_type" => $item_type,
-            "type" => $type,
-            "item_id" => $item_id,
-            'course_name' => null,
-            'lesson_id' => null,
-            'publish_date' => null
+            'body'=> $reqNot['message'],
+            "item_type" => $reqNot['item_type'],
+            "type" => $reqNot['type'],
+            "item_id" => $reqNot['item_id'],
+            'course_name' => $reqNot['course_name'],
+            'lesson_id' => $reqNot['lesson_id'],
+            'publish_date' => $reqNot['publish_date']
         ];
+
+        // dd($data);
 
         // $clientt = new Client();
         // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/send/notifications', [

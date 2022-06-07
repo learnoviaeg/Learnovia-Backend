@@ -219,9 +219,9 @@ class AssignmentController extends Controller
             // $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
             // $notification->send();
 
-            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
-            if(!isset($request->users_ids))
-                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is created',$assignment->id,'notification','assignment');
+            // $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+            // if(!isset($request->users_ids))
+            //     $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is created',$assignment->id,'notification','assignment');
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
@@ -395,7 +395,7 @@ class AssignmentController extends Controller
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-            $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
+            // $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
@@ -516,8 +516,8 @@ class AssignmentController extends Controller
         $assignment->restricted=1;
         if(!isset($request->users_ids))
             $assignment->restricted=0;
-        else
-            $this->notification->sendNotify($request->users_ids,$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');            
+        // else
+        //     $this->notification->sendNotify($request->users_ids,$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');            
         
         $assignment->save();
 

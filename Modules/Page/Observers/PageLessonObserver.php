@@ -50,11 +50,11 @@ class PageLessonObserver
                 $material->restricted=1;
                 $material->save();
             }
-            if($courseItem == null)
-            {
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
-                $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
-            }
+            // if($courseItem == null)
+            // {
+            //     $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
+            //     $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
+            // }
             LessonComponent::firstOrCreate([
                 'lesson_id' => $lesson->id,
                 'comp_id' => $page->id,

@@ -247,10 +247,10 @@ class MediaController extends Controller
                 }
 
                 // dd($request->users_ids);
-                if(!isset($request->users_ids)){
-                    $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
-                    $this->notification->sendNotify($users->toArray(),$media->name. ' media is created',$media->id,'notification','media');    
-                }
+                // if(!isset($request->users_ids)){
+                //     $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+                //     $this->notification->sendNotify($users->toArray(),$media->name. ' media is created',$media->id,'notification','media');    
+                // }
             }
         }
         $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();

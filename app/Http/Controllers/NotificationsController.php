@@ -291,6 +291,7 @@ class NotificationsController extends Controller
         $us=[];
         $usersAll=collect();
         $us['all']=0;
+        $us['type']=$request->type;
         if(isset($request->all))
             $us['all']=1;
         else
