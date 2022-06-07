@@ -63,6 +63,9 @@ class ChunksUploadController extends Controller
                 'name' => $fileName,
                 'type' => $request->type,
             ]);
+            if($request->type == 'create_assignment' || $request->type == 'submit_assignment')
+                $uploaded_file->update(['type' => 'assignemnt']);
+                
             //creating text file to save base64 chunks  
             Storage::disk('public')->put('uploads/'.$fileName.'.txt', $request->content);
         }
@@ -79,12 +82,12 @@ class ChunksUploadController extends Controller
             $uploaded_file->uploaded = 1;
             if($request->type == 'files' || $request->type == 'media' )
                 $uploaded_file->path = $uploaded_file->type.'/'.$uploaded_file->name;
-                
+
             if($request->type == 'create_assignment' )
                 $uploaded_file->path = 'assignment/'.$uploaded_file->name;
 
             if( $request->type == 'submit_assignment' )
-                $uploaded_file->path = 'assigment/'.$uploaded_file->name;
+                $uploaded_file->path = 'assignment/'.$uploaded_file->name;
             
             $uploaded_file->save();
             $base64_whole_string = Storage::disk('public')->get('uploads/'.$uploaded_file->name.'.txt');
