@@ -220,7 +220,7 @@ class QuestionsController extends Controller
                         'type' => 'notification',
                         'publish_date' => $newQuizLesson->publish_date,
                         'lesson_id' => $newQuizLesson->lesson_id,
-                        'course_name' => $quiz->course_id
+                        'course_name' => $quiz->course->name
                     ];
 
                     $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');

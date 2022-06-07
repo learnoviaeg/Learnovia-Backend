@@ -191,11 +191,6 @@ class QuizzesController extends Controller
             'correct_feedback' => $request->correct_feedback,
         ]);
 
-        if(isset($request->users_ids)){
-            CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
-            $quiz->restricted=1;
-        }
-
         $lessons = Lesson::whereIn('id', $request->lesson_id)
                     ->with([
                         'course.gradeCategory'=> function($query)use ($request){
@@ -226,6 +221,11 @@ class QuizzesController extends Controller
                 'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
+
+            if(isset($request->users_ids)){
+                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+                $quiz->restricted=1;
+            }
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -577,6 +577,7 @@ class QuizzesController extends Controller
         ]);
 
         $quiz= Quiz::find($request->id);
+        $quizLesson=QuizLesson::where('quiz_id',$quiz->id)->where('lesson_id',$request->lesson_id)->first();
         $quiz->restricted=1;
 
         if(!isset($request->users_ids))
@@ -588,9 +589,9 @@ class QuizzesController extends Controller
                 'item_id' => $quiz->id,
                 'item_type' => 'quiz',
                 'type' => 'notification',
-                'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'publish_date' => $quizLesson->publish_date,
                 'lesson_id' => $request->lesson_id,
-                'course_name' => $quiz->course_id
+                'course_name' => $quizLesson->lesson->course->name
             ];
             $this->notification->sendNotify($request->users_ids,$reqNot);
         }
