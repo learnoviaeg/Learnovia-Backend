@@ -4,17 +4,21 @@ namespace App\Observers;
 
 use App\Material;
 use App\Repositories\RepportsRepositoryInterface;
+use App\Repositories\NotificationRepoInterface;
 use App\UserSeen;
 use App\Lesson;
+use App\CourseItem;
+use App\SecondaryChain;
 use App\Notifications\MaterialNotification;
 use Illuminate\Support\Facades\Auth;
 class MaterialsObserver
 {
     protected $report;
 
-    public function __construct(RepportsRepositoryInterface $report)
+    public function __construct(RepportsRepositoryInterface $report,NotificationRepoInterface $notification)
     {
         $this->report = $report;
+        $this->notification = $notification;
     }
     /**
      * Handle the material "created" event.
@@ -24,8 +28,8 @@ class MaterialsObserver
      */
     public function created(Material $material)
     {
-        $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is added.');
-        $notification->send();
+        // $notification = new MaterialNotification($material,$material->name.' '.$material->type.' is added.');
+        // $notification->send();
 
         $this->report->calculate_course_progress($material->course_id);
     }

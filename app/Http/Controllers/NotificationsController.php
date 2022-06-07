@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Notifications\NewMessage;
 use App\User;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use DB;
 use App\LastAction;
 use App\Course;
@@ -30,77 +31,134 @@ class NotificationsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request,$types=null)
+    // public function index(Request $request,$types=null)
+    // {
+    //     $request->validate([
+    //         'read' => 'in:1,0',
+    //         'type'=>'string|in:announcement,notification',  
+    //         'course_id' => 'integer|exists:courses,id',
+    //         'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting',
+    //         'sort_in' => 'in:asc,desc', 
+    //         'search' => 'string'
+    //     ]);
+
+    //     //check if the auth user is parent and has current child to get his child notifications
+
+    //     $user = Auth::user();
+    //     $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
+
+    //     $roles = Auth::user()->roles->pluck('name');
+
+    //     if(in_array("Parent" , $roles->toArray())){
+
+    //         if(Auth::user()->currentChild != null)
+    //         {
+    //             $currentChild =User::find(Auth::user()->currentChild->child_id);
+    //             Auth::setUser($currentChild);
+    //             $notifications[] = $user->notifications->where('publish_date' ,'<=',Carbon::now());
+    //         }
+    //     }
+      
+    //     // for route api/notifications/{types} 
+    //     if($types=='types'){
+
+    //         $notifications_types = $notifications->where('item_type','!=','announcement')->pluck('item_type')->unique();
+
+    //         return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
+    //     }
+
+    //     if($request->has('sort_in') && $request->sort_in == 'asc'){
+    //         $notifications = $notifications->reverse()->values();
+    //     }
+
+    //     //read
+    //     if($request->has('read') && $request->read){
+    //         $notifications = $notifications->where('pivot.read_at','!=',null);
+    //     }
+
+    //     //unread
+    //     if($request->has('read') && !$request->read){
+    //         $notifications = $notifications->where('pivot.read_at',null);
+    //     }
+
+    //     if($request->type){
+    //         $notifications = $notifications->where('type',$request->type);
+    //     }
+        
+    //     if($request->filled('component_type')){
+    //         $notifications = $notifications->where('item_type',$request->component_type);
+    //     }
+
+    //     if($request->filled('course_id')){
+    //         $notifications = $notifications->where('course_id',$request->course_id);
+    //     }
+
+    //     if($request->filled('search')){
+
+    //         $notifications = $notifications->filter(function ($item) use ($request) {
+    //             if($item->message != null && str_contains(strtolower($item->message), strtolower($request->search))) 
+    //                 return $item; 
+    //         });
+    //     }
+
+    //     return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
+    // }
+
+    public function index(Request $request)
     {
         $request->validate([
-            'read' => 'in:1,0',
-            'type'=>'string|in:announcement,notification',  
-            'course_id' => 'integer|exists:courses,id',
-            'component_type' => 'string|in:file,media,Page,quiz,assignment,h5p,meeting',
-            'sort_in' => 'in:asc,desc', 
-            'search' => 'string'
+            'users' => 'required|exists:users,id',
+            'type' => 'string' // announcement-notification
         ]);
 
-        //check if the auth user is parent and has current child to get his child notifications
-
-        $user = Auth::user();
-        $notifications = $user->notifications->where('publish_date' ,'<=',Carbon::now());
-
-        $roles = Auth::user()->roles->pluck('name');
-
-        if(in_array("Parent" , $roles->toArray())){
-
-            if(Auth::user()->currentChild != null)
-            {
-                $currentChild =User::find(Auth::user()->currentChild->child_id);
-                Auth::setUser($currentChild);
-                $notifications[] = $user->notifications->where('publish_date' ,'<=',Carbon::now());
-            }
-        }
-      
-        // for route api/notifications/{types} 
-        if($types=='types'){
-
-            $notifications_types = $notifications->where('item_type','!=','announcement')->pluck('item_type')->unique();
-
-            return response()->json(['message' => 'notification types list.','body' => $notifications_types->unique()->values()], 200);
+        $data=[];
+        $us=[];
+        $usersAll=collect();
+        $us['page']=isset($request->page) ? $request->page : 1;
+        $us['paginate']=isset($request->paginate) ? $request->paginate : 10;
+        $us['type']=$request->type;
+        $us['seen']=isset($request->seen) ? $request->seen : null;
+        foreach($request->users as $user)
+        {
+            $data['user_id']=$user;
+            $data['school_domain']='test';
+            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            $us['users'][]=$data;
         }
 
-        if($request->has('sort_in') && $request->sort_in == 'asc'){
-            $notifications = $notifications->reverse()->values();
-        }
+        // $clientt = new Client();
+        // // return $us;
+        // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications', [
+        //     'headers'   => [
+        //         'username' => 'test',
+        //         'password' => 'api_test_5eOiG7CTC',
+        //     ], 
+        //     "form_params" => $us
+        // ]);
 
-        //read
-        if($request->has('read') && $request->read){
-            $notifications = $notifications->where('pivot.read_at','!=',null);
-        }
+        $curl = curl_init();
 
-        //unread
-        if($request->has('read') && !$request->read){
-            $notifications = $notifications->where('pivot.read_at',null);
-        }
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>json_encode($us),
+        CURLOPT_HTTPHEADER => array(
+                'username: test',
+                'password: api_test_5eOiG7CTC',
+                'Content-Type: application/json'
+            ),
+        ));
 
-        if($request->type){
-            $notifications = $notifications->where('type',$request->type);
-        }
-        
-        if($request->filled('component_type')){
-            $notifications = $notifications->where('item_type',$request->component_type);
-        }
+        $response = curl_exec($curl);
+        curl_close($curl);
 
-        if($request->filled('course_id')){
-            $notifications = $notifications->where('course_id',$request->course_id);
-        }
-
-        if($request->filled('search')){
-
-            $notifications = $notifications->filter(function ($item) use ($request) {
-                if($item->message != null && str_contains(strtolower($item->message), strtolower($request->search))) 
-                    return $item; 
-            });
-        }
-
-        return response()->json(['message' => 'User notification list.','body' => $notifications->values()->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(json_decode($response));
     }
 
     /**
@@ -207,19 +265,50 @@ class NotificationsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$id)
-    {
-        $notificaton = Notification::findOrFail($id);
+    // public function update(Request $request,$id)
+    // {
+    //     $notificaton = Notification::findOrFail($id);
 
-        $user_notification = $notificaton->users->where('pivot.user_id',Auth::id())->first();
+    //     $user_notification = $notificaton->users->where('pivot.user_id',Auth::id())->first();
         
-        if($user_notification){
+    //     if($user_notification){
 
-            $user_notification->pivot->read_at = Carbon::now()->toDateTimeString();
-            $user_notification->pivot->save();
-        }
+    //         $user_notification->pivot->read_at = Carbon::now()->toDateTimeString();
+    //         $user_notification->pivot->save();
+    //     }
        
-        return response()->json(['message' => 'Notification was read','body' => $notificaton], 200); 
+    //     return response()->json(['message' => 'Notification was read','body' => $notificaton], 200); 
+    // }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'notification_ids' => 'array',
+            'all' => 'in:0,1'
+        ]);
+
+        $data=[];
+        $us=[];
+        $usersAll=collect();
+        $us['all']=0;
+        if(isset($request->all))
+            $us['all']=1;
+        else
+            foreach($request->notification_ids as $notification_id)
+            {
+                $data['notification_id']=$notification_id;
+                $us['notifications'][]=$data;
+            }
+
+        $clientt = new Client();
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
+            'headers'   => [
+                'username' => 'test',
+                'password' => 'api_test_5eOiG7CTC',
+            ], 
+            'form_params' => $us
+        ]);
+        return $res;
     }
 
     public function read(Request $request,$read=null)

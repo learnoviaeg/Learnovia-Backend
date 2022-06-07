@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\h5pLesson;
-use App\Lesson;
+use DB;
+use Auth;
 use App\User;
 use App\Enroll;
+use App\Lesson;
 use App\Component;
-use App\CourseItem;
-use Auth;
+use App\h5pLesson;
 use Carbon\Carbon;
-use DB;
+use App\CourseItem;
 use App\LastAction;
-use App\Http\Controllers\Controller;
 use App\Notification;
-use App\Notifications\H5PNotification;
+use App\SecondaryChain;
 use App\UserCourseItem;
+use Illuminate\Http\Request;
 use App\Helpers\CoursesHelper;
+use App\Http\Controllers\Controller;
+use App\Notifications\H5PNotification;
 use Illuminate\Database\Eloquent\Builder;
+use App\Repositories\NotificationRepoInterface;
+use App\TempLog;
+use App\AuditLog;
 
 class H5PLessonController extends Controller
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification = $notification;
+    }
 
     public function install()
     {
@@ -65,7 +73,6 @@ class H5PLessonController extends Controller
         return \App\Http\Controllers\HelperController::api_response_format(200, null, 'Component Installed Successfully');
     }
 
-
     public function create (Request $request)
     {
         $request->validate([
@@ -77,19 +84,18 @@ class H5PLessonController extends Controller
             'users_ids.*' => 'exists:users,id'
         ]);
 
-        // $h5p_lesson = h5pLesson::where('content_id',$request->content_id)->whereIn('lesson_id',$request->lesson_id)->first();
-        // if(!isset($h5p_lesson)){
         foreach($request->lesson_id as $lesson_id){
             $h5p_lesson = h5pLesson::firstOrCreate([
                 'content_id' => $request->content_id,
                 'lesson_id' => $lesson_id,
                 'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
-                'start_date' => Carbon::now(),
+                'start_date' => $request->publish_date,
                 'user_id' => Auth::id(),
-                'visible'=>isset($request->visible)?$request->visible:1
+                'visible'=>isset($request->visible)?$request->visible:1,
+                'restricted' => 0
             ]);
-        // }
-            /////////user restrictions 
+
+            //user restrictions 
             if(isset($request->users_ids)){
                 CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
                 h5pLesson::where('id',$h5p_lesson->id)->update(['restricted' => 1]);
@@ -97,14 +103,18 @@ class H5PLessonController extends Controller
             $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
             $lesson = Lesson::find($lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
-            // $class_id=$Lesson->shared_classes;
 
             //sending Notification
-            $notification = new H5PNotification($h5p_lesson, $content->title.' interactive is added');
-            $notification->send();
+            // $notification = new H5PNotification($h5p_lesson, $content->title.' interactive is added');
+            // $notification->send();
+            $updatedH5p=h5pLesson::find($h5p_lesson->id);
+            if($updatedH5p->restricted){
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson->id)->pluck('user_id');
+                $this->notification->sendNotify($users,$content->title.' interactive is created',$request->content_id,'interactive','interactive');
+            }
         }
 
-        return HelperController::api_response_format(200,$h5p_lesson, __('messages.interactive.add'));
+        return HelperController::api_response_format(200,$updatedH5p, __('messages.interactive.add'));
     }
 
     public function toggleVisibility(Request $request)
@@ -158,7 +168,6 @@ class H5PLessonController extends Controller
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
 
-
         $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();
         $h5p_content= collect();
@@ -189,22 +198,21 @@ class H5PLessonController extends Controller
 
         $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
-
+        
         return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
     }
 
-    public function edit (Request $request){
-
+    public function edit(Request $request){
         $request->validate([
             'content_id' => 'required|exists:h5p_contents,id',
             'lesson_id' => 'required|integer|exists:h5p_lessons,lesson_id',
             'updated_lesson_id' => 'nullable|exists:lessons,id',
             'visible'=>'in:0,1'
-
-
         ]);
         // $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+        $content = DB::table('h5p_contents')->whereId($request->content_id)->first();
         $h5pLesson = h5pLesson::where('content_id', $request->content_id)->where('lesson_id', $request->lesson_id)->first();
+        $h5pLessons=$h5pLesson;
         if(!isset($h5pLesson))
             return HelperController::api_response_format(500, null,__('messages.interactive.interactive_not_belong'));
         $lesson = Lesson::find($request->lesson_id);
@@ -215,31 +223,47 @@ class H5PLessonController extends Controller
             ]);
             $lesson = Lesson::find($request->updated_lesson_id);
             LastAction::lastActionInCourse($lesson->course_id);
-            }
+        }
         if ($request->filled('visible')) {
             $h5pLesson->update([
                 'visible' => $request->visible
             ]);
         }
 
+        $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        // dd($h5pLessons->id);
+        $courseItem = CourseItem::where('item_id', $h5pLessons->id)->where('type', 'h5p_content')->first();
+        if(isset($courseItem))
+            $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
+        $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
 
         // $content = response()->json(DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first());
         // // $content->link =  $url.'/api/h5p/'.$h5pLesson->content_id.'/edit';
         // $content->pivot = [
-        //     'lesson_id' =>  $h5pLesson->lesson_id,
-        //     'content_id' =>  $h5pLesson->content_id,
-        //     'publish_date' => $h5pLesson->publish_date,
-        //     'created_at' =>  $h5pLesson->created_at,
+        //     'lesson_id'     =>  $h5pLesson->lesson_id,
+        //     'content_id'    =>  $h5pLesson->content_id,
+        //     'publish_date'  => $h5pLesson->publish_date,
+        //     'created_at'    =>  $h5pLesson->created_at,
         // ];
 
+        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();  
+        // update some data
+        $temp_log->user_id = $request->user('api')->id;
+        $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
+        $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
+        $temp_log->save();
+        
+        $arr = $temp_log->toArray();
+        $result = Auditlog::firstOrCreate($arr);
+        if ($result) {
+            $temp_log->delete();
+        }    
+        
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
-
-
     ////////////////////user restrictions
-
 
     public function editH5pAssignedUsers(Request $request){
         $request->validate([
@@ -253,6 +277,8 @@ class H5PLessonController extends Controller
 
         if(!isset($request->users_ids))
             $h5pLessons->update(['restricted' => 0]);
+        else
+            $this->notification->sendNotify($request->users_ids,$content->title.' interactive is created',$request->content_id,'interactive','interactive');  
 
         foreach($h5pLessons->cursor() as $h5pLesson){
             CoursesHelper::updateCourseItem($h5pLesson->id, 'h5p_content', $request->users_ids);
@@ -284,5 +310,4 @@ class H5PLessonController extends Controller
 
         return response()->json($result,200);
     }
-
 }

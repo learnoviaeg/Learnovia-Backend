@@ -7,12 +7,18 @@ use App\Events\MassLogsEvent;
 use Modules\UploadFiles\Entities\File;
 use App\Lesson;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 use App\CourseItem;
 use App\SecondaryChain;
 use App\LessonComponent;
 
 class FileLessonObserver
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
     /**
      * Handle the file lesson "created" event.
      *
@@ -33,6 +39,7 @@ class FileLessonObserver
                 'course_id' => $course_id,
                 'lesson_id' => $fileLesson->lesson_id,
                 'type' => 'file',
+                'restricted' => 0,
                 'visible' => $fileLesson->visible,
                 'link' => $file->url,
                 'mime_type'=> $file->type,
@@ -52,6 +59,11 @@ class FileLessonObserver
             {
                 $material->restricted=1;
                 $material->save();
+            }
+            if($courseItem == null)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
             }
         }
     }
@@ -111,8 +123,8 @@ class FileLessonObserver
     public function deleted(FileLesson $fileLesson)
     {
         //for log event
-        $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
-        $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->first()->delete();
+        // $logsbefore=Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->get();
+        // $all = Material::where('lesson_id',$fileLesson->lesson_id)->where('item_id',$fileLesson->file_id)->where('type','file')->first()->delete();
         $LessonComponent = LessonComponent::where('comp_id',$fileLesson->file_id)->where('lesson_id',$fileLesson->lesson_id)->where('model' , 'file')->first();
 
         if(isset($LessonComponent)){
@@ -122,8 +134,8 @@ class FileLessonObserver
             ->where('index' ,'>=',$current_lesson_component->index )->decrement('index');
             $LessonComponent->delete();
         }
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'deleted'));
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'deleted'));
 
         LessonComponent::where('comp_id',$fileLesson->media_id)
             ->where('lesson_id',$fileLesson->lesson_id)

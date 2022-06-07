@@ -1,4 +1,7 @@
 <?php
+
+Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
+
 Route::get('/' , 'AuthController@site');
 Route::get('testNotification' , 'NotificationController@testNotification');
 Route::get('/materials/{id}', 'MaterialsController@show')->middleware(['getauth','LastAction']);
@@ -418,6 +421,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
     Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
     Route::get('deleteEnrollmentInWrongClasses', 'ScriptsController@deleteEnrollmentInWrongClasses');
+    Route::get('deleteDuplicatedGrades', 'ScriptsController@delete_duplicated_grades');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -522,6 +526,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
+    Route::patch('notify/update', 'NotificationsController@update');
     Route::Resource('notify', NotificationsController::class);
     Route::post('working-days/edit', 'WorkingDayController@edit');
     Route::Resource('working-days', WorkingDayController::class);
@@ -600,6 +605,28 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('logs/list-types', 'LogsController@List_Types');
     Route::Resource('logs', LogsController::class);
     Route::post('upload-chunks', 'ChunksUploadController@uploads');
+
+    // added ahmed
+    
+    Route::group(['prefix' => 'v1'], function () {
+    // logs filter with user and action 
+        Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFilterController@logs_filteration')->name('logs_filteration');
+
+        Route::get('logs/models/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_models_dropdown')->name('logs_models_dropdown');
+        
+        Route::get('logs/actions/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_actions_dropdown')->name('logs_actions_dropdown');
+        
+        Route::get('logs/users/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_users_dropdown')->name('logs_users_dropdown');
+
+        Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
+        
+       Route::get('logs/seed', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@seed_logs')
+       ->name('seed_logs');
+
+       Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
+       Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
+    });
+    // added ahmed
 });
 
 Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], function () {

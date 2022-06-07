@@ -5,6 +5,7 @@ use Modules\Page\Entities\PageLesson;
 use App\Events\MassLogsEvent;
 use Modules\Page\Entities\Page;
 use App\Material;
+use App\Repositories\NotificationRepoInterface;
 use App\LessonComponent;
 use App\Lesson;
 use App\CourseItem;
@@ -12,6 +13,11 @@ use App\SecondaryChain;
 
 class PageLessonObserver
 {
+    public function __construct(NotificationRepoInterface $notification)
+    {
+        $this->notification=$notification;
+    }
+
     /**
      * Handle the page lesson "created" event.
      *
@@ -33,6 +39,10 @@ class PageLessonObserver
                 'lesson_id' => $pageLesson->lesson_id,
                 'type' => 'page',
                 'visible' => $pageLesson->visible,
+                'restricted' => 0,
+                // added ahmed
+                'link'        => 'no-url',
+                'mime_type'   => 'no-mime-type',
             ]);
             $courseItem=CourseItem::where('item_id',$pageLesson->page_id)->where('type','page')->first();
             if(isset($courseItem))
@@ -40,7 +50,11 @@ class PageLessonObserver
                 $material->restricted=1;
                 $material->save();
             }
-
+            if($courseItem == null)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
+            }
             LessonComponent::firstOrCreate([
                 'lesson_id' => $lesson->id,
                 'comp_id' => $page->id,
@@ -103,8 +117,8 @@ class PageLessonObserver
     public function deleted(PageLesson $pageLesson)
     {
         //for log event
-        $logsbefore= Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->get();
-        $all = Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->first()->delete();
+        // $logsbefore= Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->get();
+        // $all = Material::where('lesson_id',$pageLesson->lesson_id)->where('item_id',$pageLesson->page_id)->where('type','page')->first()->delete();
         $LessonComponent = LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->lesson_id)->where('model' , 'page')->first();
        
         if(isset($LessonComponent)){
@@ -115,8 +129,8 @@ class PageLessonObserver
             $LessonComponent->delete();
         }
 
-        if($all > 0)
-            event(new MassLogsEvent($logsbefore,'deleted'));
+        // if($all > 0)
+        //     event(new MassLogsEvent($logsbefore,'deleted'));
 
         LessonComponent::where('comp_id',$pageLesson->page_id)->where('lesson_id',$pageLesson->lesson_id)
         ->where('module','Page')->delete();

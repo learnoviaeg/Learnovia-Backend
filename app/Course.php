@@ -4,10 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Attendance\Entities\AttendanceSession;
-
+use App\Traits\Auditable;
+use App\Segment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
 {
+    use Auditable, SoftDeletes;
+    
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
     'is_template','classes', 'letter_id','shared_lesson', 'index'];
 
@@ -101,4 +105,108 @@ class Course extends Model
     {
         return $this->hasMany('App\course_scales','course_id','id');
     }
+
+    // start function get name and value f attribute
+    public static function get_year_name($old, $new)
+    {
+            $new_segment = Segment::find(intval($new['segment_id']));
+            $target_year_id = [$new_segment->academicYear->id];
+            $target_type_id = [$new_segment->academicType->id];
+
+        $old_count = count($old);
+        if ($old_count == 0) 
+        {
+            $year_id = $target_year_id;
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+                $year_id = $target_year_id;
+            }else{
+                $old_segment = Segment::find(intval($old['segment_id']));
+                if ($new_segment->academicYear->id == $old_segment->academicYear->id) {
+                    $year_id = $target_year_id;
+                }else{
+                    $year_id = [$new_segment->academicYear->id, $old_segment->academicYear->id];
+                }
+            }
+        }
+        return $year_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_type_name($old, $new)
+    {
+        $new_segment = Segment::find(intval($new['segment_id']));
+            $target_type_id = [$new_segment->academicType->id];
+
+        $old_count = count($old);
+        if ($old_count == 0) 
+        {
+            $type_id = $target_type_id;
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+                $type_id    = $target_type_id;
+            }else{
+                $old_segment = Segment::find(intval($old['segment_id']));
+                if ($new_segment->academicType->id == $old_segment->academicType->id) {
+                    $type_id = $target_type_id;
+                }else{
+                    $type_id = [$new_segment->academicType->id, $old_segment->academicType->id];
+                }
+            }
+        }
+        return $type_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_level_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $level_id = [intval($new['level_id'])];
+        }else{
+            if ($old['level_id'] == $new['level_id']) {
+                $level_id = [intval($new['level_id'])];
+            }else{
+                $level_id = [intval($old['level_id']), intval($new['level_id'])];
+            }
+        }
+        return $level_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_class_name($old, $new)
+    {
+        $classes = $new['classes'];
+        return $classes;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_segment_name($old, $new)
+    {
+        $old_count = count($old);
+        if ($old_count == 0) {
+            $segment_id = [intval($new['segment_id'])];
+        }else{
+            if ($old['segment_id'] == $new['segment_id']) {
+                $segment_id = [intval($new['segment_id'])];
+            }else{
+                $segment_id = [intval($old['segment_id']), intval($new['segment_id'])];
+            }
+        }
+        return $segment_id;
+    }
+    // end function get name and value attribute
+
+    // start function get name and value f attribute
+    public static function get_course_name($old, $new)
+    {
+        return null;
+    }
+    // end function get name and value attribute
 }

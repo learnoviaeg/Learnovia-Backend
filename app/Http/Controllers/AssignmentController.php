@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\NotificationRepoInterface;
 use App\Lesson;
 use App\Timeline;
 use App\Level;
@@ -26,16 +27,19 @@ use Carbon\Carbon;
 use App\SecondaryChain;
 use App\GradeCategory;
 use App\GradeItems;
+use App\CourseItem;
+use App\UserCourseItem;
 use App\Repositories\SettingsReposiotryInterface;
 use App\Events\GraderSetupEvent;
 use Illuminate\Database\Eloquent\Builder;
 
 class AssignmentController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain,SettingsReposiotryInterface $setting)
+    public function __construct(ChainRepositoryInterface $chain,SettingsReposiotryInterface $setting,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
         $this->setting = $setting;
+        $this->notification = $notification;
 
         $this->middleware('auth');
         $this->middleware(['permission:assignment/get', 'ParentCheck'],   ['only' => ['index','show']]);
@@ -125,8 +129,7 @@ class AssignmentController extends Controller
         $rules = [
             'name' => 'required|string',
             'content' => 'string|required_without:file',
-            // 'file' => 'file|distinct|required_without:content|mimes:'.$settings,
-            'file_id' => 'exists:attachments,id|required_without:content',
+            'file' => 'file|distinct|required_without:content|mimes:'.$settings,
             //assignment_lesson
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
@@ -150,15 +153,23 @@ class AssignmentController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
-        $assignment = Assignment::firstOrCreate([
-            'name' => $request->name,
-            'attachment_id' => ($request->has('file_id')) ? $request->file_id : null,
-            // ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
-            'content' => isset($request->content) ? $request->content : null,
-            'created_by' => Auth::id(),
-        ]);
-
         foreach($request->lesson_id as $key => $lesson){
+
+            $lesson_obj = Lesson::find($lesson);
+
+            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
+            foreach($secondary_chains as $secondary_chain){
+                $segment = Segment::find($secondary_chain->Enroll->segment);
+                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+            }
+
+            $assignment = Assignment::firstOrCreate([
+                'name' => $request->name,
+                'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
+                'content' => isset($request->content) ? $request->content : null,
+                'created_by' => Auth::id(),
+            ]);
 
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
@@ -175,17 +186,9 @@ class AssignmentController extends Controller
                 'is_graded' => $request->is_graded,
                 'allow_attachment' => $request->allow_attachment,
             ]);
-
-            $lesson_obj = Lesson::find($lesson);
+            
             $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();
             $assignment_lesson->grade_category=$pp->id;
-
-            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
-            foreach($secondary_chains as $secondary_chain){
-                $segment = Segment::find($secondary_chain->Enroll->segment);
-                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
-                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
-            }
 
             if($request->is_graded)
             {
@@ -213,8 +216,12 @@ class AssignmentController extends Controller
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
             //sending notifications
-            $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
-            $notification->send();
+            // $notification = new AssignmentNotification($assignment_lesson, $assignment->name.' assignment is added');
+            // $notification->send();
+
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+            if(!isset($request->users_ids))
+                $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is created',$assignment->id,'notification','assignment');
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
@@ -299,18 +306,16 @@ class AssignmentController extends Controller
             'publish_date' => 'date |date_format:Y-m-d H:i:s|before:closing_date',
             'grade_category' => 'exists:grade_categories,id',
             // 'updated_lesson_id' =>'nullable|exists:lessons,id'
-            'file_id' => 'exists:attachments,id',
         ]);
 
-        // if ($request->hasFile('file')) {
+        if ($request->hasFile('file')) {
 
-        //     $settings = $this->setting->get_value('create_assignment_extensions');
+            $settings = $this->setting->get_value('create_assignment_extensions');
 
-        //     $request->validate([
-        //         'file' => 'file|distinct|mimes:'.$settings,
-        //     ]);
-        // }
-        
+            $request->validate([
+                'file' => 'file|distinct|mimes:'.$settings,
+            ]);
+        }
 
         $assignment = assignment::find($id);
 
@@ -351,7 +356,7 @@ class AssignmentController extends Controller
                 $assignment->update([
                     'content' => isset($request->content) ? $request->content : $assignment->content,
                     'name' => isset($request->name) ? $request->name : $assignment->name,
-                    'attachment_id' => $request->filled('file_id') ? $request->file_id : null,
+                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
                 ]);
                 $assigmentLesson->update([
                     'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
@@ -371,6 +376,7 @@ class AssignmentController extends Controller
                 $assigmentLesson->allow_attachment = $request->allow_attachment;
     
             $assigmentLesson->save();
+
             // $usersIDs = SecondaryChain::select('user_id')->distinct()->where('role_id',3)->where('lesson_id',$assigmentLesson->lesson_id)->pluck('user_id');
             // if ($request->filled('updated_lesson_id') && $request->updated_lesson_id !=$request->lesson_id ) {
             //     $old_students = UserAssigment::where('assignment_lesson_id', $assigmentLesson->id)->delete();
@@ -383,6 +389,13 @@ class AssignmentController extends Controller
             //         $userassigment->save();
             //     }
             // }
+
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+
+            $this->notification->sendNotify($users->toArray(),$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
@@ -503,6 +516,8 @@ class AssignmentController extends Controller
         $assignment->restricted=1;
         if(!isset($request->users_ids))
             $assignment->restricted=0;
+        else
+            $this->notification->sendNotify($request->users_ids,$assignment->name.' assignment is updated',$assignment->id,'notification','assignment');            
         
         $assignment->save();
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\ChainRepositoryInterface;
+use App\Repositories\NotificationRepoInterface;
 use App\Enroll;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizOverride;
@@ -38,11 +39,12 @@ use App\LessonComponent;
 
 class QuizzesController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware('auth');
-        $this->middleware(['permission:quiz/get'],   ['only' => ['index','show']]);
+        $this->middleware(['permission:quiz/get','ParentCheck'],   ['only' => ['index','show']]);
         $this->middleware('ParentCheck',   ['only' => ['show']]);
         $this->middleware(['permission:quiz/add'],   ['only' => ['store']]);
         $this->middleware(['permission:quiz/update'],   ['only' => ['update']]);
@@ -161,6 +163,7 @@ class QuizzesController extends Controller
             'opening_time' => 'required|date',
             'closing_time' => 'required|date|after:opening_time',
             'max_attemp' => 'required|integer|min:1',
+            'collect_marks' => 'integer|in:0,1',
             'grading_method_id' => 'in:First,Last,Highest,Lowest,Average',
             'grade_category_id.*' => 'exists:grade_categories,id',
             'grade_min' => 'integer',
@@ -219,13 +222,10 @@ class QuizzesController extends Controller
                 'index' => ++$index,
                 'visible' => isset($request->visible)?$request->visible:1,
                 'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
-                'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                // 'grade_by_user' => isset($request->grade) ? carbon::now() : null,
+                'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
-
-            // //sending notifications
-            // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-            // $notification->send();
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -244,6 +244,7 @@ class QuizzesController extends Controller
             'name' => 'string|min:3',
             'lesson_id' => 'required|exists:lessons,id',
             'is_graded' => 'boolean',
+            'collect_marks' => 'integer|in:0,1',
             'duration' => 'integer|min:60',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
             'grade_feedback' => 'in:After submission,After due_date,Never',
@@ -286,7 +287,8 @@ class QuizzesController extends Controller
                 'visible' => isset($request->visible)?$request->visible:$quiz_lesson->visible,
                 'grade_pass' => isset($request->grade_pass) ? $request->grade_pass : $quiz_lesson->grade_pass,
                 'grade_category_id' => $quiz_lesson->grade_category_id,
-                'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+                // 'grade_by_user' => isset($request->grade) ? carbon::now() : $quiz_lesson->grade_by_user,
+                'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : $quiz_lesson->collect_marks,
                 'grading_method_id' => isset($request->grading_method_id) ?  json_encode((array)$request->grading_method_id) : json_encode($quiz_lesson->grading_method_id) ,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
@@ -325,6 +327,14 @@ class QuizzesController extends Controller
             event(new UpdatedQuizQuestionsEvent($quiz->id));
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
+
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            
+            $this->notification->sendNotify($users->toArray(),$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');
+            
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
@@ -395,8 +405,12 @@ class QuizzesController extends Controller
 
         $quizLesson->delete();
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
-        if(!isset($quizlesson))
-            $quiz=Quiz::where('id',$id)->delete();
+        // if(!isset($quizlesson))
+        if( count($quizlesson) <= 0)
+        {
+            $targetQuiz = Quiz::where('id',$id)->first();
+            $targetQuiz->delete();
+        }
 
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
@@ -558,6 +572,8 @@ class QuizzesController extends Controller
 
         if(!isset($request->users_ids))
             $quiz->restricted=0;
+        else
+            $this->notification->sendNotify($request->users_ids,$quiz->name.' quiz is updated',$quiz->id,'notification','quiz');    
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);

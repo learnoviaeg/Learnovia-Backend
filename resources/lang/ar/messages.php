@@ -30,6 +30,7 @@ return [
         'role_required' => 'من فضلك ، اختر الوظيفة أولا',
         'not_allowed' => 'غير مسموح بذلك',
         'not_allowed_to_edit' => 'لا يمكن التعديل',
+        'not_allowed_to_add' => 'لا يمكن اضافة هذا العنصر',
         'extension_error' => 'هذا الامتداد غير صالح',
         'assigned_before' => 'تم اصافته من قبل'
     ],
@@ -344,11 +345,18 @@ return [
         'update' => 'تم تعديل بنجاح',
         'list' => 'القائمة',
         'delete' => 'تم الحذف ',
-        'CannotUpdate' => 'عذرًا ،يمكن التحديث',
+        'CannotUpdate' => 'عذرًا ،لا يمكن التحديث',
         'category_cannot_deleted' => 'لايمكن الحذف ',
         'Done' => 'تم',
         'reArrange' => 'لا يمكن ترتيبه',
     ],
+    // 'grading' => [
+    //     'First' => 'First',
+    //     'Last' => 'Last',
+    //     'Average' => 'Average',
+    //     'Highest' => 'Highest',
+    //     'Lowest' => 'Lowest',
+    // ],
     'grade_item' => [
         'add' => 'تم اضافة بنجاح',
         'update' => 'تم تعديل بنجاح',

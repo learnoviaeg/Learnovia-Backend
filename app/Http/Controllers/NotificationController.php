@@ -167,19 +167,39 @@ class NotificationController extends Controller
     */
     public function markasread(Request $request)
     {
-        $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-        foreach ($noti as $not) {
-            $not->data= json_decode($not->data, true);
-            if($not->data['type'] != 'announcement')
-            {
-                //for log event
-                // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
-                $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                // if($check > 0)
-                //     event(new MassLogsEvent($logsbefore,'updated'));
-            }
-        }
-        return HelperController::api_response_format(200, null, 'Read');
+        // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
+        // foreach ($noti as $not) {
+        //     $not->data= json_decode($not->data, true);
+        //     if($not->data['type'] != 'announcement')
+        //     {
+        //         //for log event
+        //         // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+        //         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
+        //         // if($check > 0)
+        //         //     event(new MassLogsEvent($logsbefore,'updated'));
+        //     }
+        // }
+        // return HelperController::api_response_format(200, null, 'Read');
+        $data=[
+            'users' => $users,
+            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            'school_domain'=>'test',
+            // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            'title'=> 'Learnovia',
+            'body'=> $message,
+            "item_type" => $item_type,
+            "type" => $type,
+            "item_id" => $item_id,
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
+            'headers'   => [
+                'username' => 'test',
+                'password' => 'api_test_5eOiG7CTC',
+            ],
+            'form_params' => $data
+        ]);
+        return $res;
     }
 
    /**
@@ -293,32 +313,5 @@ class NotificationController extends Controller
         $user->save();
         
         return HelperController::api_response_format(200, 'token added Done');
-    }
-
-    public function testNotification()
-    {
-        // for($i=0;$i<=10000;$i++)
-        // {
-            $notification = [
-                'type' => 'notification',
-                'item_id' => 1,
-                'item_type' => 'quiz',
-                'message' => 'quiz tested performance',
-                'publish_date' => Carbon::now(),
-                'created_by' => 1,
-                'lesson_id' => 1,
-                'course_id' => 1,
-                'classes' => json_encode([1]),
-            ];
-    
-            //assign notification to given users
-            $t=new SendNotification();
-            $createdNotification = $t->toDatabase($notification,User::pluck('id')); // User::whereId(1)->get()
-            
-            //firebase Notifications
-            $t->toFirebase($createdNotification);
-        // }
-
-        return 'Done';
     }
 }
