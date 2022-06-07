@@ -77,7 +77,15 @@ class ChunksUploadController extends Controller
         if($request->filled('last') && $request->last == 1){
 
             $uploaded_file->uploaded = 1;
-            $uploaded_file->path = $uploaded_file->type.'/'.$uploaded_file->name;
+            if($request->type == 'files' || $request->type == 'media' )
+                $uploaded_file->path = $uploaded_file->type.'/'.$uploaded_file->name;
+                
+            if($request->type == 'create_assignment' )
+                $uploaded_file->path = 'assignment/'.$uploaded_file->name;
+
+            if( $request->type == 'submit_assignment' )
+                $uploaded_file->path = 'assigment/'.$uploaded_file->name;
+            
             $uploaded_file->save();
             $base64_whole_string = Storage::disk('public')->get('uploads/'.$uploaded_file->name.'.txt');
             $base64_encoded_string = base64_decode(($base64_whole_string));
