@@ -577,24 +577,24 @@ class QuizzesController extends Controller
         ]);
 
         $quiz= Quiz::find($request->id);
-        $quizLesson=QuizLesson::where('quiz_id',$quiz->id)->where('lesson_id',$request->lesson_id)->first();
+        // $quizLesson=QuizLesson::where('quiz_id',$quiz->id)->where('lesson_id',$request->lesson_id)->first();
         $quiz->restricted=1;
 
         if(!isset($request->users_ids))
             $quiz->restricted=0;
-        else
-        {
-            $reqNot=[
-                'message' => $quiz->name.' quiz is updated',
-                'item_id' => $quiz->id,
-                'item_type' => 'quiz',
-                'type' => 'notification',
-                'publish_date' => $quizLesson->publish_date,
-                'lesson_id' => $request->lesson_id,
-                'course_name' => $quizLesson->lesson->course->name
-            ];
-            $this->notification->sendNotify($request->users_ids,$reqNot);
-        }
+        // else
+        // {
+            // $reqNot=[
+            //     'message' => $quiz->name.' quiz is updated',
+            //     'item_id' => $quiz->id,
+            //     'item_type' => 'quiz',
+            //     'type' => 'notification',
+            //     'publish_date' => $quizLesson->publish_date,
+            //     'lesson_id' => $request->lesson_id,
+            //     'course_name' => $quizLesson->lesson->course->name
+            // ];
+            // $this->notification->sendNotify($request->users_ids,$reqNot);
+        // }
         
         $quiz->save();
         CoursesHelper::updateCourseItem($request->id, 'quiz', $request->users_ids);

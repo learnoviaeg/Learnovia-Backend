@@ -529,7 +529,7 @@ class AssignmentController extends Controller
         ]);
 
         $assignment= Assignment::find($request->id);
-        $assignmentLesson=AssignmentLesson::where('assignment_id',$assignment->id)->where('lesson_id',$request->lesson_id)->first();
+        // $assignmentLesson=AssignmentLesson::where('assignment_id',$assignment->id)->where('lesson_id',$request->lesson_id)->first();
         
         $assignment->restricted=1;
         if(!isset($request->users_ids))
