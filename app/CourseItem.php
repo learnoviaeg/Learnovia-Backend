@@ -40,6 +40,10 @@ class CourseItem extends Model
         return $this->belongsTo('Djoudi\LaravelH5p\Eloquents\H5pContent','item_id')->where('type', 'h5p_content');
     }
 
+    public function item(){
+        return $this->morphTo('item' , 'type', 'item_id');
+    }
+
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {

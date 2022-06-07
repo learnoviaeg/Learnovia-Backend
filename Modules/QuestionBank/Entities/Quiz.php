@@ -24,9 +24,15 @@ class quiz extends Model
     {
         return $this->belongsToMany('Modules\QuestionBank\Entities\Questions', 'quiz_questions', 'quiz_id', 'question_id')->whereNull('parent');
     }
+
     public function Lesson()
     {
         return $this->belongsToMany('App\Lesson', 'quiz_lessons', 'quiz_id', 'lesson_id');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough('App\Lesson' ,'Modules\QuestionBank\Entities\QuizLesson', 'quiz_id' , 'id' , 'id' , 'id' );
     }
 
     public function course()

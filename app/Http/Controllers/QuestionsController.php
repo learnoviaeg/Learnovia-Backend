@@ -223,8 +223,8 @@ class QuestionsController extends Controller
                         'course_name' => $quiz->course_id
                     ];
 
-                    // $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
-                    // $this->notification->sendNotify($users->toArray(),$reqNot);
+                    $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$reqNot);
                 }
             }
            
