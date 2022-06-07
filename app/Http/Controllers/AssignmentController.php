@@ -156,7 +156,7 @@ class AssignmentController extends Controller
 
         $assignment = Assignment::firstOrCreate([
             'name' => $request->name,
-            'attachment_id' => ($request->has('file_id')) ? $request->file_id : null,
+            'attachment_id' => ($request->filled('file_id')) ? $request->file_id : null,
             // ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
             'content' => isset($request->content) ? $request->content : null,
             'created_by' => Auth::id(),
@@ -175,7 +175,7 @@ class AssignmentController extends Controller
 
             $assignment = Assignment::firstOrCreate([
                 'name' => $request->name,
-                'attachment_id' => ($request->hasFile('file')) ? attachment::upload_attachment($request->file, 'assignment', null)->id : null,
+                'attachment_id' => ($request->filled('file_id')) ? $request->file_id : null,
                 'content' => isset($request->content) ? $request->content : null,
                 'created_by' => Auth::id(),
             ]);
