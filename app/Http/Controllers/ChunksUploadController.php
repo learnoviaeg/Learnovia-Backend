@@ -37,7 +37,7 @@ class ChunksUploadController extends Controller
             $extension = finfo_buffer(finfo_open(), base64_decode($request->content), FILEINFO_MIME_TYPE);
             $ext = substr($extension,strrpos($extension,"/")+1);  
 
-            if($request->type == 'file')
+            if($request->type == 'files')
                 $settings = $this->setting->get_value('upload_file_extensions');
             if($request->type == 'media')
                 $settings = $this->setting->get_value('upload_media_extensions');
