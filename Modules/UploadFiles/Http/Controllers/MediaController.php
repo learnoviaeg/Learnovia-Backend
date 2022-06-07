@@ -142,8 +142,10 @@ class MediaController extends Controller
 
         $rules = [
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'required_if:type,==,0|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            // 'Imported_file' => 'required_if:type,==,0|array',
+            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            'file_id' => 'required_if:type,==,0||array',
+            'file_id.*' => 'required_if:type,==,0|exists:media,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -156,48 +158,55 @@ class MediaController extends Controller
             'users_ids.*' => 'exists:users,id'
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
-        ];
+        // $customMessages = [
+        //     'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        // ];
 
-        if ($request->hasFile('Imported_file')) {
-            $customMessages = [
-                'Imported_file.*.mimes' => $request->Imported_file[0]->getClientOriginalExtension() . ' ' .__('messages.error.extension_not_supported')
-            ];
-        }
+        // if ($request->hasFile('Imported_file')) {
+        //     $customMessages = [
+        //         'Imported_file.*.mimes' => $request->Imported_file[0]->getClientOriginalExtension() . ' ' .__('messages.error.extension_not_supported')
+        //     ];
+        // }
 
-        if($request->hasFile('Imported_file') && !in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
-            $this->validate($request, $rules, $customMessages);
+        // if($request->hasFile('Imported_file') && !in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
+        //     $this->validate($request, $rules);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
                 $publishdate = Carbon::now();
-            }
+            } 
         } else {
             $publishdate = Carbon::now();
         }
 
         if ($request->type == 0)
-            $array = $request->Imported_file;
+            $array = $request->file_id;
         else if ($request->type == 1)
             $array = $request->url;
         foreach ($array as $item) {
-            $media = new media;
-            $media->user_id = Auth::user()->id;
+            // $media = new media;
+            // $media->user_id = Auth::user()->id;
             if ($request->type == 0) {
-                $formsg=$item->getClientMimeType();
-                $extension = $item->getClientOriginalExtension();
-                $fileName = $item->getClientOriginalName();
-                $size = $item->getSize();
-                $name = uniqid() . '.' . $extension;
-                $media->type = $item->getClientMimeType();
-                // $media->name = $name;
-                $media->size = $size;
-                $media->attachment_name = $fileName;
-                $media->link = url('storage/media/' . $name);
+                $media = media::whereId($item)->first();
+                $media->update([
+                    'name' => $request->name,
+                    'description' => isset($request->description) ?? null,
+                ]);
+                $name = $media->name;
+                // return $media;
+                $formsg=$media->getOriginal('type');
+                // $extension = $item->getClientOriginalExtension();
+                // $fileName = $item->getClientOriginalName();
+                // $size = $item->getSize();
+                // $name = uniqid() . '.' . $extension;
+                // $media->type = $item->getClientMimeType();
+                // // $media->name = $name;
+                // $media->size = $size;
+                // $media->attachment_name = $fileName;
+                // $media->link = url('storage/media/' . $name);
             }
-
+            
             if ($request->type == 1) {
                 // $avaiableHosts = collect([
                 //     'www.youtube.com',
@@ -226,10 +235,9 @@ class MediaController extends Controller
                 $media->show = $request->show;
             $media->save();
 
-            //bra l foreach beta3et l lesson 3l4an tarteb l observers
             if(isset($request->users_ids))
                 CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
-            
+
             foreach ($request->lesson_id as $lesson) {
 
                 $tempLesson = Lesson::find($lesson);
@@ -242,15 +250,9 @@ class MediaController extends Controller
 
                 $mediaLesson->save();
 
-                if ($request->type == 0) {
-                    Storage::disk('public')->putFileAs('media/', $item, $name);
-                }
-
-                // dd($request->users_ids);
-                if(!isset($request->users_ids)){
-                    $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
-                    $this->notification->sendNotify($users->toArray(),$media->name. ' media is created',$media->id,'notification','media');    
-                }
+                // if ($request->type == 0) {
+                //     Storage::disk('public')->putFileAs('media/', $item, $name);
+                // }
             }
         }
         $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();
@@ -296,7 +298,7 @@ class MediaController extends Controller
             'id' => 'required|integer|exists:media,id',
             'name' => 'nullable|string|max:190',
             'description' => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|mimes:'.$settings,
+            // 'Imported_file' => 'nullable|file|mimes:'.$settings,
             'url' => 'nullable|active_url',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
@@ -306,16 +308,16 @@ class MediaController extends Controller
             'visible' => 'in:0,1',
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
-        ];
-        if(isset($request->Imported_file)){
-            $customMessages = [
-                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
-            ];
-        }
+        // $customMessages = [
+        //     'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        // ];
+        // if(isset($request->Imported_file)){
+        //     $customMessages = [
+        //         'Imported_file.mimes' => $request->Imported_file->extension() . ' ' .__('messages.error.extension_not_supported')
+        //     ];
+        // }
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         $media = media::find($request->id);
         $mediaLesson = MediaLesson::whereIn('lesson_id' , $request->lesson_id)->where('media_id' , $request->id)->first();
@@ -325,16 +327,24 @@ class MediaController extends Controller
         if(isset($request->Imported_file) && $request->filled('url'))
             return HelperController::api_response_format(400, null, __('messages.media.only_url_or_media'));
 
-        if (isset($request->Imported_file)) {
-            $extension = $request->Imported_file->getClientOriginalExtension();
-            $fileName = $request->Imported_file->getClientOriginalName();
-            $size = $request->Imported_file->getSize();
-            $name = uniqid() . '.' . $extension;
-            $media->type = $request->Imported_file->getClientMimeType();
-            $media->size = $size;
-            $media->attachment_name = $fileName;
-            $media->link = url('storage/media/' . $name);
-            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+        if (isset($request->file_id)) {
+            $newly_created_media = media::find($request->file_id);
+    
+
+            // $file->url = $newly_created_file->url;
+            // $file->url2 = $newly_created_file->url2;
+            // $file->type =  $newly_created_file->type;
+            // $file->description =  $request->description ?? $newly_created_file->description;
+            // $file->attachment_name = $request->attachment_name ?? $newly_created_file->attachment_name;
+
+            $media->type = $newly_created_media->type;
+            // $media->size = $size;
+            $media->attachment_name = $newly_created_media->attachment_name;
+            $media->link = $newly_created_media->link; // url('storage/media/' . $name);
+            // Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+
+            $newly_created_media->delete();
+
         }
 
         if ($request->filled('url')){
@@ -367,15 +377,6 @@ class MediaController extends Controller
         ]);
         $mediaLesson->updated_at = Carbon::now();
         $mediaLesson->save();
-
-        // //send notification
-        // $users=SecondaryChain::select('user_id')->whereIn('lesson_id',$request->lesson_id)->pluck('user_id');
-        // $courseItem = CourseItem::where('item_id', $media->id)->where('type', 'media')->first();
-        // if(isset($courseItem))
-        //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
-        //     // dd($users);
-        // $this->notification->sendNotify($users->toArray(),$media->name. ' media is updated',$media->id,'notification','media');    
-        
         $tempReturn = Lesson::find($request->updated_lesson_id)->module('UploadFiles', 'media')->get();
         $lesson = Lesson::find($request->updated_lesson_id);
         $courseID = $lesson->course_id;
@@ -404,6 +405,8 @@ class MediaController extends Controller
             }
         }
     }
+
+
 
     /**
      * Delete Specifc Media

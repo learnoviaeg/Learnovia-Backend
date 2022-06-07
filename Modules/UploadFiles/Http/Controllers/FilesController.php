@@ -225,8 +225,8 @@ class FilesController extends Controller
 
         $rules = [
             'name' => 'string|min:1',
-            'Imported_file' => 'required|array',
-            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            'file_id' => 'required|array',
+            'file_id.*' => 'required|exists:files,id',
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'exists:lessons,id',
             'publish_date' => 'nullable|date',
@@ -235,11 +235,11 @@ class FilesController extends Controller
             'users_ids.*' => 'exists:users,id'
         ];
 
-        $customMessages = [
-            'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
-        ];
+        // $customMessages = [
+        //     'Imported_file.*.mimes' => $request->Imported_file[0]->extension() . ' ' . __('messages.error.extension_not_supported')
+        // ];
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
@@ -250,23 +250,11 @@ class FilesController extends Controller
             $publishdate = Carbon::now();
         }
 
-        foreach ($request->Imported_file as $singlefile) {
-            $extension = $singlefile->getClientOriginalExtension();
-            $fileName = $singlefile->getClientOriginalName();
-            $size = $singlefile->getSize();
-            $name = uniqid() . '.' . $extension;
-            $file = new file;
-            $file->type = $extension;
-            $file->description = $name;
-            $file->name = ($request->filled('name')) ? $request->name : $fileName;
-            $file->size = $size;
-            $file->attachment_name = $fileName;
-            $file->user_id = Auth::user()->id;
-            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-            $file->url2 = 'files/' . $name;
-            $check = $file->save();
-
-            if ($check) {
+        foreach ($request->file_id as $singlefile) {
+            $file = file::find($singlefile);
+            $file->name = ($request->filled('name')) ? $request->name : $file->name;
+            $file->save();
+            if ($file) {
                 if(isset($request->users_ids))
                     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 
@@ -279,13 +267,8 @@ class FilesController extends Controller
                     $fileLesson->index = FileLesson::getNextIndex($lesson);
                     $fileLesson->publish_date = $publishdate;
                     $fileLesson->visible = isset($request->visible)?$request->visible:1;
-
                     $fileLesson->save();
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->$lesson,
-                        $singlefile,
-                        $name
-                    );
+
                 }
             }
         }
@@ -394,42 +377,43 @@ class FilesController extends Controller
             'id'            => 'required|exists:files,id',
             'name'          => 'nullable|string|max:190',
             'description'   => 'nullable|string|min:1',
-            'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
+            // 'Imported_file' => 'nullable|file|distinct|mimes:'.$settings,
             'lesson_id'        => 'required|exists:lessons,id',
             'publish_date'  => 'nullable|date',
             'updated_lesson_id' =>'nullable|exists:lessons,id',
             'visible' =>'in:0,1'
         ];
-        $customMessages = [
-            'Imported_file.mimes' =>__('messages.error.extension_not_supported')
-        ];
-        if(isset($request->Imported_file)){
-            $customMessages = [
-                'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
-            ];
-        }
+        // $customMessages = [
+        //     'Imported_file.mimes' =>__('messages.error.extension_not_supported')
+        // ];
+        // if(isset($request->Imported_file)){
+        //     $customMessages = [
+        //         'Imported_file.mimes' => $request->Imported_file->extension() . ' ' . __('messages.error.extension_not_supported')
+        //     ];
+        // }
 
-        $this->validate($request, $rules, $customMessages);
+        $this->validate($request, $rules);
 
         $file = file::find($request->id);
 
         $file_name = isset($request->name) ? $request->name : $file->name;
         $file->name    = $file_name;
         $file->user_id = Auth::user()->id;
-        //$file->update (['name' => isset($request->name) ? $request->name : $file->name]);
         
-        if (isset($request->Imported_file)) {
-            $extension = $request->Imported_file->getClientOriginalExtension();
-            $name = uniqid() . '.' . $extension;
-            Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
-            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
-            $file->url2 = 'files/' . $name;
-            $file->type = $extension;
-            $fileName =  $request->Imported_file->getClientOriginalName();
-            $file->description = $name;
-            $file->attachment_name = $fileName;
+        if (isset($request->file_id)) {
+            $newly_created_file = file::find($request->file_id);
+            // https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+        //    return  $newly_created_file;
+            
+            $file->url = $newly_created_file->url;
+            $file->url2 = $newly_created_file->url2;
+            $file->type =  $newly_created_file->type;
+            $file->description =  $request->description ?? $newly_created_file->description;
+            $file->attachment_name = $request->attachment_name ?? $newly_created_file->attachment_name;
 
+            $newly_created_file->delete();
         }
+
         $tempReturn = null;
         $fileLesson = FileLesson::where('file_id', $request->id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($fileLesson))
@@ -455,8 +439,9 @@ class FilesController extends Controller
 
         if (!$request->filled('updated_lesson_id')) 
           $request->updated_lesson_id= $request->lesson_id;
-        
-        $fileLesson->lesson_id = $request->updated_lesson_id;
+
+
+          $fileLesson->lesson_id = $request->updated_lesson_id;
         $fileLesson->updated_at = Carbon::now();
         $file->save();
         $fileLesson->save();
