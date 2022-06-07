@@ -99,7 +99,7 @@ class ChunksUploadController extends Controller
             Storage::disk('public')->put($uploaded_file->type.'/'.$uploaded_file->name .'.'. $ext, $base64_encoded_string);
 
             ///////////////////moving file to attachment table 
-            if($uploaded_file->type == 'create_assignment' || $uploaded_file->type == 'submit_assignment' ){
+            if($uploaded_file->type == 'assignment' ){
                 $attachment = new attachment;
                 $attachment->name = $uploaded_file->name.'.'. $ext;
                 $attachment->path = $uploaded_file->getOriginal('path').'.'. $ext;
