@@ -85,7 +85,7 @@ class ChunksUploadController extends Controller
 
             if($request->type == 'create_assignment' || $request->type == 'submit_assignment' ){
                 $uploaded_file->path = 'assignment/'.$uploaded_file->name;
-                $uploaded_file->update(['type' => 'assignemnt']);
+                $uploaded_file->type = 'assignemnt';
             }
 
             // if( $request->type == 'submit_assignment' )
