@@ -29,7 +29,8 @@ class SendNotificationListener
      */
     public function handle(CreateCourseItemEvent $event)
     {
-        dd($event->usercourseItem->courseItem->item->lessons);
+        // if($event->usercourseItem->courseItem->type == 'quiz')
+        //     $publish_date=
         $reqNot=[
             'message' => $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created',
             'item_id' => $event->usercourseItem->courseItem->item_id,
