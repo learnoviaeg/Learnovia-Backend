@@ -64,7 +64,6 @@ class file extends Model
     {
         return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\FileLesson', 'file_id' , 'id' , 'id' , 'id' );
     }
-    
     public function Lesson()
     {
         return $this->belongsToMany('App\Lesson', 'file_lessons', 'file_id', 'lesson_id');
