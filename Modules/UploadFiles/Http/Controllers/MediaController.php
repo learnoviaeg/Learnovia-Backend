@@ -226,9 +226,9 @@ class MediaController extends Controller
                 $media->show = $request->show;
             $media->save();
 
-            //bra l foreach beta3et l lesson 3l4an tarteb l observers
-            if(isset($request->users_ids))
-                CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
+            // //bra l foreach beta3et l lesson 3l4an tarteb l observers
+            // if(isset($request->users_ids))
+            //     CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
             
             foreach ($request->lesson_id as $lesson) {
 
@@ -246,11 +246,28 @@ class MediaController extends Controller
                     Storage::disk('public')->putFileAs('media/', $item, $name);
                 }
 
-                // dd($request->users_ids);
-                // if(!isset($request->users_ids)){
-                //     $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
-                //     $this->notification->sendNotify($users->toArray(),$media->name. ' media is created',$media->id,'notification','media');    
-                // }
+                $material=Material::select('id','restricted', 'name','publish_date')->where('item_id' ,$mediaLesson->media_id)->where('lesson_id' ,$mediaLesson->lesson_id)->where('type' , 'media')->first();
+                if(isset($request->users_ids))
+                {
+                    CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
+                    // $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
+                    $material->restricted=1;
+                    $material->save();
+                }
+                if(!isset($request->users_ids)){
+                    $reqNot=[
+                        'message' => $material->name.' media is added',
+                        'item_id' => $material->id,
+                        'item_type' => 'media',
+                        'type' => 'notification',
+                        'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
+                        'lesson_id' => $lesson,
+                        'course_name' => $material->course_id,
+                    ];
+
+                    $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$reqNot);
+                }
             }
         }
         $tempReturn = Lesson::find($mediaLesson->lesson_id)->module('UploadFiles', 'media')->get();
