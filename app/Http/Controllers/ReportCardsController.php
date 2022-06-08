@@ -269,7 +269,7 @@ class ReportCardsController extends Controller
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
-            $result = User::select('id','username','lastname', 'firstname','profile_fields')->whereId($user_id)->whereHas('enroll' , $callback)
+            $result = User::select('id','username','lastname', 'firstname', 'profile_fields')->whereId($user_id)->whereHas('enroll' , $callback)
                             ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
             if($result != null)
                 $result_collection->push($result);
