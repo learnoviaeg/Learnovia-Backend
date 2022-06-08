@@ -60,9 +60,14 @@ class file extends Model
         return $this->hasOne('App\CourseItem', 'item_id')->where('type', 'file');
     }
 
-    public function lessons()
+    public function lessons() 
     {
-        return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\FileLesson', 'file_id' , 'id' , 'id' , 'id' );
+        return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\FileLesson', 'file_id' , 'id' , 'id' , 'id' ); 
+    } 
+
+    public function Lesson()
+    {
+        return $this->belongsToMany('App\Lesson', 'file_lessons', 'file_id', 'lesson_id');
     }
 
     // start function get name and value f attribute
