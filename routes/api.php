@@ -87,7 +87,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::group(['prefix' => 'notifications'], function () {
         Route::get('get-all', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:notifications/get-all');
         Route::get('get-unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:notifications/get-unread');
-        Route::get('mark-as-read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:notifications/mark-as-read');
         Route::get('get-for-user', 'NotificationController@GetNotifcations')->name('readnotification')->middleware('permission:notifications/get-for-user');
         Route::get('delete-duration', 'NotificationController@DeletewithTime')->name('readnotification')->middleware('permission:notifications/delete-duration');
         Route::post('seen', 'NotificationController@SeenNotifications')->name('seennotification')->middleware('permission:notifications/seen');
@@ -102,7 +101,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
         Route::get('getbyid', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
         Route::get('get-unread', 'AnnouncementController@unreadannouncements')->name('getunreadannouncements')->middleware('permission:announcements/get-unread');
-        Route::post('mark-as-read', 'AnnouncementController@markasread')->name('readannouncements')->middleware('permission:announcements/mark-as-read');
         Route::get('my', 'AnnouncementController@My_announc')->name('myannouncements')->middleware('permission:announcements/my');
     });
 

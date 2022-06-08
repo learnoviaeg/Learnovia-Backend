@@ -309,10 +309,8 @@ class FilesController extends Controller
 
                         $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
                         $this->notification->sendNotify($users->toArray(),$reqNot);
-
                     }
                 }
-        
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
