@@ -216,20 +216,20 @@ class AssignmentController extends Controller
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
             //sending notifications
-            // $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
-            // if(!isset($request->users_ids))
-            // {
-            //     $reqNot=[
-            //         'message' => $assignment->name.' assignment is created',
-            //         'item_id' => $assignment->id,
-            //         'item_type' => 'assignment',
-            //         'type' => 'notification',
-            //         'publish_date' => $assignment_lesson->publish_date,
-            //         'lesson_id' => $assignment_lesson->lesson_id,
-            //         'course_name' => $assignment_lesson->lesson->course->name
-            //     ];
-            //     $this->notification->sendNotify($users->toArray(),$reqNot);
-            // }
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson)->pluck('user_id');
+            if(!isset($request->users_ids))
+            {
+                $reqNot=[
+                    'message' => $assignment->name.' assignment is created',
+                    'item_id' => $assignment->id,
+                    'item_type' => 'assignment',
+                    'type' => 'notification',
+                    'publish_date' => $assignment_lesson->publish_date,
+                    'lesson_id' => $assignment_lesson->lesson_id,
+                    'course_name' => $assignment_lesson->lesson->course->name
+                ];
+                $this->notification->sendNotify($users->toArray(),$reqNot);
+            }
 
             ///create grade category for assignment
             event(new AssignmentCreatedEvent($assignment_lesson));
@@ -398,21 +398,21 @@ class AssignmentController extends Controller
             //     }
             // }
 
-            // $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
-            // $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
-            // if(isset($courseItem))
-            //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
+            if(isset($courseItem))
+                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-            // $reqNot=[
-            //     'message' => $assignment->name.' assignment is updated',
-            //     'item_id' => $assignment->id,
-            //     'item_type' => 'assignment',
-            //     'type' => 'notification',
-            //     'publish_date' => $assigmentLesson->publish_date,
-            //     'lesson_id' => $assigmentLesson->lesson_id,
-            //     'course_name' => $assigmentLesson->lesson->course->name
-            // ];
-            // $this->notification->sendNotify($users->toArray(),$reqNot);
+            $reqNot=[
+                'message' => $assignment->name.' assignment is updated',
+                'item_id' => $assignment->id,
+                'item_type' => 'assignment',
+                'type' => 'notification',
+                'publish_date' => $assigmentLesson->publish_date,
+                'lesson_id' => $assigmentLesson->lesson_id,
+                'course_name' => $assigmentLesson->lesson->course->name
+            ];
+            $this->notification->sendNotify($users->toArray(),$reqNot);
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
@@ -529,24 +529,10 @@ class AssignmentController extends Controller
         ]);
 
         $assignment= Assignment::find($request->id);
-        // $assignmentLesson=AssignmentLesson::where('assignment_id',$assignment->id)->where('lesson_id',$request->lesson_id)->first();
         
         $assignment->restricted=1;
         if(!isset($request->users_ids))
-            $assignment->restricted=0;
-        // else
-        // {
-        //     $reqNot=[
-        //         'message' => $assignment->name.' assignment is updated',
-        //         'item_id' => $assignment->id,
-        //         'item_type' => 'assignment',
-        //         'type' => 'notification',
-        //         'publish_date' => $assignmentLesson->publish_date,
-        //         'lesson_id' => $assignmentLesson->lesson_id,
-        //         'course_name' => $assignmentLesson->lesson->course->name
-        //     ];
-        //     $this->notification->sendNotify($request->users_ids,$reqNot);
-        // }         
+            $assignment->restricted=0;         
         
         $assignment->save();
 

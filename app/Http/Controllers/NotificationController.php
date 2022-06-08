@@ -182,8 +182,8 @@ class NotificationController extends Controller
         // return HelperController::api_response_format(200, null, 'Read');
         $data=[
             'users' => $users,
-            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            'school_domain'=>'test',
+            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            // 'school_domain'=>'test',
             // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'title'=> 'Learnovia',
             'body'=> $message,
