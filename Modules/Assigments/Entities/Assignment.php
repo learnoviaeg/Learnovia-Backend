@@ -29,6 +29,10 @@ class assignment extends Model
     {
         return $this->belongsToMany('App\Lesson', 'assignment_lessons', 'assignment_id', 'lesson_id');
     }
+    // public function lessons()
+    // {
+    //     return $this->hasManyThrough('App\Lesson' ,'Modules\Assigments\Entities\AssignmentLesson', 'assignment_id' , 'id' , 'id' , 'id' );
+    // }
 
     public function getUrlAttribute()
     {
