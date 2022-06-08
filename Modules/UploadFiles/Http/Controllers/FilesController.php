@@ -267,8 +267,8 @@ class FilesController extends Controller
             $check = $file->save();
 
             if ($check) {
-                if(isset($request->users_ids))
-                    CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                // if(isset($request->users_ids))
+                //     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 
                 foreach ($request->lesson_id as $lesson) {
                     $tempLesson = Lesson::find($lesson);
@@ -286,7 +286,17 @@ class FilesController extends Controller
                         $singlefile,
                         $name
                     );
+
+                    if(isset($request->users_ids))
+                    {
+                        CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                        // $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
+                        $material=Material::select('id','restricted')->where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
+                        $material->restricted=1;
+                        $material->save();
+                    }
                 }
+        
             }
         }
         $file = Lesson::find($request->lesson_id[0])->module('UploadFiles', 'file')->get();;
