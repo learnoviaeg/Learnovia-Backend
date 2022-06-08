@@ -25,9 +25,9 @@ class CoursesHelper{
         $courseItem = CourseItem::where('item_id', $itemId)->where('type', $type)->first();
         if(isset($usersIds)){
             if(isset($courseItem)){
-                $courseItem->courseItemUsers()->delete();
+                $courseItem->courseItemUsers()->whereNotIn('user_id',$usersIds)->delete();
                 foreach($usersIds as $userId){
-                    UserCourseItem::create([
+                    UserCourseItem::firstOrCreate([
                         'user_id' => $userId,
                         'course_item_id' => $courseItem->id,
                     ]);

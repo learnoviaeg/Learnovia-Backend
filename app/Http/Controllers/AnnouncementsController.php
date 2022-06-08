@@ -226,7 +226,6 @@ class AnnouncementsController extends Controller
                 'lesson_id' => null,
                 'course_name' => null
             ];
-//return $users;
             $this->notification->sendNotify($users,$reqNot);
         }
 
@@ -304,8 +303,6 @@ class AnnouncementsController extends Controller
 
         $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
         $this->notification->sendNotify($users,$reqNot);
-
-        // $this->notification->sendNotify($users,$announcement->title.' announcement is updated',$announcement->id,'announcement','announcement');
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }

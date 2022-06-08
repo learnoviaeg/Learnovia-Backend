@@ -209,8 +209,6 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
-                // $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-                // $notification->send();
                 if(!$quiz->restricted)
                 {
                     $reqNot=[
