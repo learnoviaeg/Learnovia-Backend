@@ -12,6 +12,7 @@ use App\h5pLesson;
 use Carbon\Carbon;
 use App\CourseItem;
 use App\LastAction;
+use App\Course;
 use App\Notification;
 use App\SecondaryChain;
 use App\UserCourseItem;
@@ -109,15 +110,15 @@ class H5PLessonController extends Controller
             if(!$updatedH5p->restricted){
                 $reqNot=[
                     'message' => $content->title.' interactive is created',
-                    'item_id' => $request->content_id,
+                    'item_id' => $h5p_lesson->id,
                     'item_type' => 'interactive',
                     'type' => 'notification',
-                    'publish_date' => $updatedH5p->publish_date,
-                    'lesson_id' => $request->lesson_id,
+                    'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
+                    'lesson_id' => $lesson_id,
                     'course_name' => Course::find($lesson->course_id)->name
                 ];
                 $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
-                $this->notification->sendNotify($users,$reqNot); 
+                $this->notification->sendNotify($users,$reqNot);
             }
         }
 
@@ -248,11 +249,11 @@ class H5PLessonController extends Controller
                 'item_id' => $request->content_id,
                 'item_type' => 'interactive',
                 'type' => 'notification',
-                'publish_date' => $updatedH5p->publish_date,
+                'publish_date' => Carbon::parse($h5pLesson->publish_date)->format('Y-m-d H:i:s'),
                 'lesson_id' => $request->lesson_id,
                 'course_name' => Course::find($lesson->course_id)->name
             ];
-            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $this->notification->sendNotify($users,$reqNot); 
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
@@ -266,18 +267,20 @@ class H5PLessonController extends Controller
         //     'created_at'    =>  $h5pLesson->created_at,
         // ];
 
-        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();  
-        // update some data
-        $temp_log->user_id = $request->user('api')->id;
-        $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
-        $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
-        $temp_log->save();
+
+        // comment 4o8l morsy because bydrap
+        // $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();  
+        // // update some data
+        // $temp_log->user_id = $request->user('api')->id;
+        // $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
+        // $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
+        // $temp_log->save();
         
-        $arr = $temp_log->toArray();
-        $result = Auditlog::firstOrCreate($arr);
-        if ($result) {
-            $temp_log->delete();
-        }    
+        // $arr = $temp_log->toArray();
+        // $result = Auditlog::firstOrCreate($arr);
+        // if ($result) {
+        //     $temp_log->delete();
+        // }    
         
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
