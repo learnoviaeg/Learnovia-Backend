@@ -328,22 +328,25 @@ class QuizzesController extends Controller
             $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
             dispatch($userGradesJob);    
 
-            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
-            $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
-            if(isset($courseItem))
-                $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
-        
-            $reqNot=[
-                'message' => $quiz->name.' quiz is updated',
-                'item_id' => $quiz->id,
-                'item_type' => 'quiz',
-                'type' => 'notification',
-                'publish_date' => $quiz_lesson->publish_date,
-                'lesson_id' => $request->lesson_id,
-                'course_name' => Course::find($quiz->course_id)->name
-            ];
-
-            $this->notification->sendNotify($users,$reqNot);
+            //send notification
+            if(!$quiz->draft)
+            {
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
+                if(isset($courseItem))
+                    $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+            
+                $reqNot=[
+                    'message' => $quiz->name.' quiz is updated',
+                    'item_id' => $quiz->id,
+                    'item_type' => 'quiz',
+                    'type' => 'notification',
+                    'publish_date' => $quiz_lesson->publish_date,
+                    'lesson_id' => $request->lesson_id,
+                    'course_name' => Course::find($quiz->course_id)->name
+                ];
+                $this->notification->sendNotify($users,$reqNot);   
+            }
         }
         return HelperController::api_response_format(200, $quiz,__('messages.quiz.update'));
     }
