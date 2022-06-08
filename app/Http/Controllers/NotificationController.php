@@ -161,48 +161,6 @@ class NotificationController extends Controller
     }
 
    /**
-    * @description: mark all the notifications of this user as read.
-    * @param no required parameters
-    * @return all notifications.
-    */
-    public function markasread(Request $request)
-    {
-        // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-        // foreach ($noti as $not) {
-        //     $not->data= json_decode($not->data, true);
-        //     if($not->data['type'] != 'announcement')
-        //     {
-        //         //for log event
-        //         // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
-        //         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-        //         // if($check > 0)
-        //         //     event(new MassLogsEvent($logsbefore,'updated'));
-        //     }
-        // }
-        // return HelperController::api_response_format(200, null, 'Read');
-        $data=[
-            'users' => $users,
-            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            // 'school_domain'=>'test',
-            // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            'title'=> 'Learnovia',
-            'body'=> $message,
-            "item_type" => $item_type,
-            "type" => $type,
-            "item_id" => $item_id,
-        ];
-        $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
-            'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
-            ],
-            'form_params' => $data
-        ]);
-        return $res;
-    }
-
-   /**
     * @description: gets all the notifications of this user.
     * @param no required parameters
     * @return all notifications.

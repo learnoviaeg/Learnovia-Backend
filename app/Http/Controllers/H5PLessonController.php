@@ -105,13 +105,20 @@ class H5PLessonController extends Controller
             LastAction::lastActionInCourse($lesson->course_id);
 
             //sending Notification
-            // $notification = new H5PNotification($h5p_lesson, $content->title.' interactive is added');
-            // $notification->send();
             $updatedH5p=h5pLesson::find($h5p_lesson->id);
-            // if($updatedH5p->restricted){
-            //     $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson->id)->pluck('user_id');
-            //     $this->notification->sendNotify($users,$content->title.' interactive is created',$request->content_id,'interactive','interactive');
-            // }
+            if(!$updatedH5p->restricted){
+                $reqNot=[
+                    'message' => $content->title.' interactive is created',
+                    'item_id' => $request->content_id,
+                    'item_type' => 'interactive',
+                    'type' => 'notification',
+                    'publish_date' => $updatedH5p->publish_date,
+                    'lesson_id' => $request->lesson_id,
+                    'course_name' => Course::find($lesson->course_id)->name
+                ];
+                $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
+                $this->notification->sendNotify($users,$reqNot); 
+            }
         }
 
         return HelperController::api_response_format(200,$updatedH5p, __('messages.interactive.add'));
@@ -235,6 +242,18 @@ class H5PLessonController extends Controller
         $courseItem = CourseItem::where('item_id', $h5pLessons->id)->where('type', 'h5p_content')->first();
         if(isset($courseItem))
             $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+
+            $reqNot=[
+                'message' => $content->title.' interactive is updated',
+                'item_id' => $request->content_id,
+                'item_type' => 'interactive',
+                'type' => 'notification',
+                'publish_date' => $updatedH5p->publish_date,
+                'lesson_id' => $request->lesson_id,
+                'course_name' => Course::find($lesson->course_id)->name
+            ];
+            $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
+            $this->notification->sendNotify($users,$reqNot); 
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
 
