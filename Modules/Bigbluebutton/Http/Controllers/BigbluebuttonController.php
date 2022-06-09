@@ -35,6 +35,7 @@ use App\Classes;
 use App\Course;
 use App\Paginate;
 use App\Http\Controllers\Controller;
+use App\Repositories\NotificationRepoInterface;
 use App\LastAction;
 use App\Exports\BigbluebuttonGeneralReport;
 use App\Notification;
@@ -42,9 +43,11 @@ use App\Notifications\VirtualNotification;
 
 class BigbluebuttonController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
+
         $this->middleware('auth');
     }
 
@@ -217,8 +220,19 @@ class BigbluebuttonController extends Controller
                             }
 
                             //sending Notification
-                            $notification = new VirtualNotification($bigbb, $request->name.' meeting is created');
-                            $notification->send();
+                            $reqNot=[
+                                'message' => $bigbb->name.' zoom is created',
+                                'item_id' => $bigbb->id,
+                                'item_type' => 'zoom',
+                                'type' => 'notification',
+                                'publish_date' => $bigbb->start_date,
+                                'lesson_id' => null,
+                                'course_name' => Course::find($bigbb->course_id)->name
+                            ];
+        
+                            $users=Enroll::select('user_id')->where('course',$bigbb->course_id)->pluck('user_id');
+                            // dd($users);
+                            $this->notification->sendNotify($users->toArray(),$reqNot);
 
                             $created_meetings->push($bigbb);
                             

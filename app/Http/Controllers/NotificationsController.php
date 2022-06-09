@@ -126,16 +126,6 @@ class NotificationsController extends Controller
             $us['users'][]=$data;
         }
 
-        $clientt = new Client();
-        // return $us;
-        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications', [
-            'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
-            ], 
-            "form_params" => $us
-        ]);
-
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
