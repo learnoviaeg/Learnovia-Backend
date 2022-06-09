@@ -29,10 +29,9 @@ class SendNotificationListener
      */
     public function handle(CreateCourseItemEvent $event)
     {
-        // if($event->usercourseItem->courseItem->type == 'quiz')
-        //     $publish_date=
         $reqNot=[
-            'message' => $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created',
+            'message' => isset($event->usercourseItem->courseItem->item->name) ? $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created' :
+                        $event->usercourseItem->courseItem->item->title . ' ' . $event->usercourseItem->courseItem->type . ' is created',
             'item_id' => $event->usercourseItem->courseItem->item_id,
             'item_type' => $event->usercourseItem->courseItem->type,
             'type' => 'notification',
@@ -46,6 +45,5 @@ class SendNotificationListener
 
         $this->notification->sendNotify($users,$reqNot);
 
-        // $this->notification->sendNotify($users->toArray(), $event->usercourseItem->courseItem->type.' is created', $event->usercourseItem->courseItem->item_id, 'notification', $event->usercourseItem->courseItem->type);
     }
 }

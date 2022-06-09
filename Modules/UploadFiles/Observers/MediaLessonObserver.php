@@ -53,12 +53,12 @@ class MediaLessonObserver
                 'index' => LessonComponent::getNextIndex($mediaLesson->lesson_id)
             ]);
 
-            $courseItem=CourseItem::where('item_id',$mediaLesson->media_id)->where('type','media')->first();
-            if(isset($courseItem))
-            {
-                $material->restricted=1;
-                $material->save();
-            }
+            // $courseItem=CourseItem::where('item_id',$mediaLesson->media_id)->where('type','media')->first();
+            // if(isset($courseItem))
+            // {
+            //     $material->restricted=1;
+            //     $material->save();
+            // }
         }
     }
 

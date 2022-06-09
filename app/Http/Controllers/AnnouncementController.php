@@ -561,62 +561,6 @@ class AnnouncementController extends Controller
         return HelperController::api_response_format(200, $data,'all user unread announcements');
     }
 
-    public function markasread(Request $request)
-    {
-        $request->validate([
-            // 'id' => 'exists:notifications,id',
-            'type' => 'string|in:announcement',
-            'id' => 'int',
-            'message' => 'string'
-        ]);
-        $session_id = Auth::User()->id;
-        if(isset($request->id))
-        {
-            // $note = DB::table('notifications')->where('id', $request->id)->first();
-            // if ($note->notifiable_id == $session_id){
-            //     $notify =  DB::table('notifications')->where('id', $request->id)->update(['read_at' =>  Carbon::now()]);
-            //     $print=self::get($request);
-            //     return $print;
-            // }
-            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-            foreach ($noti as $not) {
-                $not->data= json_decode($not->data, true);
-                if($not->data['type'] == 'announcement')
-                {
-                    //for log event
-                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
-
-                    if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message){
-                        $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                    // if($check > 0)
-                    //     event(new MassLogsEvent($logsbefore,'updated'));
-                    }
-                }
-            }
-            $print=self::get($request);
-            return $print;
-        }
-        else
-        {
-            // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
-            $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
-            foreach ($noti as $not) {
-                $not->data= json_decode($not->data, true);
-                if($not->data['type'] == 'announcement')
-                {
-                    //for log event
-                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
-                    $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                    // if($check > 0)
-                    //     event(new MassLogsEvent($logsbefore,'updated'));
-                }
-            }
-            $print=self::get($request);
-            return $print;
-        }
-        return HelperController::api_response_format(400, $body = [], $message = 'You cannot seen this announcement');
-    }
-
     public function My_announc(Request $request)
     {
         $my = Announcement::where('created_by',Auth::id())->whereHas('UserAnnouncement');

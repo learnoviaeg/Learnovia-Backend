@@ -343,7 +343,7 @@ class QuizzesController extends Controller
                     'type' => 'notification',
                     'publish_date' => $quiz_lesson->publish_date,
                     'lesson_id' => $request->lesson_id,
-                    'course_name' => Course::find($quiz->course_id)->name
+                    'course_name' => $quiz->course->name,
                 ];
                 $this->notification->sendNotify($users,$reqNot);   
             }
