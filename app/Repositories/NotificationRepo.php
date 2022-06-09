@@ -24,17 +24,6 @@ class NotificationRepo implements NotificationRepoInterface
             'publish_date' => $reqNot['publish_date']
         ];
 
-        // dd($data);
-
-        // $clientt = new Client();
-        // $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/send/notifications', [
-        //     'headers'   => [
-        //         'username' => 'test',
-        //         'password' => 'api_test_5eOiG7CTC',
-        //     ],
-        //     'form_params' => $data
-        // ]);
-
         $curl = curl_init();
 
         curl_setopt_array($curl, array(

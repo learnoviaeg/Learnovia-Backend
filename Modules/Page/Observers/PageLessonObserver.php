@@ -44,12 +44,12 @@ class PageLessonObserver
                 'link'        => 'no-url',
                 'mime_type'   => 'no-mime-type',
             ]);
-            $courseItem=CourseItem::where('item_id',$pageLesson->page_id)->where('type','page')->first();
-            if(isset($courseItem))
-            {
-                $material->restricted=1;
-                $material->save();
-            }
+            // $courseItem=CourseItem::where('item_id',$pageLesson->page_id)->where('type','page')->first();
+            // if(isset($courseItem))
+            // {
+            //     $material->restricted=1;
+            //     $material->save();
+            // }
             // if($courseItem == null)
             // {
             //     $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');

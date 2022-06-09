@@ -46,13 +46,16 @@ class SendNotificationListener
         }
         else
             $reqNot=[
-                'message' => $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created',
+                'message' => isset($event->usercourseItem->courseItem->item->name) ? $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created' :
+                            $event->usercourseItem->courseItem->item->title . ' ' . $event->usercourseItem->courseItem->type . ' is created',
                 'item_id' => $event->usercourseItem->courseItem->item_id,
                 'item_type' => $event->usercourseItem->courseItem->type,
                 'type' => 'notification',
                 'publish_date' => Carbon::now()->format('Y-m-d H:i:s'), // must be on itemLesson ... met2gela
-                'lesson_id' => $event->usercourseItem->courseItem->item->Lesson[0]->id,
-                'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name,
+                // 'lesson_id' => null, //same publish_date
+                // 'course_name' => null, // same issue
+                'lesson_id' => isset($event->usercourseItem->courseItem->item->Lesson[0]->id), //same publish_date
+                'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name, // same issue
             ];
         $users=UserCourseItem::where('course_item_id',$event->usercourseItem->courseItem->id)->pluck('user_id');
 
