@@ -27,7 +27,7 @@ class NotificationRepo implements NotificationRepoInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/send/notifications',
+        CURLOPT_URL => config('NotificationConfig.Notification_url').'send/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,

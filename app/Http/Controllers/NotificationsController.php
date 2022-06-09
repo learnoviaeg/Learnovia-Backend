@@ -121,15 +121,15 @@ class NotificationsController extends Controller
         foreach($request->users as $user)
         {
             $data['user_id']=$user;
-            // $data['school_domain']='test';
-            $data['school_domain']=substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+            $data['school_domain']='test';
+            // $data['school_domain']=substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
             $us['users'][]=$data;
         }
 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/get/notifications',
+        CURLOPT_URL =>  __('NotificationConfig.Notification_url').'get/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -292,7 +292,7 @@ class NotificationsController extends Controller
             }
 
         $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/update/notifications', [
+        $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'update/notifications', [
             'headers'   => [
                 'username' => 'test',
                 'password' => 'api_test_5eOiG7CTC',
