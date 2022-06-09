@@ -129,7 +129,7 @@ class NotificationsController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL =>  __('NotificationConfig.Notification_url').'get/notifications',
+        CURLOPT_URL =>  config('NotificationConfig.Notification_url').'get/notifications',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
