@@ -131,24 +131,28 @@ class AuthController extends Controller
         $user->api_token = $tokenResult->accessToken;
         $user->save();
 
-        $fcm_tokens=[
-            'fcm_token' => $request->fcm_tokens[0],
-        ];
-        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
-        $data=[
-            'user_id' => $user->id,
-            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            // 'school_domain'=>'test',
-            'fcm_tokens'=> array($fcm_tokens)
-        ];
-        $clientt = new Client();
-        $res = $clientt->request('POST', 'http://ec2-100-26-60-206.compute-1.amazonaws.com/api/register', [
-            'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
-            ], 
-            'form_params' => $data
-        ]);
+        if(count($request->fcm_tokens) > 1)
+        {
+            $fcm_tokens=[
+                'fcm_token' => $request->fcm_tokens[0],
+            ];
+            // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+            $data=[
+                'user_id' => $user->id,
+                'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+                // 'school_domain'=>'test',
+                'fcm_tokens'=> array($fcm_tokens)
+            ];
+            $clientt = new Client();
+            $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+                'headers'   => [
+                    'username' => 'test',
+                    'password' => 'api_test_5eOiG7CTC',
+                ], 
+                'form_params' => $data
+            ]);
+        }
+
         // return $res;
 
     //    LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
