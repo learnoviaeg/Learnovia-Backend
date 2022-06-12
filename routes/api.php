@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
+    Route::post('register-token', 'AuthController@RegisterNotification')->name('tokennotification');
 
     //for editor
     Route::post('upload-editor', 'CourseController@Upload')->name('uploadForEditor');

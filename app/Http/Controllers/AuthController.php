@@ -176,6 +176,34 @@ class AuthController extends Controller
         ], __('messages.auth.login'));
     }
 
+    public function RegisterNotification(Request $request)
+    {
+        $request->validate([
+            'fcm_tokens' => 'required|array',
+        ]);
+
+        $fcm_tokens=[
+            'fcm_token' => $request->fcm_tokens[0],
+        ];
+        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+        $data=[
+            'user_id' => Auth::id(),
+            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            // 'school_domain'=>'test',
+            'fcm_tokens'=> array($fcm_tokens)
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+            'headers'   => [
+                'username' => 'test',
+                'password' => 'api_test_5eOiG7CTC',
+            ], 
+            'form_params' => $data
+        ]);
+        
+        return 'Done';
+    }
+
     public function Get_Dictionary($callOrNot = 0,Request $request)
     {
         $request->validate([
