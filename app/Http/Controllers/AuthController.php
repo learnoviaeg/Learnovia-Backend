@@ -153,7 +153,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // return $res;
+        return $res;
 
     //    LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
     //         'user_id' => $request->user()->id 
