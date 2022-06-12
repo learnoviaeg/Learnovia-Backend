@@ -131,7 +131,7 @@ class AuthController extends Controller
         $user->api_token = $tokenResult->accessToken;
         $user->save();
 
-        if(count($request->fcm_tokens) > 1)
+        if(isset($request->fcm_tokens) && count($request->fcm_tokens) > 1)
         {
             $fcm_tokens=[
                 'fcm_token' => $request->fcm_tokens[0],
