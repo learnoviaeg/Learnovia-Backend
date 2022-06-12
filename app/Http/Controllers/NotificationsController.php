@@ -123,6 +123,9 @@ class NotificationsController extends Controller
             $data['user_id']=$user;
             // $data['school_domain']='test';
             $data['school_domain']=substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+
+            print_r($data['school_domain']);
+            die();
             $us['users'][]=$data;
         }
 
