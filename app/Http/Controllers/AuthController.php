@@ -347,7 +347,8 @@ class AuthController extends Controller
             'storageBucket'=> 'learnovia-notifications.appspot.com',
             'messagingSenderId'=> '1056677579116',
             'appId'=> '1:1056677579116:web:23adce50898d8016ec8b49',
-            'measurementId'=> 'G-BECF0Q93VE'
+            'measurementId'=> 'G-BECF0Q93VE',
+            'vapidKey' => 'BJPe05dk-zBOZqUXoQJ48am8DVX4RdEWGOTuLGtQHgd-zmyUSKmQ5ZQd2GM-sPBg9saIb404oXwDhALkRa_lFw4'
         ];
         $config=[
             'production'=> env('APP_DEBUG'),
