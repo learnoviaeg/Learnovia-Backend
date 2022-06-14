@@ -162,10 +162,10 @@ class ReportCardsController extends Controller
             
         if($request->term == 'final'){
             if($user->can('report_card/mfis/mfisg-final'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
+                $allowed_levels=Permission::where('name','report_card/mfis/mfisg-final')->pluck('allowed_levels')->first();
 
             if($user->can('report_card/mfis/mfisb-final'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
+                $allowed_levels=Permission::where('name','report_card/mfis/mfisb-final')->pluck('allowed_levels')->first();
 
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {
