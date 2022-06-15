@@ -90,7 +90,7 @@ class H5PLessonController extends Controller
                 'content_id' => $request->content_id,
                 'lesson_id' => $lesson_id,
                 'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
-                'start_date' => $request->publish_date,
+                'start_date' =>  isset($request->publish_date)?$request->publish_date : Carbon::now(),
                 'user_id' => Auth::id(),
                 'visible'=>isset($request->visible)?$request->visible:1,
                 'restricted' => 0
@@ -110,14 +110,14 @@ class H5PLessonController extends Controller
             if(!$updatedH5p->restricted){
                 $reqNot=[
                     'message' => $content->title.' interactive is created',
-                    'item_id' => $h5p_lesson->id,
-                    'item_type' => 'interactive',
+                    'item_id' => $h5p_lesson->content_id,
+                    'item_type' => 'h5p_content',
                     'type' => 'notification',
                     'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
                     'lesson_id' => $lesson_id,
                     'course_name' => Course::find($lesson->course_id)->name
                 ];
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
+                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
                 $this->notification->sendNotify($users,$reqNot);
             }
         }
@@ -169,7 +169,8 @@ class H5PLessonController extends Controller
                 //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
                 // }
 
-                if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                // if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                if($h5p_lesson->visible == 0 )
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
@@ -238,7 +239,7 @@ class H5PLessonController extends Controller
             ]);
         }
 
-        $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
         // dd($h5pLessons->id);
         $courseItem = CourseItem::where('item_id', $h5pLessons->id)->where('type', 'h5p_content')->first();
         if(isset($courseItem))
@@ -247,13 +248,13 @@ class H5PLessonController extends Controller
             $reqNot=[
                 'message' => $content->title.' interactive is updated',
                 'item_id' => $request->content_id,
-                'item_type' => 'interactive',
+                'item_type' => 'h5p_content',
                 'type' => 'notification',
                 'publish_date' => Carbon::parse($h5pLesson->publish_date)->format('Y-m-d H:i:s'),
                 'lesson_id' => $request->lesson_id,
                 'course_name' => Course::find($lesson->course_id)->name
             ];
-            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $this->notification->sendNotify($users,$reqNot); 
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');

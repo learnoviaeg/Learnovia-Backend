@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CoursesHelper;
 use App\SecondaryChain;
 use Illuminate\Http\Request;
 use Modules\QuestionBank\Entities\quiz;
@@ -16,7 +17,6 @@ use App\Paginate;
 use App\Events\GradeItemEvent;
 use App\Events\UpdatedQuizQuestionsEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
-// use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
@@ -205,6 +205,13 @@ class QuestionsController extends Controller
             }
             event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
+
+            if(isset($request->users_ids)){
+                $quiz->restricted=1;
+                $quiz->save();
+                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            }
+
             $quiz->save();
 
             foreach($quiz->quizLesson as $newQuizLesson){
@@ -221,7 +228,7 @@ class QuestionsController extends Controller
                         'course_name' => $quiz->course->name
                     ];
 
-                    $users=SecondaryChain::select('user_id')->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
+                    $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
                     $this->notification->sendNotify($users->toArray(),$reqNot);
                 }
             }

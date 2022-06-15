@@ -71,7 +71,7 @@ class SendNotificationListener
 
             $reqNot=[
                 'message' => 'Interactive is created',
-                'item_id' => $event->usercourseItem->courseItem->item_id, //h5pLesson
+                'item_id' => $h5pLesson->content_id,
                 'item_type' => $event->usercourseItem->courseItem->type,
                 'type' => 'notification',
                 'publish_date' => $h5pLesson->publish_date,
@@ -92,7 +92,7 @@ class SendNotificationListener
                 'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name,
                 'course_id' => $event->usercourseItem->courseItem->item->Lesson[0]->course->id,
             ];
-        $users=UserCourseItem::where('course_item_id',$event->usercourseItem->courseItem->id)->pluck('user_id');
+        $users=[$event->usercourseItem->user_id];
 
         $this->notification->sendNotify($users,$reqNot);
     }

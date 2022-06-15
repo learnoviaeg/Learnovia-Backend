@@ -222,10 +222,10 @@ class QuizzesController extends Controller
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
 
-            if(isset($request->users_ids)){
-                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
-                $quiz->restricted=1;
-            }
+            // if(isset($request->users_ids)){
+            //     CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            //     $quiz->restricted=1;
+            // }
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -331,7 +331,7 @@ class QuizzesController extends Controller
             //send notification
             if(!$quiz->draft)
             {
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
                 $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
                 if(isset($courseItem))
                     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
