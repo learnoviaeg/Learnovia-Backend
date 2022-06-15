@@ -92,7 +92,7 @@ class SendNotificationListener
                 'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name,
                 'course_id' => $event->usercourseItem->courseItem->item->Lesson[0]->course->id,
             ];
-        $users=UserCourseItem::where('course_item_id',$event->usercourseItem->courseItem->id)->pluck('user_id');
+        $users=[$event->usercourseItem->user_id];
 
         $this->notification->sendNotify($users,$reqNot);
     }
