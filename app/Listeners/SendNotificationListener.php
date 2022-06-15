@@ -56,7 +56,7 @@ class SendNotificationListener
         }
         if($event->usercourseItem->courseItem->type == 'media')
         {
-            $MediaLesson=MediaLesson::where('media_is',$event->usercourseItem->courseItem->item_id)
+            $MediaLesson=MediaLesson::where('media_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
             $publish_date=$MediaLesson->publish_date;
         }
@@ -88,7 +88,7 @@ class SendNotificationListener
                 'item_type' => $event->usercourseItem->courseItem->type,
                 'type' => 'notification',
                 'publish_date' => $publish_date,
-                'lesson_id' => isset($event->usercourseItem->courseItem->item->Lesson[0]->id),
+                'lesson_id' => $event->usercourseItem->courseItem->item->Lesson[0]->id,
                 'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name,
                 'course_id' => $event->usercourseItem->courseItem->item->Lesson[0]->course->id,
             ];
