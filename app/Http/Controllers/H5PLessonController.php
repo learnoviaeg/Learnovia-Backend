@@ -90,7 +90,7 @@ class H5PLessonController extends Controller
                 'content_id' => $request->content_id,
                 'lesson_id' => $lesson_id,
                 'publish_date' => isset($request->publish_date)?$request->publish_date : Carbon::now(),
-                'start_date' => $request->publish_date,
+                'start_date' =>  isset($request->publish_date)?$request->publish_date : Carbon::now(),
                 'user_id' => Auth::id(),
                 'visible'=>isset($request->visible)?$request->visible:1,
                 'restricted' => 0
