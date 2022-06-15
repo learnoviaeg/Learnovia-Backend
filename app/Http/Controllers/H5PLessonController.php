@@ -117,7 +117,7 @@ class H5PLessonController extends Controller
                     'lesson_id' => $lesson_id,
                     'course_name' => Course::find($lesson->course_id)->name
                 ];
-                $users=SecondaryChain::select('user_id')->where('lesson_id',$lesson_id)->pluck('user_id');
+                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
                 $this->notification->sendNotify($users,$reqNot);
             }
         }
@@ -238,7 +238,7 @@ class H5PLessonController extends Controller
             ]);
         }
 
-        $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
         // dd($h5pLessons->id);
         $courseItem = CourseItem::where('item_id', $h5pLessons->id)->where('type', 'h5p_content')->first();
         if(isset($courseItem))
@@ -253,7 +253,7 @@ class H5PLessonController extends Controller
                 'lesson_id' => $request->lesson_id,
                 'course_name' => Course::find($lesson->course_id)->name
             ];
-            $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $this->notification->sendNotify($users,$reqNot); 
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
