@@ -151,7 +151,7 @@ class H5PLessonController extends Controller
         ];
 
         $customMessages = [
-            'content_id.exists' => 'This interactive is invalid.'
+            'content_id.exists' => 'This item has been removed.'
         ];
 
         $this->validate($request, $rules, $customMessages);
