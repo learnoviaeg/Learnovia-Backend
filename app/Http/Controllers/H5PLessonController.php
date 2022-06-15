@@ -110,7 +110,7 @@ class H5PLessonController extends Controller
             if(!$updatedH5p->restricted){
                 $reqNot=[
                     'message' => $content->title.' interactive is created',
-                    'item_id' => $h5p_lesson->id,
+                    'item_id' => $h5p_lesson->content_id,
                     'item_type' => 'interactive',
                     'type' => 'notification',
                     'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
@@ -169,7 +169,8 @@ class H5PLessonController extends Controller
                 //         return response()->json(['message' => __('messages.error.no_permission'), 'body' => null], 403);
                 // }
 
-                if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                // if(($h5p_lesson->visible == 0 || $h5p_lesson->publish_date < Carbon::now()))
+                if($h5p_lesson->visible == 0 )
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
