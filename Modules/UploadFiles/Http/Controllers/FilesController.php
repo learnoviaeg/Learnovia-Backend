@@ -287,7 +287,7 @@ class FilesController extends Controller
                         $name
                     );
 
-                    $material=Material::select('id','restricted', 'name', 'publish_date')->where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
+                    $material=Material::select('id','restricted', 'name', 'publish_date','course_id')->where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
                     if(isset($request->users_ids))
                     {
                         CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
