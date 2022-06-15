@@ -207,8 +207,9 @@ class QuestionsController extends Controller
             $quiz->draft=0;
 
             if(isset($request->users_ids)){
-                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
                 $quiz->restricted=1;
+                $quiz->save();
+                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
             }
 
             $quiz->save();
