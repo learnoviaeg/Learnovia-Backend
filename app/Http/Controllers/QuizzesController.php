@@ -478,7 +478,7 @@ class QuizzesController extends Controller
         if($grade_Cat->parent != null)
             $quizLesson->Parent_grade_category = $grade_Cat->Parents->id;
 
-        if(!isset($quizLesson))
+        if(!isset($quizLesson)|| !$quiz)
             return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
         $user_quiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quizLesson->id);
