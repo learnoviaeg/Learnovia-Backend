@@ -222,10 +222,10 @@ class QuizzesController extends Controller
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
 
-            if(isset($request->users_ids)){
-                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
-                $quiz->restricted=1;
-            }
+            // if(isset($request->users_ids)){
+            //     CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            //     $quiz->restricted=1;
+            // }
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
