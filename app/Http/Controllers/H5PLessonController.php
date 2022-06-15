@@ -111,7 +111,7 @@ class H5PLessonController extends Controller
                 $reqNot=[
                     'message' => $content->title.' interactive is created',
                     'item_id' => $h5p_lesson->content_id,
-                    'item_type' => 'interactive',
+                    'item_type' => 'h5p_content',
                     'type' => 'notification',
                     'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
                     'lesson_id' => $lesson_id,
@@ -248,7 +248,7 @@ class H5PLessonController extends Controller
             $reqNot=[
                 'message' => $content->title.' interactive is updated',
                 'item_id' => $request->content_id,
-                'item_type' => 'interactive',
+                'item_type' => 'h5p_content',
                 'type' => 'notification',
                 'publish_date' => Carbon::parse($h5pLesson->publish_date)->format('Y-m-d H:i:s'),
                 'lesson_id' => $request->lesson_id,
