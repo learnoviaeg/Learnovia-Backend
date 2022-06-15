@@ -246,7 +246,7 @@ class MediaController extends Controller
                     Storage::disk('public')->putFileAs('media/', $item, $name);
                 }
 
-                $material=Material::select('id','restricted', 'name','publish_date')->where('item_id' ,$mediaLesson->media_id)->where('lesson_id' ,$mediaLesson->lesson_id)->where('type' , 'media')->first();
+                $material=Material::select('id','restricted', 'name','publish_date','course_id')->where('item_id' ,$mediaLesson->media_id)->where('lesson_id' ,$mediaLesson->lesson_id)->where('type' , 'media')->first();
                 if(isset($request->users_ids))
                 {
                     CoursesHelper::giveUsersAccessToViewCourseItem($media->id, 'media', $request->users_ids);
