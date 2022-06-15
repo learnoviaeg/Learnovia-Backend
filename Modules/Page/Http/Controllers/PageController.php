@@ -120,7 +120,7 @@ class PageController extends Controller
             $TempLesson = Lesson::find($lesson);
             LastAction::lastActionInCourse($TempLesson->course_id);
 
-            $material=Material::select('id','restricted', 'name','publish_date','course_id')->where('item_id' ,$page->id)->where('lesson_id' ,$lesson)->where('type' , 'page')->first();
+            $material=Material::select('id','restricted', 'name','publish_date','course_id','lesson_id')->where('item_id' ,$page->id)->where('lesson_id' ,$lesson)->where('type' , 'page')->first();
             
             if(isset($request->users_ids))
             {
