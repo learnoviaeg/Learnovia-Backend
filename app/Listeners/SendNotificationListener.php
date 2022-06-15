@@ -8,6 +8,7 @@ use App\Repositories\NotificationRepoInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\UserCourseItem;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Modules\UploadFiles\Entities\FileLesson;
 use Modules\UploadFiles\Entities\MediaLesson;
 use Modules\Page\Entities\pageLesson;
@@ -70,7 +71,7 @@ class SendNotificationListener
             $h5pLesson=h5pLesson::find($event->usercourseItem->courseItem->item_id);
 
             $reqNot=[
-                'message' => 'Interactive is created',
+                'message' => DB::table('h5p_contents')->whereId($h5pLesson->content_id)->first()->title . ' Interactive is created',
                 'item_id' => $h5pLesson->content_id,
                 'item_type' => $event->usercourseItem->courseItem->type,
                 'type' => 'notification',
