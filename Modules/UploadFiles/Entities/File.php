@@ -64,6 +64,10 @@ class file extends Model
     {
         return $this->hasManyThrough('App\Lesson' ,'Modules\UploadFiles\Entities\FileLesson', 'file_id' , 'id' , 'id' , 'id' );
     }
+    public function Lesson()
+    {
+        return $this->belongsToMany('App\Lesson', 'file_lessons', 'file_id', 'lesson_id');
+    }
 
     // start function get name and value f attribute
     public static function get_year_name($old, $new)

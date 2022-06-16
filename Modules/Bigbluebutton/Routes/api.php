@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 Route::post('callback_function', 'BigbluebuttonController@callback_function');
 
-Route::group(['prefix' => 'bigbluebutton', 'middleware' => ['auth:api','LastAction']], function () {
+Route::group(['prefix' => 'bigbluebutton', 'middleware' => ['auth:api']], function () {
 
     //install Bigbluebutton Routes
     Route::get('install','BigbluebuttonController@install');

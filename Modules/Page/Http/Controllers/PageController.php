@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Lesson;
 use App\Enroll;
+use App\SecondaryChain;
 use App\Http\Controllers\Controller;
 use Modules\Page\Entities\Page;
 use Modules\Page\Entities\pageLesson;
@@ -19,9 +20,15 @@ use App\Material;
 use Exception;
 use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
+use App\Repositories\NotificationRepoInterface;
 
 class PageController extends Controller
 {
+    public function __construct( NotificationRepoInterface $notification)
+    {
+        $this->notification = $notification;
+    }
+
     /**
      * Display a listing of the resource.
      * @return Response
@@ -99,8 +106,8 @@ class PageController extends Controller
         $page->content = $request->content;
         $page->save();
 
-        if(isset($request->users_ids))
-            CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+        // if(isset($request->users_ids))
+            // CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
 
         foreach($request->lesson_id as $lesson){
             pageLesson::firstOrCreate([
@@ -112,6 +119,32 @@ class PageController extends Controller
 
             $TempLesson = Lesson::find($lesson);
             LastAction::lastActionInCourse($TempLesson->course_id);
+
+            $material=Material::where('item_id' ,$page->id)->where('lesson_id' ,$lesson)->where('type' , 'page')->first();
+            
+            if(isset($request->users_ids))
+            {
+                CoursesHelper::giveUsersAccessToViewCourseItem($page->id, 'page', $request->users_ids);
+                // $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
+                $material->restricted=1;
+                $material->save();
+            }
+            if(!isset($request->users_ids)){
+                $reqNot=[
+                    'message' => $material->name.' page is added',
+                    'item_id' => $material->id,
+                    'item_type' => 'page',
+                    'type' => 'notification',
+                    'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
+                    'lesson_id' => $lesson,
+                    'course_name' => $TempLesson->course->name,
+                ];
+
+                $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                $this->notification->sendNotify($users->toArray(),$reqNot);
+            }
+
+
         }
 
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
@@ -181,6 +214,15 @@ class PageController extends Controller
 
         $page_lesson->updated_at = Carbon::now();
         $page_lesson->save();
+
+        // //send notification
+        // $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        // $courseItem = CourseItem::where('item_id', $page->id)->where('type', 'page')->first();
+        // if(isset($courseItem))
+        //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+        //     // dd($users);
+        // $this->notification->sendNotify($users->toArray(),$page->name. ' page is updated',$page->id,'notification','page');    
+        
         $page['lesson'] =  $page->Lesson;
 
         return HelperController::api_response_format(200, $page, __('messages.page.update'));

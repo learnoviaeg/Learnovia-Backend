@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\MassLogsEvent;
 use Carbon\Carbon;
 use App\User;
+use GuzzleHttp\Client;
 use App\Classes;
 use App\Level;
 use App\Enroll;
@@ -129,14 +130,40 @@ class AuthController extends Controller
         $user->last_login = Carbon::now();
         $user->api_token = $tokenResult->accessToken;
         $user->save();
-       LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
-            'user_id' => $request->user()->id 
-            ,'name' => 'login'
-            ,'method'=>$request->route()->methods[0]
-            ,'uri' =>  $request->route()->uri
-            ,'resource' =>  $request->route()->action['controller']
-            ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
+
+        if(isset($request->fcm_tokens) && count($request->fcm_tokens) > 0 && !in_array(null,$request->fcm_tokens))
+        {
+            $fcm_tokens=[
+                'fcm_token' => $request->fcm_tokens[0],
+            ];
+            // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+            $data=[
+                'user_id' => $user->id,
+                'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+                // 'school_domain'=>'test',
+                'fcm_tokens'=> array($fcm_tokens)
+            ];
+            $clientt = new Client();
+            $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+                'headers'   => [
+                    'username' => 'test',
+                    'password' => 'api_test_5eOiG7CTC',
+                ], 
+                'form_params' => $data
             ]);
+        }
+
+        // return $res;
+
+    //    LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
+    //         'user_id' => $request->user()->id 
+    //         ,'name' => 'login'
+    //         ,'method'=>$request->route()->methods[0]
+    //         ,'uri' =>  $request->route()->uri
+    //         ,'resource' =>  $request->route()->action['controller']
+    //         ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
+    //         ]);
+
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
@@ -147,6 +174,34 @@ class AuthController extends Controller
             'language' => Language::find($user->language),
             // 'dictionary' => self::Get_Dictionary(1,$request),
         ], __('messages.auth.login'));
+    }
+
+    public function RegisterNotification(Request $request)
+    {
+        $request->validate([
+            'fcm_tokens' => 'required|array',
+        ]);
+
+        $fcm_tokens=[
+            'fcm_token' => $request->fcm_tokens[0],
+        ];
+        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+        $data=[
+            'user_id' => Auth::id(),
+            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            // 'school_domain'=>'test',
+            'fcm_tokens'=> array($fcm_tokens)
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+            'headers'   => [
+                'username' => 'test',
+                'password' => 'api_test_5eOiG7CTC',
+            ], 
+            'form_params' => $data
+        ]);
+        
+        return 'Done';
     }
 
     public function Get_Dictionary($callOrNot = 0,Request $request)
@@ -292,7 +347,8 @@ class AuthController extends Controller
             'storageBucket'=> 'learnovia-notifications.appspot.com',
             'messagingSenderId'=> '1056677579116',
             'appId'=> '1:1056677579116:web:23adce50898d8016ec8b49',
-            'measurementId'=> 'G-BECF0Q93VE'
+            'measurementId'=> 'G-BECF0Q93VE',
+            'vapidKey' => 'BJPe05dk-zBOZqUXoQJ48am8DVX4RdEWGOTuLGtQHgd-zmyUSKmQ5ZQd2GM-sPBg9saIb404oXwDhALkRa_lFw4'
         ];
         $config=[
             'production'=> env('APP_DEBUG'),

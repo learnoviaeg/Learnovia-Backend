@@ -30,6 +30,7 @@ use App\Material;
 use  App\LastAction;
 use App\SecondaryChain;
 use App\Repositories\SettingsReposiotryInterface;
+use App\Repositories\NotificationRepoInterface;
 use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
 
@@ -43,9 +44,10 @@ class FilesController extends Controller
      *
      * @param SettingsReposiotryInterface $setting
      */
-    public function __construct(SettingsReposiotryInterface $setting)
+    public function __construct(SettingsReposiotryInterface $setting, NotificationRepoInterface $notification)
     {
         $this->setting = $setting;
+        $this->notification = $notification;
     }
 
     public function install_file()
@@ -265,8 +267,8 @@ class FilesController extends Controller
             $check = $file->save();
 
             if ($check) {
-                if(isset($request->users_ids))
-                    CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                // if(isset($request->users_ids))
+                //     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
 
                 foreach ($request->lesson_id as $lesson) {
                     $tempLesson = Lesson::find($lesson);
@@ -284,6 +286,30 @@ class FilesController extends Controller
                         $singlefile,
                         $name
                     );
+
+                    $material=Material::where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
+                    if(isset($request->users_ids))
+                    {
+                        CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
+                        // $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
+                        $material->restricted=1;
+                        $material->save();
+                    }
+
+                    if(!isset($request->users_ids)){
+                        $reqNot=[
+                            'message' => $material->name.' file is added',
+                            'item_id' => $material->id,
+                            'item_type' => 'file',
+                            'type' => 'notification',
+                            'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
+                            'lesson_id' => $lesson,
+                            'course_name' => $tempLesson->course->name,
+                        ];
+
+                        $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                        $this->notification->sendNotify($users->toArray(),$reqNot);
+                    }
                 }
             }
         }
@@ -384,9 +410,7 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        // dd('l');
         $settings = $this->setting->get_value('upload_file_extensions');
-        // dd($request->Imported_file[0]->extension());
 
         $rules = [
             'id'            => 'required|exists:files,id',
@@ -432,6 +456,7 @@ class FilesController extends Controller
         $fileLesson = FileLesson::where('file_id', $request->id)->where('lesson_id', $request->lesson_id)->first();
         if(!isset($fileLesson))
             return HelperController::api_response_format(200, null , __('messages.file.file_not_belong'));
+        
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
@@ -448,15 +473,24 @@ class FilesController extends Controller
             $fileLesson->update([
                 'visible' => $request->visible,
             ]);
-          }
-
-        if (!$request->filled('updated_lesson_id')) {
-          $request->updated_lesson_id= $request->lesson_id;
         }
+
+        if (!$request->filled('updated_lesson_id')) 
+          $request->updated_lesson_id= $request->lesson_id;
+        
         $fileLesson->lesson_id = $request->updated_lesson_id;
         $fileLesson->updated_at = Carbon::now();
         $file->save();
         $fileLesson->save();
+
+        // //send notification
+        // $users=SecondaryChain::select('user_id')->where('lesson_id',$request->lesson_id)->pluck('user_id');
+        // $courseItem = CourseItem::where('item_id', $file->id)->where('type', 'file')->first();
+        // if(isset($courseItem))
+        //     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
+        //     // dd($users);
+        // $this->notification->sendNotify($users->toArray(),$file->name. ' file is updated',$file->id,'notification','file');    
+                
         $course_seg_drag = Lesson::where('id',$request->lesson_id)->first();
 
         LastAction::lastActionInCourse($course_seg_drag->course_id);
