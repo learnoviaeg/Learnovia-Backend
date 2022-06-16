@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CoursesHelper;
+use App\SecondaryChain;
 use Illuminate\Http\Request;
 use Modules\QuestionBank\Entities\quiz;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuestionsType;
+use App\Repositories\NotificationRepoInterface;
 use App\Repositories\ChainRepositoryInterface;
 use App\Notifications\QuizNotification;
 use App\Enroll;
@@ -14,16 +17,16 @@ use App\Paginate;
 use App\Events\GradeItemEvent;
 use App\Events\UpdatedQuizQuestionsEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
-// use App\CourseSegment;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
 
 class QuestionsController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware('auth');
         // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
         // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
@@ -202,29 +205,45 @@ class QuestionsController extends Controller
             }
             event(new UpdatedQuizQuestionsEvent($quiz_id));            
             $quiz->draft=0;
+
+            if(isset($request->users_ids)){
+                $quiz->restricted=1;
+                $quiz->save();
+                CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
+            }
+
             $quiz->save();
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
-                $notification = new QuizNotification($newQuizLesson,$quiz->name.' quiz is added.');
-                $notification->send();
+                if(!$quiz->restricted)
+                {
+                    $reqNot=[
+                        'message' => $quiz->name.' quiz is created',
+                        'item_id' => $quiz->id,
+                        'item_type' => 'quiz',
+                        'type' => 'notification',
+                        'publish_date' => $newQuizLesson->publish_date,
+                        'lesson_id' => $newQuizLesson->lesson_id,
+                        'course_name' => $quiz->course->name
+                    ];
+
+                    $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$reqNot);
+                }
             }
            
             //calculte time
             $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
-                
-            if($endDate < Carbon::today()){
+            if($endDate < Carbon::today())
                 $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
-            }
  
             $seconds = $endDate->diffInSeconds(Carbon::now());
 
-            if($seconds < 0) {
+            if($seconds < 0)
                 $seconds = 0 ;
-            }
 
             $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
-
             dispatch($job);
 
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));

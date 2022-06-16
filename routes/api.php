@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('dashboard', 'SpatieController@dashboard')->name('dashboard');
     Route::get('spatie', 'SpatieController@index')->name('spatie');
     Route::post('comparepermissions', 'SpatieController@comparepermissions');
+    Route::post('register-token', 'AuthController@RegisterNotification')->name('tokennotification');
 
     //for editor
     Route::post('upload-editor', 'CourseController@Upload')->name('uploadForEditor');
@@ -87,7 +88,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::group(['prefix' => 'notifications'], function () {
         Route::get('get-all', 'NotificationController@getallnotifications')->name('getallnotifications')->middleware('permission:notifications/get-all');
         Route::get('get-unread', 'NotificationController@unreadnotifications')->name('getunreadnotifications')->middleware('permission:notifications/get-unread');
-        Route::get('mark-as-read', 'NotificationController@markasread')->name('readnotification')->middleware('permission:notifications/mark-as-read');
         Route::get('get-for-user', 'NotificationController@GetNotifcations')->name('readnotification')->middleware('permission:notifications/get-for-user');
         Route::get('delete-duration', 'NotificationController@DeletewithTime')->name('readnotification')->middleware('permission:notifications/delete-duration');
         Route::post('seen', 'NotificationController@SeenNotifications')->name('seennotification')->middleware('permission:notifications/seen');
@@ -102,7 +102,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
         Route::post('update', 'AnnouncementController@update_announce')->name('updateannounce')->middleware('permission:announcements/update');
         Route::get('getbyid', 'AnnouncementController@getAnnounceByID')->name('getbyid')->middleware('permission:announcements/getbyid');
         Route::get('get-unread', 'AnnouncementController@unreadannouncements')->name('getunreadannouncements')->middleware('permission:announcements/get-unread');
-        Route::post('mark-as-read', 'AnnouncementController@markasread')->name('readannouncements')->middleware('permission:announcements/mark-as-read');
         Route::get('my', 'AnnouncementController@My_announc')->name('myannouncements')->middleware('permission:announcements/my');
     });
 
@@ -526,6 +525,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user-report/{option}', 'ReportsController@index')->middleware(['permission:user/get-my-users']);
     Route::Resource('questions', QuestionsController::class);
+    Route::patch('notify/update', 'NotificationsController@update');
     Route::Resource('notify', NotificationsController::class);
     Route::post('working-days/edit', 'WorkingDayController@edit');
     Route::Resource('working-days', WorkingDayController::class);
@@ -624,7 +624,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
        Route::get('quiz/history/{id}', 'Api\Quiz\QuizHistoryApiController@quiz_history')->name('quiz_history');
        Route::get('history/details/{log}', 'Api\Quiz\QuizHistoryApiController@history_view_details')->name('history_view_details');
-   
     });
     // added ahmed
 });

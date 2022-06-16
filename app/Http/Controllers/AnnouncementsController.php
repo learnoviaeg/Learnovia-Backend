@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Input;
+use App\Repositories\NotificationRepoInterface;
 
 class AnnouncementsController extends Controller
 {
@@ -25,9 +26,11 @@ class AnnouncementsController extends Controller
      *
      * @param ChainRepositoryInterface $post
      */
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
+
         $this->middleware('auth');
         $this->middleware(['permission:announcements/get'],   ['only' => ['index','show']]);
         $this->middleware(['permission:announcements/update'],   ['only' => ['update']]);
@@ -211,8 +214,19 @@ class AnnouncementsController extends Controller
             userAnnouncement::insert($data);
         
             //sending Notification
-            $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
-            $notification->send();
+            // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
+            // $notification->send();
+
+            $reqNot=[
+                'message' => $announcement->title.' announcement is created',
+                'item_id' => $announcement->id,
+                'item_type' => 'announcement',
+                'type' => 'announcement',
+                'publish_date' => $announcement->publish_date,
+                'lesson_id' => null,
+                'course_name' => null
+            ];
+            $this->notification->sendNotify($users,$reqNot);
         }
 
         return response()->json(['message' => __('messages.announcement.add'), 'body' => $announcement], 200);
@@ -274,6 +288,21 @@ class AnnouncementsController extends Controller
             $announcement->attached_file = null;
 
         $announcement->save();
+
+        // send notification
+
+        $reqNot=[
+            'message' => $announcement->title.' announcement is updated',
+            'item_id' => $announcement->id,
+            'item_type' => 'announcement',
+            'type' => 'announcement',
+            'publish_date' => $announcement->publish_date,
+            'lesson_id' => null,
+            'course_name' => null
+        ];
+
+        $users=userAnnouncement::where('announcement_id',$announcement->id)->pluck('user_id');
+        $this->notification->sendNotify($users,$reqNot);
 
         return response()->json(['message' => __('messages.announcement.update'), 'body' => $announcement], 200);
     }
