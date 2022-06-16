@@ -172,7 +172,7 @@ class BigbluebuttonController extends Controller
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
                     $i=0;
-                    LastAction::lastActionInCourse($object['course_id']);
+                    //LastAction::lastActionInCourse($object['course_id']);
 
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
@@ -230,7 +230,7 @@ class BigbluebuttonController extends Controller
                                 'course_name' => Course::find($bigbb->course_id)->name
                             ];
         
-                            $users=Enroll::select('user_id')->where('course',$bigbb->course_id)->pluck('user_id');
+                            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
                             // dd($users);
                             $this->notification->sendNotify($users->toArray(),$reqNot);
 
@@ -351,9 +351,13 @@ class BigbluebuttonController extends Controller
 
         $bigbb->join_url=json_decode($response,true)['join_url'];
         // $bigbb->meeting_id=json_decode($response,true)['id'];
-        // $bigbb->status = 'current';
-        // $bigbb->started = 1;
-        // $bigbb->actutal_start_date = Carbon::now();
+        if(Carbon::parse($bigbb->start_date) <= Carbon::now())
+        {
+            $bigbb->status = 'current';
+            $bigbb->started = 1;
+            $bigbb->actutal_start_date = Carbon::now();
+        }
+
         // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
         // if(Auth::id() == $bigbb->host_id)
         //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
@@ -370,7 +374,7 @@ class BigbluebuttonController extends Controller
         ]);
 
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+        //LastAction::lastActionInCourse($bigbb->course_id);
 
         $url= config('app.url');
         $url = substr($url, 0, strpos($url, "api"));
@@ -488,7 +492,7 @@ class BigbluebuttonController extends Controller
                 return HelperController::api_response_format(200, [],__('messages.error.try_again'));
         }
 
-        LastAction::lastActionInCourse($bigbb->course_id);
+        //LastAction::lastActionInCourse($bigbb->course_id);
             
         $url = null;
         if($bigbb->type == 'BBB'){
@@ -569,8 +573,8 @@ class BigbluebuttonController extends Controller
         if(isset($request->course))
             $request['courses']= [$request->course];
         
-        if($request->filled('course'))
-            LastAction::lastActionInCourse($request->course);
+        // if($request->filled('course'))
+        //     LastAction::lastActionInCourse($request->course);
 
         // $sort_in = 'desc';
         // if($request->has('sort_in'))
@@ -726,7 +730,7 @@ class BigbluebuttonController extends Controller
         ]);
         $logs = AttendanceLog::where('session_id',$request->id)->where('type','online')->get();
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+       // LastAction::lastActionInCourse($bigbb->course_id);
 
         if(count($logs) > 0)
             return HelperController::api_response_format(404 , null , __('messages.error.cannot_delete'));
@@ -760,7 +764,7 @@ class BigbluebuttonController extends Controller
         if($request->filled('id'))
         {
             $bigbb=BigbluebuttonModel::find($request->id);
-            LastAction::lastActionInCourse($bigbb->course_id);
+            //LastAction::lastActionInCourse($bigbb->course_id);
             $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::whereId($request->id)->first();
 
@@ -943,7 +947,7 @@ class BigbluebuttonController extends Controller
         
         $bbb_object = self::viewAttendence($request,1);
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+       // LastAction::lastActionInCourse($bigbb->course_id);
         $filename = uniqid();
         $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xlsx','public');
         $file = url(Storage::url('bbb'.$filename.'.xlsx'));
