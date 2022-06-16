@@ -410,9 +410,7 @@ class FilesController extends Controller
      */
     public function update(Request $request)
     {
-        // dd('l');
         $settings = $this->setting->get_value('upload_file_extensions');
-        // dd($request->Imported_file[0]->extension());
 
         $rules = [
             'id'            => 'required|exists:files,id',
@@ -459,7 +457,7 @@ class FilesController extends Controller
         if(!isset($fileLesson))
             return HelperController::api_response_format(200, null , __('messages.file.file_not_belong'));
         
-            if ($request->filled('publish_date')) {
+        if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
             if (Carbon::parse($request->publish_date)->isPast()) {
                 $publishdate = Carbon::now();

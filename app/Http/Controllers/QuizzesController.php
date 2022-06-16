@@ -213,7 +213,7 @@ class QuizzesController extends Controller
                 'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : json_encode(["Last"]),
                 'grade' => isset($request->grade) ? $request->grade : 0,
                 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_time,
+                'publish_date' => isset($request->publish_date) ? $request->publish_date : Carbon::now(),
                 'index' => ++$index,
                 'visible' => isset($request->visible)?$request->visible:1,
                 'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
