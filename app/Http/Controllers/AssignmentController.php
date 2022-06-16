@@ -224,7 +224,7 @@ class AssignmentController extends Controller
                     'item_id' => $assignment->id,
                     'item_type' => 'assignment',
                     'type' => 'notification',
-                    'publish_date' => $assignment_lesson->publish_date,
+                    'publish_date' => Carbon::parse($assignment_lesson->publish_date)->format('Y-m-d H:i:s'),
                     'lesson_id' => $assignment_lesson->lesson_id,
                     'course_name' => $assignment_lesson->lesson->course->name
                 ];
