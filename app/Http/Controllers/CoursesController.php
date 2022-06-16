@@ -212,7 +212,7 @@ class CoursesController extends Controller
         $course = Course::with('attachment','level')->find($id);
 
         if(isset($course)){
-            LastAction::lastActionInCourse($id);
+           // LastAction::lastActionInCourse($id);
             return response()->json(['message' => __('messages.course.object'), 'body' => $course], 200);
         }
         return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);

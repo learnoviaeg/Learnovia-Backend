@@ -172,7 +172,7 @@ class BigbluebuttonController extends Controller
                 $meeting_id = 'Learnovia'.env('DB_DATABASE').uniqid();
                 foreach($object['class_id'] as $class){
                     $i=0;
-                    LastAction::lastActionInCourse($object['course_id']);
+                    //LastAction::lastActionInCourse($object['course_id']);
 
                     foreach($request->start_date as $start_date){
                         $last_date = $start_date;
@@ -370,7 +370,7 @@ class BigbluebuttonController extends Controller
         ]);
 
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+        //LastAction::lastActionInCourse($bigbb->course_id);
 
         $url= config('app.url');
         $url = substr($url, 0, strpos($url, "api"));
@@ -488,7 +488,7 @@ class BigbluebuttonController extends Controller
                 return HelperController::api_response_format(200, [],__('messages.error.try_again'));
         }
 
-        LastAction::lastActionInCourse($bigbb->course_id);
+        //LastAction::lastActionInCourse($bigbb->course_id);
             
         $url = null;
         if($bigbb->type == 'BBB'){
@@ -569,8 +569,8 @@ class BigbluebuttonController extends Controller
         if(isset($request->course))
             $request['courses']= [$request->course];
         
-        if($request->filled('course'))
-            LastAction::lastActionInCourse($request->course);
+        // if($request->filled('course'))
+        //     LastAction::lastActionInCourse($request->course);
 
         // $sort_in = 'desc';
         // if($request->has('sort_in'))
@@ -726,7 +726,7 @@ class BigbluebuttonController extends Controller
         ]);
         $logs = AttendanceLog::where('session_id',$request->id)->where('type','online')->get();
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+       // LastAction::lastActionInCourse($bigbb->course_id);
 
         if(count($logs) > 0)
             return HelperController::api_response_format(404 , null , __('messages.error.cannot_delete'));
@@ -760,7 +760,7 @@ class BigbluebuttonController extends Controller
         if($request->filled('id'))
         {
             $bigbb=BigbluebuttonModel::find($request->id);
-            LastAction::lastActionInCourse($bigbb->course_id);
+            //LastAction::lastActionInCourse($bigbb->course_id);
             $bbb = new BigBlueButton();
             $meet = BigbluebuttonModel::whereId($request->id)->first();
 
@@ -943,7 +943,7 @@ class BigbluebuttonController extends Controller
         
         $bbb_object = self::viewAttendence($request,1);
         $bigbb=BigbluebuttonModel::find($request->id);
-        LastAction::lastActionInCourse($bigbb->course_id);
+       // LastAction::lastActionInCourse($bigbb->course_id);
         $filename = uniqid();
         $file = Excel::store(new BigBlueButtonAttendance($bbb_object), 'bbb'.$filename.'.xlsx','public');
         $file = url(Storage::url('bbb'.$filename.'.xlsx'));
