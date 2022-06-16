@@ -351,9 +351,13 @@ class BigbluebuttonController extends Controller
 
         $bigbb->join_url=json_decode($response,true)['join_url'];
         // $bigbb->meeting_id=json_decode($response,true)['id'];
-        // $bigbb->status = 'current';
-        // $bigbb->started = 1;
-        // $bigbb->actutal_start_date = Carbon::now();
+        if(Carbon::parse($bigbb->start_date) <= Carbon::now())
+        {
+            $bigbb->status = 'current';
+            $bigbb->started = 1;
+            $bigbb->actutal_start_date = Carbon::now();
+        }
+
         // $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,0);
         // if(Auth::id() == $bigbb->host_id)
         //     $signature=ZoomAccount::generate_signature($updatedUser->api_key,$updatedUser->api_secret,$bigbb->meeting_id,1);
