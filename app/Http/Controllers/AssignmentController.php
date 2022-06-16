@@ -174,7 +174,7 @@ class AssignmentController extends Controller
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
                 'assignment_id' => $assignment->id,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : $request->opening_date,
+                'publish_date' => isset($request->publish_date) ? $request->publish_date : Carbon::now(),
                 'due_date' => isset($request->closing_date) ? $request->closing_date : null,
                 'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
                 'scale_id' => isset($request->scale) ? $request->scale : null,
