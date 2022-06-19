@@ -65,6 +65,7 @@ class GradeItemsController extends Controller
             'scale_id' => 'required_if:aggregation,==,Scale|exists:scales,id',
             'locked' => 'boolean',
             'hidden' => 'boolean',
+            'grading_schema_id'=>'exists:grading_schema,id'
         ]);
 
         if($request->filled('grade_category_id'))
@@ -92,8 +93,9 @@ class GradeItemsController extends Controller
             'hidden' =>isset($request->hidden) ? $request->hidden : 0,
             'item_type' => 'Manual',
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : 'Value',
-            'course_id' => $course,
+            'course_id' => isset($request->grading_schema_id) ? null : $course,
             'scale_id' => isset($request->scale_id) ? $request->scale_id : NULL,
+            'grading_schema_id' => isset($request->grading_schema_id) ? $request->grading_schema_id : null  
         ]);    
         $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
         foreach($enrolled_students as $student){
