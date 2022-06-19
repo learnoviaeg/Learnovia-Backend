@@ -24,7 +24,7 @@ class GradingSchemaRequest extends FormRequest
     public function rules()
     {
         return [
-            'grade_categories.*.name' => 'required'
+            'name'=>'required'
         ];
     }
 }

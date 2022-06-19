@@ -43,14 +43,15 @@ class GradingSchemaController extends Controller
      */
     public function store(GradingSchemaRequest $gradingSchemaRequest){
         $gradingSchema = GradingSchema::create([
-            'name'=>$gradingSchemaRequest->name
+            'name'=>$gradingSchemaRequest->name,
+            'description' => $gradingSchemaRequest->description
         ]);
 
 
 
-        $gradingSchemaService = new GradingSchemaService();
+        // $gradingSchemaService = new GradingSchemaService();
 
-        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
+        // $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
 
         return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
     }
