@@ -27,9 +27,8 @@ class GradingSchemaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){
-
-        return response()->json(['message' => __('messages.grade_schema.list'), 'body' => GradingSchema::get() ], 200);
+    public function index(Request $request){
+        return response()->json(['message' => __('messages.grade_schema.list'), 'body' => GradingSchema::get()->paginate(HelperController::GetPaginate($request)) ], 200);
     }
 
     public function show($id){
