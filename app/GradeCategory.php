@@ -9,7 +9,7 @@ use stdClass;
 class GradeCategory extends Model
 {
     protected $fillable = ['name', 'course_id', 'parent','index', 'hidden' ,'instance_type' ,'instance_id','lesson_id', 'item_type' , 'type' ,'scale_id',
-            'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust'];
+            'aggregation','weights' , 'min','max' ,'calculation_type' , 'locked','exclude_empty_grades','weight_adjust','reference_category_id','grading_schema_id'];
     
     protected $dispatchesEvents = [
         'created' => \App\Events\CreatedGradeCatEvent::class,
@@ -50,6 +50,11 @@ class GradeCategory extends Model
     public function categories_items()
     {
         return $this->hasMany('App\GradeCategory', 'parent', 'id');
+    }
+
+    public function schemaCategory()
+    {
+        return $this->hasMany('App\GradeCategory', 'reference_category_id', 'id');
     }
 
     public function userGrades()
