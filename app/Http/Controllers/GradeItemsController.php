@@ -95,8 +95,9 @@ class GradeItemsController extends Controller
             'aggregation' =>isset($request->aggregation) ? $request->aggregation : 'Value',
             'course_id' => isset($request->grading_schema_id) ? null : $course,
             'scale_id' => isset($request->scale_id) ? $request->scale_id : NULL,
-            'grading_schema_id' => isset($request->grading_schema_id) ? $request->grading_schema_id : null  
-        ]);    
+            'grading_schema_id' => isset($request->grading_schema_id) ? $request->grading_schema_id : null,
+        ]);
+
         $enrolled_students = Enroll::select('user_id')->distinct()->where('course',$course)->where('role_id',3)->get()->pluck('user_id');
         foreach($enrolled_students as $student){
             UserGrader::create([
