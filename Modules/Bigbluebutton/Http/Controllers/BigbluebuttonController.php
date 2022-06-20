@@ -478,7 +478,6 @@ class BigbluebuttonController extends Controller
         if($request->user()->can('bigbluebutton/session-moderator') && $bigbb->started == 0 && $bigbb->type != 'teams'){
             if($bigbb->type == 'Zoom'){
                 $start_meeting = self::start_meeting_zoom($request);
-dd($bigbb);
                 $bigbb->meeting_id=json_decode($start_meeting,true)['id']."";
                 $bigbb->status = 'current';
                 $bigbb->started = 1;
