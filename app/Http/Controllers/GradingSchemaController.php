@@ -15,15 +15,20 @@ use App\Http\Requests\GradingSchemaRequest;
 
 class GradingSchemaController extends Controller
 {
+    public function __construct()
+    {
+        // $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
+        // $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
+        // $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
+    }
 
     /**
      * list grading schema
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){
-
-        return response()->json(['message' => __('messages.grade_schema.list'), 'body' => GradingSchema::get() ], 200);
+    public function index(Request $request){
+        return response()->json(['message' => __('messages.grade_schema.list'), 'body' => GradingSchema::get()->paginate(HelperController::GetPaginate($request)) ], 200);
     }
 
     public function show($id){
@@ -63,13 +68,10 @@ class GradingSchemaController extends Controller
         if(is_array($data) && count($data)>0)
         {
             foreach($data as $chain){
-                if(!empty($chain['courses'])){
+                $courses = Course::with('level')->where('level_id',$chain['level_id'])->get();
+
+                if(!empty($chain['courses']))
                     $courses = Course::with('level')->whereIn('id',$chain['courses'])->get();
-                }
-                else
-                {
-                    $courses = Course::with('level')->where('level_id',$chain['level_id'])->get();
-                }
         
                 foreach($courses as $course){
                     GradingSchemaCourse::create([
@@ -78,6 +80,8 @@ class GradingSchemaController extends Controller
                         'grading_schema_id'=>$id
                     ]);
                 }
+
+                GradingSchema::whereId($id)->update(['is_drafted'=>0]);
                 $gradingSchemaService = new GradingSchemaService();
                 
                 $categories = GradeCategory::where('grading_schema_id' ,$id)->whereNull('parent')->with('Children','GradeItems')->get();
