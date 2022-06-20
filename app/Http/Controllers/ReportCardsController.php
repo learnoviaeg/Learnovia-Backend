@@ -507,7 +507,7 @@ class ReportCardsController extends Controller
             $allowed_levels=Permission::where('name','report_card/fgls/final')->pluck('allowed_levels')->first();
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%Grades_Final%")
+                    $query->where('name', 'LIKE' , "%Final%")
                           ->orWhere('name','LIKE' , "%درجات%");
                 });     
             };
@@ -609,7 +609,7 @@ class ReportCardsController extends Controller
             if($request->term == 'final'){
                 $course_callback = function ($qu) use ($request ) {
                     $qu->Where(function ($query) {
-                        $query->where('name', 'LIKE' , "%Grades_Final%")
+                        $query->where('name', 'LIKE' , "%Final%")
                               ->orWhere('name','LIKE' , "%درجات%");
                     });     
                 };
