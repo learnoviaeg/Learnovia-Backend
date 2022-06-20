@@ -994,7 +994,7 @@ class UserController extends Controller
 
         $filename = uniqid();
 
-        if($request->filled('type') && $request->type == 'details')
+        if($request->filled('types') && $request->types == 'details')
             $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
         else
             $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
