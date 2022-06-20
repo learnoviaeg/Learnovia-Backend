@@ -263,8 +263,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/grades', 'title' => 'Grades', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/category/get-gradecategories', 'title' => 'Get Grade Categories']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/get-scheme', 'title' => 'Get Grade Scheme' , 'icon' => 'grade' ,'dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/create-scheme', 'title' => 'Get Grade Scheme' , 'icon' => 'grade']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/apply-scheme', 'title' => 'Get Grade Scheme' , 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/create-scheme', 'title' => 'Create Grade Scheme' , 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/apply-scheme', 'title' => 'Apply Grade Scheme' , 'icon' => 'grade']);
 
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
