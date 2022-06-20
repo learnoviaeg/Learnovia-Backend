@@ -17,7 +17,6 @@ use Modules\QuestionBank\Entities\quiz;
 
 class GradeCategoriesController extends Controller
 {
-
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
@@ -27,7 +26,6 @@ class GradeCategoriesController extends Controller
         $this->middleware(['permission:grade/category/get'],   ['only' => ['index']]);
         $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
     }
-
 
     /**
      * Display a listing of the resource.
@@ -83,28 +81,27 @@ class GradeCategoriesController extends Controller
             'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean',
-            'grading_schema_id'=>'exists:grading_schema,id'
+            'category.*.grading_schema_id'=>'exists:grading_schema,id'
         ]);
 
-
-        if(isset($request->category[0])&&isset($request->category[0]['grading_schema_id'])){
-            $category = $request->category[0];
-            $cat = GradeCategory::create([
-                'name' => $category['name'],
-                'parent' => isset($category['parent']) ?$category['parent']: null,
-                'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
-                'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
-                'locked' =>isset($category['locked']) ? $category['locked'] : 0,
-                'min' =>isset($category['min']) ? $category['min'] : 0,
-                'max' =>isset($category['max']) ? $category['max'] : null,
-                'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
-                'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
-                'weights' =>isset($category['weight']) ? $category['weight'] : null,
-                'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
-                'grading_schema_id' => $category['grading_schema_id']
-            ]);
-        }else{
-            if($request->filled('courses'))
+        // if(isset($request->category[0])&&isset($request->category[0]['grading_schema_id'])){
+        //     $category = $request->category[0];
+        //     $cat = GradeCategory::create([
+        //         'name' => $category['name'],
+        //         'parent' => isset($category['parent']) ?$category['parent']: null,
+        //         'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
+        //         'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
+        //         'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+        //         'min' =>isset($category['min']) ? $category['min'] : 0,
+        //         'max' =>isset($category['max']) ? $category['max'] : null,
+        //         'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
+        //         'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+        //         'weights' =>isset($category['weight']) ? $category['weight'] : null,
+        //         'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
+                // 'grading_schema_id' => $category['grading_schema_id']
+        //     ]);
+        // }else{
+        if($request->filled('courses'))
             $courses = $request->courses;
         else{
             $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id', 1);
@@ -114,7 +111,7 @@ class GradeCategoriesController extends Controller
             $course_total_category = GradeCategory::select('id')->whereNull('parent')->where('type','category')->where('course_id',$course)->first();
             foreach($request->category as $key=>$category){
                 $cat = GradeCategory::create([
-                    'course_id'=> $course,
+                    'course_id'=> isset($category['grading_schema_id']) ? null : $course,
                     'name' => $category['name'],
                     'parent' => isset($category['parent']) ? $category['parent'] : $course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
@@ -125,6 +122,7 @@ class GradeCategoriesController extends Controller
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
                     'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                    'grading_schema_id' => isset($category['grading_schema_id']) ? $category['grading_schema_id'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                 ]);
                 // $cat->index=GradeCategory::where('parent',$cat->parent)->max('index')+1;
@@ -144,8 +142,6 @@ class GradeCategoriesController extends Controller
                 dispatch($userGradesJob);
             }
         }
-
-    }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
 
