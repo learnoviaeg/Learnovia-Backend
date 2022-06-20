@@ -29,8 +29,10 @@ class GradingSchemaController extends Controller
     public function show($id){
         $gradingSchema = GradingSchema::with(['gradeCategoryParents'])->find($id);
 
+        $gradeCategoriesList = GradeCategory::where('grading_schema_id' ,$id)->where('type','category')->get()->toArray();
+        $gradeCategories = GradeCategory::where('grading_schema_id' ,$id)->whereNull('parent')->with('Children','GradeItems')->get()->toArray();
         if($gradingSchema)
-            return response()->json(['message' => __('messages.grade_schema.list'), 'body' => $gradingSchema ], 200);
+            return response()->json(['message' => __('messages.grade_schema.list'), 'body' => ['grade_categories_list'=>$gradeCategoriesList,'grade_setup'=>$gradeCategories] ], 200);
         else
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
 
