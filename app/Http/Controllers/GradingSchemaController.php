@@ -42,7 +42,7 @@ class GradingSchemaController extends Controller
                 if(isset($request->levels))
                     $q->whereIn('level_id',$request->levels);
             };
-            $check=GradingSchema::whereId($grade->id)->whereHas('levels.courses', $callback)->whereHas('levels',$callback2)
+            $check=GradingSchema::whereId($grade->id)//->whereHas('levels.courses', $callback)->whereHas('levels',$callback2)
                 ->with(['levels'=>$callback2,'levels.courses' => $callback ,'GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear'])->first();
             if(isset($check))
                 $all[]=$check;
