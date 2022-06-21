@@ -49,6 +49,7 @@ class QuestionsController extends Controller
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable|string',
+            'complexity' => 'in:easy,medium,hard',
             'update_shuffle' => 'nullable' //to prevent shuffle questions on update
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
@@ -105,6 +106,9 @@ class QuestionsController extends Controller
         
         if (isset($request->question_type)) 
             $questions->whereIn('question_type_id', $request->question_type);
+        
+        if (isset($request->complexity)) 
+            $questions->where('complexity', $request->complexity);
         
         //using api quizzes/null/count 
         if($question == 'count'){
@@ -385,6 +389,7 @@ class QuestionsController extends Controller
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
             'Question.*.parent_id' => 'exists:questions,id',
             'Question.*.text' => 'required|string', //need in every type_question
+            'Question.*.complexity' => 'string|in:easy,medium,hard',
         ]);
         
         $all=collect([]);
@@ -414,9 +419,8 @@ class QuestionsController extends Controller
                     $all->push($essay); //essay not have special answer
                     break;
 
-                case 5: // Comprehension
+                case 5: // Comprehension(paragraph)
                     $comprehension=$this->Comprehension($question);
-                    // $comprehension->children;
                     $all->push($comprehension);
                     break;
             }
@@ -441,6 +445,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'complexity' => isset($question['complexity']) && Auth::user()->can('question/complexity') ? $question['complexity'] : null ,
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
@@ -470,6 +475,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'complexity' => isset($question['complexity']) && Auth::user()->can('question/complexity') ? $question['complexity'] : null ,
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'mcq_type' => isset($question['mcq_type']) ? $question['mcq_type'] : null,
@@ -507,6 +513,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'complexity' => isset($question['complexity']) && Auth::user()->can('question/complexity') ? $question['complexity'] : null ,
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
         ];
@@ -532,6 +539,7 @@ class QuestionsController extends Controller
             'question_category_id' => $question['question_category_id'],
             'question_type_id' => $question['question_type_id'],
             'text' => $question['text'],
+            'complexity' => isset($question['complexity']) && Auth::user()->can('question/complexity') ? $question['complexity'] : null ,
             'parent' => isset($parent) ? $parent : null,
             'created_by' => Auth::id(),
             'content' => null //not have specific|model answer
@@ -542,7 +550,7 @@ class QuestionsController extends Controller
         return $added;
     }
 
-    public function Comprehension($question)
+    public function Comprehension($question) //paragraph
     {
         $added=self::Essay($question,null); //same data saved of Essay Question
         return $added;
@@ -575,7 +583,8 @@ class QuestionsController extends Controller
             'question_category_id' => 'integer|exists:questions_categories,id',
             'question_type_id' => 'integer|exists:questions_types,id',
             //for request of creation multi type questions
-            'text' => 'string', //need in every type_question
+            'text' => 'string',
+            'complexity' => 'string',
         ]);
         
         $data=array();
@@ -587,6 +596,7 @@ class QuestionsController extends Controller
             'question_type_id' => isset($request->question_type_id) ? $request->question_type_id : $question->question_type_id,
             'created_by' => Auth::id(),
             'text' => isset($request->text) ? $request->text : $question->text,
+            'complexity' => isset($request->complexity) && Auth::user()->can('question/complexity') ? $request->complexity : $question->complexity,
         ]);
         $question->save();
         switch ($question->question_type_id) {

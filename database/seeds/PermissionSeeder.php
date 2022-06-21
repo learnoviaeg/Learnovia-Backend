@@ -480,6 +480,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/random','title' => 'get random questions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/add-answer','title' => 'add question answer']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/delete-answer','title' => 'delete question answer']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/complexity','title' => 'add/update question complexity']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add','title' => 'add quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update','title' => 'update quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
