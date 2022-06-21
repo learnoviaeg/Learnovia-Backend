@@ -12,7 +12,8 @@ class Questions extends Model
 {
     use Auditable, SoftDeletes;
 
-    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id' , 'mcq_type'];
+    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id',
+        'course_id' , 'mcq_type','complexity'];
 
     //count of all quizzes
     protected $appends = ['count_quizzes'];
