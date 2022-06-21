@@ -268,9 +268,12 @@ class GradeCategoriesController extends Controller
                         AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 0]);
                 }          
             }
-            event(new GraderSetupEvent($category->Parents));
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
-            dispatch($userGradesJob);
+            if(isset($category->Parents)) //3l4an fe halet n l category tab3 scheme bs malha4 parent
+            {
+                event(new GraderSetupEvent($category->Parents));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
+                dispatch($userGradesJob);
+            }
         }
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }
