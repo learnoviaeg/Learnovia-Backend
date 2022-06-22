@@ -11,7 +11,7 @@ class UserDetailsExport implements FromCollection, WithHeadings
 {
     use Exportable;
 
-    protected $fields = ['id','username','firstname'];
+    protected $fields = ['id','username','firstname','lastname','fullname'];
 
     function __construct($userids) {
         $this->ids = $userids;
@@ -23,12 +23,14 @@ class UserDetailsExport implements FromCollection, WithHeadings
     public function collection()
     {
         $forSetExport = collect();
-        $users = User::select('id', 'username', 'firstname', 'profile_fields')->whereNull('deleted_at')->whereIn('id', $this->ids); 
+        $users = User::select('id', 'username', 'firstname','lastname', 'profile_fields')->whereNull('deleted_at')->whereIn('id', $this->ids); 
         foreach ($users->cursor() as $user){
             $forExport = [];
             $forExport['id']= $user->id;
             $forExport['username']= $user->username;
             $forExport['firstname']= $user->firstname;
+            $forExport['lastname']= $user->lastname;
+            $forExport['fullname']= $user->fullname;
             $extra_fields = json_decode(json_encode($user->profile_fields), true);
             if($user->profile_fields != null){
                 foreach($extra_fields as $key => $field){
