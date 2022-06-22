@@ -155,14 +155,14 @@ class AuthController extends Controller
 
         // return $res;
 
-    //    LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
-    //         'user_id' => $request->user()->id 
-    //         ,'name' => 'login'
-    //         ,'method'=>$request->route()->methods[0]
-    //         ,'uri' =>  $request->route()->uri
-    //         ,'resource' =>  $request->route()->action['controller']
-    //         ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
-    //         ]);
+       LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
+            'user_id' => $request->user()->id 
+            ,'name' => 'login'
+            ,'method'=>$request->route()->methods[0]
+            ,'uri' =>  $request->route()->uri
+            ,'resource' =>  $request->route()->action['controller']
+            ,'date' => Carbon::now()->format('Y-m-d H:i:s a')
+            ]);
 
         return HelperController::api_response_format(200, [
             'access_token' => $tokenResult->accessToken,
