@@ -18,9 +18,9 @@ class GradingSchemaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
-        $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
-        $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
+        // $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
+        // $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
+        // $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
     }
 
     /**
@@ -44,6 +44,9 @@ class GradingSchemaController extends Controller
             };
             $check=GradingSchema::whereId($grade->id)->whereHas('levels.courses', $callback)->whereHas('levels',$callback2)
                 ->with(['levels'=>$callback2,'levels.courses' => $callback ,'GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear'])->first();
+            
+            if($grade->is_drafted)
+                $all[]=$grade;
             if(isset($check))
                 $all[]=$check;
         }
