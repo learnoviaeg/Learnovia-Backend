@@ -61,7 +61,7 @@ class GradingSchemaController extends Controller
         };
 
         $gradingSchema = GradingSchema::whereId($id)//->whereHas('levels.courses',$callback)
-            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear','scales'])
+            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear','scales.details'])
             ->first();
 
         $gradeCategoriesList = GradeCategory::where('grading_schema_id' ,$id)->where('type','category')->get()->toArray();
