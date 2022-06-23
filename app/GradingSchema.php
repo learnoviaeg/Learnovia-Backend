@@ -29,6 +29,6 @@ class GradingSchema extends Model
     }
 
     public function scales(){
-        return $this->belongsToMany('App\Scale', 'grading_schema_scales', 'grading_schema_id', 'scale_id');
+        return $this->belongsToMany('App\scale', 'grading_schema_scales', 'grading_schema_id', 'scale_id');
     }
 }
