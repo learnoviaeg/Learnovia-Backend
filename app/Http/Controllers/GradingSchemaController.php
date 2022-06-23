@@ -10,6 +10,7 @@ use App\GradingSchemaLevel;
 use App\Course;
 use App\Level;
 use App\GradeCategory;
+use App\GradingSchemaScale;
 use App\Services\GradingSchemaService;
 use stdClass;
 use App\Http\Requests\GradingSchemaRequest;
@@ -60,7 +61,7 @@ class GradingSchemaController extends Controller
         };
 
         $gradingSchema = GradingSchema::whereId($id)//->whereHas('levels.courses',$callback)
-            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear'])
+            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear','scales'])
             ->first();
 
         $gradeCategoriesList = GradeCategory::where('grading_schema_id' ,$id)->where('type','category')->get()->toArray();
@@ -124,6 +125,20 @@ class GradingSchemaController extends Controller
                 return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
         
 
+    }
+
+    public function applyScale($id,Request $request){
+        $request = $request->toArray();
+        if(isset($request['scales']) && is_array($request['scales'])){
+            foreach($request['scales'] as $scale){
+                GradingSchemaScale::updateOrCreate([
+                    'scale_id'=>$scale,
+                    'grading_schema_id'=>$id
+                ]);
+            }
+
+            return response()->json(['message' => __('messages.grading_schema.scales_assigned'), 'body' => null ], 200);
+        }
     }
 
     /**
