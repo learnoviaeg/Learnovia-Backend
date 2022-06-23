@@ -87,7 +87,9 @@ class GradingSchemaController extends Controller
         foreach($gradingSchemaRequest->chain as $chain){
             $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
 
-                if(!empty($chain['courses']))
+                if(!empty($chain['courses'])){
+                    
+                }
                     $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->whereIn('id',$chain['courses'])->get();
 
                 foreach($courses as $course){
@@ -104,8 +106,12 @@ class GradingSchemaController extends Controller
                 ]);
         }
 
-        // $gradingSchemaService = new GradingSchemaService();
-        // $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
+        if($gradingSchemaRequest->grade_schema_reference){
+            $gradeSchema = GradingSchema::with('gradeCategoryParents')->whereId($gradingSchemaRequest->grade_schema_reference)->first()->toArray();
+        }
+
+        $gradingSchemaService = new GradingSchemaService();
+        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradeSchema['grade_category_parents'],null,$gradingSchema->id,true);
 
         return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
     }
