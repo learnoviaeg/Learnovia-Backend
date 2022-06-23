@@ -265,7 +265,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/get-scheme', 'title' => 'Get Grade Scheme' , 'icon' => 'grade' ,'dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/create-scheme', 'title' => 'Create Grade Scheme' , 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/apply-scheme', 'title' => 'Apply Grade Scheme' , 'icon' => 'grade']);
-
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/delete-scheme', 'title' => 'Delete Grade Scheme' , 'icon' => 'grade']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/force-delete-scheme', 'title' => 'Force Delete Grade Scheme' , 'icon' => 'grade']);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/get', 'title' => 'get grade item']);
@@ -547,7 +548,6 @@ class PermissionSeeder extends Seeder
         // added ahmed
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/logs', 'title' => 'ststistics', 'dashboard' => 1, 'icon'=> 'statistics']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/log', 'title' => 'log details', 'dashboard' => 0]);
-
 
         //create status
         Status::firstOrCreate(['name' => 'Graded']);

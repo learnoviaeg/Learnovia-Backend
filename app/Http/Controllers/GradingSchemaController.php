@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Segment;
+use Auth;
 use App\GradingSchema;
 use App\GradingSchemaCourse;
 use App\GradingSchemaLevel;
@@ -18,9 +19,9 @@ class GradingSchemaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
-        $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
-        $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
+        // $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
+        // $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
+        // $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
     }
 
     /**
@@ -59,7 +60,7 @@ class GradingSchemaController extends Controller
             $qu->whereIn('id',$gradingSchema->courses->pluck('id')->toArray());
         };
 
-        $gradingSchema = GradingSchema::whereId($id)->whereHas('levels.courses',$callback)
+        $gradingSchema = GradingSchema::whereId($id)//->whereHas('levels.courses',$callback)
             ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear'])
             ->first();
 
@@ -122,7 +123,6 @@ class GradingSchemaController extends Controller
         }else{
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
         }
-
     }
 
     /**
@@ -131,5 +131,21 @@ class GradingSchemaController extends Controller
     */
     public function update($id,GradingSchemaRequest $gradingSchemaRequest){
         
+    }
+
+    public function destroy($id)
+    {
+        $gradingScheme=GradingSchema::find($id);
+        if(!$gradingScheme->is_drafted)
+        {
+            if(!Auth::user()->can('grade/delete-scheme'))
+                $gradingScheme->delete();
+        }
+        else if(Auth::user()->can('grade/force-delete-scheme'))
+        {
+
+            $gradingScheme->delete();
+        }
+        return 'Done';
     }
 }
