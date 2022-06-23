@@ -166,8 +166,9 @@ class GradingSchemaController extends Controller
             {
                 GradeCategory::where('grading_schema_id',$id)->delete();
                 $gradingScheme->delete();
+                
+                return response()->json(['message' => __('messages.grading_schema.delete'), 'body' => null ], 200);
             }
-            return response()->json(['message' => __('messages.grading_schema.delete'), 'body' => null ], 200);
         }
         else if(Auth::user()->can('grade/force-delete-scheme'))
         {
