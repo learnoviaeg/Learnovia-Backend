@@ -4,10 +4,10 @@
       "label": "Elementos do questionário",
       "widgets": [
         {
-          "label": "Predefinição"
+          "label": "Padrão"
         }
       ],
-      "entity": "element",
+      "entity": "elemento",
       "field": {
         "label": "Escolher biblioteca",
         "fields": [
@@ -37,7 +37,7 @@
         },
         {
           "label": "Texto a ser exibido na submissão",
-          "default": "Completou o questionário."
+          "default": "Concluiu o questionário."
         }
       ]
     },
