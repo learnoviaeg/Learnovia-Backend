@@ -136,13 +136,19 @@ class GradingSchemaController extends Controller
     public function destroy($id)
     {
         $gradingScheme=GradingSchema::find($id);
-        if(!$gradingScheme->is_drafted)
+        if($gradingScheme->is_drafted)
         {
-            if(!Auth::user()->can('grade/delete-scheme'))
+            if(Auth::user()->can('grade/delete-scheme'))
+            {
+                GradeCategory::where('grading_schema_id',$id)->delete();
                 $gradingScheme->delete();
+            }
         }
         else if(Auth::user()->can('grade/force-delete-scheme'))
         {
+            $gradeCategories=GradeCategory::where('grading_schema_id',$id)->pluck('id');
+            GradeCategory::whereIn('reference_category_id',$gradeCategories)->delete();
+            GradeCategory::where('grading_schema_id',$id)->delete();
 
             $gradingScheme->delete();
         }
