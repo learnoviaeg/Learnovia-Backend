@@ -343,7 +343,9 @@ return [
     'grading_schema' => [
         'add'    => 'تم اضافة بنجاح',
         'list' => 'القائمة',
-        'scales_assigned'=> 'تم إضافة المقياسات بنجاح'
+        'scales_assigned'=> 'تم إضافة المقياسات بنجاح',
+        'delete' => 'تم الحذف بنجاح',
+        'canNot_delete' => 'لا تستطيع الحذف'
     ],
     'grade_category' => [
         'add' => 'تم اضافة بنجاح',
