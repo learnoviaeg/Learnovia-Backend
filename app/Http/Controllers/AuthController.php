@@ -139,8 +139,8 @@ class AuthController extends Controller
             // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
             $data=[
                 'user_id' => $user->id,
-                'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-                // 'school_domain'=>'test',
+                // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+                'school_domain'=>'test',
                 'fcm_tokens'=> array($fcm_tokens)
             ];
             $clientt = new Client();
