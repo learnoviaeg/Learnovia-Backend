@@ -125,12 +125,6 @@ class GradingSchemaController extends Controller
                 
             if($results)
                 return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
-<<<<<<< HEAD
-        }else{
-            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
-=======
-        
-
     }
 
     public function applyScale($id,Request $request){
@@ -152,7 +146,6 @@ class GradingSchemaController extends Controller
             }
 
             return response()->json(['message' => __('messages.grading_schema.scales_assigned'), 'body' => null ], 200);
->>>>>>> e3e6ad6acaa43dba0a1ecb4718f59d5b877c65a4
         }
     }
 
