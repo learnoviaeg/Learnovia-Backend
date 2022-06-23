@@ -352,7 +352,8 @@ return [
     ],
     'grading_schema' => [
         'add'    => 'Grading schema added successfully',
-        'list' => 'grading schema list'
+        'list' => 'grading schema list',
+        'scales_assigned'=> 'Scales assign successfully'
     ],
     'grade_category' => [
         'add'    => 'Grade category added successfully',

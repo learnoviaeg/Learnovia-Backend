@@ -11,6 +11,8 @@ use App\GradingSchemaLevel;
 use App\Course;
 use App\Level;
 use App\GradeCategory;
+use App\GradingSchemaScale;
+use App\course_scales;
 use App\Services\GradingSchemaService;
 use stdClass;
 use App\Http\Requests\GradingSchemaRequest;
@@ -61,7 +63,7 @@ class GradingSchemaController extends Controller
         };
 
         $gradingSchema = GradingSchema::whereId($id)//->whereHas('levels.courses',$callback)
-            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear'])
+            ->with(['levels.courses' => $callback,'gradeCategoryParents','GradingSchemaLevel.segment','GradingSchemaLevel.segment.academicType','GradingSchemaLevel.segment.academicYear','scales.details'])
             ->first();
 
         $gradeCategoriesList = GradeCategory::where('grading_schema_id' ,$id)->where('type','category')->get()->toArray();
@@ -83,45 +85,74 @@ class GradingSchemaController extends Controller
             'description' => $gradingSchemaRequest->description
         ]);
 
-        // $gradingSchemaService = new GradingSchemaService();
-        // $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
-
-        return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
-    }
-
-    public function applyGradingSchema($id,Request $gradingSchemaRequest){
-        $data = $gradingSchemaRequest->toArray();
-        if(is_array($data) && count($data)>0)
-        {
-            foreach($data as $chain){
-                $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
+        foreach($gradingSchemaRequest->chain as $chain){
+            $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
 
                 if(!empty($chain['courses']))
                     $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->whereIn('id',$chain['courses'])->get();
-        
+
                 foreach($courses as $course){
                     GradingSchemaCourse::firstOrCreate([
                         'course_id'=>$course->id,
-                        'grading_schema_id'=>$id
+                        'grading_schema_id'=>$gradingSchema->id
                     ]);
                 }
                 
                 GradingSchemaLevel::firstOrCreate([
                     'level_id'=>$chain['level_id'],
                     'segment_id'=>$chain['segment_id'],
-                    'grading_schema_id'=>$id
+                    'grading_schema_id'=>$gradingSchema->id
                 ]);
+        }
 
+        // $gradingSchemaService = new GradingSchemaService();
+        // $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradingSchemaRequest['grade_categories'],null,$gradingSchema->id,true);
+
+        return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
+    }
+
+    public function applyGradingSchema($id){
+        
+                // $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
+                $courses = GradingSchema::where('id',$id)//->whereHas('levels.courses', $callback)
+                ->with(['courses'])->first()->courses;
+                //from here assign login
                 GradingSchema::whereId($id)->update(['is_drafted'=>0]);
                 $gradingSchemaService = new GradingSchemaService();
                 
                 $categories = GradeCategory::where('grading_schema_id' ,$id)->whereNull('parent')->with('Children','GradeItems')->get();
                 $results[] = $gradingSchemaService->importGradeSchema($categories,$courses,null,true);
-            }
+                
             if($results)
                 return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
+<<<<<<< HEAD
         }else{
             return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+=======
+        
+
+    }
+
+    public function applyScale($id,Request $request){
+        $request = $request->toArray();
+        if(isset($request['scales']) && is_array($request['scales'])){
+            $courses = GradingSchemaCourse::where('grading_schema_id',$id)->get()->pluck('course_id');
+            foreach($request['scales'] as $scale){
+                GradingSchemaScale::updateOrCreate([
+                    'scale_id'=>$scale,
+                    'grading_schema_id'=>$id
+                ]);
+
+                foreach($courses as $courseId){
+                    course_scales::firstOrCreate([
+                        'course_id' => $courseId,
+                        'scale_id' => $scale,
+                    ]);
+                }
+            }
+
+            return response()->json(['message' => __('messages.grading_schema.scales_assigned'), 'body' => null ], 200);
+>>>>>>> e3e6ad6acaa43dba0a1ecb4718f59d5b877c65a4
         }
     }
 
