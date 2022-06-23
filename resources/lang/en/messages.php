@@ -353,7 +353,9 @@ return [
     'grading_schema' => [
         'add'    => 'Grading schema added successfully',
         'list' => 'grading schema list',
-        'scales_assigned'=> 'Scales assign successfully'
+        'scales_assigned'=> 'Scales assign successfully',
+        'delete' => 'Schema Deleted Successfully',
+        'canNot_delete' => 'You can\'t delete this scheme'
     ],
     'grade_category' => [
         'add'    => 'Grade category added successfully',
