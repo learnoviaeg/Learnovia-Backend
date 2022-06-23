@@ -11,6 +11,7 @@ use App\Course;
 use App\Level;
 use App\GradeCategory;
 use App\GradingSchemaScale;
+use App\course_scales;
 use App\Services\GradingSchemaService;
 use stdClass;
 use App\Http\Requests\GradingSchemaRequest;
@@ -130,11 +131,19 @@ class GradingSchemaController extends Controller
     public function applyScale($id,Request $request){
         $request = $request->toArray();
         if(isset($request['scales']) && is_array($request['scales'])){
+            $courses = GradingSchemaCourse::where('grading_schema_id',$id)->get()->pluck('course_id');
             foreach($request['scales'] as $scale){
                 GradingSchemaScale::updateOrCreate([
                     'scale_id'=>$scale,
                     'grading_schema_id'=>$id
                 ]);
+
+                foreach($courses as $courseId){
+                    course_scales::firstOrCreate([
+                        'course_id' => $courseId,
+                        'scale_id' => $scale,
+                    ]);
+                }
             }
 
             return response()->json(['message' => __('messages.grading_schema.scales_assigned'), 'body' => null ], 200);
