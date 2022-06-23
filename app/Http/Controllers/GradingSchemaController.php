@@ -109,10 +109,10 @@ class GradingSchemaController extends Controller
 
         if($gradingSchemaRequest->grade_schema_reference){
             $gradeSchema = GradingSchema::with('gradeCategoryParents')->whereId($gradingSchemaRequest->grade_schema_reference)->first()->toArray();
-        }
 
-        $gradingSchemaService = new GradingSchemaService();
-        $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradeSchema['grade_category_parents'],null,$gradingSchema->id,true);
+            $gradingSchemaService = new GradingSchemaService();
+            $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradeSchema['grade_category_parents'],null,$gradingSchema->id,true);
+        }
 
         return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
     }
