@@ -87,7 +87,7 @@ class GradingSchemaController extends Controller
 
                 if(!empty($chain['courses']))
                     $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->whereIn('id',$chain['courses'])->get();
-        
+
                 foreach($courses as $course){
                     GradingSchemaCourse::firstOrCreate([
                         'course_id'=>$course->id,
@@ -112,7 +112,7 @@ class GradingSchemaController extends Controller
         
                 // $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
                 $courses = GradingSchema::where('id',$id)//->whereHas('levels.courses', $callback)
-                ->with(['courses'])->first()->courses->pluck('id')->toArray();
+                ->with(['courses'])->first()->courses;
                 //from here assign login
                 GradingSchema::whereId($id)->update(['is_drafted'=>0]);
                 $gradingSchemaService = new GradingSchemaService();
