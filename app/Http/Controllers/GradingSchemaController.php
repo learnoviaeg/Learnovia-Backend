@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Segment;
+use Auth;
 use App\GradingSchema;
 use App\GradingSchemaCourse;
 use App\GradingSchemaLevel;
@@ -124,6 +125,10 @@ class GradingSchemaController extends Controller
                 
             if($results)
                 return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
+<<<<<<< HEAD
+        }else{
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => [] ], 400);
+=======
         
 
     }
@@ -147,6 +152,7 @@ class GradingSchemaController extends Controller
             }
 
             return response()->json(['message' => __('messages.grading_schema.scales_assigned'), 'body' => null ], 200);
+>>>>>>> e3e6ad6acaa43dba0a1ecb4718f59d5b877c65a4
         }
     }
 
@@ -156,5 +162,27 @@ class GradingSchemaController extends Controller
     */
     public function update($id,GradingSchemaRequest $gradingSchemaRequest){
         
+    }
+
+    public function destroy($id)
+    {
+        $gradingScheme=GradingSchema::find($id);
+        if($gradingScheme->is_drafted)
+        {
+            if(Auth::user()->can('grade/delete-scheme'))
+            {
+                GradeCategory::where('grading_schema_id',$id)->delete();
+                $gradingScheme->delete();
+            }
+        }
+        else if(Auth::user()->can('grade/force-delete-scheme'))
+        {
+            $gradeCategories=GradeCategory::where('grading_schema_id',$id)->pluck('id');
+            GradeCategory::whereIn('reference_category_id',$gradeCategories)->delete();
+            GradeCategory::where('grading_schema_id',$id)->delete();
+
+            $gradingScheme->delete();
+        }
+        return 'Done';
     }
 }
