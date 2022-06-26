@@ -3,6 +3,7 @@
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Status;
+use App\BloomCategory;
 
 class PermissionSeeder extends Seeder
 {
@@ -552,5 +553,7 @@ class PermissionSeeder extends Seeder
         //create status
         Status::firstOrCreate(['name' => 'Graded']);
         Status::firstOrCreate(['name' => 'Not Graded']);
+
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'complexity/categories', 'title' => 'Bloom Settings', 'dashboard' => 1, 'icon'=> 'pyramid-chart']);
     }
 }

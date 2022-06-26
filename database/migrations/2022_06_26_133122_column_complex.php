@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ComplexityQ extends Migration
+class ColumnComplex extends Migration
 {
     /**
      * Run the migrations.
@@ -14,13 +14,9 @@ class ComplexityQ extends Migration
     public function up()
     {
         Schema::table('questions', function (Blueprint $table) {
-            $table->string('complexity')->nullable();
+            $table->unsignedBigInteger('complexity')->nullable();
+            $table->foreign('complexity')->references('id')->on('bloom_categories')->onDelete('cascade')->onUpdate('cascade');
         });
-
-        Artisan::call('db:seed', [
-            '--class' => 'PermissionSeeder',
-            '--force' => true 
-        ]);
     }
 
     /**
