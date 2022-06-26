@@ -21,7 +21,7 @@ class GradingSchemaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
+        // $this->middleware(['permission:grade/get-scheme'],   ['only' => ['index','show']]);
         $this->middleware('permission:grade/create-scheme', ['only' => ['store']]);      
         $this->middleware('permission:grade/apply-scheme', ['only' => ['applyGradingSchema']]);          
     }
@@ -33,7 +33,7 @@ class GradingSchemaController extends Controller
      */
     public function index(Request $request){
 
-        $grading=GradingSchema::where('id','!=',null);
+        $grading=GradingSchema::where('id','!=',null)->orderBy('created_at','desc');
         $all=[];
         foreach($grading->cursor() as $grade){
             $callback = function ($qu) use ($request,$grade) {
@@ -172,7 +172,7 @@ class GradingSchemaController extends Controller
             {
                 GradeCategory::where('grading_schema_id',$id)->delete();
                 $gradingScheme->delete();
-                
+
                 return response()->json(['message' => __('messages.grading_schema.delete'), 'body' => null ], 200);
             }
         }
