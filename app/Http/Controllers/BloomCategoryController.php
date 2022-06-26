@@ -15,7 +15,7 @@ class BloomCategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $bloomCategories=BloomCategory::where('currest',1);
+        $bloomCategories=BloomCategory::where('current',1);
         if(isset($request->default))
             $bloomCategories->where('default',$request->default);
 
