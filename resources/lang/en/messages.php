@@ -357,6 +357,10 @@ return [
         'delete' => 'Schema Deleted Successfully',
         'canNot_delete' => 'You can\'t delete this scheme'
     ],
+    'bloom_category' => [
+        'get' => 'complexity list',
+        'add' => 'Complexity add/update successfully'
+    ],
     'grade_category' => [
         'add'    => 'Grade category added successfully',
         'update' => 'Grade category is updated successfully',
