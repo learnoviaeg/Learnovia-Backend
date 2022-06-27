@@ -34,11 +34,11 @@ class GradingSchemaService {
                     'type' => 'category',
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
-                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                    'weights' =>isset($category['weights']) ? $category['weights'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                     
                 ]);
-                if($parent_id==null && isset($category['weight']) && isset($category['weight_adjust']) && $category['weight'] && $category['weight_adjust'])
+                if($parent_id==null && isset($category['weights']) && isset($category['weight_adjust']) && $category['weights'] && $category['weight_adjust'])
                    event(new GraderSetupEvent($cat));
                 if(isset($category['GradeItems']) && count($category['GradeItems']) > 0){
                     foreach($category['GradeItems'] as $item){
@@ -51,7 +51,7 @@ class GradingSchemaService {
                             "locked"=> $item['locked'],
                             "hidden"=> $item['hidden'],
                             "weight_adjust"=> $item['weight_adjust'],
-                            "weight"=> $item['weight'],
+                            "weights"=> $item['weights'],
                             "name"=> $item['name'],
                             "min"=>$item['min'],
                             "max"=> $item['max'],
@@ -84,7 +84,7 @@ class GradingSchemaService {
                     'type' => 'category',
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
-                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                    'weights' =>isset($category['weights']) ? $category['weights'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                     'grading_schema_id' => $grade_schema_id
                 ]);
@@ -99,7 +99,7 @@ class GradingSchemaService {
                             "locked"=> $item['locked'],
                             "hidden"=> $item['hidden'],
                             "weight_adjust"=> $item['weight_adjust'],
-                            "weight"=> $item['weight'],
+                            "weights"=> $item['weights'],
                             "name"=> $item['name'],
                             "min"=>$item['min'],
                             "max"=> $item['max'],
