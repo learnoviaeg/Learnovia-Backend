@@ -34,7 +34,7 @@ class GradingSchemaService {
                     'type' => 'category',
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
-                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                    'weights' =>isset($category['weights']) ? $category['weights'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                     
                 ]);
@@ -51,7 +51,7 @@ class GradingSchemaService {
                             "locked"=> $item['locked'],
                             "hidden"=> $item['hidden'],
                             "weight_adjust"=> $item['weight_adjust'],
-                            "weight"=> $item['weight'],
+                            "weights"=> $item['weights'],
                             "name"=> $item['name'],
                             "min"=>$item['min'],
                             "max"=> $item['max'],
@@ -84,22 +84,22 @@ class GradingSchemaService {
                     'type' => 'category',
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
                     'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
-                    'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                    'weights' =>isset($category['weights']) ? $category['weights'] : null,
                     'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                     'grading_schema_id' => $grade_schema_id
                 ]);
 
                 $this->categoriesData[] = $cat->id; 
                 
-                if(isset($category['GradeItems']) && count($category['GradeItems']) > 0){
-                    foreach($category['GradeItems'] as $item_key=>$item){
+                if(isset($category['grade_items']) && count($category['grade_items']) > 0){
+                    foreach($category['grade_items'] as $item_key=>$item){
                         $item = GradeCategory::create([
                             "parent"=>$cat->id,
                             "type" => "item",
                             "locked"=> $item['locked'],
                             "hidden"=> $item['hidden'],
                             "weight_adjust"=> $item['weight_adjust'],
-                            "weight"=> $item['weight'],
+                            "weights"=> $item['weights'],
                             "name"=> $item['name'],
                             "min"=>$item['min'],
                             "max"=> $item['max'],
@@ -110,7 +110,7 @@ class GradingSchemaService {
                     }
                 }
 
-                if(isset($category['Children']) && count($category['Children']) > 0){
+                if(isset($category['categories']) && count($category['categories']) > 0){
                     Self::importGradeSchemaDefault($category['categories'],$cat->id,$grade_schema_id);
                 }
             }
