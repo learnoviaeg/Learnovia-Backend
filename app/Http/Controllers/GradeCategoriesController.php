@@ -100,6 +100,9 @@ class GradeCategoriesController extends Controller
                 'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
                 'grading_schema_id' => $category['grading_schema_id']
             ]);
+            event(new GraderSetupEvent($cat));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat));
+            dispatch($userGradesJob);
             return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
         }
         if($request->filled('courses'))
