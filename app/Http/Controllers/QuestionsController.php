@@ -49,7 +49,7 @@ class QuestionsController extends Controller
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable|string',
-            'complexity' => 'in:easy,medium,hard',
+            'complexity' => 'exists:bloom_categories,id',
             'update_shuffle' => 'nullable' //to prevent shuffle questions on update
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
@@ -389,7 +389,7 @@ class QuestionsController extends Controller
             'Question.*.question_type_id' => 'required|exists:questions_types,id', 
             'Question.*.parent_id' => 'exists:questions,id',
             'Question.*.text' => 'required|string', //need in every type_question
-            'Question.*.complexity' => 'string|in:easy,medium,hard',
+            'Question.*.complexity' => 'exists:bloom_categories,id',
         ]);
         
         $all=collect([]);
@@ -582,9 +582,8 @@ class QuestionsController extends Controller
             'course_id' => 'integer|exists:courses,id',
             'question_category_id' => 'integer|exists:questions_categories,id',
             'question_type_id' => 'integer|exists:questions_types,id',
-            //for request of creation multi type questions
             'text' => 'string',
-            'complexity' => 'string',
+            'complexity' => 'exists:bloom_categories,id',
         ]);
         
         $data=array();
