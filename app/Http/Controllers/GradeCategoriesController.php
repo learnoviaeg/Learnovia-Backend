@@ -17,7 +17,6 @@ use Modules\QuestionBank\Entities\quiz;
 
 class GradeCategoriesController extends Controller
 {
-
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
@@ -27,7 +26,6 @@ class GradeCategoriesController extends Controller
         $this->middleware(['permission:grade/category/get'],   ['only' => ['index']]);
         $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
     }
-
 
     /**
      * Display a listing of the resource.
@@ -83,9 +81,8 @@ class GradeCategoriesController extends Controller
             'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
             'category.*.exclude_empty_grades' => 'boolean',
-            'grading_schema_id'=>'exists:grading_schema,id'
+            'category.*.grading_schema_id'=>'exists:grading_schema,id'
         ]);
-
 
         if(isset($request->category[0])&&isset($request->category[0]['grading_schema_id'])){
             $category = $request->category[0];
@@ -147,8 +144,6 @@ class GradeCategoriesController extends Controller
                 dispatch($userGradesJob);
             }
         }
-
-    }
         return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
     }
 
@@ -275,9 +270,12 @@ class GradeCategoriesController extends Controller
                         AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 0]);
                 }          
             }
-            event(new GraderSetupEvent($category->Parents));
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
-            dispatch($userGradesJob);
+            if(isset($category->Parents)) //3l4an fe halet n l category tab3 scheme bs malha4 parent
+            {
+                event(new GraderSetupEvent($category->Parents));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
+                dispatch($userGradesJob);
+            }
         }
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }

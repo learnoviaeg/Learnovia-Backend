@@ -565,6 +565,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grading-schema', GradingSchemaController::class);
     Route::post('apply-grading-schema/{id}', 'GradingSchemaController@applyGradingSchema');
+    Route::post('grading-schema-scale/{id}', 'GradingSchemaController@applyScale');
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
     Route::get('grader-setup', 'GraderReportController@grade_setup');
@@ -589,6 +590,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     
     Route::Resource('session', AttendanceSessionController::class);
+    Route::Resource('complexity/categories', BloomCategoryController::class);
 
     Route::Resource('topic', TopicController::class);
 

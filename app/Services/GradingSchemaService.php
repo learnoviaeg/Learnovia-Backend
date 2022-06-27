@@ -91,8 +91,8 @@ class GradingSchemaService {
 
                 $this->categoriesData[] = $cat->id; 
                 
-                if(isset($category['grade_items']) && count($category['grade_items']) > 0){
-                    foreach($category['grade_items'] as $item_key=>$item){
+                if(isset($category['GradeItems']) && count($category['GradeItems']) > 0){
+                    foreach($category['GradeItems'] as $item_key=>$item){
                         $item = GradeCategory::create([
                             "parent"=>$cat->id,
                             "type" => "item",
@@ -110,7 +110,7 @@ class GradingSchemaService {
                     }
                 }
 
-                if(isset($category['categories']) && count($category['categories']) > 0){
+                if(isset($category['Children']) && count($category['Children']) > 0){
                     Self::importGradeSchemaDefault($category['categories'],$cat->id,$grade_schema_id);
                 }
             }

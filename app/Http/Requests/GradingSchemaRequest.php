@@ -24,7 +24,10 @@ class GradingSchemaRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'=>'required'
+            'name'=>'required',
+            'chain' => 'required',
+            'chain.*.level_id'=>'required',
+            'chain.*.segment_id'=>'required'
         ];
     }
 }

@@ -22,7 +22,7 @@ class AddGradingSchemaCourses extends Migration
 
             $table->foreign('grading_schema_id')->references('id')->on('grading_schema')->onDelete('cascade');
             $table->foreign('level_id')->references('id')->on('levels')->onDelete('cascade');
-            $table->foreign('course_id')->references('id')->on('grading_schema')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
         });
     }
 
