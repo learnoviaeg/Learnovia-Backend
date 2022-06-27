@@ -17,7 +17,7 @@ class BloomCategoryController extends Controller
     {
         $bloomCategories=BloomCategory::where('current',1);
         if(isset($request->default))
-            $bloomCategories->where('default',$request->default);
+            $bloomCategories=BloomCategory::where('default',$request->default);
 
         return response()->json(['message' => __('messages.bloom_category.get'), 'body' => $bloomCategories->get() ], 200);
     }
