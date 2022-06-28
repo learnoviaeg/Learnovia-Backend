@@ -224,10 +224,16 @@ class GradeCategoriesController extends Controller
         $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
         $grade_category->child()->update(['parent' => $top_parent_category->id]);
         $parent_Category = GradeCategory::find($grade_category->parent);
+
+        if($grade_category->grading_schema_id){
+            GradeCategory::where('reference_category_id',$id)->delete();
+        }
         $grade_category->delete();
-        event(new GraderSetupEvent($parent_Category));
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
-        dispatch($userGradesJob);
+        if($parent_Category){
+            event(new GraderSetupEvent($parent_Category));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+            dispatch($userGradesJob);
+        }
 
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
