@@ -86,9 +86,10 @@ class GradeCategoriesController extends Controller
 
         if(isset($request->category[0])&&isset($request->category[0]['grading_schema_id'])){
             $category = $request->category[0];
+            $schemaParent = GradeCategory::where('grading_schema_id',$request->category[0]['grading_schema_id'])->where('parent',null)->first();
             $cat = GradeCategory::create([
                 'name' => $category['name'],
-                'parent' => isset($category['parent']) ?$category['parent']: null,
+                'parent' => isset($category['parent']) ?$category['parent']: $schemaParent->id,
                 'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
                 'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
                 'locked' =>isset($category['locked']) ? $category['locked'] : 0,

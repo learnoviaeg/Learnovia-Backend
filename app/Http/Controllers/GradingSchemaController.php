@@ -85,12 +85,15 @@ class GradingSchemaController extends Controller
             'description' => $gradingSchemaRequest->description
         ]);
 
+        $gradeCatParent = GradeCategory::firstOrCreate([
+            'name' => $gradingSchemaRequest->name . ' Total',
+            'grading_schema_id' => $gradingSchema->id
+        ]);
+
         foreach($gradingSchemaRequest->chain as $chain){
             $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->where('level_id',$chain['level_id'])->get();
 
-                if(!empty($chain['courses'])){
-                    
-                }
+                if(!empty($chain['courses']))
                     $courses = Course::with('level')->where('segment_id',$chain['segment_id'])->whereIn('id',$chain['courses'])->get();
 
                 foreach($courses as $course){
@@ -111,7 +114,7 @@ class GradingSchemaController extends Controller
             $gradeSchema = GradingSchema::with('gradeCategoryParents')->whereId($gradingSchemaRequest->grade_schema_reference)->first()->toArray();
 
             $gradingSchemaService = new GradingSchemaService();
-            $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradeSchema['grade_category_parents'],null,$gradingSchema->id,true);
+            $gradeSchemaDefault = $gradingSchemaService->importGradeSchemaDefault($gradeSchema['grade_category_parents'],$gradeCatParent->id,$gradingSchema->id,true);
         }
 
         return response()->json(['message' => __('messages.grading_schema.add'), 'body' => null ], 200);
@@ -126,7 +129,8 @@ class GradingSchemaController extends Controller
                 GradingSchema::whereId($id)->update(['is_drafted'=>0]);
                 $gradingSchemaService = new GradingSchemaService();
                 
-                $categories = GradeCategory::where('grading_schema_id' ,$id)->whereNull('parent')->with('Children','GradeItems')->get();
+                $schemaParent = GradeCategory::where('grading_schema_id' ,$id)->whereNull('parent')->first();
+                $categories = GradeCategory::where('grading_schema_id' ,$id)->where('parent',$schemaParent->id)->with('Children','GradeItems')->get();
                 $results[] = $gradingSchemaService->importGradeSchema($categories,$courses,null,true);
                 
             if($results)
