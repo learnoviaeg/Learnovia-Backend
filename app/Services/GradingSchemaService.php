@@ -27,7 +27,7 @@ class GradingSchemaService {
                     'name' => $category['name'],
                     'parent' => $parent_id?$parent_id:$course_total_category->id,
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
-                    'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
+                    'calculation_type' =>isset($category['calculation_type']) ? $category['calculation_type'] : json_encode(['Natural']),
                     'locked' =>isset($category['locked']) ? $category['locked'] : 0,
                     'min' =>isset($category['min']) ? $category['min'] : 0,
                     'max' =>isset($category['max']) ? $category['max'] : null,
