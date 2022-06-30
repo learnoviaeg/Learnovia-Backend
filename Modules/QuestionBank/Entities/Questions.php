@@ -46,6 +46,12 @@ class Questions extends Model
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
 
+    public function bloom()
+    {
+        return $this->belongsTo('App\BloomCategory', 'complexity', 'id');
+    }
+
+
     // public function question_answer()
     // {
     //     return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\BloomCategory;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuiz;
+use DB;
 
 class BloomCategoryController extends Controller
 {
@@ -76,5 +79,53 @@ class BloomCategoryController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function singleReport(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+            'student_id' => 'exists:users,id',
+        ]);
+        $quizLesson=QuizLesson::where('quiz_id',$request->quiz_id)->where('lesson_id',$request->lesson_id)->first();
+        $attempts=UserQuiz::where('quiz_lesson_id',$quizLesson->id)->where('user_id',$request->student_id);
+
+        if($quizLesson->grading_method_id[0] == 'Last')
+            $attempt=$attempts->latest()->first();
+
+            
+        if($quizLesson->grading_method_id[0] == 'First')
+            $attempt=$attempts->first();
+
+        
+        if($quizLesson->grading_method_id[0] == 'Highest')
+            $attempt=$attempts->orderBy('grade','desc')->first();
+
+        if($quizLesson->grading_method_id[0] == 'Lowest')
+            $attempt=$attempts->orderBy('grade','asc')->first();
+
+        foreach($attempt->UserQuizAnswer as $key => $UQA)
+        {
+            $count[$UQA->Question->Bloom->name][$key] =1;
+            // $bloom[]=BloomCategory::select(DB::raw
+            // (  "COUNT(case `id` when ".$UQA->Question->Bloom->id . " then 1 else null end) as " . $UQA->Question->Bloom->name .""))->first()->only($UQA->Question->Bloom->name);
+        }
+        foreach($count as $key=>$value)
+            $cout[$key]=count($value);
+
+        $a=[];
+        foreach($cout as $key => $cc)
+        {
+            $daragat=0;
+            foreach($attempt->UserQuizAnswer as $answer)
+            {
+                if($answer->Question->Bloom->name == $key)
+                    $daragat+=$answer->user_grade;
+            }
+            $a[$key]=$daragat/$cc;
+        }
+
+        return HelperController::api_response_format(200, $a, 'Statistices');
     }
 }
