@@ -87,7 +87,9 @@ class GradingSchemaController extends Controller
 
         $gradeCatParent = GradeCategory::firstOrCreate([
             'name' => $gradingSchemaRequest->name . ' Total',
-            'grading_schema_id' => $gradingSchema->id
+            'grading_schema_id' => $gradingSchema->id,
+            'weights' => 100,
+            'calculation_type' => json_encode(["Natural"]),
         ]);
 
         foreach($gradingSchemaRequest->chain as $chain){
