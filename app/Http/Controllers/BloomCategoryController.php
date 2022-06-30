@@ -7,6 +7,7 @@ use App\BloomCategory;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
 use DB;
 
 class BloomCategoryController extends Controller
@@ -93,11 +94,9 @@ class BloomCategoryController extends Controller
 
         if($quizLesson->grading_method_id[0] == 'Last')
             $attempt=$attempts->latest()->first();
-
             
         if($quizLesson->grading_method_id[0] == 'First')
             $attempt=$attempts->first();
-
         
         if($quizLesson->grading_method_id[0] == 'Highest')
             $attempt=$attempts->orderBy('grade','desc')->first();
@@ -105,7 +104,13 @@ class BloomCategoryController extends Controller
         if($quizLesson->grading_method_id[0] == 'Lowest')
             $attempt=$attempts->orderBy('grade','asc')->first();
 
-        foreach($attempt->UserQuizAnswer as $key => $UQA)
+        if($quizLesson->grading_method_id[0] != 'Average')
+            $questionAnswers=$attempt->UserQuizAnswer;
+
+        if($quizLesson->grading_method_id[0] == 'Average')
+            $questionAnswers=UserQuizAnswer::whereIn('user_quiz_id',$attempts->pluck('id'))->get();
+
+        foreach($questionAnswers as $key => $UQA)
         {
             $count[$UQA->Question->Bloom->name][$key] =1;
             // $bloom[]=BloomCategory::select(DB::raw
@@ -118,7 +123,7 @@ class BloomCategoryController extends Controller
         foreach($cout as $key => $cc)
         {
             $daragat=0;
-            foreach($attempt->UserQuizAnswer as $answer)
+            foreach($questionAnswers as $answer)
             {
                 if($answer->Question->Bloom->name == $key)
                     $daragat+=$answer->user_grade;
