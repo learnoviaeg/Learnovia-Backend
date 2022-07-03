@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\BloomCategory;
 use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\UserQuizAnswer;
+use DB;
 
 class BloomCategoryController extends Controller
 {
@@ -76,5 +80,75 @@ class BloomCategoryController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function singleReport(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+            'student_id' => 'exists:users,id',
+        ]);
+
+        $quizLessons=QuizLesson::where('quiz_id',$request->quiz_id)->get();
+        if(isset($request->student_id))
+            $attemptss=UserQuiz::where('user_id',$request->student_id)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+        else
+            $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+
+        $questionAnswers=array();
+        foreach( $attemptss->cursor() as $att)
+        {
+            if(isset($request->student_id))
+            $attempts=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'))->where('user_id',$att->user_id);
+
+            if($quizLessons[0]->grading_method_id[0] == 'Last')
+                $attempt=$attempts->latest()->first();
+                
+            if($quizLessons[0]->grading_method_id[0] == 'First')
+                $attempt=$attempts->first();
+            
+            if($quizLessons[0]->grading_method_id[0] == 'Highest')
+                $attempt=$attempts->orderBy('grade','desc')->first();
+
+            if($quizLessons[0]->grading_method_id[0] == 'Lowest')
+                $attempt=$attempts->orderBy('grade','asc')->first();
+
+            if($quizLessons[0]->grading_method_id[0] != 'Average'){
+                $iteration=$attempt->UserQuizAnswer;
+                foreach($iteration as $one)
+                    array_push($questionAnswers,$one);
+            }
+
+            if($quizLessons[0]->grading_method_id[0] == 'Average'){
+                $iteration = UserQuizAnswer::whereIn('user_quiz_id',$attempts->pluck('id'))->get();
+                $iteration=$attempt->UserQuizAnswer;
+                foreach($iteration as $one)
+                    array_push($questionAnswers,$one);
+            }
+        }
+        // return ($questionAnswers);
+
+        foreach($questionAnswers as $key => $UQA)
+        {
+            $count[$UQA->Question->Bloom->name][$key] =1;
+            // $bloom[]=BloomCategory::select(DB::raw
+            // (  "COUNT(case `id` when ".$UQA->Question->Bloom->id . " then 1 else null end) as " . $UQA->Question->Bloom->name .""))->first()->only($UQA->Question->Bloom->name);
+        }
+        foreach($count as $key=>$value)
+            $cout[$key]=count($value);
+
+        $a=[];
+        foreach($cout as $key => $cc)
+        {
+            $daragat=0;
+            foreach($questionAnswers as $answer)
+            {
+                if($answer->Question->Bloom->name == $key)
+                    $daragat+=$answer->user_grade;
+            }
+            $a[$key]=round($daragat/$cc,2);
+        }
+
+        return HelperController::api_response_format(200, $a, 'Statistices');
     }
 }

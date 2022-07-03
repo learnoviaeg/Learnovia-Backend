@@ -14,7 +14,9 @@ use App\Classes;
 use Spatie\Permission\Models\Permission;
 use Carbon\Carbon;
 use App\Log;
+use Modules\QuestionBank\Entities\Quiz;
 use App\Lesson;
+use App\SecondaryChain;
 use App\UserSeen;
 use App\GradeCategory;
 use App\Segment;
@@ -24,6 +26,8 @@ use App\AcademicType;
 use App\YearLevel;
 use App\AcademicYearType;
 use App\Course;
+use App\CourseItem;
+use App\UserCourseItem;
 use App\Contract;
 use App\CourseSegment;
 use App\ClassLevel;
@@ -276,5 +280,33 @@ class UsersController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function itemUsers(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required|integer|exists:quizzes,id'
+        ]);   
+
+        $quiz=Quiz::find($request->item_id);
+
+        $courseItem=CourseItem::where('item_id',$request->item_id)->first();
+        $users=[];
+        if(isset($courseItem)){
+            $users['users']=UserCourseItem::where('course_item_id',$courseItem->id)->with(['user:id,firstname,lastname'])->get()->pluck('user');
+            foreach($users['users'] as $user)
+            {
+
+                $user->class=Classes::find(Enroll::whereIn('user_id',$users['users'])->latest()->first()->group);
+            }
+        }
+        else
+        {
+            // return ($quiz->Lesson->pluck('id'));
+            $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
+            $users['classes']=$quiz->Lesson->pluck('shared_classes');
+        }
+
+        return response()->json(['message' =>  null, 'body' => $users ], 200);
     }
 }

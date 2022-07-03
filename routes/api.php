@@ -520,6 +520,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
+    Route::get('itemUsers', 'UsersController@itemUsers');
     Route::get('user/{count}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{participants}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
@@ -591,6 +592,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     
     Route::Resource('session', AttendanceSessionController::class);
     Route::Resource('complexity/categories', BloomCategoryController::class);
+    Route::get('complexity/report', 'BloomCategoryController@singleReport');
 
     Route::Resource('topic', TopicController::class);
 
