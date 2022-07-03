@@ -93,7 +93,7 @@ class BloomCategoryController extends Controller
         if(isset($request->student_id))
             $attemptss=UserQuiz::where('user_id',$request->student_id)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
         else
-            $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'))->distinct('user_id');
+            $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
 
         $questionAnswers=array();
         foreach( $attemptss->cursor() as $att)
