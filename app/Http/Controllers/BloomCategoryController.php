@@ -150,7 +150,7 @@ class BloomCategoryController extends Controller
 
         // $cout dh kam mara l so2al dah et7al(etfata7 mn kam attempt)
 
-        $BloomCount=[];
+        $BloomCounts=[];
         foreach($quiz->Question as $question){
             if(!isset($question->Bloom))
                 continue;
