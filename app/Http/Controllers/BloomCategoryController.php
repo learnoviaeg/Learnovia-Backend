@@ -130,7 +130,6 @@ class BloomCategoryController extends Controller
 
             if($quizLessons[0]->grading_method_id[0] == 'Average'){
                 $iteration = UserQuizAnswer::whereIn('user_quiz_id',$attempts->pluck('id'))->get();
-                $iteration=$attempt->UserQuizAnswer;
                 foreach($iteration as $one)
                     array_push($questionAnswers,$one);
             }
@@ -161,7 +160,6 @@ class BloomCategoryController extends Controller
         foreach($BloomCount as $key=>$value)
             $BloomCounts[$key]=count($value);
 
-
         foreach($cout as $key => $cc)
         {
             $daragat=0;
@@ -177,6 +175,7 @@ class BloomCategoryController extends Controller
             // $a l result
             $a[$key]=round($daragat/$cc,2);
         }
+
         $a['question_bloom_count']=$BloomCounts;
 
         return HelperController::api_response_format(200, $a, 'Statistices');
