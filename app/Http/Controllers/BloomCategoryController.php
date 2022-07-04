@@ -8,6 +8,7 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
+use Modules\QuestionBank\Entities\quiz;
 use DB;
 
 class BloomCategoryController extends Controller
@@ -151,4 +152,19 @@ class BloomCategoryController extends Controller
 
         return HelperController::api_response_format(200, $a, 'Statistices');
     }
+
+    public function countQuestions(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|integer|exists:quizzes,id',
+        ]);
+
+        $quiz = quiz::whereId($request->quiz_id)->select('id as quiz_id')->withCount('Question as questions_count')
+        ->withCount(['Question as bloom_questions_count' => function($query) use ($request){
+            $query->whereNotNull('complexity');
+        }])->first();
+
+        return response()->json(['message' => null, 'body' => $quiz ], 200); 
+    }
+
 }
