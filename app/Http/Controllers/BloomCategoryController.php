@@ -152,7 +152,7 @@ class BloomCategoryController extends Controller
 
         $BloomCounts=[];
         $BloomCount=[];
-        foreach($quiz->Question as $question){
+        foreach($quiz->Question as $key => $question){
             if(!isset($question->Bloom))
                 continue;
             $BloomCount[$question->Bloom->name][$key] =1;
