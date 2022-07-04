@@ -109,10 +109,10 @@ class BloomCategoryController extends Controller
             $qu->where('quiz_id', $request->quiz_id);  
         };
 
-        $bloom = BloomCategory::select('id','name as bloom_name')
-        ->withCount(['questions as count ' => function($query) use ($request, $quiz_question_callback){
-            $query->whereHas('quizQuestion' , $quiz_question_callback)->with(['quizQuestion' => $quiz_question_callback]);}
-        ]);
+        $bloom = BloomCategory::select('id','name as bloom_name')->where('current',1)
+            ->withCount(['questions' => function($query) use ($request, $quiz_question_callback){
+                $query->whereHas('quizQuestion' , $quiz_question_callback)->with(['quizQuestion' => $quiz_question_callback]);}
+            ]);
 
         $questionAnswers=array();
         foreach( $attemptss->cursor() as $att)
@@ -147,27 +147,16 @@ class BloomCategoryController extends Controller
         $a=[];
         $count=[];
         $cout=[];
+        //this becouse came undefined index
         foreach($questionAnswers as $key => $UQA){
             if(!isset($UQA->Question->Bloom))
                 continue;
             $count[$UQA->Question->Bloom->name][$key] =1;
         }
 
+        //count according answers
         foreach($count as $key=>$value)
             $cout[$key]=count($value);
-
-        // $cout dh kam mara l so2al dah et7al(etfata7 mn kam attempt)
-
-        $BloomCounts=[];
-        $BloomCount=[];
-        foreach($quiz->Question as $key => $question){
-            if(!isset($question->Bloom))
-                continue;
-            $BloomCount[$question->Bloom->name][$key] =1;
-        }
-
-        foreach($BloomCount as $key=>$value)
-            $BloomCounts[$key]=count($value);
 
         foreach($cout as $key => $cc)
         {
@@ -182,14 +171,7 @@ class BloomCategoryController extends Controller
                     $daragat+=$answer->user_grade;
             }
             // $a l result
-            // $categories=BloomCategory::where('current',1)->pluck('name');
-            // // return $categories;
-            // foreach($categories as $category){
-            //     if($category == $key)
             $a[$key]=round($daragat/$cc,2);
-            //     else
-            //         $a[$key]=0;
-            // }
         }
 
         $a['question_bloom']=$bloom->get();
