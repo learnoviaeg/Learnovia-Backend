@@ -105,6 +105,15 @@ class BloomCategoryController extends Controller
         else
             $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
 
+        $quiz_question_callback = function ($qu) use ($request) {
+            $qu->where('quiz_id', $request->quiz_id);  
+        };
+
+        $bloom = BloomCategory::select('id','name as bloom_name')
+        ->withCount(['questions as count ' => function($query) use ($request, $quiz_question_callback){
+            $query->whereHas('quizQuestion' , $quiz_question_callback)->with(['quizQuestion' => $quiz_question_callback]);}
+        ]);
+
         $questionAnswers=array();
         foreach( $attemptss->cursor() as $att)
         {
@@ -130,7 +139,6 @@ class BloomCategoryController extends Controller
 
             if($quizLessons[0]->grading_method_id[0] == 'Average'){
                 $iteration = UserQuizAnswer::whereIn('user_quiz_id',$attempts->pluck('id'))->get();
-                $iteration=$attempt->UserQuizAnswer;
                 foreach($iteration as $one)
                     array_push($questionAnswers,$one);
             }
@@ -161,7 +169,6 @@ class BloomCategoryController extends Controller
         foreach($BloomCount as $key=>$value)
             $BloomCounts[$key]=count($value);
 
-
         foreach($cout as $key => $cc)
         {
             $daragat=0;
@@ -175,9 +182,17 @@ class BloomCategoryController extends Controller
                     $daragat+=$answer->user_grade;
             }
             // $a l result
+            // $categories=BloomCategory::where('current',1)->pluck('name');
+            // // return $categories;
+            // foreach($categories as $category){
+            //     if($category == $key)
             $a[$key]=round($daragat/$cc,2);
+            //     else
+            //         $a[$key]=0;
+            // }
         }
-        $a['question_bloom_count']=$BloomCounts;
+
+        $a['question_bloom']=$bloom->get();
 
         return HelperController::api_response_format(200, $a, 'Statistices');
     }
