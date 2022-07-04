@@ -593,6 +593,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('session', AttendanceSessionController::class);
     Route::Resource('complexity/categories', BloomCategoryController::class);
     Route::get('complexity/report', 'BloomCategoryController@singleReport');
+    Route::get('complexity/quiz-counters', 'BloomCategoryController@countQuestions');
 
     Route::Resource('topic', TopicController::class);
 
