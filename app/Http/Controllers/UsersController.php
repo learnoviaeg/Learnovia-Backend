@@ -292,20 +292,16 @@ class UsersController extends Controller
 
         $courseItem=CourseItem::where('item_id',$request->item_id)->first();
         $users=[];
-        if(isset($courseItem)){
+        if(isset($courseItem))
             $users['users']=UserCourseItem::where('course_item_id',$courseItem->id)->with(['user:id,firstname,lastname'])->get()->pluck('user');
-            foreach($users['users'] as $user)
-            {
-
-                $user->class=Classes::find(Enroll::whereIn('user_id',$users['users'])->latest()->first()->group);
-            }
-        }
+    
         else
-        {
-            // return ($quiz->Lesson->pluck('id'));
             $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
-            $users['classes']=$quiz->Lesson->pluck('shared_classes');
-        }
+
+        foreach($users['users'] as $user)
+            $user->class=Classes::find(Enroll::whereIn('user_id',$users['users'])->latest()->first()->group);
+
+        $users['classes']=$quiz->Lesson->pluck('shared_classes')[0];
 
         return response()->json(['message' =>  null, 'body' => $users ], 200);
     }

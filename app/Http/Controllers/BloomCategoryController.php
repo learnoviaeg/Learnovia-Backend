@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\BloomCategory;
 use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
+use App\SecondaryChain;
 use Modules\QuestionBank\Entities\UserQuiz;
+use Modules\QuestionBank\Entities\Quiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\quiz;
 use DB;
@@ -88,18 +90,25 @@ class BloomCategoryController extends Controller
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'student_id' => 'exists:users,id',
+            'classes' => 'array|exists:classes,id'
         ]);
 
+        $quiz=Quiz::find($request->quiz_id);
         $quizLessons=QuizLesson::where('quiz_id',$request->quiz_id)->get();
         if(isset($request->student_id))
             $attemptss=UserQuiz::where('user_id',$request->student_id)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+
+        else if(isset($request->classes)){
+            $users=SecondaryChain::select('user_id')->distinct()->whereIn('group_id',$request->classes)->pluck('user_id');
+            $attemptss=UserQuiz::whereIn('user_id',$users)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+        }
+
         else
             $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
 
         $questionAnswers=array();
         foreach( $attemptss->cursor() as $att)
         {
-            if(isset($request->student_id))
             $attempts=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'))->where('user_id',$att->user_id);
 
             if($quizLessons[0]->grading_method_id[0] == 'Last')
@@ -127,28 +136,48 @@ class BloomCategoryController extends Controller
                     array_push($questionAnswers,$one);
             }
         }
-        // return ($questionAnswers);
 
-        foreach($questionAnswers as $key => $UQA)
-        {
+        $a=[];
+        $count=[];
+        $cout=[];
+        foreach($questionAnswers as $key => $UQA){
+            if(!isset($UQA->Question->Bloom))
+                continue;
             $count[$UQA->Question->Bloom->name][$key] =1;
-            // $bloom[]=BloomCategory::select(DB::raw
-            // (  "COUNT(case `id` when ".$UQA->Question->Bloom->id . " then 1 else null end) as " . $UQA->Question->Bloom->name .""))->first()->only($UQA->Question->Bloom->name);
         }
+
         foreach($count as $key=>$value)
             $cout[$key]=count($value);
 
-        $a=[];
+        // $cout dh kam mara l so2al dah et7al(etfata7 mn kam attempt)
+
+        $BloomCount=[];
+        foreach($quiz->Question as $question){
+            if(!isset($question->Bloom))
+                continue;
+            $BloomCount[$question->Bloom->name][$key] =1;
+        }
+
+        foreach($BloomCount as $key=>$value)
+            $BloomCounts[$key]=count($value);
+
+
         foreach($cout as $key => $cc)
         {
             $daragat=0;
             foreach($questionAnswers as $answer)
             {
+                if(!isset($UQA->Question->Bloom))
+                    continue;
+                
                 if($answer->Question->Bloom->name == $key)
+                // l daragat d kol l nesab beta3et l so2al
                     $daragat+=$answer->user_grade;
             }
+            // $a l result
             $a[$key]=round($daragat/$cc,2);
         }
+        $a['question_bloom_count']=$BloomCounts;
 
         return HelperController::api_response_format(200, $a, 'Statistices');
     }
@@ -168,3 +197,4 @@ class BloomCategoryController extends Controller
     }
 
 }
+
