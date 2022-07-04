@@ -8,7 +8,6 @@ use Modules\QuestionBank\Entities\Questions;
 use Modules\QuestionBank\Entities\QuizLesson;
 use App\SecondaryChain;
 use Modules\QuestionBank\Entities\UserQuiz;
-use Modules\QuestionBank\Entities\Quiz;
 use Modules\QuestionBank\Entities\UserQuizAnswer;
 use Modules\QuestionBank\Entities\quiz;
 use DB;
