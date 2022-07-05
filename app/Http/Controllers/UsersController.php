@@ -299,8 +299,9 @@ class UsersController extends Controller
             $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
 
         foreach($users['users'] as $user)
-            $user->class=Classes::find(Enroll::where('user_id',$user->id)->latest()->first()->group);
+            $user->class=Classes::find(Enroll::where('user_id',$user->id)->whereIn('group',$quiz->Lesson->pluck('shared_classes')[0]->pluck('id'))->latest()->first()->group);
 
+            return $quiz->Lesson->getOriginal('shared_classes');
         $users['classes']=$quiz->Lesson->pluck('shared_classes')[0];
 
         return response()->json(['message' =>  null, 'body' => $users ], 200);
