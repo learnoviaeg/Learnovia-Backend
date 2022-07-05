@@ -14,6 +14,12 @@ use DB;
 
 class BloomCategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(['permission:complexity/report'],   ['only' => ['singleReport']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
