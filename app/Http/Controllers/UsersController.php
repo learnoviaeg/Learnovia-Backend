@@ -299,7 +299,7 @@ class UsersController extends Controller
             $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
 
         foreach($users['users'] as $user)
-            $user->class=Classes::find(Enroll::whereIn('user_id',$users['users'])->latest()->first()->group);
+            $user->class=Classes::find(Enroll::where('user_id',$user)->latest()->first()->group);
 
         $users['classes']=$quiz->Lesson->pluck('shared_classes')[0];
 
