@@ -296,7 +296,7 @@ class UsersController extends Controller
             $users['users']=UserCourseItem::where('course_item_id',$courseItem->id)->with(['user:id,firstname,lastname'])->get()->pluck('user');
     
         else
-            $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
+            $users['users']=User::select('id','firstname','lastname')->whereIn('id',SecondaryChain::where('role_id' , 3)->whereIn('lesson_id',$quiz->Lesson->pluck('id'))->pluck('user_id'))->get();
 
         foreach($users['users'] as $user)
             $user->class=Classes::find(Enroll::where('user_id',$user->id)->whereIn('group',$quiz->Lesson->pluck('shared_classes')[0]->pluck('id'))->latest()->first()->group);
