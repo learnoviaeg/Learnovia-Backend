@@ -169,7 +169,7 @@ class BloomCategoryController extends Controller
             $daragat=0;
             foreach($questionAnswers as $answer)
             {
-                if(!isset($UQA->Question->Bloom))
+                if($answer->Question->complexity == null)
                     continue;
                 
                 if($answer->Question->Bloom->name == $key)
