@@ -17,7 +17,7 @@ class BloomCategoryController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware(['permission:complexity/report'],   ['only' => ['singleReport']]);
+        // $this->middleware(['permission:complexity/report'],   ['only' => ['singleReport']]);
     }
 
     /**
@@ -105,11 +105,26 @@ class BloomCategoryController extends Controller
 
         else if(isset($request->classes)){
             $users=SecondaryChain::select('user_id')->distinct()->whereIn('group_id',$request->classes)->where('role_id',3)->pluck('user_id');
+            if($quiz->restricted){
+                $usersR=[];
+                foreach($quiz['courseItem']->courseItemUsers as $user)
+                    $usersR[] = $user->user_id;
+
+                $users=array_intersect($usersR,$users->toArray());
+            }
+
             $attemptss=UserQuiz::whereIn('user_id',$users)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
         }
 
         else{
             $users=SecondaryChain::select('user_id')->distinct()->where('role_id',3)->pluck('user_id');
+            if($quiz->restricted){
+                $users=[];
+                foreach($quiz['courseItem']->courseItemUsers as $user)
+                   $users[] = $user->user_id;
+
+                // $users=array_intersect($usersR,$users->toArray());
+            }
             $attemptss=UserQuiz::whereIn('user_id',$users)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
         }
 
