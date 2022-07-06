@@ -104,12 +104,14 @@ class BloomCategoryController extends Controller
             $attemptss=UserQuiz::where('user_id',$request->student_id)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
 
         else if(isset($request->classes)){
-            $users=SecondaryChain::select('user_id')->distinct()->whereIn('group_id',$request->classes)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->distinct()->whereIn('group_id',$request->classes)->where('role_id',3)->pluck('user_id');
             $attemptss=UserQuiz::whereIn('user_id',$users)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
         }
 
-        else
-            $attemptss=UserQuiz::whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+        else{
+            $users=SecondaryChain::select('user_id')->distinct()->where('role_id',3)->pluck('user_id');
+            $attemptss=UserQuiz::whereIn('user_id',$users)->whereIn('quiz_lesson_id',$quizLessons->pluck('id'));
+        }
 
         $quiz_question_callback = function ($qu) use ($request) {
             $qu->where('quiz_id', $request->quiz_id);  
