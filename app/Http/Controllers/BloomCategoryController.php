@@ -17,7 +17,7 @@ class BloomCategoryController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        // $this->middleware(['permission:complexity/report'],   ['only' => ['singleReport']]);
+        $this->middleware(['permission:complexity/report'],   ['only' => ['singleReport']]);
     }
 
     /**
