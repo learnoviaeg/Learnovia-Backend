@@ -555,7 +555,8 @@ class PermissionSeeder extends Seeder
         Status::firstOrCreate(['name' => 'Not Graded']);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'complexity/categories', 'title' => 'Bloom Settings', 'dashboard' => 1, 'icon'=> 'pyramid-chart']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'complexity/report', 'title' => 'Bloom statistics report', 'icon'=> 'pyramid-chart']);
 
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly-plan/create', 'title' => 'Create weekly plan', 'dashboard' => 0]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly-plan/get', 'title' => 'View weekly plan', 'dashboard' => 0]);
     }
 }
