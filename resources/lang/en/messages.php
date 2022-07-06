@@ -406,5 +406,10 @@ return [
     'working_day' => [
         'list' => 'All Days',
         'update' => 'Days updated successfully'
-    ]
+    ],
+    'weekly-plan' => [
+        'add' => 'Weekly plan added successfully',
+        'delete' => 'Weekly plan deleted successfully',
+        'update' => 'Weekly plan updated Successfully',
+    ],
 ];
