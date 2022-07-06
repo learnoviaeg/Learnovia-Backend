@@ -26,6 +26,11 @@ class Questions extends Model
         return $count_quest;  
     }
 
+    public function quizQuestion()
+    {
+        return $this->hasMany('Modules\QuestionBank\Entities\quiz_questions','question_id');
+    }
+
     public function question_type()
     {
         return $this->belongsTo('Modules\QuestionBank\Entities\QuestionsType', 'question_type_id', 'id');
