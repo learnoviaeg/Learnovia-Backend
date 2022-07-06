@@ -16,8 +16,8 @@ class WeeklyPlanController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['permission:weekly-plan/create'],   ['only' => ['store']]);
-        $this->middleware(['permission:weekly-plan/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
+        $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
