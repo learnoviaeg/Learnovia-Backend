@@ -18,8 +18,8 @@ class WeeklyPlanController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        // $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
-        // $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
+        $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
