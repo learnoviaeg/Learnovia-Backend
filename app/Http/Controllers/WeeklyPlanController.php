@@ -11,13 +11,15 @@ use Auth;
 use DateTime;
 use DateInterval;
 use DatePeriod;
+use App\Repositories\ChainRepositoryInterface;
 
 class WeeklyPlanController extends Controller
 {
-    public function __construct()
+    public function __construct(ChainRepositoryInterface $chain)
     {
-        $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
-        $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
+        $this->chain = $chain;
+        // $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
+        // $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
     }
     /**
      * Display a listing of the resource.
@@ -28,24 +30,36 @@ class WeeklyPlanController extends Controller
     {
         $request->validate([
             'course_id'   => 'exists:courses,id',
-            // 'plans.*.date' => 'required|date|date_format:Y-m-d',
+            'from' => 'date|date_format:Y-m-d',
+            'to' => 'date|date_format:Y-m-d',
             'view' => 'nullable|in:week', 
         ]); 
+        $courses = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
         $now = Carbon::now();
-        $weekStartDate = $now->startOfWeek(Carbon::SATURDAY)->format('Y-m-d');
-        $weekEndDate   = $now->endOfWeek(Carbon::FRIDAY)->format('Y-m-d ');
+       
+        $plans = WeeklyPlan::select('id', 'description','date','course_id')->with('course:id,name')->whereIn('course_id', $courses);
+        if($request->filled('view') && $request->view == 'week'){
+            $weekStartDate = $now->startOfWeek(Carbon::SATURDAY)->format('Y-m-d');
+            $weekEndDate   = $now->endOfWeek(Carbon::FRIDAY)->format('Y-m-d ');
+        }
 
         if($request->filled('from') && $request->filled('to')){
             $weekStartDate = $request->from;
             $weekEndDate   = $request->to;
         }
-        $plans = WeeklyPlan::select('id' , 'added_by' , 'description','date')->WhereBetween('date', [$weekStartDate, $weekEndDate]);
+
+        if(isset($weekStartDate) && isset($weekEndDate))
+            $plans->WhereBetween('date', [$weekStartDate, $weekEndDate]);
+
+
+        if(!$request->filled('view') && $request->view != 'week' && !isset($weekStartDate) && !isset($weekEndDate))
+            $plans->where('date', $now->format('Y-m-d'));
 
         if($request->filled('course_id'))
             $plans->where('course_id', $request->course_id);
 
 
-        return response()->json(['message' => null, 'body' => $plans->get()->groupBy('date') ], 200); 
+        return response()->json(['message' => null, 'body' => $plans->get()->groupBy('course_id') ], 200); 
     }
 
     /**
@@ -115,7 +129,7 @@ class WeeklyPlanController extends Controller
      */
     public function show($id)
     {
-        $plan = WeeklyPlan::find($id);
+        $plan = WeeklyPlan::whereId($id)->with(['user:id,lastname,firstname','course:id,name'])->first();
         return response()->json(['message' => null , 'body' => $plan ], 200); 
     }
 
@@ -134,8 +148,8 @@ class WeeklyPlanController extends Controller
         $key = 1;
         while ($start->weekOfYear !== $end->weekOfYear) {
             $weeks[] = [
-                'from' => $start->startOfWeek()->format('Y-m-d'),
-                'to' => $start->endOfWeek()->format('Y-m-d'),
+                'from' => $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'),
+                'to' => $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'),
                 'week_number' => $key++
 
             ];
