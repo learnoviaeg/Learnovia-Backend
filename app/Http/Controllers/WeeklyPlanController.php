@@ -35,9 +35,15 @@ class WeeklyPlanController extends Controller
             'from' => 'date|date_format:Y-m-d',
             'to' => 'date|date_format:Y-m-d',
             'view' => 'nullable|in:week',
+            'day' => 'date|date_format:Y-m-d',
         ]); 
         $courses = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
+
         $now = Carbon::now();
+        $day = $now->format('Y-m-d');
+
+        if($request->filled('day'))
+             $day = $request->day;
        
         $plans = WeeklyPlan::select('id', 'description','date','course_id')->with('course:id,name')->whereIn('course_id', $courses);
         if($request->filled('view') && $request->view == 'week'){
@@ -55,12 +61,8 @@ class WeeklyPlanController extends Controller
 
 
         if(!$request->filled('view') && $request->view != 'week' && !isset($weekStartDate) && !isset($weekEndDate))
-            $plans->where('date', $now->format('Y-m-d'));
-
-        if($request->filled('course_id'))
-            $plans->where('course_id', $request->course_id);
-
-
+            $plans->where('date', $day);
+       
         return response()->json(['message' => null, 'body' => $plans->get()->groupBy('course_id') ], 200); 
     }
 
@@ -152,11 +154,16 @@ class WeeklyPlanController extends Controller
         $end = Carbon::parse($segment->end_date);
         $weeks = [];
         $key = 1;
-        while ($start->weekOfYear !== $end->weekOfYear) {
-            $weeks[] = [
+        while ($start->endOfWeek(Carbon::FRIDAY) < $end) {
+
+            $startDate = Carbon::createFromFormat('Y-m-d', $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'));
+            $endDate = Carbon::createFromFormat('Y-m-d', $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'));
+            $check = Carbon::now()->between($startDate, $endDate);
+                $weeks[] = [
                 'from' => $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'),
                 'to' => $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'),
-                'week_number' => $key++
+                'week_number' => $key++,
+                'current_week' => ($check) ? true : false,
 
             ];
             $start->addWeek(1);
