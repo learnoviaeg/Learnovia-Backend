@@ -20,6 +20,8 @@ class WeeklyPlanController extends Controller
         $this->chain = $chain;
         $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
         $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
+        $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
     }
     /**
      * Display a listing of the resource.
@@ -158,5 +160,17 @@ class WeeklyPlanController extends Controller
         return response()->json(['message' => 'Weeks number', 'body' => $weeks ], 200); 
 
     }
+
+    public function updateCourse(Request $request)
+    {
+        $request->validate([
+            'old_course'   => 'required|exists:courses,id',
+            'new_course'   => 'required|exists:courses,id',
+        ]); 
+        $plan = WeeklyPlan::where('course_id',$request->old_course)->update(['course_id'=> $request->new_course]);
+        return response()->json(['message' =>  __('messages.weekly-plan.update'), 'body' => null ], 200); 
+    }
+
+
 
 }
