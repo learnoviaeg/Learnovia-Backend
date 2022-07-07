@@ -155,10 +155,15 @@ class WeeklyPlanController extends Controller
         $weeks = [];
         $key = 1;
         while ($start->endOfWeek(Carbon::FRIDAY) < $end) {
+
+            $startDate = Carbon::createFromFormat('Y-m-d', $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'));
+            $endDate = Carbon::createFromFormat('Y-m-d', $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'));
+            $check = Carbon::now()->between($startDate, $endDate);
                 $weeks[] = [
                 'from' => $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'),
                 'to' => $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'),
-                'week_number' => $key++
+                'week_number' => $key++,
+                'current_week' => ($check) ? true : false,
 
             ];
             $start->addWeek(1);
