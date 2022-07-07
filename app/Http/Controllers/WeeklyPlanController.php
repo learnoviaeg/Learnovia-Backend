@@ -154,8 +154,8 @@ class WeeklyPlanController extends Controller
         $end = Carbon::parse($segment->end_date);
         $weeks = [];
         $key = 1;
-        while ($start->weekOfYear !== $end->weekOfYear) {
-            $weeks[] = [
+        while ($start->endOfWeek(Carbon::FRIDAY) < $end) {
+                $weeks[] = [
                 'from' => $start->startOfWeek(Carbon::SATURDAY)->format('Y-m-d'),
                 'to' => $start->endOfWeek(Carbon::FRIDAY)->format('Y-m-d'),
                 'week_number' => $key++
