@@ -34,7 +34,8 @@ class WeeklyPlanController extends Controller
             'course_id'   => 'exists:courses,id',
             'from' => 'date|date_format:Y-m-d',
             'to' => 'date|date_format:Y-m-d',
-            'view' => 'nullable|in:week', 
+            'view' => 'nullable|in:week',
+            '' 
         ]); 
         $courses = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
         $now = Carbon::now();
@@ -140,10 +141,14 @@ class WeeklyPlanController extends Controller
     public function getWeekNumber(Request $request)
     {
         $request->validate([
-            'course_id'   => 'required|exists:courses,id',
+            'course_id'   => 'exists:courses,id',
         ]); 
 
-        $segment = Segment::select('start_date' , 'end_date')->whereId((Course::select('segment_id')->whereId($request->course_id)->first()->segment_id))->first();
+        $segment = Segment::where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->first();
+        
+        if($request->filled('course_id'))
+            $segment = Segment::select('start_date' , 'end_date')->whereId((Course::select('segment_id')->whereId($request->course_id)->first()->segment_id))->first();
+
         $start = Carbon::parse($segment->start_date);
         $end = Carbon::parse($segment->end_date);
         $weeks = [];
