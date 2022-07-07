@@ -26,7 +26,7 @@ class CreateWorkingDaysTable extends Migration
             ['day' => 'Sunday','status' => true],
             ['day' => 'Monday','status' => true],
             ['day' => 'Tuesday','status' => true ],
-            ['day' => 'Wendesday','status' => true],
+            ['day' => 'Wednesday','status' => true],
             ['day' => 'Thursday','status' => true],
             ['day' => 'Friday','status' => false],
         ];
