@@ -42,7 +42,12 @@ class BloomCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->complex);
+        $request->validate([
+            'complex' => 'required|array',
+            'map' => 'required|array',
+            'map.*.id' => 'required|exists:bloom_categories,id',
+            'map.*.new' => 'required|string',
+        ]);
         foreach($request->complex as $complexity){
             $blooms=BloomCategory::updateOrCreate(['name' => $complexity],['current' => 1]);
             $ids[] = $blooms->id; 
