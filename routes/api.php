@@ -604,6 +604,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
     Route::Resource('weekly-plan', WeeklyPlanController::class);
     Route::get('week-number', 'WeeklyPlanController@getWeekNumber');
+    Route::get('plan/change-course', 'WeeklyPlanController@updateCourse');
 
 });
 
