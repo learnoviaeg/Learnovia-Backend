@@ -35,7 +35,6 @@ class WeeklyPlanController extends Controller
             'from' => 'date|date_format:Y-m-d',
             'to' => 'date|date_format:Y-m-d',
             'view' => 'nullable|in:week',
-            '' 
         ]); 
         $courses = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
         $now = Carbon::now();
@@ -145,7 +144,7 @@ class WeeklyPlanController extends Controller
         ]); 
 
         $segment = Segment::where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->first();
-        
+
         if($request->filled('course_id'))
             $segment = Segment::select('start_date' , 'end_date')->whereId((Course::select('segment_id')->whereId($request->course_id)->first()->segment_id))->first();
 
