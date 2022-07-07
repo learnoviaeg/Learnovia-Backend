@@ -18,10 +18,10 @@ class WeeklyPlanController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
-        $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
-        $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
-        $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
+        // $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
+        // $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
+        // $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
+        // $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
     }
     /**
      * Display a listing of the resource.
@@ -63,7 +63,7 @@ class WeeklyPlanController extends Controller
         if(!$request->filled('view') && $request->view != 'week' && !isset($weekStartDate) && !isset($weekEndDate))
             $plans->where('date', $day);
        
-        return response()->json(['message' => null, 'body' => $plans->get()->groupBy('course_id') ], 200); 
+        return response()->json(['message' => null, 'body' => $plans->get()], 200); 
     }
 
     /**
