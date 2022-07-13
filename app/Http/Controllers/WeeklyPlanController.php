@@ -18,10 +18,10 @@ class WeeklyPlanController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        // $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
-        // $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
-        // $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
-        // $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
+        $this->middleware(['permission:weekly_plan/create'],   ['only' => ['store']]);
+        $this->middleware(['permission:weekly_plan/get'],   ['only' => ['index']]);
+        $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
+        $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
     }
     /**
      * Display a listing of the resource.
@@ -36,8 +36,15 @@ class WeeklyPlanController extends Controller
             'to' => 'date|date_format:Y-m-d',
             'view' => 'nullable|in:week',
             'day' => 'date|date_format:Y-m-d',
-        ]); 
-        $courses = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
+        ]);
+
+        if ($user->can('weekly_plan/level-filter')) 
+            $request->validate([
+                'levels' => 'required|array',
+                'levels' => 'exists:levels,id',
+            ]); 
+
+        $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
 
         $now = Carbon::now();
         $day = $now->format('Y-m-d');
