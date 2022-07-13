@@ -560,5 +560,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/get', 'title' => 'View weekly plan', 'dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/update', 'title' => 'Update weekly plan', 'dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/delete', 'title' => 'Delete weekly plan', 'dashboard' => 0]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/level-filter', 'title' => 'Filter by level in weekly plan', 'dashboard' => 0]);
     }
 }
