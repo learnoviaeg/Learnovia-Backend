@@ -38,7 +38,7 @@ class WeeklyPlanController extends Controller
             'day' => 'date|date_format:Y-m-d',
         ]);
 
-        if ($user->can('weekly_plan/level-filter')) 
+        if (Auth::user()->can('weekly_plan/level-filter')) 
             $request->validate([
                 'levels' => 'required|array',
                 'levels' => 'exists:levels,id',
