@@ -33,9 +33,10 @@ class lastActionjob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($req)
+    public function __construct($req )
     {
         $this->req=$req;
+        // $this->user=$user;
     }
 
         /**
@@ -46,6 +47,7 @@ class lastActionjob implements ShouldQueue
     public function handle()
     {
         $request=$this->req;
+        // dd($request);
         $defult_lang = Language::where('default', 1)->first();
         $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
         
