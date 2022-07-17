@@ -43,8 +43,11 @@ class WeeklyPlanController extends Controller
                 'levels' => 'required|array',
                 'levels' => 'exists:levels,id',
             ]); 
-
-        $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
+        if(!$request->filled('course_id'))
+            $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->get('course')->pluck('course');
+        
+        if($request->filled('course_id'))
+            $courses[] = $request->course_id;
 
         $now = Carbon::now();
         $day = $now->format('Y-m-d');
