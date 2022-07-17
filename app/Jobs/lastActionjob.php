@@ -28,14 +28,17 @@ class lastActionjob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $req;
+    public $data;
+
         /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($req)
+    public function __construct($data ,$req , $lang = null)
     {
         $this->req=$req;
+        $this->data=$data;
     }
 
         /**
@@ -46,6 +49,9 @@ class lastActionjob implements ShouldQueue
     public function handle()
     {
         $request=$this->req;
+        $data=$this->data;
+
+        dd($data);
         $defult_lang = Language::where('default', 1)->first();
         $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
         
