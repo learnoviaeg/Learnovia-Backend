@@ -21,6 +21,13 @@ class ChatController extends Controller
         $participants_chat_id = collect();
         foreach($request->participants as $participant){
             $chat_uid = User::whereId($participant)->pluck('chat_uid')->first();
+            if(!isset($chat_uid))
+            {
+                $req=new Request([
+                    'user_id'=>$participant,
+                ]);
+                self::chat_token($req);
+            }
             if(isset($chat_uid))
                 $participants_chat_id->push($chat_uid);
         }
@@ -61,6 +68,8 @@ class ChatController extends Controller
         ]);
         $clientt = new Client();
         $user= User::find($request->user_id);
+        if($user->refresh_chat_token == null)
+            self::chat_token($request);
         $data = array(
             'refresh_token' => $user->refresh_chat_token
         );            
@@ -104,7 +113,7 @@ class ChatController extends Controller
         ]);
 
         $user->update([
-                'chat_uid' => json_decode($res->getBody(),true)['user_id'],
+            'chat_uid' => json_decode($res->getBody(),true)['user_id'],
             'chat_token' => json_decode($res->getBody(),true)['custom_token'],
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
             ]);
@@ -112,6 +121,4 @@ class ChatController extends Controller
 
         return response()->json(['message' => 'chat token is created....', 'body' => $user], 200);
     }
-
-
 }
