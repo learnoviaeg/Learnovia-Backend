@@ -111,8 +111,8 @@ class WeeklyPlanController extends Controller
     {
         $plan = WeeklyPlan::find($id);
         $plan->update([
-            'date' => isset($request->date) ?? $plan->date,
-            'description' => isset($request->description) ?? $plan->description,
+            // 'date' => isset($request->date) ?? $plan->date,
+            'description' => isset($request->description) ? $request->description : $plan->description,
         ]);
 
         return response()->json(['message' => __('messages.weekly-plan.update'), 'body' => null ], 200); 
