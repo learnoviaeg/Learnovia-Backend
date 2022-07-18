@@ -28,14 +28,19 @@ class lastActionjob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $req;
+    public $data;
+    public $user;
+
         /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($req)
+    public function __construct($data ,$req , $user)
     {
         $this->req=$req;
+        $this->data=$data;
+        $this->user=$user;
     }
 
         /**
@@ -46,8 +51,11 @@ class lastActionjob implements ShouldQueue
     public function handle()
     {
         $request=$this->req;
+        $data=$this->data;
+        $user=$this->user;
+
         $defult_lang = Language::where('default', 1)->first();
-        $lang = $request->user()->language ? $request->user()->language : ($defult_lang ? $defult_lang->id : null);
+        $lang = $user->language ? $user->language : ($defult_lang ? $defult_lang->id : null);
         
         if(isset($lang)){
             if($lang == 1)
@@ -58,27 +66,27 @@ class lastActionjob implements ShouldQueue
         }
 
         $permission_name = null;    
-        foreach($request->route()->action['middleware'] as $middleware){
+        foreach($data['route_middleware'] as $middleware){
             if( str_contains($middleware, 'permission:'))
                 $permission_name =  explode(':',$middleware)[1];
         }
 
         $title = Permission::where('name',$permission_name)->first();
-        if(!$request->user()->can('site/parent'))
-            $last_action = LastAction::updateOrCreate(['user_id'=> $request->user()->id ],[
-                    'user_id' => $request->user()->id 
-                    ,'name' => isset($title)?$title->title:explode('api/', $request->route()->uri)[1]
-                    ,'method'=>$request->route()->methods[0]
-                    ,'uri' =>  $request->route()->uri
-                    ,'resource' =>  $request->route()->action['controller']
+        if(!$user->can('site/parent'))
+            $last_action = LastAction::updateOrCreate(['user_id'=> $user->id ],[
+                    'user_id' => $user->id
+                    ,'name' => isset($title)?$title->title:explode('api/', $data['uri'])[1]
+                    ,'method'=> $data['methods']
+                    ,'uri' =>  $data['uri']
+                    ,'resource' =>  $data['route_controller']
                     ,'date' => Carbon::now()
             ]);
         
         $route_views = Config::get('routes.view');
 
-        if(in_array($request->route()->uri,$route_views) && $request->route()->methods[0] == 'GET'){
+        if(in_array($data['uri'],$route_views) && $data['methods'] == 'GET'){
             
-            $Model = explode('api/', $request->route()->uri)[1];
+            $Model = explode('api/',$data['uri'])[1];
         
             if(str_contains($Model, '/'))
                 $Model = substr($Model, 0, strpos($Model, "/"));
@@ -94,14 +102,14 @@ class lastActionjob implements ShouldQueue
         //start seen report
         $route_seen = Config::get('routes.seen_report');
         
-        if(in_array($request->route()->uri,$route_seen) && $request->user()->can('site/course/student')){
+        if(in_array($data['uri'],$route_seen) && $user->can('site/course/student')){
 
-            if(str_contains($request->route()->uri, 'material') || str_contains($request->route()->uri, 'page')){
+            if(str_contains($data['uri'], 'material') || str_contains($data['uri'], 'page')){
 
-                if(str_contains($request->route()->uri, 'material'))
-                    $materials = Material::whereId($request->route()->parameters()['id'])->first();
+                if(str_contains($data['uri'], 'material'))
+                    $materials = Material::whereId($data['id'])->first();
 
-                if(str_contains($request->route()->uri, 'page'))
+                if(str_contains($data['uri'], 'page'))
                     $materials = Material::where('item_id',$request->id)->where('lesson_id',$request->lesson_id)->where('type','page')->first();
 
                 if(isset($materials)){
@@ -111,9 +119,9 @@ class lastActionjob implements ShouldQueue
                 }
             }
             
-            if(str_contains($request->route()->uri, 'announcement')){
+            if(str_contains($data['uri'], 'announcement')){
 
-                $announcement = Announcement::whereId($request->route()->parameters()['announcement'])->first();
+                $announcement = Announcement::whereId( $data['announcement'])->first();
 
                 if(isset($announcement)){
                     $announcement->seen_number = $announcement->seen_number + 1;
@@ -154,7 +162,7 @@ class lastActionjob implements ShouldQueue
 
             if(str_contains($request->route()->uri, 'interactive')){
 
-                $interactive = h5pLesson::where('content_id',$request->route()->parameters()['id'])->first();
+                $interactive = h5pLesson::where('content_id',$data['id'])->first();
                 
                 if(isset($interactive)){
                     $interactive->seen_number = $interactive->seen_number + 1;
@@ -166,8 +174,8 @@ class lastActionjob implements ShouldQueue
             }
 
             if(isset($object)){
-                $user_views = UserSeen::updateOrCreate(['user_id' => $request->user()->id,'item_id' => $object->item_id,'type' => $object->type,'lesson_id' => $object->lesson_id],[
-                    'user_id' => $request->user()->id,
+                $user_views = UserSeen::updateOrCreate(['user_id' => $user->id,'item_id' => $object->item_id,'type' => $object->type,'lesson_id' => $object->lesson_id],[
+                    'user_id' => $user->id,
                     'item_id' => $object->item_id,
                     'lesson_id' => $object->lesson_id,
                     'type' => $object->type,
