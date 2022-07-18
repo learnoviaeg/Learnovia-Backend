@@ -170,7 +170,7 @@ class LastActionMiddleWare
         $data['route_controller'] = $request->route()->action['controller'];
         $data['methods'] = $request->route()->methods[0];
 
-        if(in_array($data['uri'],$route_seen) && Auth::user()->can('site/course/student')){
+        if(in_array($data['uri'],$route_seen) && $request->user()->can('site/course/student')){
             if(str_contains($request->route()->uri, 'interactive'))
                 $data['interactive'] = $request->route()->parameters()['id'];
 
