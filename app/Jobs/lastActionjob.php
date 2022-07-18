@@ -135,8 +135,7 @@ class lastActionjob implements ShouldQueue
             }
 
             if(str_contains($data['uri'], 'quizzes')){
-
-                $quiz = QuizLesson::where('quiz_id',$data['quiz'])->where('lesson_id',$request->lesson_id)->first();
+                $quiz = QuizLesson::where('quiz_id',$data['quiz'])->where('lesson_id',$request['lesson_id'])->first();
                 
                 if(isset($quiz)){
                     $quiz->seen_number = $quiz->seen_number + 1;
@@ -149,7 +148,7 @@ class lastActionjob implements ShouldQueue
 
             if(str_contains($data['uri'], 'assignment')){
 
-                $assignment = AssignmentLesson::where('assignment_id',$request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
+                $assignment = AssignmentLesson::where('assignment_id',$request['assignment_id'])->where('lesson_id',$request['lesson_id'])->first();
                 
                 if(isset($assignment)){
                     $assignment->seen_number = $assignment->seen_number + 1;
