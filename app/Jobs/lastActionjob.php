@@ -136,7 +136,7 @@ class lastActionjob implements ShouldQueue
 
             if(str_contains($request->route()->uri, 'quizzes')){
 
-                $quiz = QuizLesson::where('quiz_id',$request->route()->parameters()['quiz'])->where('lesson_id',$request->lesson_id)->first();
+                $quiz = QuizLesson::where('quiz_id',$data['quiz'])->where('lesson_id',$request->lesson_id)->first();
                 
                 if(isset($quiz)){
                     $quiz->seen_number = $quiz->seen_number + 1;
