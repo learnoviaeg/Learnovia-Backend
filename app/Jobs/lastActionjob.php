@@ -134,7 +134,7 @@ class lastActionjob implements ShouldQueue
                 }
             }
 
-            if(str_contains($request->route()->uri, 'quizzes')){
+            if(str_contains($data['uri'], 'quizzes')){
 
                 $quiz = QuizLesson::where('quiz_id',$data['quiz'])->where('lesson_id',$request->lesson_id)->first();
                 
@@ -147,7 +147,7 @@ class lastActionjob implements ShouldQueue
                 }
             }
 
-            if(str_contains($request->route()->uri, 'assignment')){
+            if(str_contains($data['uri'], 'assignment')){
 
                 $assignment = AssignmentLesson::where('assignment_id',$request->assignment_id)->where('lesson_id',$request->lesson_id)->first();
                 
@@ -160,7 +160,7 @@ class lastActionjob implements ShouldQueue
                 }
             }
 
-            if(str_contains($request->route()->uri, 'interactive')){
+            if(str_contains($data['uri'], 'interactive')){
 
                 $interactive = h5pLesson::where('content_id',$data['id'])->first();
                 
@@ -172,7 +172,6 @@ class lastActionjob implements ShouldQueue
                     $object['item_id'] = $interactive->content_id;
                 }
             }
-
             if(isset($object)){
                 $user_views = UserSeen::updateOrCreate(['user_id' => $user->id,'item_id' => $object->item_id,'type' => $object->type,'lesson_id' => $object->lesson_id],[
                     'user_id' => $user->id,
