@@ -172,7 +172,6 @@ class lastActionjob implements ShouldQueue
                     $object['item_id'] = $interactive->content_id;
                 }
             }
-dd($object);
             if(isset($object)){
                 $user_views = UserSeen::updateOrCreate(['user_id' => $user->id,'item_id' => $object->item_id,'type' => $object->type,'lesson_id' => $object->lesson_id],[
                     'user_id' => $user->id,
