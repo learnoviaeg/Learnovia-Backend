@@ -162,31 +162,33 @@ class LastActionMiddleWare
         //     }
 
         // }
+        if($request->route()->methods[0] == 'GET'){
 
-        $data = [];
-        $route_seen = Config::get('routes.seen_report');
-        $data['uri'] = $request->route()->uri;
-        $data['route_middleware'] = $request->route()->action['middleware'];
-        $data['route_controller'] = $request->route()->action['controller'];
-        $data['methods'] = $request->route()->methods[0];
+            $data = [];
+            $route_seen = Config::get('routes.seen_report');
+            $data['uri'] = $request->route()->uri;
+            $data['route_middleware'] = $request->route()->action['middleware'];
+            $data['route_controller'] = $request->route()->action['controller'];
+            $data['methods'] = $request->route()->methods[0];
+    
+            if(in_array($data['uri'],$route_seen)){
+                if(str_contains($request->route()->uri, 'interactive'))
+                    $data['interactive'] = $request->route()->parameters()['id'];
 
-        if(in_array($data['uri'],$route_seen)){
-            if(str_contains($request->route()->uri, 'interactive'))
-                $data['interactive'] = $request->route()->parameters()['id'];
+                if(str_contains($request->route()->uri, 'quizzes'))
+                    $data['quiz'] = $request->route()->parameters()['quiz'];
 
-            if(str_contains($request->route()->uri, 'quizzes'))
-                $data['quiz'] = $request->route()->parameters()['quiz'];
+                if(str_contains($request->route()->uri, 'announcement'))
+                    $data['announcement'] = $request->route()->parameters()['announcement'];
 
-            if(str_contains($request->route()->uri, 'announcement'))
-                $data['announcement'] = $request->route()->parameters()['announcement'];
-
-            if(str_contains($request->route()->uri, 'material'))
-            // || str_contains($request->route()->uri, 'material') )
-                $data['id'] = $request->route()->parameters()['id'];
+                if(str_contains($request->route()->uri, 'material'))
+                // || str_contains($request->route()->uri, 'material') )
+                    $data['id'] = $request->route()->parameters()['id'];
+                }
+                $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
+                dispatch($lastActionjob);
         }
        
-         $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
-         dispatch($lastActionjob);
         
         return $next($request);
     }
