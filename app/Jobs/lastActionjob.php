@@ -112,7 +112,7 @@ class lastActionjob implements ShouldQueue
                     $materials = Material::whereId($data['id'])->first();
 
                 if(str_contains($data['uri'], 'page'))
-                    $materials = Material::where('item_id',$data['id'])->where('lesson_id',$data['lesson_id'])->where('type','page')->first();
+                    $materials = Material::where('item_id',$request['id'])->where('lesson_id',$request['lesson_id'])->where('type','page')->first();
 
                 if(isset($materials)){
                     $materials->seen_number = $materials->seen_number + 1;
