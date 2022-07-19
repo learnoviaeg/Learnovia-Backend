@@ -185,10 +185,10 @@ class LastActionMiddleWare
                 // || str_contains($request->route()->uri, 'material') )
                     $data['id'] = $request->route()->parameters()['id'];
                 }
-                if(str_contains($request->route()->uri, 'page')){
-                    $data['lesson_id'] = $request->route()->parameters()['lesson_id'];
-                    $data['id'] = $request->route()->parameters()['id'];
-                }
+                // if(str_contains($request->route()->uri, 'page')){
+                //     $data['lesson_id'] = $request->route()->parameters()['lesson_id'];
+                //     $data['id'] = $request->route()->parameters()['id'];
+                // }
                 $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
                 dispatch($lastActionjob);
         }
