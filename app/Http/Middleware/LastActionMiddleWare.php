@@ -185,7 +185,6 @@ class LastActionMiddleWare
                 $data['id'] = $request->route()->parameters()['id'];
         }
        
-
          $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
          dispatch($lastActionjob);
         
