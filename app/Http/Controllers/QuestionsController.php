@@ -49,7 +49,8 @@ class QuestionsController extends Controller
             'question_type' => 'array',
             'question_type.*' => 'integer|exists:questions_types,id',
             'search' => 'nullable|string',
-            'complexity' => 'exists:bloom_categories,id',
+            'complexity' => 'array',
+            'complexity.*' => 'exists:bloom_categories,id',
             'update_shuffle' => 'nullable' //to prevent shuffle questions on update
         ]);
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
@@ -108,7 +109,7 @@ class QuestionsController extends Controller
             $questions->whereIn('question_type_id', $request->question_type);
         
         if (isset($request->complexity)) 
-            $questions->where('complexity', $request->complexity);
+            $questions->whereIn('complexity', $request->complexity);
         
         //using api quizzes/null/count 
         if($question == 'count'){
