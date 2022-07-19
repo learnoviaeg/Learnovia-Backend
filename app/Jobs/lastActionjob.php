@@ -7,6 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Auth;
 
 use App\Announcement;
 use App\LastAction;
@@ -53,6 +54,7 @@ class lastActionjob implements ShouldQueue
         $request=$this->req;
         $data=$this->data;
         $user=$this->user;
+        Auth::setUser($user);
 
         $defult_lang = Language::where('default', 1)->first();
         $lang = $user->language ? $user->language : ($defult_lang ? $defult_lang->id : null);
