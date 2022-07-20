@@ -560,8 +560,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     });
 
     Route::Resource('letter', LetterController::class);
-
     Route::Resource('settings', SettingsController::class);
+    Route::Resource('installments', InstallmentController::class);
 
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grading-schema', GradingSchemaController::class);
