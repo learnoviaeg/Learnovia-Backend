@@ -35,7 +35,7 @@ class SeenReportController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        $this->middleware(['permission:reports/overall_seen_report'],   ['only' => ['index']]);
+        // $this->middleware(['permission:reports/overall_seen_report'],   ['only' => ['index']]);
     }
 
     /**
@@ -46,13 +46,19 @@ class SeenReportController extends Controller
     public function index(Request $request,$option = null)
     {
         $request->validate([
-            'year' => 'exists:academic_years,id',
-            'type' => 'exists:academic_types,id',
-            'level' => 'exists:levels,id',
-            'segment' => 'exists:segments,id',
-            'courses'    => 'nullable|array',
+            'years'    => 'nullable|array',
+            'years.*' => 'exists:academic_years,id',
+            'types'    => 'nullable|array',
+            'types.*' => 'exists:academic_types,id',
+            'levels'    => 'required|nullable|array',
+            'levels.*' => 'exists:levels,id',
+            'classes'    => 'nullable|array',
+            'classes.*' => 'exists:classes,id',
+            'segments'    => 'nullable|array',
+            'segments.*' => 'exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'exists:courses,id',
             'role'    => 'array|exists:roles,id',
-            'courses.*'  => 'nullable|integer|exists:courses,id',
             'item_type' => 'array',
             'item_type.*' => 'string|in:page,media,file,quiz,assignment,h5p',
             'class' => 'nullable|integer|exists:classes,id',
@@ -64,17 +70,12 @@ class SeenReportController extends Controller
         ]);
 
         
-        $enrollss = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
+        $enrollss = $this->chain->getEnrollsByManyChain($request)->select('id')->where('user_id',Auth::id());
       
         if($request->filled('role'))
             $enrollss->whereIn('role_id',$request->role);
 
-        // if(!$request->user()->can('site/show-all-courses'))//student
-            // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
-
-        // $user_course_segments = $user_course_segments->select('course_segment')->distinct()->with('courseSegment.lessons')->get();
-
-        $lessons = SecondaryChain::whereIn('enroll_id', $enrollss->get()->pluck('id'))->pluck('lesson_id');
+        $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id', $enrollss->get()->pluck('id'))->pluck('lesson_id');
        
         if($request->has('lesson')){
             if(!in_array($request->lesson,$lessons->toArray()))
@@ -91,9 +92,8 @@ class SeenReportController extends Controller
             $lessons_object = collect([Lesson::find($request->lesson_id)]);
 
         $lessons_object->map(function ($lesson) use ($lessons_enrolls) {
-            
+
             $total = SecondaryChain::where('lesson_id', $lesson->id)->where('role_id',3)->count();
-            // $total = count(Enroll::where('course_segment',$lesson->course_segment_id)->where('role_id',3)->select('user_id')->distinct()->get());
 
             $lessons_enrolls->push([
                 'lesson_id' => $lesson->id,
@@ -121,7 +121,6 @@ class SeenReportController extends Controller
             $assignments = $assignments->get();
 
             $assignments->map(function ($assignment) use ($report,$lessons_enrolls) {
-
                 $total = collect($lessons_enrolls->where('lesson_id',$assignment->lesson_id))->collapse();
                 $lesson = Lesson::whereId($assignment->lesson_id)->first();
                 $report->push([
