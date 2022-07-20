@@ -229,7 +229,6 @@ class ReportsController extends Controller
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
-
     public function courseProgressReport(Request $request){
 
         $types = ['materials','assignments','quizzes','interactives','virtuals'];
@@ -240,7 +239,7 @@ class ReportsController extends Controller
             'years.*' => 'exists:academic_years,id',
             'types'    => 'nullable|array',
             'types.*' => 'exists:academic_types,id',
-            'levels'    => 'nullable|array',
+            'levels'    => 'required|array',
             'levels.*' => 'exists:levels,id',
             'classes'    => 'nullable|array',
             'classes.*' => 'exists:classes,id',
