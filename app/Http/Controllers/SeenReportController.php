@@ -35,7 +35,7 @@ class SeenReportController extends Controller
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
-        // $this->middleware(['permission:reports/overall_seen_report'],   ['only' => ['index']]);
+        $this->middleware(['permission:reports/overall_seen_report'],   ['only' => ['index']]);
     }
 
     /**
