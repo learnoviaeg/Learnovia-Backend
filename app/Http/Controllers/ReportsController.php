@@ -274,8 +274,11 @@ class ReportsController extends Controller
         foreach($courses as $course){
 
             $level = $course->level;
+            $classes=$course->classes ;
+            if(isset($request->classes))
+                $classes=$request->classes;
 
-            foreach($course->classes as $groupId){
+            foreach($classes as $groupId){
 
                 $group = Classes::whereId($groupId)->first();
 
