@@ -284,8 +284,8 @@ class ReportsController extends Controller
 
                 $componentsHelper = new ComponentsHelper();
 
-                $componentsHelper->setCourse($course->id);
-                $componentsHelper->setClass($groupId);
+                $componentsHelper->setCourse([$course->id]);
+                $componentsHelper->setClass([$groupId]);
 
                 if($request->has('user_id')){
                     $componentsHelper->setTeacher($request->user_id);
@@ -323,16 +323,17 @@ class ReportsController extends Controller
                     //if just the counters
                     if(!$request->has('details')){
 
-                        $reportObjects->push([
-                            'level' => $level->name,
-                            'level_id' => $level->id,
-                            'course' => $course->name,
-                            'course_id' => $course->id,
-                            'class' => $group->name,
-                            'class_id' => $group->id,
-                            'type' => $type,
-                            'count' => $componentsHelper->$type()->count(),
-                        ]);
+                        if($componentsHelper->$type()->count() > 0)
+                            $reportObjects->push([
+                                'level' => $level->name,
+                                'level_id' => $level->id,
+                                'course' => $course->name,
+                                'course_id' => $course->id,
+                                'class' => $group->name,
+                                'class_id' => $group->id,
+                                'type' => $type,
+                                'count' => $componentsHelper->$type()->count(),
+                            ]);
                     }
                 }
 
@@ -393,6 +394,11 @@ class ReportsController extends Controller
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
+        // dd($request->courses);
+        if(isset($request->courses))
+            $componentsHelper->setCourse($request->courses);
+        if(isset($request->classes))
+            $componentsHelper->setClass($request->classes);
 
         if($request->has('user_id')){
             $componentsHelper->setTeacher($request->user_id);
