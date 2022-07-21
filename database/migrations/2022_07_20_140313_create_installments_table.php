@@ -16,6 +16,7 @@ class CreateInstallmentsTable extends Migration
         Schema::create('installments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->date('date');
+            $table->double('percentage');
             $table->timestamps();
         });
     }
