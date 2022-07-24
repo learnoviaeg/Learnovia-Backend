@@ -213,6 +213,11 @@ class User extends Authenticatable
         return $this->hasMany('App\SessionLog','user_id','id');
     }
 
+    public function fees()
+    {
+        return $this->hasOne('App\Fees');
+    }
+
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {

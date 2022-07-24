@@ -287,7 +287,7 @@ class AuthController extends Controller
         $user = $request->user();
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
-
+        $user->fees;
         $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
         $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
         $user['level']=$level->id;

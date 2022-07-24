@@ -17,6 +17,7 @@ class CreateInstallmentsTable extends Migration
             $table->bigIncrements('id');
             $table->date('date');
             $table->double('percentage');
+            $table->boolean('notified')->default(0);
             $table->timestamps();
         });
     }
