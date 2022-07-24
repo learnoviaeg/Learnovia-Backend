@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Validator;
 use App\User;
 use App\Installment;
-use App\Payment;
+use App\Fees;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 HeadingRowFormatter::default('none');
 
@@ -27,33 +27,23 @@ class FeesImport implements  ToModel, WithHeadingRow
         ])->validate();
 
         $data = [];
+        $paid_amout = 0;
         $installments_count = Installment::count();
         foreach($row as $key => $value){
             if($key == 'username'){
                 $data['user_id'] = User::where('username', $value)->select('id')->first()->id;
-                $current_installment = 0;
             }
-            if($key == 'to pay'){
+           
+            if($key == 'to_pay')
                 $data['to_pay'] = $value;
-                $data['per_installment'] = $value/$installments_count;
-                // dd($data);
-            }
-            if($key != 'to pay' && $key != 'username'){
-                $installment = Installment::select('id')->skip($current_installment)->take(1)->first();
-                if($data['to_pay'] == 0)
-                    continue;
-                if($value == $data['per_installment']){
-                
-                    Payment::updateOrCreate(
-                        ['user_id'=>  $data['user_id'] , 'installment_id' => $installment->id],
-                        ['amount' =>  $value ]
-                    );
-                    $data['to_pay'] = $data['to_pay'] - $value;
-                    dd($data);
-
-                }
-                $current_installment++;
-            }
+            
+            if($key != 'to_pay' && $key != 'username')
+                $paid_amout += $value; 
+            
         }
+        Fees::updateOrCreate(
+            ['user_id'=>  $data['user_id']],
+            ['paid_amount' =>  $paid_amout, 'total_amount' => $data['to_pay'] , 'percentage' => (($paid_amout / $data['to_pay']) *100) ]
+        );
     }
 }
