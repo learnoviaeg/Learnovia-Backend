@@ -187,7 +187,7 @@ class AC_year_type extends Controller
             $academic_year_type=AcademicYearType::checkRelation($req->id_year[$counter],$req->id_type);
             $counter++;
         }
-         return HelperController::api_response_format(200, 'Academic Year-Type Relation Created Succssesfully');
+        return HelperController::api_response_format(200, 'Academic Year-Type Relation Created Succssesfully');
     }
 
     public function GetMytypes(Request $request)
@@ -247,8 +247,5 @@ class AC_year_type extends Controller
             return response()->json(['message' =>null, 'body' => url(Storage::url('files/'.$setting->key.'.'.$ext)) ], 200);
         }
         return response()->json(['message' =>null, 'body' => $setting ], 200);
-
     }
-
-
 }

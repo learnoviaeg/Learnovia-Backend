@@ -567,6 +567,5 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/settings', 'title' => 'Installment settings', 'dashboard' => 1,'icon' => 'school_fees']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/has_fees', 'title' => 'Has fees', 'dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/get', 'title' => 'show fees']);
-
     }
 }
