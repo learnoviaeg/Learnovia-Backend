@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Installment;
+use App\Fees;
 
 class InstallmentController extends Controller
 {
@@ -58,4 +59,23 @@ class InstallmentController extends Controller
        return response()->json(['message' => null, 'body' =>null], 200); 
    }
 
+   public function user_installments(Request $request)
+   {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+        $installments = Installment::get();
+        $paid = Fees::select('percentage')->where('user_id', $request->user_id)->first();
+        $percentage_paid = $paid->percentage;
+        $total_percentage_of_installments = 0;
+        if(isset($paid->pecentage))
+            $percentage_paid = $paid->percentage;
+
+        foreach($installments as $installment){
+            $total_percentage_of_installments += $installment->percentage; 
+            $installment->paid_or_not = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
+        }
+
+        return response()->json(['message' => null, 'body' => $installments], 200); 
+   }
 }
