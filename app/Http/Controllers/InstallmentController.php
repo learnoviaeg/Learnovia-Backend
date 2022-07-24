@@ -64,9 +64,10 @@ class InstallmentController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
+
         $installments = Installment::get();
-        $paid = Fees::select('percentage')->where('user_id', $request->user_id)->first();
-        $percentage_paid = $paid->percentage;
+        $paid = Fees::select('percentage','total_amount', 'paid_amount')->where('user_id', $request->user_id)->first();
+        $percentage_paid = 0;
         $total_percentage_of_installments = 0;
         if(isset($paid->pecentage))
             $percentage_paid = $paid->percentage;
@@ -75,7 +76,9 @@ class InstallmentController extends Controller
             $total_percentage_of_installments += $installment->percentage; 
             $installment->paid_or_not = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
         }
-
-        return response()->json(['message' => null, 'body' => $installments], 200); 
+        $result['installments'] = $installments;
+        $result['paid_amount'] = isset($paid->paid_amount) ? $paid->paid_amount :0;
+        $result['total_amount'] = isset($paid->total_amount) ? $paid->total_amount : 0;
+        return response()->json(['message' => null, 'body' => $result], 200); 
    }
 }
