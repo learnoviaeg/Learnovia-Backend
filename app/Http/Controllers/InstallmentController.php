@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Installment;
 use App\Fees;
+use App\User;
 
 class InstallmentController extends Controller
 {
@@ -64,6 +65,9 @@ class InstallmentController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
+
+        if(!User::find($request->user_id)->can('school_fees/has_fees'))
+            return response()->json(['message' => 'This user has no fees', 'body' => null], 200); 
 
         $installments = Installment::get();
         $paid = Fees::select('percentage','total_amount', 'paid_amount')->where('user_id', $request->user_id)->first();
