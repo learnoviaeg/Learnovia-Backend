@@ -164,7 +164,7 @@ class AttendanceSessionController extends Controller
                             array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
         
                     while($attendancestart <= Carbon::parse($repeated_until)){
-                        $attendance=AttendanceSession::firstOrCreate([ 
+                        AttendanceSession::firstOrCreate([ 
                             'name' => $request->name,
                             'attendance_id' => $request->attendance_id,
                             'class_id' => $request->class_id,
@@ -174,7 +174,7 @@ class AttendanceSessionController extends Controller
                             'to' => Carbon::parse($session['to'])->format('H:i'),
                             'created_by' => Auth::id()
                         ]);
-                        $attendancestart=$attendancestart->addDays(7);                   
+                        $attendancestart=$attendancestart->addDays(7);
                     }   
                 }
                 else if($attendance->attendance_type == 'Daily') // it entered if this type was per session so i write this if
@@ -224,7 +224,7 @@ class AttendanceSessionController extends Controller
         }      
         else
         {
-            $attendance=AttendanceSession::firstOrCreate([
+            AttendanceSession::firstOrCreate([
                 'name' => $request->name,
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,

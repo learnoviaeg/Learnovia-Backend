@@ -47,11 +47,11 @@ class ComponentsHelper
         $this->lessons = SecondaryChain::query();
 
         if($this->course){
-            $this->lessons->where('course_id',$this->course);
+            $this->lessons->whereIn('course_id',$this->course);
         }
 
         if($this->class){
-            $this->lessons->where('group_id',$this->class);
+            $this->lessons->whereIn('group_id',$this->class);
         }
 
         $this->lessons = $this->lessons->select('lesson_id')->distinct()->pluck('lesson_id');
@@ -141,11 +141,11 @@ class ComponentsHelper
         $virtuals = BigbluebuttonModel::query();
 
         if($this->course){
-            $virtuals->where('course_id', $this->course);
+            $virtuals->whereIn('course_id', $this->course);
         }
 
         if($this->class){
-            $virtuals->where('class_id', $this->class);
+            $virtuals->whereIn('class_id', $this->class);
         }
 
         if($this->teacher){
