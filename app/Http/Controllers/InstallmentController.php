@@ -33,9 +33,9 @@ class InstallmentController extends Controller
         foreach($request->installments as $key => $Installment){
             $data[] = [
                 'date' => $Installment['date'],
-                'percentage' => $Installment['percentage'],
+                'percentage' => isset($percentage) ? $percentage  : $Installment['percentage'] ,
             ]; 
-            $total_percentage += $Installment['percentage'];
+                $total_percentage +=  isset($percentage) ? $percentage  : $Installment['percentage'];
         }
 
         if($total_percentage != 100)
