@@ -52,4 +52,10 @@ class InstallmentController extends Controller
    }
 
 
+   public function reset()
+   {
+        Installment::truncate();
+       return response()->json(['message' => null, 'body' =>null], 200); 
+   }
+
 }
