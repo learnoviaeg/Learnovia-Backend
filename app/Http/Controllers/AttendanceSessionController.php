@@ -354,17 +354,18 @@ class AttendanceSessionController extends Controller
         // dd($notifyUsers);
         if(isset($noti_settings)){
             $publish_date=Carbon::now()->addHours(($noti_settings->after_min)/60)->format('Y-m-d H:i:s');
-            // dd($publish_date);
-            $usrs=User::whereNotNull('id')->whereHas('roles', function($q) use($request){
-                $q->whereIn('role_id',$request->roles);
-            })->get();
-            dd($usrs);
-            // dd($noti_settings->users);
-            $notifyUsers=array_merge($noti_settings->users,$usrs);
+            $usrs=User::whereNotNull('id')->whereHas('roles', function($q) use($noti_settings){
+                if(isset($noti_settings->roles))
+                    $q->whereIn('id',$noti_settings->roles);
+            })->with('roles')->pluck('id');
+            if(isset($noti_settings->users))
+                $notifyUsers=array_merge($noti_settings->users,$usrs->toArray());
+            else
+                $notifyUsers=$usrs;
         }
 
         $reqNot=[
-            'message' => $session->title.' attendance was taken',
+            'message' => $session->attendance->name.' attendance was taken',
             'item_id' => $session->attendance_id,
             'item_type' => 'attendance',
             'type' => 'attendance',
