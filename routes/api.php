@@ -563,7 +563,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('settings', SettingsController::class);
     Route::Resource('installments', InstallmentController::class);
     Route::get('installment/reset', 'InstallmentController@reset');
-    Route::get('fees/pofile', 'InstallmentController@user_installments');
+    Route::get('fees/profile', 'InstallmentController@user_installments');
 
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grading-schema', GradingSchemaController::class);
