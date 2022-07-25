@@ -135,7 +135,7 @@ class GraderReportController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,id',
         ]);
-        $categories = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('Children','GradeItems')->first();
+        $categories = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('Children','GradeItems')->first()->toArray();
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $categories ], 200);
     }
 

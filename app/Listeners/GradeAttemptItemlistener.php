@@ -61,24 +61,33 @@ class GradeAttemptItemlistener
                         if($question_type == 1){
                             $grade=$this->gradeinterface->True_False($correction_answer);
                             $gradeOld= $stud_quest_ans->correction; //old
+                            $stud_quest_ans->user_grade=round(($grade->mark/$grade->total_mark)*100,2);
+
                             if(isset($gradeOld->grade)){
                                 $grade->and_why_right = $gradeOld->and_why_right;
                                 $grade->grade = $gradeOld->grade;
                                 $grade->feedback = $gradeOld->feedback;
                                 $grade->and_why_mark = $gradeOld->and_why_mark;
+                                $stud_quest_ans->user_grade=round(($grade->grade/$grade->total_mark)*100,2);
                                 if(($grade->and_why_right == 1 && $gradeOld->mark < 1) || ($grade->and_why_right == 0 && $gradeOld->mark >= 1))
                                     $grade->right=2;
                             }
                         }
 
-                        if($question_type == 2)
+                        if($question_type == 2){
                             $grade=$this->gradeinterface->MCQ($correction_answer);
+                            $stud_quest_ans->user_grade=round(($grade->mark/$grade->total_mark)*100,2);
+                        }
 
-                        if($question_type == 3)
+                        if($question_type == 3){
                             $grade=$this->gradeinterface->Match($correction_answer);
+                            $stud_quest_ans->user_grade=round(($grade->mark/$grade->total_mark)*100,2);
+                        }
 
-                        if($question_type == 4 && $stud_quest_ans->correction != null)
+                        if($question_type == 4 && $stud_quest_ans->correction != null){
                             $grade= $stud_quest_ans->correction;
+                            $stud_quest_ans->user_grade=round(($grade->grade/$grade->total_mark)*100,2);
+                        }
                     
                         ItemDetailsUser::firstOrCreate([
                             'user_id' => $event->attempt->user_id,
