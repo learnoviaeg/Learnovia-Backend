@@ -67,7 +67,7 @@ class InstallmentController extends Controller
         ]);
 
         if(!User::find($request->user_id)->can('school_fees/has_fees'))
-            return response()->json(['message' => 'This user has no fees', 'body' => null], 200); 
+            return response()->json(['message' => 'This user has no fees', 'body' => null], 400); 
 
         $installments = Installment::get();
         $paid = Fees::select('percentage','total_amount', 'paid_amount')->where('user_id', $request->user_id)->first();
