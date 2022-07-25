@@ -373,7 +373,7 @@ class AttendanceSessionController extends Controller
             'lesson_id' => null,
             'course_name' => null
         ];
-        dd($reqNot);
+        
         $this->notification->sendNotify($notifyUsers,$reqNot);
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
