@@ -67,7 +67,7 @@ class InstallmentController extends Controller
         ]);
 
         if(!User::find($request->user_id)->can('school_fees/has_fees'))
-            return response()->json(['message' => 'This user has no fees', 'body' => null], 200); 
+            return response()->json(['message' => 'This user has no fees', 'body' => null], 400); 
 
         $installments = Installment::get();
         $paid = Fees::select('percentage','total_amount', 'paid_amount')->where('user_id', $request->user_id)->first();
@@ -78,7 +78,7 @@ class InstallmentController extends Controller
 
         foreach($installments as $installment){
             $total_percentage_of_installments += $installment->percentage; 
-            $installment->paid_or_not = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
+            $installment->paid = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
         }
         $result['installments'] = $installments;
         $result['paid_amount'] = isset($paid->paid_amount) ? $paid->paid_amount :0;
