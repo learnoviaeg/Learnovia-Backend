@@ -247,7 +247,8 @@ class AuthController extends Controller
         $user=$request->user();
         $user->token=null;
         $user->save();
-        $request->user()->token()->revoke();
+        if($request->user()->token() != null)
+            $request->user()->token()->revoke();
 
         // for log event
         $logsbefore=Parents::where('parent_id',Auth::id())->get();
