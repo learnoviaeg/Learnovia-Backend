@@ -17,7 +17,6 @@ use Modules\QuestionBank\Entities\quiz;
 
 class GradeCategoriesController extends Controller
 {
-
     public function __construct(ChainRepositoryInterface $chain)
     {
         $this->chain = $chain;
@@ -27,7 +26,6 @@ class GradeCategoriesController extends Controller
         $this->middleware(['permission:grade/category/get'],   ['only' => ['index']]);
         $this->middleware(['permission:grade/category/delete'],   ['only' => ['destroy']]);
     }
-
 
     /**
      * Display a listing of the resource.
@@ -68,9 +66,9 @@ class GradeCategoriesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'courses'    => 'nullable|array|required_without:levels',
+            'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'levels'    => 'nullable|array|required_without:courses',
+            'levels'    => 'nullable|array',
             'levels.*'  => 'nullable|integer|exists:levels,id',
             'category' => 'required|array',
             'category.*.name' => 'required|string',
@@ -82,8 +80,32 @@ class GradeCategoriesController extends Controller
             'category.*.min'=>'between:0,100',
             'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
-            'category.*.exclude_empty_grades' => 'boolean'
+            'category.*.exclude_empty_grades' => 'boolean',
+            'category.*.grading_schema_id'=>'exists:grading_schema,id'
         ]);
+
+        if(isset($request->category[0])&&isset($request->category[0]['grading_schema_id'])){
+            $category = $request->category[0];
+            $schemaParent = GradeCategory::where('grading_schema_id',$request->category[0]['grading_schema_id'])->where('parent',null)->first();
+            $cat = GradeCategory::create([
+                'name' => $category['name'],
+                'parent' => isset($category['parent']) ?$category['parent']: $schemaParent->id,
+                'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
+                'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
+                'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+                'min' =>isset($category['min']) ? $category['min'] : 0,
+                'max' =>isset($category['max']) ? $category['max'] : null,
+                'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
+                'weight_adjust' =>isset($category['weight_adjust']) ? $category['weight_adjust'] : 0,
+                'weights' =>isset($category['weight']) ? $category['weight'] : null,
+                'exclude_empty_grades' =>isset($category['exclude_empty_grades']) ? $category['exclude_empty_grades'] : 0,
+                'grading_schema_id' => $category['grading_schema_id']
+            ]);
+            event(new GraderSetupEvent($cat));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $cat));
+            dispatch($userGradesJob);
+            return response()->json(['message' => __('messages.grade_category.add'), 'body' => null ], 200);
+        }
         if($request->filled('courses'))
             $courses = $request->courses;
         else{
@@ -203,10 +225,16 @@ class GradeCategoriesController extends Controller
         $grade_category->GradeItems()->update(['parent' => $top_parent_category->id]);
         $grade_category->child()->update(['parent' => $top_parent_category->id]);
         $parent_Category = GradeCategory::find($grade_category->parent);
+
+        if($grade_category->grading_schema_id){
+            GradeCategory::where('reference_category_id',$id)->delete();
+        }
         $grade_category->delete();
-        event(new GraderSetupEvent($parent_Category));
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
-        dispatch($userGradesJob);
+        if($parent_Category){
+            event(new GraderSetupEvent($parent_Category));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+            dispatch($userGradesJob);
+        }
 
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
@@ -250,9 +278,12 @@ class GradeCategoriesController extends Controller
                         AssignmentLesson::where('assignment_id', $category->instance_id )->update(['is_graded' => 0]);
                 }          
             }
-            event(new GraderSetupEvent($category->Parents));
-            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
-            dispatch($userGradesJob);
+            if(isset($category->Parents)) //3l4an fe halet n l category tab3 scheme bs malha4 parent
+            {
+                event(new GraderSetupEvent($category->Parents));
+                $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $category->Parents));
+                dispatch($userGradesJob);
+            }
         }
         return response()->json(['message' => __('messages.grade_category.update'), 'body' => null ], 200);
     }

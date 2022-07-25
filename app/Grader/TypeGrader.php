@@ -34,14 +34,21 @@ class TypeGrader implements GraderInterface
                     foreach($answer['correct_answer']->details as $detail){
                         $detail->stu_ans=0;
                         $detail->right=0;
+                        $count_is_true=0;
+                        $count_stuAns=0;
                         if(isset($answer['student_answer'])){
                             if($detail->key == (int)$answer['student_answer'][0] && $detail->is_true==1){
                                 $mark+=$detail->mark;
                                 $right=1;
                                 $detail->right=$right;
+                                $count_is_true +=1;
                             }
-                            if($detail->key == (int)$answer['student_answer'][0])
+                            if($detail->key == (int)$answer['student_answer'][0]){
                                 $detail->stu_ans=1;
+                                $count_stuAns +=1;
+                            }
+                            if($count_stuAns > $count_is_true)
+                                $mark=0;
                         }
                     }
                     break;
@@ -50,16 +57,22 @@ class TypeGrader implements GraderInterface
                     foreach($answer['correct_answer']->details as $detail){
                         $detail->stu_ans=0;
                         $detail->right=0;
+                        $count_is_true=0;
+                        $count_stuAns=0;
                         if(isset($answer['student_answer'])){
                             for($i=0;$i<count($answer['student_answer']);$i++){
                                 if($detail->key == $answer['student_answer'][$i]){
                                     if($detail->is_true == 1){
                                         $mark+=$detail->mark;
                                         $detail->right=1;
+                                        $count_is_true +=1;
                                     }
                                     $detail->stu_ans=1;
+                                    $count_stuAns +=1;
                                 }
                             }
+                            if($count_stuAns > $count_is_true)
+                                $mark=0;
                         }
                     }
                     if($mark < $answer['correct_answer']->total_mark)
