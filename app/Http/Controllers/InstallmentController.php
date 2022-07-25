@@ -78,7 +78,7 @@ class InstallmentController extends Controller
 
         foreach($installments as $installment){
             $total_percentage_of_installments += $installment->percentage; 
-            $installment->paid_or_not = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
+            $installment->paid = ($percentage_paid >= $total_percentage_of_installments) ? true : false;
         }
         $result['installments'] = $installments;
         $result['paid_amount'] = isset($paid->paid_amount) ? $paid->paid_amount :0;
