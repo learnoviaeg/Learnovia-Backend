@@ -6,11 +6,17 @@ use Illuminate\Http\Request;
 use App\Installment;
 use App\Fees;
 use App\User;
+use App\Jobs\FeesJob;
+use App\Events\CreateInstallmentEvent;
+use App\Repositories\ChainRepositoryInterface;
+use App\Repositories\NotificationRepoInterface;
 
 class InstallmentController extends Controller
 {
-    public function __construct()
+    public function __construct(ChainRepositoryInterface $chain , NotificationRepoInterface $notification)
     {
+        $this->notification = $notification;
+        $this->chain        = $chain;
         // $this->middleware(['permission:installment/create'],   ['only' => ['store']]);  
     }
 
@@ -27,6 +33,9 @@ class InstallmentController extends Controller
             'installments.percentage.*' => 'nullable',
 
         ]);
+
+        // if(Installment::count() > 0)
+        //     return response()->json(['message' => 'Reset installments please!' , 'body' => null], 200); 
         $total_percentage = 0;
 
         if(!isset($request->installments[0]['percentage']))
@@ -42,8 +51,9 @@ class InstallmentController extends Controller
 
         if($total_percentage != 100)
             return response()->json(['message' => 'Percentages total should be 100%' , 'body' => null], 200); 
-            
+        
         $Installments = Installment::insert($data);
+        event(new CreateInstallmentEvent($this->chain , $this->notification));
         return response()->json(['message' => null, 'body' => $Installments], 200); 
    } 
 

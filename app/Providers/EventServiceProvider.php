@@ -98,7 +98,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\CreateCourseItemEvent' => [
             'App\Listeners\SendNotificationListener',
         ],
-
+        'App\Events\CreateInstallmentEvent' => [
+            'App\Listeners\InstallmentNotificationListener',
+        ],
     ];
 
     /**
