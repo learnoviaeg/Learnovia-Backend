@@ -1,12 +1,4 @@
 <?php
-
-/**
- * Created by PhpStorm.
- * User: Huda
- * Date: 6/23/2019
- * Time: 9:51 AM
- */
-
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use App\Language;
@@ -45,6 +37,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
 use App\LastAction;
+use App\Installment;
 
 class UserController extends Controller
 {
@@ -420,7 +413,11 @@ class UserController extends Controller
             'suspend' => 'in:1,0',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
+            'fees' => 'in:paid,not_paid',
         ]);
+
+        $Installment_percentage = Installment::where('date' , '<=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
+
         $users = User::where('id','!=',0)->with('roles');
         if(Auth::id() != 1)
             $users = $users->where('id','!=',1);
@@ -437,6 +434,20 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+
+
+        if($request->filled('fees')){
+            if($request->fees == 'paid')
+                $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
+                $q->where("percentage", '>=',$Installment_percentage);
+            }); 
+
+            if($request->fees == 'not_paid')
+                $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
+                $q->where("percentage", '<',$Installment_percentage);
+            });
+        }
+      
         if($request->filled('suspend'))
             $users = $users->where('suspend',$request->suspend);
         if($request->filled('from') && $request->filled('to')){ //lastaction filter
@@ -466,9 +477,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('year',$request->year);
             $flag=true;
         }      
-        // $enrolled_users=$enrolled_users->pluck('user_id');
-        // $users = User:: whereIn('id',$enrolled_users)->with('roles');
-        
+
         if($flag){
             $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
             $users=$users->whereIn('id',$intersect);

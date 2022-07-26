@@ -440,9 +440,9 @@ class PermissionSeeder extends Seeder
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-daily', 'title' => 'Daily Attendance Report','dashboard' => 0,'icon'=> 'Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-daily', 'title' => 'Daily Attendance Report','dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-perSession', 'title' => 'Per Session Report','dashboard' => 1,'icon'=> 'Attendance']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-weekly', 'title' => 'Weekly Attendance Report','dashboard' => 0,'icon'=> 'Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/report-weekly', 'title' => 'Weekly Attendance Report','dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-users-in-session', 'title' => 'Get students in session']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/export', 'title' => 'Export attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/user_report', 'title' => 'attendance user report']);
@@ -561,5 +561,11 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/update', 'title' => 'Update weekly plan', 'dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/delete', 'title' => 'Delete weekly plan', 'dashboard' => 0]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/level-filter', 'title' => 'Filter by level in weekly plan', 'dashboard' => 0]);
+
+        //installment fees permission
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees', 'title' => 'School Fees', 'dashboard' => 1,'icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/settings', 'title' => 'Installment settings', 'dashboard' => 1,'icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/has_fees', 'title' => 'Has fees', 'dashboard' => 0]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/get', 'title' => 'show fees']);
     }
 }
