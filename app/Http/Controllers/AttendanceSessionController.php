@@ -351,13 +351,14 @@ class AttendanceSessionController extends Controller
 
         $noti_settings=NotificationSetting::where('type','attendance')->first();
         $publish_date=Carbon::now()->format('Y-m-d H:i:s');
-        // dd($notifyUsers);
         if(isset($noti_settings)){
             $publish_date=Carbon::now()->addHours(($noti_settings->after_min)/60)->format('Y-m-d H:i:s');
+
             $usrs=User::whereNotNull('id')->whereHas('roles', function($q) use($noti_settings){
                 if(isset($noti_settings->roles))
                     $q->whereIn('id',$noti_settings->roles);
             })->with('roles')->pluck('id');
+
             if(isset($noti_settings->users))
                 $notifyUsers=array_merge($noti_settings->users,$usrs->toArray());
             else
