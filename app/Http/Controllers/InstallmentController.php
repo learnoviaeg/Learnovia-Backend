@@ -17,7 +17,12 @@ class InstallmentController extends Controller
     {
         $this->notification = $notification;
         $this->chain        = $chain;
-        // $this->middleware(['permission:installment/create'],   ['only' => ['store']]);  
+        $this->middleware(['permission:school_fees/installment/create'],   ['only' => ['store']]);  
+        $this->middleware(['permission:school_fees/installment/update'],   ['only' => ['update']]); 
+        $this->middleware(['permission:school_fees/installment/get'],   ['only' => ['index','show']]);   
+        $this->middleware(['permission:school_fees/get'],   ['only' => ['user_installments']]);  
+        $this->middleware(['permission:school_fees/installment/reset'],   ['only' => ['reset']]);  
+        
     }
 
     public function index(Request $request)

@@ -565,7 +565,11 @@ class PermissionSeeder extends Seeder
         //installment fees permission
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees', 'title' => 'School Fees', 'dashboard' => 1,'icon' => 'school_fees']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/settings', 'title' => 'Installment settings', 'dashboard' => 1,'icon' => 'school_fees']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/has_fees', 'title' => 'Has fees', 'dashboard' => 0]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/get', 'title' => 'show fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/has_fees', 'title' => 'Has fees', 'dashboard' => 0 ,'icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/get', 'title' => 'show fees','icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/create', 'title' => 'Create installments list','icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/update', 'title' => 'update installment','icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/get', 'title' => 'show installments list','icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/reset', 'title' => 'reset installments list','icon' => 'school_fees']);
     }
 }
