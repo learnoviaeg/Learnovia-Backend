@@ -34,8 +34,8 @@ class InstallmentController extends Controller
 
         ]);
 
-        // if(Installment::count() > 0)
-        //     return response()->json(['message' => 'Reset installments please!' , 'body' => null], 200); 
+        if(Installment::count() > 0)
+            return response()->json(['message' => 'Reset installments please!' , 'body' => null], 200); 
         $total_percentage = 0;
 
         if(!isset($request->installments[0]['percentage']))
