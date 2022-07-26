@@ -561,6 +561,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::Resource('letter', LetterController::class);
     Route::Resource('settings', SettingsController::class);
+    Route::Resource('notification-settings', NotificationSettingsController::class);
     Route::Resource('installments', InstallmentController::class);
     Route::get('installment/reset', 'InstallmentController@reset');
     Route::get('fees/profile', 'InstallmentController@user_installments');
