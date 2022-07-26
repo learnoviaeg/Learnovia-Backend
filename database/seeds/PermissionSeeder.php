@@ -3,7 +3,6 @@
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Status;
-use App\BloomCategory;
 
 class PermissionSeeder extends Seeder
 {
@@ -263,12 +262,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/category/chain-categories', 'title' => 'get all chain grade category']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/grades', 'title' => 'Grades', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/category/get-gradecategories', 'title' => 'Get Grade Categories']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/get-scheme', 'title' => 'Get Grade Scheme' , 'icon' => 'grade' ,'dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/create-scheme', 'title' => 'Create Grade Scheme' , 'icon' => 'grade']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/apply-scheme', 'title' => 'Apply Grade Scheme' , 'icon' => 'grade']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/delete-scheme', 'title' => 'Delete Grade Scheme' , 'icon' => 'grade']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/force-delete-scheme', 'title' => 'Force Delete Grade Scheme' , 'icon' => 'grade']);
 
+        //Grade Item
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/get', 'title' => 'get grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/delete', 'title' => 'delete grade item']);
@@ -436,7 +431,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add', 'title' => 'Create Attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/delete', 'title' => 'Delete Attendance']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/edit', 'title' => 'Edit Attendance']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/viewAllAttendance', 'title' => 'Get Attendances','dashboard'=>1,'icon'=>'Attendance']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/viewAllAttendance', 'title' => 'Get Attendances']);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/add-log', 'title' => 'Take attendnace']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'attendance/get-daily', 'title' => 'Daily']);
@@ -482,7 +477,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/random','title' => 'get random questions']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/add-answer','title' => 'add question answer']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/delete-answer','title' => 'delete question answer']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'question/complexity','title' => 'add/update question complexity']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add','title' => 'add quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update','title' => 'update quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
@@ -550,16 +544,9 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/logs', 'title' => 'ststistics', 'dashboard' => 1, 'icon'=> 'statistics']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'logs/log', 'title' => 'log details', 'dashboard' => 0]);
 
+
         //create status
         Status::firstOrCreate(['name' => 'Graded']);
         Status::firstOrCreate(['name' => 'Not Graded']);
-
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'complexity/categories', 'title' => 'Bloom Settings', 'dashboard' => 1, 'icon'=> 'pyramid-chart']);
-
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/create', 'title' => 'Create weekly plan', 'dashboard' => 0]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/get', 'title' => 'View weekly plan', 'dashboard' => 0]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/update', 'title' => 'Update weekly plan', 'dashboard' => 0]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/delete', 'title' => 'Delete weekly plan', 'dashboard' => 0]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'weekly_plan/level-filter', 'title' => 'Filter by level in weekly plan', 'dashboard' => 0]);
     }
 }

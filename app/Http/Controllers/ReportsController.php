@@ -229,6 +229,7 @@ class ReportsController extends Controller
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }
 
+
     public function courseProgressReport(Request $request){
 
         $types = ['materials','assignments','quizzes','interactives','virtuals'];
@@ -239,7 +240,7 @@ class ReportsController extends Controller
             'years.*' => 'exists:academic_years,id',
             'types'    => 'nullable|array',
             'types.*' => 'exists:academic_types,id',
-            'levels'    => 'required|array',
+            'levels'    => 'nullable|array',
             'levels.*' => 'exists:levels,id',
             'classes'    => 'nullable|array',
             'classes.*' => 'exists:classes,id',
@@ -274,18 +275,15 @@ class ReportsController extends Controller
         foreach($courses as $course){
 
             $level = $course->level;
-            $classes=$course->classes ;
-            if(isset($request->classes))
-                $classes=$request->classes;
 
-            foreach($classes as $groupId){
+            foreach($course->classes as $groupId){
 
                 $group = Classes::whereId($groupId)->first();
 
                 $componentsHelper = new ComponentsHelper();
 
-                $componentsHelper->setCourse([$course->id]);
-                $componentsHelper->setClass([$groupId]);
+                $componentsHelper->setCourse($course->id);
+                $componentsHelper->setClass($groupId);
 
                 if($request->has('user_id')){
                     $componentsHelper->setTeacher($request->user_id);
@@ -323,17 +321,16 @@ class ReportsController extends Controller
                     //if just the counters
                     if(!$request->has('details')){
 
-                        if($componentsHelper->$type()->count() > 0)
-                            $reportObjects->push([
-                                'level' => $level->name,
-                                'level_id' => $level->id,
-                                'course' => $course->name,
-                                'course_id' => $course->id,
-                                'class' => $group->name,
-                                'class_id' => $group->id,
-                                'type' => $type,
-                                'count' => $componentsHelper->$type()->count(),
-                            ]);
+                        $reportObjects->push([
+                            'level' => $level->name,
+                            'level_id' => $level->id,
+                            'course' => $course->name,
+                            'course_id' => $course->id,
+                            'class' => $group->name,
+                            'class_id' => $group->id,
+                            'type' => $type,
+                            'count' => $componentsHelper->$type()->count(),
+                        ]);
                     }
                 }
 
@@ -394,11 +391,6 @@ class ReportsController extends Controller
 
         $componentsHelper = new ComponentsHelper();
         $componentsHelper->setLessons($lessons);
-        // dd($request->courses);
-        if(isset($request->courses))
-            $componentsHelper->setCourse($request->courses);
-        if(isset($request->classes))
-            $componentsHelper->setClass($request->classes);
 
         if($request->has('user_id')){
             $componentsHelper->setTeacher($request->user_id);

@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(UserSeeder::class);
+        $this->call(LanguageSeeder::class);
         $this->call(ItemTypeSeeder::class);
         // $this->call(LetterSeeder::class);
         // $this->call(ScaleSeeder::class);

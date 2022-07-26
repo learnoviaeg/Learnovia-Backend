@@ -21,7 +21,7 @@ H5P.ArithmeticQuiz.SoundEffects = (function () {
     H5P.SoundJS.alternateExtensions = ['mp3'];
     for (var i = 0; i < SoundEffects.types.length; i++) {
       var type = SoundEffects.types[i];
-      // H5P.SoundJS.registerSound(libraryPath + 'sounds/' + type + '.ogg', type);
+      H5P.SoundJS.registerSound(libraryPath + 'sounds/' + type + '.ogg', type);
     }
 
     return true;

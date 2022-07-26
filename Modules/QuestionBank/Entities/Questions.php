@@ -12,8 +12,7 @@ class Questions extends Model
 {
     use Auditable, SoftDeletes;
 
-    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id',
-        'course_id' , 'mcq_type','complexity'];
+    protected $fillable = ['text','mark','parent','content','category_id','survey','question_type_id','question_category_id','course_id' , 'mcq_type'];
 
     //count of all quizzes
     protected $appends = ['count_quizzes'];
@@ -24,11 +23,6 @@ class Questions extends Model
         $count_quest = 0;
         $count_quest = quiz_questions::where('question_id',$this->id)->count();
         return $count_quest;  
-    }
-
-    public function quizQuestion()
-    {
-        return $this->hasMany('Modules\QuestionBank\Entities\quiz_questions','question_id');
     }
 
     public function question_type()
@@ -50,12 +44,6 @@ class Questions extends Model
     {
         return $this->belongsTo('App\Course', 'course_id', 'id');
     }
-
-    public function bloom()
-    {
-        return $this->belongsTo('App\BloomCategory', 'complexity', 'id');
-    }
-
 
     // public function question_answer()
     // {

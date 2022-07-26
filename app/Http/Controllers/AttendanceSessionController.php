@@ -134,7 +134,7 @@ class AttendanceSessionController extends Controller
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date',
         ]);
-        $weekMap = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
 
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
@@ -152,7 +152,7 @@ class AttendanceSessionController extends Controller
                 {
                     $request->validate([
                         'class_id' => 'required',
-                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday|required_if:repeated,==,1',
+                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
                     ]);
 
                     if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
@@ -164,7 +164,7 @@ class AttendanceSessionController extends Controller
                             array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
         
                     while($attendancestart <= Carbon::parse($repeated_until)){
-                        AttendanceSession::firstOrCreate([ 
+                        $attendance=AttendanceSession::firstOrCreate([ 
                             'name' => $request->name,
                             'attendance_id' => $request->attendance_id,
                             'class_id' => $request->class_id,
@@ -174,7 +174,7 @@ class AttendanceSessionController extends Controller
                             'to' => Carbon::parse($session['to'])->format('H:i'),
                             'created_by' => Auth::id()
                         ]);
-                        $attendancestart=$attendancestart->addDays(7);
+                        $attendancestart=$attendancestart->addDays(7);                   
                     }   
                 }
                 else if($attendance->attendance_type == 'Daily') // it entered if this type was per session so i write this if
@@ -224,7 +224,7 @@ class AttendanceSessionController extends Controller
         }      
         else
         {
-            AttendanceSession::firstOrCreate([
+            $attendance=AttendanceSession::firstOrCreate([
                 'name' => $request->name,
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,

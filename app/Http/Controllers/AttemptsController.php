@@ -496,15 +496,6 @@ class AttemptsController extends Controller
                             break;
             
                         case 2: // MCQ
-                            $content=$currentQuestion->content;
-                            $count=0;
-                            foreach($currentQuestion->content as $content)
-                                if($content->is_true)
-                                    $count++;
-                            
-                            // if(count($question['MCQ_Choices']) > $count)
-                            //     return HelperController::api_response_format(400, null, 'You must choose '.$count. ' maximum in question ' .$currentQuestion->text);
-
                             $data['user_answers'] = isset($question['MCQ_Choices']) ? json_encode($question['MCQ_Choices']) : null;
                             break;
             

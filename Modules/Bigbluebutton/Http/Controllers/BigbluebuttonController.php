@@ -10,7 +10,6 @@ use App\User;
 use App\Events\MassLogsEvent;
 use App\Enroll;
 use App\ZoomAccount;
-use App\SecondaryChain;
 use Auth;
 use Log;
 use App\CourseSegment;
