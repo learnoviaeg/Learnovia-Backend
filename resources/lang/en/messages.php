@@ -413,4 +413,13 @@ return [
         'delete' => 'Weekly plan deleted successfully',
         'update' => 'Weekly plan updated Successfully',
     ],
+
+    'fees' => [
+        'add' => 'Installment added successfully',
+        'delete' => 'Installment deleted successfully',
+        'update' => 'Installment updated Successfully',
+        'list' => 'Installments list',
+        'percentage' => 'Percentages total should be 100%',
+        'reset' => 'Please delete all the installments first',
+    ],
 ];
