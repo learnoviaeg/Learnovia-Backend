@@ -88,7 +88,7 @@ class InstallmentController extends Controller
         $paid = Fees::select('percentage','total_amount', 'paid_amount')->where('user_id', $request->user_id)->first();
         $percentage_paid = 0;
         $total_percentage_of_installments = 0;
-        if(isset($paid->pecentage))
+        if(isset($paid->percentage))
             $percentage_paid = $paid->percentage;
 
         foreach($installments as $installment){
