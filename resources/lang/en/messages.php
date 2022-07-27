@@ -16,6 +16,7 @@ return [
         'data_invalid' => 'This data is invalid',
         'item_added_before' => 'This item added before',
         'cannot_delete' => 'This item cannot be deleted',
+        'cannot_add' => 'This item cannot be added',
         'item_deleted' => 'This item has been removed',
         'incomplete_data' => 'This data is incomplete',
         'grade_less_than' => 'Please, put grade less than ',

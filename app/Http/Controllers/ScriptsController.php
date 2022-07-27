@@ -490,4 +490,20 @@ class ScriptsController extends Controller
         
         return 'Done';
     }
+
+    public function DCourses(Request $request)
+    {
+        $courses=Course::select('id')->where('id','>=',241)->pluck('id');
+        foreach($courses as $course)
+        {
+            $lessons=Lesson::where('course_id',$course)->get();
+            foreach($lessons as $lesson)
+            {
+                if($lesson-> index > 4)
+                    $lesson->delete();
+            }
+
+        }
+        return 'Done';
+    }
 }

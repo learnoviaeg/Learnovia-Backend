@@ -156,10 +156,11 @@ class CoursesController extends Controller
                             if($request->shared_lesson == 1){
                                 $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
-                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                     'shared_lesson' => 1,
                                     'course_id' => $course->id,
                                     'shared_classes' => json_encode($chain['class']),
+                                ],[
+                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                 ]);
                             }else{
                                 $lesson=lesson::create([

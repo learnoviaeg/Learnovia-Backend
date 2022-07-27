@@ -35,10 +35,14 @@ class NotificationSettingsController extends Controller
             'type' => 'required|string|in:attendance,fees'
         ]);
 
+        if($request->type == 'attendance')
+            if(!isset($request->roles) && !isset($request->users))
+                return response()->json(['message' => __('messages.error.cannot_add'), 'body' => []], 400);
+
         NotificationSetting::updateOrCreate([
             'after_min' => $request->after_min,
-            'roles' => json_encode($request->roles),
-            'users' => json_encode($request->users),
+            'roles' => (json_encode($request->roles)) ? json_encode($request->roles) : null,
+            'users' => (json_encode($request->users)) ? json_encode($request->users) : null,
             'type' => $request->type
         ]);
 
