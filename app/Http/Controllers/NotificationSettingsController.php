@@ -12,9 +12,12 @@ class NotificationSettingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $notificationSetting=NotificationSetting::where('type','attendance')->first();
+        $request->validate([
+            'type' => 'required|string|in:attendance,fees'
+        ]);
+        $notificationSetting=NotificationSetting::where('type',$request->type)->first();
         return response()->json(['message' => 'Notification setting.','body' => $notificationSetting], 200);
     }
 
@@ -40,10 +43,11 @@ class NotificationSettingsController extends Controller
                 return response()->json(['message' => __('messages.error.cannot_add'), 'body' => []], 400);
 
         NotificationSetting::updateOrCreate([
+            'type' => $request->type
+        ],[
             'after_min' => $request->after_min,
             'roles' => isset($request->roles) ? json_encode($request->roles) : null,
             'users' => isset($request->users) ? json_encode($request->users) : null,
-            'type' => $request->type
         ]);
 
         return response()->json(['message' => 'Notification was set.','body' => null], 200);
