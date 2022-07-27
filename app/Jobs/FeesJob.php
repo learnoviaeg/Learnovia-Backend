@@ -50,8 +50,9 @@ class FeesJob implements ShouldQueue
         $students = $this->chain->getEnrollsByManyChain(new Request())->select('user_id')->distinct('user_id')->where('role_id', 3)
                     ->whereHas('user.fees',function($q) use ($Installment_percentage){  $q->where('percentage', '>=', $Installment_percentage );  })->pluck('user_id');
 
-        $users = Parents::select('parent_id')->distinct('parent_id')->whereIn('child_id', $students)->pluck('Parent_id');
-        $this->notification->sendNotify($users->toArray(),$reqNot);
+        $users = Parents::select('parent_id')->distinct('parent_id')->whereIn('child_id', $students)->pluck('parent_id');
+        if($users->count() > 0)
+            $this->notification->sendNotify($users->toArray(),$reqNot);
         
     }
 }
