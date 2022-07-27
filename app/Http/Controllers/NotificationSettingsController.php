@@ -32,7 +32,7 @@ class NotificationSettingsController extends Controller
             'roles.*' => 'exists:roles,id',
             'users' => 'nullable',
             'users.*' => 'exists:users,id',
-            'type' => 'required|string',
+            'type' => 'required|string|in:attendance,fees'
         ]);
 
         if($request->type == 'attendance')
