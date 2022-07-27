@@ -40,7 +40,7 @@ class InstallmentController extends Controller
         ]);
 
         if(Installment::count() > 0)
-            return response()->json(['message' => 'Reset installments please!' , 'body' => null], 200); 
+            return response()->json(['message' => __('messages.fees.reset') , 'body' => null], 200); 
         $total_percentage = 0;
 
         if(!isset($request->installments[0]['percentage']))
@@ -55,24 +55,24 @@ class InstallmentController extends Controller
         }
 
         if($total_percentage != 100)
-            return response()->json(['message' => 'Percentages total should be 100%' , 'body' => null], 200); 
+            return response()->json(['message' => __('messages.fees.percentage') , 'body' => null], 200); 
         
         $Installments = Installment::insert($data);
         event(new CreateInstallmentEvent($this->chain , $this->notification));
-        return response()->json(['message' => null, 'body' => $Installments], 200); 
+        return response()->json(['message' => __('messages.fees.add'), 'body' => $Installments], 200); 
    } 
 
    public function destroy($id)
    {
         Installment::find($id)->delete();
-       return response()->json(['message' => null, 'body' =>null], 200); 
+       return response()->json(['message' => __('messages.fees.delete') , 'body' =>null], 200); 
    }
 
 
    public function reset()
    {
         Installment::truncate();
-       return response()->json(['message' => null, 'body' =>null], 200); 
+       return response()->json(['message' => __('messages.fees.delete'), 'body' =>null], 200); 
    }
 
    public function user_installments(Request $request)
@@ -98,6 +98,6 @@ class InstallmentController extends Controller
         $result['installments'] = $installments;
         $result['paid_amount'] = isset($paid->paid_amount) ? $paid->paid_amount :0;
         $result['total_amount'] = isset($paid->total_amount) ? $paid->total_amount : 0;
-        return response()->json(['message' => null, 'body' => $result], 200); 
+        return response()->json(['message' => __('messages.fees.list'), 'body' => $result], 200); 
    }
 }
