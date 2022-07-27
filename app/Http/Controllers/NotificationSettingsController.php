@@ -32,7 +32,7 @@ class NotificationSettingsController extends Controller
             'roles.*' => 'exists:roles,id',
             'users' => 'nullable',
             'users.*' => 'exists:users,id',
-            'type' => 'required|string'
+            'type' => 'required|string',
         ]);
 
         if($request->type == 'attendance')
@@ -41,8 +41,8 @@ class NotificationSettingsController extends Controller
 
         NotificationSetting::updateOrCreate([
             'after_min' => $request->after_min,
-            'roles' => (json_encode($request->roles)) ? json_encode($request->roles) : null,
-            'users' => (json_encode($request->users)) ? json_encode($request->users) : null,
+            'roles' => isset($request->roles) ? json_encode($request->roles) : null,
+            'users' => isset($request->users) ? json_encode($request->users) : null,
             'type' => $request->type
         ]);
 
