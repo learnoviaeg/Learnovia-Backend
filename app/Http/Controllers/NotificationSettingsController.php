@@ -12,9 +12,12 @@ class NotificationSettingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $notificationSetting=NotificationSetting::where('type','attendance')->first();
+        $request->validate([
+            'type' => 'required|string|in:attendance,fees'
+        ]);
+        $notificationSetting=NotificationSetting::where('type',$request->type)->first();
         return response()->json(['message' => 'Notification setting.','body' => $notificationSetting], 200);
     }
 
