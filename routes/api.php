@@ -416,7 +416,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('course_sorting', 'ScriptsController@course_index');
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
-    Route::get('course_d', 'ScriptsController@DCourses');
+    Route::get('course_d', 'ScriptsController@DCourses'); // douplicated lessons
     Route::get('lesson_sorting', 'ScriptsController@lessons_index');
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
     Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
