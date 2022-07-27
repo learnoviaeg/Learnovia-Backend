@@ -1,4 +1,4 @@
- <?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -41,8 +41,8 @@ class NotificationSettingsController extends Controller
 
         NotificationSetting::updateOrCreate([
             'after_min' => $request->after_min,
-            'roles' => isset(json_encode($request->roles)) ? json_encode($request->roles) : null,
-            'users' => isset(json_encode($request->users)) ? json_encode($request->users) : null,
+            'roles' => (json_encode($request->roles)) ? json_encode($request->roles) : null,
+            'users' => (json_encode($request->users)) ? json_encode($request->users) : null,
             'type' => $request->type
         ]);
 
