@@ -48,7 +48,7 @@ class FeesJob implements ShouldQueue
         ];
         $Installment_percentage = Installment::where('date' , '<=' , Carbon::parse($this->installment->date)->format('Y-m-d'))->sum('percentage');
         $students = $this->chain->getEnrollsByManyChain(new Request())->select('user_id')->distinct('user_id')->where('role_id', 3)
-                    ->whereHas('user.fees',function($q) use ($Installment_percentage){  $q->where('percentage', '>=', $Installment_percentage );  })->pluck('user_id');
+                    ->whereHas('user.fees',function($q) use ($Installment_percentage){  $q->where('percentage', '>', $Installment_percentage );  })->pluck('user_id');
 
         $users = Parents::select('parent_id')->distinct('parent_id')->whereIn('child_id', $students)->pluck('parent_id');
         if($users->count() > 0)
