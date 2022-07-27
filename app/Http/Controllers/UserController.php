@@ -445,7 +445,7 @@ class UserController extends Controller
             if($request->fees == 'not_paid')
                 $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
                 $q->where("percentage", '<',$Installment_percentage);
-            });
+            })->orWhereDoesntHave('fees');
         }
       
         if($request->filled('suspend'))
