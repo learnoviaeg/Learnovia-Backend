@@ -416,7 +416,7 @@ class UserController extends Controller
             'fees' => 'in:paid,not_paid',
         ]);
 
-        $Installment_percentage = Installment::where('date' , '<=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
+        $Installment_percentage = Installment::where('date' , '>=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
 
         $users = User::where('id','!=',0)->with('roles');
         if(Auth::id() != 1)
