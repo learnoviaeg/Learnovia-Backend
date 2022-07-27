@@ -11,6 +11,7 @@ use App\Installment;
 use App\Repositories\ChainRepositoryInterface;
 use App\Repositories\NotificationRepoInterface;
 use Carbon\Carbon;
+use App\Parents;
 
 class FeesJob implements ShouldQueue
 {
