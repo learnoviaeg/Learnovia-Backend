@@ -10,8 +10,8 @@ class NotificationRepo implements NotificationRepoInterface
         // dd($reqNot);
         $data=[
             'users' => $users,
-            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            // 'school_domain'=>'test',
+            // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            'school_domain'=>'test',
             // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'title'=> 'Learnovia',
             'body'=> $reqNot['message'],
