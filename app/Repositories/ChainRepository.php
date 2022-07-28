@@ -173,7 +173,7 @@ class ChainRepository implements ChainRepositoryInterface
                 throw new \Exception('There is no active segment in this type '.$types);
             // $segment_id = Segment::Get_current($request->type)->id;
             if ($request->filled('segment'))
-                $segment_id = $request->segment;
+                $segment_id = [$request->segment];
             $enrolls=$enrolls->whereIn('segment', $segment_id);
         }
         if ($request->filled('level'))
