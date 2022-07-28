@@ -4,9 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\NotificationSetting;
+use App\Repositories\ChainRepositoryInterface;
+use App\Repositories\NotificationRepoInterface;
+use App\Jobs\FeesJob;
+use App\Events\CreateInstallmentEvent;
 
 class NotificationSettingsController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain , NotificationRepoInterface $notification)
+    {
+        $this->notification = $notification;
+        $this->chain        = $chain;
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -45,6 +56,11 @@ class NotificationSettingsController extends Controller
             'users' => isset($request->users) ? json_encode($request->users) : null,
             'type' => $request->type
         ]);
+
+        if($request-> type == 'fees'){
+            event(new CreateInstallmentEvent($this->chain , $this->notification));
+
+        }
 
         return response()->json(['message' => 'Notification was set.','body' => null], 200);
     }
