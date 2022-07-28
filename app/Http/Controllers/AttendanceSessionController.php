@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
 use App\WorkingDay;
+use App\Repositories\NotificationRepoInterface;
 use App\Events\TakeAttendanceEvent;
 use Auth;
 use App\Course;
@@ -23,9 +24,10 @@ use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
         $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
@@ -369,7 +371,7 @@ class AttendanceSessionController extends Controller
             'message' => $session->attendance->name.' attendance was taken',
             'item_id' => $session->attendance_id,
             'item_type' => 'attendance',
-            'type' => 'attendance',
+            'type' => 'notification',
             'publish_date' => $publish_date,
             'lesson_id' => null,
             'course_name' => null
