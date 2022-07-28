@@ -121,8 +121,8 @@ class NotificationsController extends Controller
         foreach($request->users as $user)
         {
             $data['user_id']=$user;
-            $data['school_domain']='test';
-            // $data['school_domain']=substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
+            // $data['school_domain']='test';
+            $data['school_domain']=substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
             $us['users'][]=$data;
         }
 
