@@ -291,10 +291,13 @@ class AuthController extends Controller
 
         $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
         $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
-        $user['level']=$level->id;
-        $user['level_']=$level;
-        $user['class']=$class->id;  
-        $user['class_']=$class;  
+        if(isset($level))
+        {
+            $user['level']=$level->id;
+            $user['level_']=$level;
+            $user['class']=$class->id;  
+            $user['class_']=$class;
+        }
 
         $user->setHidden(['password']);
 

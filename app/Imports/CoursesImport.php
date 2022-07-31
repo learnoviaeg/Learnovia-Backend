@@ -3,17 +3,13 @@
 namespace App\Imports;
 
 use App\Course;
-// use App\AcademicYearType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-// use App\ClassLevel;
-// use App\CourseSegment;
 use App\Segment;
 use App\Classes;
 use App\SecondaryChain;
 use App\Lesson;
 use App\Enroll;
 use App\Http\Controllers\CoursesController;
-// use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Events\CourseCreatedEvent;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -71,7 +67,6 @@ class CoursesImport implements ToModel , WithHeadingRow
         $req=new Request([
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'chains' => $chains,
             'chains' => $chains,
             'category_id' => isset($row['category']) ? $row['category'] : null,
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,

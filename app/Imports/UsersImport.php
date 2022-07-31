@@ -127,6 +127,19 @@ class UsersImport implements ToModel, WithHeadingRow
 
         if (isset($row['class_id'])){
 
+            // $rules = [
+            //     'class_id' => 'exists:classes,id',
+            //     'segment_id' => 'required|exists:segments,id',
+            // ];
+    
+            // $customMessages = [
+            //     'segment_id.required'   => 'segment_id array is required.',
+            //     'segment_id.exists'   => 'Invalid segment_is supplied!.',
+            //     'class_id.exists'   => 'Invalid class_is supplied!.',
+            // ];
+    
+            // $this->validate($request, $rules, $customMessages);
+
             Validator::make($row,[
                 'class_id' => 'exists:classes,id',
                 'segment_id' => 'required|exists:segments,id',
@@ -153,7 +166,7 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$enrollOptional.$enrollcounter])) {
                     $course=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->first();
                     if($course->segment_id != $row['segment_id'])
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+                        die('please, check segment');
     
                     $course_id=$course->id;
                     if(!isset($course_id))
@@ -178,7 +191,7 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course=Course::where('short_name',$row[$teacheroptional.$teachercounter])->first();
                     if($course->segment_id != $row['segment_id'])
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+                        die('please, check segment');
         
                     $course_id=$course->id;
                     if(!isset($course_id))
