@@ -10,12 +10,8 @@ use App\User;
 use App\Course;
 use App\Classes;
 use App\Segment;
-use App\CourseSegment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EnrollUserToCourseController;
-use App\ClassLevel;
-use App\SegmentClass;
-
 class EnrollStudent implements ToModel,WithHeadingRow
 {
     /**
@@ -23,14 +19,14 @@ class EnrollStudent implements ToModel,WithHeadingRow
     */
     public function model(array $row)
     {
-        $messages = [
-            'exists' => 'user with username '.$row['username'].' not found'
-        ];
+        // $messages = [
+        //     'exists' => 'user with username '.$row['username'].' not found'
+        // ];
         $validator = Validator::make($row,[
             'class_id' => 'exists:classes,id',
             'username' => 'required|exists:users,username',
             'segment_id' => 'required|exists:segments,id'
-        ],$messages)->validate();
+        ])->validate();//,$messages)->validate();
         
         $optional='optional';
 
@@ -61,7 +57,7 @@ class EnrollStudent implements ToModel,WithHeadingRow
 
             $course_id=$course->id;
             if(!isset($course_id))
-                die('shortname '.$row[$optional.$count].'doesn\'t exist');
+                throw new \Exception('shortname '.$row[$optional.$count].'doesn\'t exist');
 
             Enroll::firstOrCreate([
                 'user_id' => $user_id,
