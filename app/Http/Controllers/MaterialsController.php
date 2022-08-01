@@ -203,6 +203,7 @@ class MaterialsController extends Controller
         }
         if($material->type == 'page'){
             $result = page::find($material->item_id);
+            return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
         }
 
         if(!file_exists($path))
