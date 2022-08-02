@@ -58,12 +58,13 @@ class UsersImport implements ToModel, WithHeadingRow
 
         $password = mt_rand(100000, 999999);
 
-        $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
-        $users=Enroll::where('role_id',3)->get();
+        // $max_allowed_users = Contract::whereNotNull('id')->pluck('numbers_of_users')->first();
+        // $users=Enroll::where('role_id',3)->get();
 
         // dd((count($users)));
-        if(((count($users) + count($row)-1)) > $max_allowed_users)
-            die('U Can\'t add users any more');
+        // if(((count($users) + count($row)-1)) > $max_allowed_users)
+        //     die('U Can\'t add users any more');
+
         $clientt = new Client();
         $data = json_encode(array(
             'name' => $row['firstname']. " " .$row['lastname'] ,
@@ -153,11 +154,11 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$enrollOptional.$enrollcounter])) {
                     $course=Course::where('short_name',$row[$enrollOptional.$enrollcounter])->first();
                     if($course->segment_id != $row['segment_id'])
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+                        throw new \Exception('please, check segment');
     
                     $course_id=$course->id;
                     if(!isset($course_id))
-                        die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
+                        throw new \Exception('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
             
                     Enroll::firstOrCreate([
                         'user_id' => $user->id,
@@ -178,11 +179,11 @@ class UsersImport implements ToModel, WithHeadingRow
                 while(isset($row[$teacheroptional.$teachercounter])){
                     $course=Course::where('short_name',$row[$teacheroptional.$teachercounter])->first();
                     if($course->segment_id != $row['segment_id'])
-                        return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+                        throw new \Exception('please, check segment');
         
                     $course_id=$course->id;
                     if(!isset($course_id))
-                        die('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
+                        throw new \Exception('shortname '.$row[$enrollOptional.$enrollcounter.'doesn\'t exist']);
         
                     Enroll::firstOrCreate([
                         'user_id' => $user->id,
