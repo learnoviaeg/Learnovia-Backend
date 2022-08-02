@@ -18,8 +18,8 @@ class NotificationRepo implements NotificationRepoInterface
             "item_type" => $reqNot['item_type'],
             "type" => $reqNot['type'],
             "item_id" => $reqNot['item_id'],
-            'course_name' => $reqNot['course_name'],
-            'lesson_id' => $reqNot['lesson_id'],
+            'course_name' => isset($reqNot['course_name']) ? $reqNot['course_name'] :null,
+            'lesson_id' => isset($reqNot['lesson_id']) ? $reqNot['lesson_id'] : null,
             'class_id' => isset($reqNot['class_id']) ? $reqNot['class_id'] :null,
             'publish_date' => $reqNot['publish_date']
         ];

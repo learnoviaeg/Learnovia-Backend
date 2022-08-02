@@ -58,9 +58,9 @@ class UserController extends Controller
             // 'nickname' => 'array',
             // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
-            'firstname.*' => 'required|string|min:2|max:50',
+            'firstname.*' => 'required|string|max:50',
             'lastname' => 'required|array',
-            'lastname.*' => 'required|string|min:2|max:50',
+            'lastname.*' => 'required|string|max:50',
             'password' => 'required|array',
             'password.*' => 'required|alpha_dash|string|min:3|max:191',
             // 'role' => 'required|array',
@@ -198,8 +198,8 @@ class UserController extends Controller
     {
         $request->validate([
             'nickname'=>'nullable|string|min:3|max:50',
-            'firstname' => 'required|string|min:2|max:50',
-            'lastname' => 'required|string|min:2|max:50',
+            'firstname' => 'required|string|max:50',
+            'lastname' => 'required|string|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
             'password' => 'alpha_dash|string|min:3|max:191',
@@ -416,7 +416,7 @@ class UserController extends Controller
             'fees' => 'in:paid,not_paid',
         ]);
 
-        $Installment_percentage = Installment::where('date' , '<=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
+        $Installment_percentage = Installment::where('date' , '>=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
 
         $users = User::where('id','!=',0)->with('roles');
         if(Auth::id() != 1)
@@ -445,7 +445,7 @@ class UserController extends Controller
             if($request->fees == 'not_paid')
                 $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
                 $q->where("percentage", '<',$Installment_percentage);
-            });
+            })->orWhereDoesntHave('fees');
         }
       
         if($request->filled('suspend'))

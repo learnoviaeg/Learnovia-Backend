@@ -56,7 +56,7 @@ class LessonsController extends Controller
             }
         }
         */
-        $result = Lesson::whereIn('id',$result_lessons->keys());
+        $result = Lesson::whereNull('deleted_at')->whereIn('id',$result_lessons->keys());
         if($request->filled('shared')){
             $result->where('shared_lesson', $request->shared)
             ->where(function($query) use ($request){        //in case of "shared", get shared lessons only

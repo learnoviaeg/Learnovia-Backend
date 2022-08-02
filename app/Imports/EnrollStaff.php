@@ -39,13 +39,13 @@ class EnrollStaff implements ToModel, WithHeadingRow
 
             $course_id=$coursess->id;
             if(!isset($course_id))
-                die('shortname '.$row[$optional.$count].' doesn\'t exist');
+                throw new \Exception('shortname '.$row[$optional.$count].' doesn\'t exist');
 
             $userId =User::FindByName($row['username'])->id;
 
             $level=Classes::find($row['class_id'])->level_id;
             if($coursess->level_id != $level)
-                die('Level on class and this course isn\'t not the same');
+                throw new \Exception('Level on class and this course isn\'t not the same');
 
             $segment=Segment::find($row['segment_id']);
             $segment_id=$segment->id;

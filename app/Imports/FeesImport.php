@@ -43,7 +43,7 @@ class FeesImport implements  ToModel, WithHeadingRow
         }
         Fees::updateOrCreate(
             ['user_id'=>  $data['user_id']],
-            ['paid_amount' =>  $paid_amout, 'total_amount' => $data['to_pay'] , 'percentage' => (($paid_amout / $data['to_pay']) *100) ]
+            ['paid_amount' =>  ($paid_amout <= $data['to_pay'])  ? $paid_amout : $data['to_pay'], 'total_amount' => $data['to_pay'] , 'percentage' => (((($paid_amout <= $data['to_pay'])  ? $paid_amout : $data['to_pay']) / $data['to_pay']) *100) ]
         );
     }
 }

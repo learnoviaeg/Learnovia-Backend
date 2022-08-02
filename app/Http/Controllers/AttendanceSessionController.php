@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\AttendanceSession;
 use App\Attendance;
 use App\GradeCategory;
+use App\NotificationSetting;
 use Carbon\Carbon;
 use App\Exports\AttendanceLogsExport;
 use App\Classes;
@@ -14,16 +15,19 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
 use App\WorkingDay;
+use App\Repositories\NotificationRepoInterface;
 use App\Events\TakeAttendanceEvent;
 use Auth;
 use App\Course;
+use App\User;
 use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
         $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
@@ -344,7 +348,36 @@ class AttendanceSessionController extends Controller
                 ['grade' =>  ($gardeOfSessions * $gradeCat->max)/100 , 'percentage' => ((($gardeOfSessions * $gradeCat->max)/100)*100)/20 ]
             );
             // event(new TakeAttendanceEvent($user['id']));
+            $notifyUsers[]=$user['id'];
         }
+
+        $noti_settings=NotificationSetting::where('type','attendance')->first();
+        $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+        if(isset($noti_settings)){
+            $publish_date=Carbon::now()->addHours(($noti_settings->after_min)/60)->format('Y-m-d H:i:s');
+
+            $usrs=User::whereNotNull('id')->whereHas('roles', function($q) use($noti_settings){
+                if(isset($noti_settings->roles))
+                    $q->whereIn('id',$noti_settings->roles);
+            })->with('roles')->pluck('id');
+
+            if(isset($noti_settings->users))
+                $notifyUsers=array_merge($noti_settings->users,$usrs->toArray());
+            else
+                $notifyUsers=$usrs;
+        }
+
+        $reqNot=[
+            'message' => $session->attendance->name.' attendance was taken',
+            'item_id' => $session->attendance_id,
+            'item_type' => 'attendance',
+            'type' => 'notification',
+            'publish_date' => $publish_date,
+            'lesson_id' => null,
+            'course_name' => null
+        ];
+        
+        $this->notification->sendNotify($notifyUsers,$reqNot);
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }

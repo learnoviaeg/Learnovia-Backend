@@ -92,7 +92,7 @@ class UsersController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByChain($request);
-        // dd($enrolls->pluck('user_id'));
+        //dd($enrolls->pluck('user_id'));
 
         if($my_chain=='count'){
             $count = [];

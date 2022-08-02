@@ -139,8 +139,8 @@ class AuthController extends Controller
             // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
             $data=[
                 'user_id' => $user->id,
-                // 'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-                'school_domain'=>'test',
+                'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+                // 'school_domain'=>'test',
                 'fcm_tokens'=> array($fcm_tokens)
             ];
             $clientt = new Client();
@@ -247,7 +247,8 @@ class AuthController extends Controller
         $user=$request->user();
         $user->token=null;
         $user->save();
-        $request->user()->token()->revoke();
+        if($request->user()->token() != null)
+            $request->user()->token()->revoke();
 
         // for log event
         $logsbefore=Parents::where('parent_id',Auth::id())->get();
@@ -290,10 +291,13 @@ class AuthController extends Controller
 
         $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
         $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
-        $user['level']=$level->id;
-        $user['level_']=$level;
-        $user['class']=$class->id;  
-        $user['class_']=$class;  
+        if(isset($level))
+        {
+            $user['level']=$level->id;
+            $user['level_']=$level;
+            $user['class']=$class->id;  
+            $user['class_']=$class;
+        }
 
         $user->setHidden(['password']);
 

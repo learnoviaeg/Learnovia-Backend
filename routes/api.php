@@ -416,6 +416,7 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('course_sorting', 'ScriptsController@course_index');
     Route::get('index_categories', 'ScriptsController@indexCatItem');
     Route::get('course_tabs', 'ScriptsController@ongoingPastCoursesIssue');
+    Route::get('course_d', 'ScriptsController@DCourses'); // douplicated lessons
     Route::get('lesson_sorting', 'ScriptsController@lessons_index');
     Route::get('duplicate_enroll', 'ScriptsController@delete_duplicated_enroll');
     Route::get('deleteWrongCourses', 'ScriptsController@delete_wrong_course');
@@ -561,9 +562,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     Route::Resource('letter', LetterController::class);
     Route::Resource('settings', SettingsController::class);
+    Route::Resource('notification-settings', NotificationSettingsController::class);
     Route::Resource('installments', InstallmentController::class);
     Route::get('installment/reset', 'InstallmentController@reset');
-    Route::get('fees/pofile', 'InstallmentController@user_installments');
+    Route::get('fees/profile', 'InstallmentController@user_installments');
 
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grading-schema', GradingSchemaController::class);
