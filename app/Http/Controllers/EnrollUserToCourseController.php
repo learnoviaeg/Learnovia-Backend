@@ -198,7 +198,7 @@ class EnrollUserToCourseController extends Controller
                 return HelperController::api_response_format(400, [], __('messages.enroll.error'));
 
         foreach ($request->users as $user) {
-            $courses=Course::select('id')->where('segment_id',$request->segment)->where('level_id',$request->level)->where('mandatory',1)->get();
+            $courses=Course::where('segment_id',$request->segment)->where('level_id',$request->level)->where('mandatory',1)->get();
 
             if (count($courses) > 0) {
                 foreach($courses as $course){
@@ -525,20 +525,8 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
-        $Enrolls=Enroll::where('user_id',1)->get();
-        foreach($Enrolls as $enroll)
-        {
-            Enroll::firstOrCreate([
-                'user_id' => $request->user_id,
-                'role_id' => 1,
-                'year' => $enroll->year,
-                'type' => $enroll->type,
-                'level' => $enroll->level,
-                'group' => $enroll->group,
-                'segment' => $enroll->segment,
-                'course' => $enroll->course,
-            ]);
-        }
+        $job = (new \App\Jobs\EnrollAdminJob($request->user_id));
+        dispatch($job);
     }
 
     /**
@@ -562,10 +550,12 @@ class EnrollUserToCourseController extends Controller
             'users' => 'required|array',
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|exists:roles,id',
-            'classes' => 'required|array|exists:classes,id',
-            'classes.*' => 'exists:classes,id',
-            'courses' => 'required|array|exists:courses,id',
-            'courses.*' => 'exists:courses,id'
+            'year' => 'exists:academic_years,id',
+            'type' => 'array|exists:academic_types,id|required_with:level',
+            'levels' => 'array|exists:levels,id|required_with:class',
+            'classes' => 'array|exists:classes,id',
+            'segments' => 'array|exists:segments,id',
+            'courses' => 'array|exists:courses,id'
         ];
 
         $customMessages = [
@@ -575,29 +565,42 @@ class EnrollUserToCourseController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        foreach ($request->users as $user) {
-            foreach ($request->courses as $course) {
-                foreach ($request->classes as $class) {
-                    $coco = Course::find($course);
-                    $seg = Segment::find($coco->segment_id);
-                    $level= $coco->level_id;
-                    $type = $seg->academic_type_id;
-                    $segment =$coco->segment_id;
-                        
-                    Enroll::firstOrCreate([
-                        'user_id' => $user,
-                        'role_id' => $request->role_id,
-                        'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
-                        'type' => isset($request->type) ? $request->type : $type,
-                        'level' => isset($request->levels) ? $request->levels[0] : $level,
-                        'group' => $class,
-                        'segment' => isset($request->segments) ? $request->segments[0] : $segment,
-                        'course' => $course,
-                    ]);
+        if (isset($request->courses)) {
+            $count = 0;
+            foreach ($request->users as $user) {
+                foreach ($request->courses as $course) {
+                    foreach ($request->classes as $class) {
+                        $coco = Course::find($course);
+                        $seg = Segment::find($coco->segment_id);
+                        $level= $coco->level_id;
+                        $type = $seg->academic_type_id;
+                        $segment =$coco->segment_id;
+                            
+                        $check = Enroll::IsExist($course,$class, $user,$request->role_id);
+                        if ($check == null) {
+                            Enroll::firstOrCreate([
+                                'user_id' => $user,
+                                'role_id' => $request->role_id,
+                                'year' => isset($request->year) ? $request->year : AcademicYear::Get_current()->id,
+                                'type' => $type,
+                                'level' => $level,
+                                'group' => $class,
+                                'segment' => $segment,
+                                'course' => $course,
+                            ]);
+                        }
+                        else
+                            $EnrolledBefore[] = $user[$count];
+                    }
                 }
+                $count++;
             }
+            if (isset($EnrolledBefore))
+                return HelperController::api_response_format(200, array_values(array_unique($EnrolledBefore)), __('messages.enroll.already_enrolled'));
+            else
+                return HelperController::api_response_format(200,[], __('messages.enroll.add'));
         }
-        return HelperController::api_response_format(200,[], __('messages.enroll.add'));
+        return HelperController::api_response_format(200, [],__('messages.error.no_active_segment'));
     }
 
     public function Migration(Request $request)
