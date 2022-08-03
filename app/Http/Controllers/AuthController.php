@@ -202,7 +202,7 @@ class AuthController extends Controller
             'form_params' => $data
         ]);
         
-        return 'Done';
+        return HelperController::api_response_format(200, null , 'registered');
     }
 
     public function Get_Dictionary($callOrNot = 0,Request $request)
