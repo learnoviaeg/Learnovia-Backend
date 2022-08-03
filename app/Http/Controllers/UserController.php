@@ -102,80 +102,53 @@ class UserController extends Controller
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
                 return HelperController::api_response_format(404 ,$username, __('messages.users.username_already_used'));
-            if (isset($request->picture[$i]))
-                    $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
-            $clientt = new Client();
-            $data = array(
-                'name' => $firstname. " " .$request->lastname[$key], 
-                'meta_data' => array(
-                    "image_link" => ($request->has('picture'))?$user_picture->path:null,
-                    'role'=> Role::find($request->role)->name,
-                ),
-            );    
-            $data = json_encode($data);
+            
+            if(isset($request->picture[$i]))
+                $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
 
-                $firstUser = User::find(1);
-
-                $user = new User;
-                $user->firstname               = $firstname;
-                $user->lastname                = $request->lastname[$key];
-                $user->username                = $request->username[$key];
-                $user->password                = bcrypt($request->password[$key]);
-                $user->real_password           = $request->password[$key];
-                $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
-
-                $user->chat_uid                = $firstUser->chat_uid;
-                $user->chat_token              = $firstUser->chat_token;
-                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
-
-            /*$env  = env('APP_LOGTEST');
-            if ($env == true) {
-                $firstUser = User::find(1);
-                $user->chat_uid                = $firstUser->chat_uid;
-                $user->chat_token              = $firstUser->chat_token;
-                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
-            }else{
-                try{
-                    $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-                        'headers'   => [
-                            'Content-Type' => 'application/json'
-                        ], 
-                        'body' => $data
-                    ]);
-                }
-                catch(\Exception $e){
-                    throw new \Exception($e->getMessage());
-                } 
-                $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
-                $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
-                $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
-            }*/
+            $user = new User;
+            $user->firstname               = $firstname;
+            $user->lastname                = $request->lastname[$key];
+            $user->username                = $request->username[$key];
+            $user->password                = bcrypt($request->password[$key]);
+            $user->real_password           = $request->password[$key];
+            $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
 
             foreach ($optionals as $optional){
-                if($request->filled($optional[$i])){
+                if($request->filled($optional[$i]))
                     $user->optional =$request->optional[$i];
-                }
+                
                 if (isset($request->picture[$i]))
                     $user->picture = $user_picture->id;
+
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
+
                     $user->$optional =$request->$optional[$i];
                 }
             }
             $i++;
 
-            if(!isset($user->language)){
+            if(!isset($user->language))
                 $user->language = Language::where('default', 1)->first()->id;
-                //$user->save();
-            }
+
             $user->save();
+
             $role = Role::find($request->role);
             $user->assignRole($role);
+
+            $req=new Request([
+                'user_id'=>$user->id,
+            ]);
+            app('App\Http\Controllers\ChatController')->chat_token($req);
+
             if($request->role ==1)
             {
-                $request_user = new Request(['user_id' => $user->id]);
-                EnrollUserToCourseController::EnrollAdmin($request_user);
+                $job = (new \App\Jobs\EnrollAdminJob($user->id));
+                dispatch($job);
+                // $request_user = new Request(['user_id' => $user->id]);
+                // EnrollUserToCourseController::EnrollAdmin($request_user);
             }
             $users_is->push($user);
         }

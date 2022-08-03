@@ -525,20 +525,8 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
-        $Enrolls=Enroll::where('user_id',1)->get();
-        foreach($Enrolls as $enroll)
-        {
-            Enroll::firstOrCreate([
-                'user_id' => $request->user_id,
-                'role_id' => 1,
-                'year' => $enroll->year,
-                'type' => $enroll->type,
-                'level' => $enroll->level,
-                'group' => $enroll->group,
-                'segment' => $enroll->segment,
-                'course' => $enroll->course,
-            ]);
-        }
+        $job = (new \App\Jobs\EnrollAdminJob($request->user_id));
+        dispatch($job);
     }
 
     /**

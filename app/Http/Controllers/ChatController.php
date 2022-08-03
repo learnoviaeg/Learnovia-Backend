@@ -116,8 +116,8 @@ class ChatController extends Controller
             'chat_uid' => json_decode($res->getBody(),true)['user_id'],
             'chat_token' => json_decode($res->getBody(),true)['custom_token'],
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
-            ]);
-            unset($user->roles,$user->attachment);
+        ]);
+        unset($user->roles,$user->attachment);
 
         return response()->json(['message' => 'chat token is created....', 'body' => $user], 200);
     }

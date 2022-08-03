@@ -140,10 +140,10 @@ class MediaController extends Controller
         //search for mime type of file in exts array
         //key value and check in settings string if contains
 
-        $request->validate([
+        $rules = [
             'description' => 'nullable|string|min:1',
             'Imported_file' => 'required_if:type,==,0|array',
-            // 'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
+            'Imported_file.*' => 'required|file|distinct|mimes:'.$settings,
             'lesson_id' => 'required|array',
             'lesson_id.*' => 'required|exists:lessons,id',
             'url' => 'required_if:type,==,1|array',
@@ -154,10 +154,20 @@ class MediaController extends Controller
             'visible' =>'in:0,1',
             'users_ids' => 'array',
             'users_ids.*' => 'exists:users,id'
-        ]);
+        ];
+
+        $customMessages = [
+            'Imported_file.*.mimes' => __('messages.error.extension_not_supported')
+        ];
+
+        if ($request->hasFile('Imported_file')) {
+            $customMessages = [
+                'Imported_file.*.mimes' => $request->Imported_file[0]->getClientOriginalExtension() . ' ' .__('messages.error.extension_not_supported')
+            ];
+        }
 
         if($request->hasFile('Imported_file') && !in_array($request->Imported_file[0]->getClientOriginalExtension(),$exts))
-            return HelperController::api_response_format(400, null, $request->Imported_file[0]->getClientOriginalExtension() . ' ' .__('messages.error.extension_not_supported'));
+            $this->validate($request, $rules, $customMessages);
 
         if ($request->filled('publish_date')) {
             $publishdate = $request->publish_date;
