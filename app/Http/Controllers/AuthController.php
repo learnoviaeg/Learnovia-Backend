@@ -181,11 +181,12 @@ class AuthController extends Controller
         $request->validate([
             'fcm_tokens' => 'required|array',
         ]);
+        if(count($request->fcm_tokens) < 1 || in_array(null,$request->fcm_tokens))
+            return HelperController::api_response_format(404, [], __('messages.error.data_invalid'));
 
         $fcm_tokens=[
             'fcm_token' => $request->fcm_tokens[0],
         ];
-        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
         $data=[
             'user_id' => Auth::id(),
             'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
