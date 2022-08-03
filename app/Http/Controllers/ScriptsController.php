@@ -490,4 +490,22 @@ class ScriptsController extends Controller
         
         return 'Done';
     }
+
+    public function DCourses(Request $request)
+    {
+        $request->validate([
+            'course_id'  => 'required|integer|exists:courses,id',
+        ]);
+        $courses=Course::select('id')->where('id','>=',$request->course_id)->pluck('id');
+        foreach($courses as $course)
+        {
+            $lessons=Lesson::where('course_id',$course)->get();
+            foreach($lessons as $lesson)
+            {
+                if($lesson-> index > 4)
+                    $lesson->forceDelete();
+            }
+        }
+        return 'Done';
+    }
 }
