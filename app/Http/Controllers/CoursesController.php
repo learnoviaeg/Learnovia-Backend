@@ -67,10 +67,10 @@ class CoursesController extends Controller
 
         $paginate = 12;
        
-        if($request->has('paginate')){
+        if($request->has('paginate'))
             $paginate = $request->paginate;
-        }
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level_id', 'ASC');
+
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level', 'ASC');
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
@@ -85,10 +85,9 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
-        })
-        ->join('courses', 'enrolls.course', '=', 'courses.id')
-        ->orderBy('courses.index', 'ASC')
-        ->groupBy(['course','level'])->get();
+        })->join('courses', 'enrolls.course', '=', 'courses.id')
+            ->orderBy('courses.index', 'ASC')
+            ->groupBy(['course','level'])->get();
 
         return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
     }
@@ -156,10 +155,11 @@ class CoursesController extends Controller
                             if($request->shared_lesson == 1){
                                 $lesson=lesson::firstOrCreate([
                                     'name' => 'Lesson ' . $i,
-                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                     'shared_lesson' => 1,
                                     'course_id' => $course->id,
                                     'shared_classes' => json_encode($chain['class']),
+                                ],[
+                                    'index' => Lesson::where('course_id',$course->id)->max('index')+1,
                                 ]);
                             }else{
                                 $lesson=lesson::create([
