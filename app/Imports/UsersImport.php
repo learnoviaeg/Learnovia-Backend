@@ -122,8 +122,11 @@ class UsersImport implements ToModel, WithHeadingRow
         $user->assignRole($role);
         if($row['role_id'] ==1)
         {
-            $request_user = new Request(['user_id' => $user->id]);
-            EnrollUserToCourseController::EnrollAdmin($request_user);
+            // $request_user = new Request(['user_id' => $user->id]);
+            // EnrollUserToCourseController::EnrollAdmin($request_user);
+
+            $job = (new \App\Jobs\EnrollAdminJob($user->id));
+            dispatch($job);
         }
 
         if (isset($row['class_id'])){

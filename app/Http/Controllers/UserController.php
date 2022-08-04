@@ -275,8 +275,11 @@ class UserController extends Controller
         // $user->assignRole($role);
         if($request->role ==1)
         {
-            $request_user = new Request(['user_id' => $user->id]);
-            EnrollUserToCourseController::EnrollAdmin($request_user);
+            // $request_user = new Request(['user_id' => $user->id]);
+            // EnrollUserToCourseController::EnrollAdmin($request_user);
+            
+            $job = (new \App\Jobs\EnrollAdminJob($user->id));
+            dispatch($job);
         }
 
         // if ($request->role_id == 3) {
