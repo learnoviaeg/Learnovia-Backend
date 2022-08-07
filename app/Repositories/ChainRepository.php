@@ -193,8 +193,8 @@ class ChainRepository implements ChainRepositoryInterface
         $crrent_year = AcademicYear::Get_current();
         $years = isset($crrent_year) ? [$crrent_year->id] : [];
         
-        if(isset($request->filter) && $request->filter == 'all')
-            $years = AcademicYear::pluck('id');
+        // if(isset($request->filter) && $request->filter == 'all')
+        //     $years = AcademicYear::pluck('id');
 
         if($request->filled('years'))
             $years = $request->years;
