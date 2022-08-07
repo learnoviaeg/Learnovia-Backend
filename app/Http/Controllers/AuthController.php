@@ -181,11 +181,12 @@ class AuthController extends Controller
         $request->validate([
             'fcm_tokens' => 'required|array',
         ]);
+        if(count($request->fcm_tokens) < 1 || in_array(null,$request->fcm_tokens))
+            return HelperController::api_response_format(404, [], __('messages.error.data_invalid'));
 
         $fcm_tokens=[
             'fcm_token' => $request->fcm_tokens[0],
         ];
-        // return substr(request()->getHost(),0,strpos(request()->getHost(),'api'));
         $data=[
             'user_id' => Auth::id(),
             'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
@@ -201,7 +202,7 @@ class AuthController extends Controller
             'form_params' => $data
         ]);
         
-        return 'Done';
+        return HelperController::api_response_format(200, null , 'registered');
     }
 
     public function Get_Dictionary($callOrNot = 0,Request $request)
@@ -247,7 +248,8 @@ class AuthController extends Controller
         $user=$request->user();
         $user->token=null;
         $user->save();
-        $request->user()->token()->revoke();
+        if($request->user()->token() != null)
+            $request->user()->token()->revoke();
 
         // for log event
         $logsbefore=Parents::where('parent_id',Auth::id())->get();
@@ -290,10 +292,13 @@ class AuthController extends Controller
 
         $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
         $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
-        $user['level']=$level->id;
-        $user['level_']=$level;
-        $user['class']=$class->id;  
-        $user['class_']=$class;  
+        if(isset($level))
+        {
+            $user['level']=$level->id;
+            $user['level_']=$level;
+            $user['class']=$class->id;  
+            $user['class_']=$class;
+        }
 
         $user->setHidden(['password']);
 

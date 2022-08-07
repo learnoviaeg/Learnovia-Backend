@@ -521,6 +521,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
+    Route::get('itemUsers', 'UsersController@itemUsers');
     Route::get('user/{count}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{participants}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('user/{all}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
@@ -560,10 +561,16 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     });
 
     Route::Resource('letter', LetterController::class);
-
     Route::Resource('settings', SettingsController::class);
+    Route::Resource('notification-settings', NotificationSettingsController::class);
+    Route::Resource('installments', InstallmentController::class);
+    Route::get('installment/reset', 'InstallmentController@reset');
+    Route::get('fees/profile', 'InstallmentController@user_installments');
 
     Route::Resource('grade-category', GradeCategoriesController::class);
+    Route::Resource('grading-schema', GradingSchemaController::class);
+    Route::post('apply-grading-schema/{id}', 'GradingSchemaController@applyGradingSchema');
+    Route::post('grading-schema-scale/{id}', 'GradingSchemaController@applyScale');
     Route::Resource('grade-item', GradeItemsController::class);
     Route::Resource('grader-report', GraderReportController::class);
     Route::get('grader-setup', 'GraderReportController@grade_setup');
@@ -588,6 +595,9 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
 
     
     Route::Resource('session', AttendanceSessionController::class);
+    Route::Resource('complexity/categories', BloomCategoryController::class);
+    Route::post('complexity/report', 'BloomCategoryController@singleReport');
+    Route::get('complexity/quiz-counters', 'BloomCategoryController@countQuestions');
 
     Route::Resource('topic', TopicController::class);
 
@@ -596,6 +606,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('courseProgressCounter' , 'ReportsController@CourseProgressCounters')->middleware('permission:reports/course_progress');
     Route::get('totalAttemptsReport' , 'ReportsController@totalAttemptsReport')->middleware('permission:reports/total_attempts_report');
     Route::get('userStatus/{option}' , 'ReportsController@usersStatusReport')->middleware('permission:reports/active_users|reports/in_active_users');
+    Route::Resource('weekly-plan', WeeklyPlanController::class);
+    Route::get('week-number', 'WeeklyPlanController@getWeekNumber');
+    Route::get('plan/change-course', 'WeeklyPlanController@updateCourse');
+
 });
 
 Route::get('materials-details', 'MaterialsController@Material_Details');

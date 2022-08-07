@@ -11,7 +11,7 @@ class FirstGrade implements gradingMethodsInterface
     public function calculate($user ,  $grade_category)
     {
         $items = GradeItems::where('grade_category_id',$grade_category->id)->pluck('id');
-        $grade = UserGrader::where('user_id',$user->id)->whereIn('item_id', $items)->first()->grade;
+        $grade = UserGrader::where('user_id',$user->id)->whereIn('item_id', $items)->where('item_type', 'item')->first()->grade;
         return $grade;
     }
 }

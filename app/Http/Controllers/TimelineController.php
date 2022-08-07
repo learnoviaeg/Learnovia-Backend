@@ -116,18 +116,19 @@ class TimelineController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timeline->get()
-            ->map(function ($line){
-                if($line->type == 'quiz'){
-                    $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
-                    $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
-                        ->whereNotNull('submit_time')->count();
-                    $line['max_attemp']=$quizLesson->max_attemp;
-                    $line['token_attempts']=$user_quiz;
-                    return $line;
-                }
+        $timelinePaginate=$timeline->get()->map(function ($line){
+            if($line->type == 'quiz'){
+                $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
+                $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
+                    ->whereNotNull('submit_time')->count();
+                $line['max_attemp']=$quizLesson->max_attemp;
+                $line['token_attempts']=$user_quiz;
                 return $line;
-        })], 200);
+            }
+            return $line;
+        });
+
+        return response()->json(['message' => 'Timeline List of items', 'body' => $timelinePaginate->paginate(HelperController::GetPaginate($request)) ], 200);
     }
 
     /**

@@ -247,8 +247,5 @@ class AC_year_type extends Controller
             return response()->json(['message' =>null, 'body' => url(Storage::url('files/'.$setting->key.'.'.$ext)) ], 200);
         }
         return response()->json(['message' =>null, 'body' => $setting ], 200);
-
     }
-
-
 }

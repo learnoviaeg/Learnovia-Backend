@@ -2,7 +2,7 @@
 
 // resources/lang/en/messages.php
 
-return [
+return [ 
     'error' => [
         'not_found' => 'Item is not found!',
         'parent_cannot_submit' => 'Parents can not submit answers',
@@ -16,6 +16,7 @@ return [
         'data_invalid' => 'This data is invalid',
         'item_added_before' => 'This item added before',
         'cannot_delete' => 'This item cannot be deleted',
+        'cannot_add' => 'This item cannot be added',
         'item_deleted' => 'This item has been removed',
         'incomplete_data' => 'This data is incomplete',
         'grade_less_than' => 'Please, put grade less than ',
@@ -350,6 +351,17 @@ return [
         'not_graded' => 'Not graded',
         'no_answers' => 'No answers',
     ],
+    'grading_schema' => [
+        'add'    => 'Grading schema added successfully',
+        'list' => 'grading schema list',
+        'scales_assigned'=> 'Scales assign successfully',
+        'delete' => 'Schema Deleted Successfully',
+        'canNot_delete' => 'You can\'t delete this scheme'
+    ],
+    'bloom_category' => [
+        'get' => 'complexity list',
+        'add' => 'Complexity add/update successfully'
+    ],
     'grade_category' => [
         'add'    => 'Grade category added successfully',
         'update' => 'Grade category is updated successfully',
@@ -395,5 +407,19 @@ return [
     'working_day' => [
         'list' => 'All Days',
         'update' => 'Days updated successfully'
-    ]
+    ],
+    'weekly-plan' => [
+        'add' => 'Weekly plan added successfully',
+        'delete' => 'Weekly plan deleted successfully',
+        'update' => 'Weekly plan updated Successfully',
+    ],
+
+    'fees' => [
+        'add' => 'Installment added successfully',
+        'delete' => 'Installment deleted successfully',
+        'update' => 'Installment updated Successfully',
+        'list' => 'Installments list',
+        'percentage' => 'Percentages total should be 100%',
+        'reset' => 'Please delete all the installments first',
+    ],
 ];

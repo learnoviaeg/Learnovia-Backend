@@ -3,17 +3,13 @@
 namespace App\Imports;
 
 use App\Course;
-// use App\AcademicYearType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-// use App\ClassLevel;
-// use App\CourseSegment;
 use App\Segment;
 use App\Classes;
 use App\SecondaryChain;
 use App\Lesson;
 use App\Enroll;
 use App\Http\Controllers\CoursesController;
-// use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Events\CourseCreatedEvent;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -43,10 +39,9 @@ class CoursesImport implements ToModel , WithHeadingRow
             // 'short_name' => 'unique:courses',
         ])->validate();
 
-
         $short_names=Course::where('segment_id',$row['segment_id'])->where('short_name',$row['short_name'])->get();
         if(count($short_names)>0)
-            die('short name must be unique');
+            throw new \Exception('short name must be unique');
 
         $no_of_lessons = 4;
         if (isset($row['no_of_lessons'])) 
@@ -59,7 +54,7 @@ class CoursesImport implements ToModel , WithHeadingRow
         // dd(Classes::where('level_id',$row['level_id'])->pluck('id'));
         $cl=Classes::where('level_id',$row['level_id'])->pluck('id');
         if(!isset($cl))
-            die('This Level doesn\'t have any classes');
+            throw new \Exception('This Level ' . $row['level_id'] .'doesn\'t have any classes');
 
         $chains[0]['class']=$cl->toArray();
         if(isset($row['class_id'])){
@@ -71,7 +66,6 @@ class CoursesImport implements ToModel , WithHeadingRow
         $req=new Request([
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'chains' => $chains,
             'chains' => $chains,
             'category_id' => isset($row['category']) ? $row['category'] : null,
             'mandatory' => isset($row['mandatory']) ? $row['mandatory'] : 1,

@@ -161,24 +161,29 @@ class ChainRepository implements ChainRepositoryInterface
             throw new \Exception('There is no active year');
         }
         $enrolls =  Enroll::where('year', $year->id);
+
         if ($request->filled('type'))
-            {            
             $enrolls=$enrolls->where('type', $request->type);
-            $segment_id = Segment::Get_current_by_one_type($request->type);
+
+        $types = $enrolls->pluck('type')->unique()->values();
+
+        if ($request->filled('segment')){
+            $segment_id = Segment::Get_current_by_one_type($types);
             if(!isset($segment_id))
-                throw new \Exception('There is no active segment in this type '.$request->type);
+                throw new \Exception('There is no active segment in this type '.$types);
             // $segment_id = Segment::Get_current($request->type)->id;
             if ($request->filled('segment'))
-                $segment_id = $request->segment;
-            $enrolls=$enrolls->where('segment', $segment_id);
-            }
+                $segment_id = [$request->segment];
+            $enrolls=$enrolls->whereIn('segment', $segment_id);
+        }
         if ($request->filled('level'))
             $enrolls=$enrolls->where('level', $request->level);
+
         if ($request->filled('class'))
             $enrolls=$enrolls->where('group', $request->class);
-        if ($request->filled('courses')){
+
+        if ($request->filled('courses'))
             $enrolls=$enrolls->whereIn('course', $request->courses);
-        }
 
     return $enrolls;
     }
@@ -187,6 +192,10 @@ class ChainRepository implements ChainRepositoryInterface
 
         $crrent_year = AcademicYear::Get_current();
         $years = isset($crrent_year) ? [$crrent_year->id] : [];
+        
+        // if(isset($request->filter) && $request->filter == 'all')
+        //     $years = AcademicYear::pluck('id');
+
         if($request->filled('years'))
             $years = $request->years;
 
@@ -235,6 +244,9 @@ class ChainRepository implements ChainRepositoryInterface
         //     $enrolls->whereIn('course', $request->courses);
 
         if($request->filled('courses')){
+            //to get data of courses on year not current
+            $enrolls =  Enroll::whereIn('course', $request->courses);
+            
             $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
             $enrolls->whereIn('segment', $Course_segments);
             $enrolls->whereIn('course', $request->courses);

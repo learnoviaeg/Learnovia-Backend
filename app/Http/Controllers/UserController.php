@@ -1,12 +1,4 @@
 <?php
-
-/**
- * Created by PhpStorm.
- * User: Huda
- * Date: 6/23/2019
- * Time: 9:51 AM
- */
-
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use App\Language;
@@ -45,6 +37,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Str;
 use App\LastAction;
+use App\Installment;
 
 class UserController extends Controller
 {
@@ -65,9 +58,9 @@ class UserController extends Controller
             // 'nickname' => 'array',
             // 'nickname.*' => 'string|min:3|max:50',
             'firstname' => 'required|array',
-            'firstname.*' => 'required|string|min:2|max:50',
+            'firstname.*' => 'required|string|max:50',
             'lastname' => 'required|array',
-            'lastname.*' => 'required|string|min:2|max:50',
+            'lastname.*' => 'required|string|max:50',
             'password' => 'required|array',
             'password.*' => 'required|alpha_dash|string|min:3|max:191',
             // 'role' => 'required|array',
@@ -109,80 +102,53 @@ class UserController extends Controller
             $username=User::where('username',$request->username[$key])->pluck('username')->count();
             if($username>0)
                 return HelperController::api_response_format(404 ,$username, __('messages.users.username_already_used'));
-            if (isset($request->picture[$i]))
-                    $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
-            $clientt = new Client();
-            $data = array(
-                'name' => $firstname. " " .$request->lastname[$key], 
-                'meta_data' => array(
-                    "image_link" => ($request->has('picture'))?$user_picture->path:null,
-                    'role'=> Role::find($request->role)->name,
-                ),
-            );    
-            $data = json_encode($data);
+            
+            if(isset($request->picture[$i]))
+                $user_picture = attachment::upload_attachment($request->picture[$i], 'User');
 
-                $firstUser = User::find(1);
-
-                $user = new User;
-                $user->firstname               = $firstname;
-                $user->lastname                = $request->lastname[$key];
-                $user->username                = $request->username[$key];
-                $user->password                = bcrypt($request->password[$key]);
-                $user->real_password           = $request->password[$key];
-                $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
-
-                $user->chat_uid                = $firstUser->chat_uid;
-                $user->chat_token              = $firstUser->chat_token;
-                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
-
-            /*$env  = env('APP_LOGTEST');
-            if ($env == true) {
-                $firstUser = User::find(1);
-                $user->chat_uid                = $firstUser->chat_uid;
-                $user->chat_token              = $firstUser->chat_token;
-                $user->refresh_chat_token      = $firstUser->refresh_chat_token;
-            }else{
-                try{
-                    $res = $clientt->request('POST', 'https://us-central1-learnovia-notifications.cloudfunctions.net/createUser', [
-                        'headers'   => [
-                            'Content-Type' => 'application/json'
-                        ], 
-                        'body' => $data
-                    ]);
-                }
-                catch(\Exception $e){
-                    throw new \Exception($e->getMessage());
-                } 
-                $user->chat_uid                = json_decode($res->getBody(),true)['user_id'];
-                $user->chat_token              = json_decode($res->getBody(),true)['custom_token'];
-                $user->refresh_chat_token      = json_decode($res->getBody(),true)['refresh_token'];
-            }*/
+            $user = new User;
+            $user->firstname               = $firstname;
+            $user->lastname                = $request->lastname[$key];
+            $user->username                = $request->username[$key];
+            $user->password                = bcrypt($request->password[$key]);
+            $user->real_password           = $request->password[$key];
+            $user->suspend                 =  (isset($request->suspend[$key])) ? $request->suspend[$key] : 0;
 
             foreach ($optionals as $optional){
-                if($request->filled($optional[$i])){
+                if($request->filled($optional[$i]))
                     $user->optional =$request->optional[$i];
-                }
+                
                 if (isset($request->picture[$i]))
                     $user->picture = $user_picture->id;
+
                 if ($request->filled($optional)){
                     if($optional =='birthdate')
                         $user->$optional = Carbon::parse($request->$optional[$i])->format('Y-m-d');
+
                     $user->$optional =$request->$optional[$i];
                 }
             }
             $i++;
 
-            if(!isset($user->language)){
+            if(!isset($user->language))
                 $user->language = Language::where('default', 1)->first()->id;
-                //$user->save();
-            }
+
             $user->save();
+
             $role = Role::find($request->role);
             $user->assignRole($role);
+
+            $req=new Request([
+                'user_id'=>$user->id,
+            ]);
+            app('App\Http\Controllers\ChatController')->chat_token($req);
+
             if($request->role ==1)
             {
-                $request_user = new Request(['user_id' => $user->id]);
-                EnrollUserToCourseController::EnrollAdmin($request_user);
+                $job = (new \App\Jobs\EnrollAdminJob($user->id));
+                dispatch($job);
+                // $request_user = new Request(['user_id' => $user->id]);
+                // EnrollUserToCourseController::EnrollAdmin($request_user);
             }
             $users_is->push($user);
         }
@@ -205,8 +171,8 @@ class UserController extends Controller
     {
         $request->validate([
             'nickname'=>'nullable|string|min:3|max:50',
-            'firstname' => 'required|string|min:2|max:50',
-            'lastname' => 'required|string|min:2|max:50',
+            'firstname' => 'required|string|max:50',
+            'lastname' => 'required|string|max:50',
             'id' => 'required|exists:users,id',
             'email' => 'unique:users,email,'.$request->id,
             'password' => 'alpha_dash|string|min:3|max:191',
@@ -309,8 +275,11 @@ class UserController extends Controller
         // $user->assignRole($role);
         if($request->role ==1)
         {
-            $request_user = new Request(['user_id' => $user->id]);
-            EnrollUserToCourseController::EnrollAdmin($request_user);
+            // $request_user = new Request(['user_id' => $user->id]);
+            // EnrollUserToCourseController::EnrollAdmin($request_user);
+            
+            $job = (new \App\Jobs\EnrollAdminJob($user->id));
+            dispatch($job);
         }
 
         // if ($request->role_id == 3) {
@@ -420,7 +389,11 @@ class UserController extends Controller
             'suspend' => 'in:1,0',
             'from' => 'date|required_with:to',
             'to' => 'date|required_with:from',
+            'fees' => 'in:paid,not_paid',
         ]);
+
+        $Installment_percentage = Installment::where('date' , '>=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
+
         $users = User::where('id','!=',0)->with('roles');
         if(Auth::id() != 1)
             $users = $users->where('id','!=',1);
@@ -437,6 +410,20 @@ class UserController extends Controller
             $users= $users->whereHas("roles", function ($q) use ($request) {
             $q->whereIn("id", $request->roles);
         });
+
+
+        if($request->filled('fees')){
+            if($request->fees == 'paid')
+                $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
+                $q->where("percentage", '>=',$Installment_percentage);
+            }); 
+
+            if($request->fees == 'not_paid')
+                $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
+                $q->where("percentage", '<',$Installment_percentage);
+            })->orWhereDoesntHave('fees');
+        }
+      
         if($request->filled('suspend'))
             $users = $users->where('suspend',$request->suspend);
         if($request->filled('from') && $request->filled('to')){ //lastaction filter
@@ -466,9 +453,7 @@ class UserController extends Controller
             $enrolled_users=$enrolled_users->where('year',$request->year);
             $flag=true;
         }      
-        // $enrolled_users=$enrolled_users->pluck('user_id');
-        // $users = User:: whereIn('id',$enrolled_users)->with('roles');
-        
+
         if($flag){
             $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());
             $users=$users->whereIn('id',$intersect);

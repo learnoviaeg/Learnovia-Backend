@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\AttendanceSession;
 use App\Attendance;
 use App\GradeCategory;
+use App\NotificationSetting;
 use Carbon\Carbon;
 use App\Exports\AttendanceLogsExport;
 use App\Classes;
@@ -14,16 +15,19 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\UserGrader;
 use App\SessionLog;
 use App\WorkingDay;
+use App\Repositories\NotificationRepoInterface;
 use App\Events\TakeAttendanceEvent;
 use Auth;
 use App\Course;
+use App\User;
 use App\Repositories\ChainRepositoryInterface;
 
 class AttendanceSessionController extends Controller
 {
-    public function __construct(ChainRepositoryInterface $chain)
+    public function __construct(ChainRepositoryInterface $chain,NotificationRepoInterface $notification)
     {
         $this->chain = $chain;
+        $this->notification = $notification;
         $this->middleware(['permission:attendance/add-session'],   ['only' => ['store']]);
         $this->middleware(['permission:attendance/get-sessions'],   ['only' => ['index','show']]);
         $this->middleware(['permission:attendance/delete-session'],   ['only' => ['destroy']]);
@@ -134,7 +138,7 @@ class AttendanceSessionController extends Controller
             'sessions.*.to' => 'required|date|after:sessions.*.from',
             'repeated_until' => 'required_if:repeated,==,1|date',
         ]);
-        $weekMap = ['Sunday','Monday','Tuesday','Wendesday','Thuresday','Friday','Saturday'];
+        $weekMap = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         $attendance=Attendance::find($request->attendance_id);
 
         if(Carbon::parse($request->start_date) < Carbon::parse($attendance->start_date))
@@ -152,7 +156,7 @@ class AttendanceSessionController extends Controller
                 {
                     $request->validate([
                         'class_id' => 'required',
-                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wendesday,Thuresday,Friday,Saturday|required_if:repeated,==,1',
+                        'sessions.*.day' => 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday|required_if:repeated,==,1',
                     ]);
 
                     if(array_search($session['day'],$weekMap) < carbon::parse($request->start_date)->dayOfWeek )
@@ -164,7 +168,7 @@ class AttendanceSessionController extends Controller
                             array_search($session['day'],$weekMap) - Carbon::parse($request->start_date)->dayOfWeek));
         
                     while($attendancestart <= Carbon::parse($repeated_until)){
-                        $attendance=AttendanceSession::firstOrCreate([ 
+                        AttendanceSession::firstOrCreate([ 
                             'name' => $request->name,
                             'attendance_id' => $request->attendance_id,
                             'class_id' => $request->class_id,
@@ -174,7 +178,7 @@ class AttendanceSessionController extends Controller
                             'to' => Carbon::parse($session['to'])->format('H:i'),
                             'created_by' => Auth::id()
                         ]);
-                        $attendancestart=$attendancestart->addDays(7);                   
+                        $attendancestart=$attendancestart->addDays(7);
                     }   
                 }
                 else if($attendance->attendance_type == 'Daily') // it entered if this type was per session so i write this if
@@ -224,7 +228,7 @@ class AttendanceSessionController extends Controller
         }      
         else
         {
-            $attendance=AttendanceSession::firstOrCreate([
+            AttendanceSession::firstOrCreate([
                 'name' => $request->name,
                 'attendance_id' => $request->attendance_id,
                 'class_id' => $request->class_id,
@@ -344,7 +348,36 @@ class AttendanceSessionController extends Controller
                 ['grade' =>  ($gardeOfSessions * $gradeCat->max)/100 , 'percentage' => ((($gardeOfSessions * $gradeCat->max)/100)*100)/20 ]
             );
             // event(new TakeAttendanceEvent($user['id']));
+            $notifyUsers[]=$user['id'];
         }
+
+        $noti_settings=NotificationSetting::where('type','attendance')->first();
+        $publish_date=Carbon::now()->format('Y-m-d H:i:s');
+        if(isset($noti_settings)){
+            $publish_date=Carbon::now()->addHours(($noti_settings->after_min)/60)->format('Y-m-d H:i:s');
+
+            $usrs=User::whereNotNull('id')->whereHas('roles', function($q) use($noti_settings){
+                if(isset($noti_settings->roles))
+                    $q->whereIn('id',$noti_settings->roles);
+            })->with('roles')->pluck('id');
+
+            if(isset($noti_settings->users))
+                $notifyUsers=array_merge($noti_settings->users,$usrs->toArray());
+            else
+                $notifyUsers=$usrs;
+        }
+
+        $reqNot=[
+            'message' => $session->attendance->name.' attendance was taken',
+            'item_id' => $session->attendance_id,
+            'item_type' => 'attendance',
+            'type' => 'notification',
+            'publish_date' => $publish_date,
+            'lesson_id' => null,
+            'course_name' => null
+        ];
+        
+        $this->notification->sendNotify($notifyUsers,$reqNot);
 
         return HelperController::api_response_format(200 , null , __('messages.attendance_session.taken'));
     }
