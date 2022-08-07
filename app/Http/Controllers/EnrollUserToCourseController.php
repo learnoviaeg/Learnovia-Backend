@@ -525,20 +525,8 @@ class EnrollUserToCourseController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
-        $Enrolls=Enroll::where('user_id',1)->get();
-        foreach($Enrolls as $enroll)
-        {
-            Enroll::firstOrCreate([
-                'user_id' => $request->user_id,
-                'role_id' => 1,
-                'year' => $enroll->year,
-                'type' => $enroll->type,
-                'level' => $enroll->level,
-                'group' => $enroll->group,
-                'segment' => $enroll->segment,
-                'course' => $enroll->course,
-            ]);
-        }
+        $job = (new \App\Jobs\EnrollAdminJob($request->user_id));
+        dispatch($job);
     }
 
     /**
@@ -563,11 +551,16 @@ class EnrollUserToCourseController extends Controller
             'users.*' => 'required|string|exists:users,id',
             'role_id' => 'required|exists:roles,id',
             'year' => 'exists:academic_years,id',
-            'type' => 'array|exists:academic_types,id|required_with:level',
-            'levels' => 'array|exists:levels,id|required_with:class',
-            'classes' => 'array|exists:classes,id',
-            'segments' => 'array|exists:segments,id',
-            'courses' => 'array|exists:courses,id'
+            'type' => 'array',
+            'type.*' => 'integer|exists:academic_types,id|required_with:level',
+            'levels' => 'array',
+            'levels.*' => 'integer|exists:levels,id|required_with:class',
+            'classes' => 'array',
+            'classes.*' => 'integer|exists:classes,id',
+            'segments' => 'array',
+            'segments.*' => 'integer|exists:segments,id',
+            'courses' => 'array',
+            'courses.*' => 'integer|exists:courses,id'
         ];
 
         $customMessages = [

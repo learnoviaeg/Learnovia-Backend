@@ -240,6 +240,9 @@ class ChainRepository implements ChainRepositoryInterface
         //     $enrolls->whereIn('course', $request->courses);
 
         if($request->filled('courses')){
+            //to get data of courses on year not current
+            $enrolls =  Enroll::whereIn('course', $request->courses);
+            
             $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
             $enrolls->whereIn('segment', $Course_segments);
             $enrolls->whereIn('course', $request->courses);
