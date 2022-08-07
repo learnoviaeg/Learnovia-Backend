@@ -28,7 +28,7 @@ class YearsController extends Controller
     {
         $request->validate([
             'search' => 'nullable',
-            'filter' => 'in:all,export' //all without enroll  //export for exporting
+            'filter' => 'in:all,export' //all without current year  //for teacher
         ]);
 
         $years=AcademicYear::whereNull('deleted_at');
