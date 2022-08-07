@@ -189,8 +189,11 @@ class LastActionMiddleWare
                 //     $data['lesson_id'] = $request->route()->parameters()['lesson_id'];
                 //     $data['id'] = $request->route()->parameters()['id'];
                 // }
-                $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
-                dispatch($lastActionjob);
+                if(Auth::user() != null)
+                {
+                    $lastActionjob = (new lastActionjob($data ,  $request->all(), Auth::user()));
+                    dispatch($lastActionjob);
+                }
         }
        
         
