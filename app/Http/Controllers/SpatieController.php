@@ -850,6 +850,8 @@ class SpatieController extends Controller
         $role = Role::create(['name' => $request->name]);
         if ($request->filled('description')) {
             $role->description = $request->description;
+            $role->ip_address = \Request::ip();
+            $role->assignedBy = Auth::id();
             $role->save();
         }
         foreach ($request->permissions as $per) {
