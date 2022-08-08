@@ -583,6 +583,7 @@ class AssigmentsController extends Controller
             $userassigment->corrected_file = attachment::upload_attachment($request->corrected_file, 'assignment', null)->id;
         }
         $userassigment->grade = $request->grade;
+        $userassigment->takebBy = Auth::id();
 
         $assigment = assignment::where('id', $request->assignment_id)->first();
         $usergrade=UserGrade::where('user_id',$request->user_id)

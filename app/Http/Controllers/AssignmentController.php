@@ -278,7 +278,7 @@ class AssignmentController extends Controller
         $assignment['visible'] = $assigLessonID->visible;
           /////////////student
         if ($user->can('site/assignment/getAssignment')) {
-            $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->first();
+            $studentassigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id', $user->id)->with('user')->first();
             if(isset($studentassigment)){
                 $assignment['user_submit'] =$studentassigment;
             }
