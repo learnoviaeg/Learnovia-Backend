@@ -717,6 +717,6 @@ class QuestionsController extends Controller
                 }
             }
         }
-        return 'Done';
+        return HelperController::api_response_format(200, $question, __('messages.question.transfer'));
     }
 }
