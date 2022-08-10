@@ -677,7 +677,7 @@ class QuestionsController extends Controller
 
         foreach($request->From as $key => $from)
         {
-            $questions=Questions::where('course_id',$from)->get();
+            $questions=Questions::whereNull('parent')->where('question_type_id','!=',5)->where('course_id',$from)->get();
             foreach($questions as $question)
             {
                 $existQCategory=QuestionsCategory::find($question->question_category_id);
