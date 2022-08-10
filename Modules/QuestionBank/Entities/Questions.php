@@ -18,7 +18,6 @@ class Questions extends Model
     //count of all quizzes
     protected $appends = ['count_quizzes'];
 
-
     public function getCountQuizzesAttribute()
     {
         $count_quest = 0;
@@ -55,12 +54,6 @@ class Questions extends Model
     {
         return $this->belongsTo('App\BloomCategory', 'complexity', 'id');
     }
-
-
-    // public function question_answer()
-    // {
-    //     return $this->hasMany('Modules\QuestionBank\Entities\QuestionsAnswer', 'question_id', 'id');
-    // }
 
     public function children()
     {
