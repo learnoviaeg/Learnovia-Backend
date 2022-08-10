@@ -183,9 +183,16 @@ class ChainRepository implements ChainRepositoryInterface
             $enrolls=$enrolls->where('group', $request->class);
 
         if ($request->filled('courses'))
-            $enrolls=$enrolls->whereIn('course', $request->courses);
+        {
+            // because data inside course like material and quizzes of year not current
+            $enrolls =  Enroll::whereIn('course', $request->courses);
+            if ($request->filled('class'))
+                $enrolls=$enrolls->where('group', $request->class);
 
-    return $enrolls;
+            // $enrolls=$enrolls->whereIn('course', $request->courses);
+        }
+
+        return $enrolls;
     }
 
     public function getEnrollsByManyChain(Request $request){
@@ -250,6 +257,8 @@ class ChainRepository implements ChainRepositoryInterface
             $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
             $enrolls->whereIn('segment', $Course_segments);
             $enrolls->whereIn('course', $request->courses);
+            if($request->filled('classes'))
+                $enrolls->whereIn('group', $request->classes);
         }
 
         if(!$request->filled('courses'))
