@@ -143,8 +143,6 @@ class PageController extends Controller
                 $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
                 $this->notification->sendNotify($users->toArray(),$reqNot);
             }
-
-
         }
 
         $tempReturn = Lesson::find($request->lesson_id[0])->module('Page', 'page')->get();;
