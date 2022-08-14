@@ -23,6 +23,7 @@ class WeeklyPlanController extends Controller
         $this->middleware(['permission:weekly_plan/update'],   ['only' => ['update , updateCourse']]);
         $this->middleware(['permission:weekly_plan/delete'],   ['only' => ['delete']]);
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -100,7 +101,6 @@ class WeeklyPlanController extends Controller
             ]); 
         }
         return response()->json(['message' => __('messages.weekly-plan.add'), 'body' => null ], 200); 
-        
     }
 
    /**
@@ -131,8 +131,8 @@ class WeeklyPlanController extends Controller
     {
         $plan = WeeklyPlan::find($id);
         $plan->delete();
+        
         return response()->json(['message' => __('messages.weekly-plan.delete'), 'body' => null ], 200); 
-
     }
 
      /**
@@ -146,8 +146,6 @@ class WeeklyPlanController extends Controller
         $plan = WeeklyPlan::whereId($id)->with(['user:id,lastname,firstname','course:id,name'])->first();
         return response()->json(['message' => null , 'body' => $plan ], 200); 
     }
-
-
 
     public function getWeekNumber(Request $request)
     {
@@ -181,7 +179,6 @@ class WeeklyPlanController extends Controller
             $start->addWeek(1);
         }
         return response()->json(['message' => 'Weeks number', 'body' => $weeks ], 200); 
-
     }
 
     public function updateCourse(Request $request)
@@ -193,7 +190,4 @@ class WeeklyPlanController extends Controller
         $plan = WeeklyPlan::where('course_id',$request->old_course)->update(['course_id'=> $request->new_course]);
         return response()->json(['message' =>  __('messages.weekly-plan.update'), 'body' => null ], 200); 
     }
-
-
-
 }

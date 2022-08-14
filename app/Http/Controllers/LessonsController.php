@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\ChainRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+// use App\Paginate;
 use App\Lesson;
 use App\SecondaryChain;
 use App\Course;
@@ -146,4 +147,28 @@ class LessonsController extends Controller
         $given_lesson->update(['index' => $request->index]);
         return response()->json(['message' => 'Sorted successfully', 'body' =>  null ], 200);
     }
+
+    // public function general(Request $request)
+    // {
+    //     $request->validate([
+    //         'lesson_id' => 'exists:lessons,id',
+    //     ]);
+
+    //     $paginate = Paginate::GetPaginate($request);
+    //     $pag=$paginate/4;
+    //     $each=floor($pag);
+    //     $ba2y=$paginate%4;
+    //     $last=$ba2y+$each;
+
+    //     $req = new Request([
+    //         'paginate' => $each,
+    //         'page' => $request->page,
+    //         'lesson_id' => $request->lesson_id
+    //     ]);
+
+    //     $all=Material::where('lesson_id',$request->lesson_id)->get();
+    //     $all[]=Timeline::where('lesson_id',$request->lesson_id)->get();
+    //     $all[]=h5pLesson::where('lesson_id',$request->lesson_id)->get();
+    //     // return $all->paginate()
+    // }
 }
