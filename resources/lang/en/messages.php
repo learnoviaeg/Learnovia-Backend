@@ -90,6 +90,7 @@ return [
         'answer_delete' => 'Question answer deleted successfully',
         'list' => 'Questions List',
         'question_type_error' => 'This Question is not Essay or true and false',
+        'transfer' => 'Transfered successfully'
     ],
     'answer' => [
         'add' => 'Answer added successfully',

@@ -11,6 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
 use App\Enroll;
+use App\attachment;
 
 class User extends Authenticatable
 {
@@ -180,6 +181,14 @@ class User extends Authenticatable
         $content=$this->attributes['profile_fields'];
         if(isset($content))
             return json_decode($content);
+        return $content;
+    }
+
+    public function getPictureAttribute()
+    {
+        $content=$this->attributes['picture'];
+        if(isset($content))
+            return attachment::find($content);
         return $content;
     }
 

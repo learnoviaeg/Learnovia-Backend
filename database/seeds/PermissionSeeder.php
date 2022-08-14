@@ -120,6 +120,7 @@ class PermissionSeeder extends Seeder
 
         //management
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'management/get', 'title' => 'Course Management' , 'dashboard' => 1, 'icon' => 'university']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'management/transfer_q_cat', 'title' => 'Transfer Question Category' , 'dashboard' => 1, 'icon' => 'university']);
         
         //Course Permissions
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 0, 'icon' => 'Course']);
