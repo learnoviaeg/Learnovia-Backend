@@ -56,8 +56,9 @@ class MaterialsController extends Controller
             'lesson' => 'nullable|integer|exists:lessons,id'
         ]);
 
+        //item_id >> it's material id from notification not item id
         if(isset($request->item_id)){
-            $check = Material::whereNull('deleted_at')->where('type',$request->item_type)->where('item_id',$request->item_id)->first();
+            $check = Material::whereId($request->item_id)->first();
             if(!isset($check))
                 return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
 
@@ -158,7 +159,6 @@ class MaterialsController extends Controller
     public function show($id)
     {
         $material = Material::find($id);
-
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
 
@@ -175,7 +175,6 @@ class MaterialsController extends Controller
             }
             return redirect($url);
         }
-
     }
 
     public function Material_Details(Request $request)
