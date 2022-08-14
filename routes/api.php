@@ -513,6 +513,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
     Route::get('lesson/sort', 'LessonsController@sort')->middleware(['permission:lesson/sort']);
+    // Route::get('lesson/general', 'LessonsController@general');
 
     Route::get('levels/{my}', 'TypesController@index');
     Route::get('levels/{export}', 'TypesController@index');
