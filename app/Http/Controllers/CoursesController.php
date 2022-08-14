@@ -296,9 +296,11 @@ class CoursesController extends Controller
         $course = Course::find($id);
         $enrolls = Enroll::where('course',$id)->where('role_id','!=',1)->count();
 
-        if($enrolls > 0){
+        if($enrolls > 0 && !$request->user()->can('course\softDelete'))
             return HelperController::api_response_format(200, [], __('messages.error.cannot_delete'));
-        }
+        
+        // if($request->user()->can('course\forceDelete'))
+        //     $course->forceDelete();
 
         $course->delete();
         return app('App\Http\Controllers\CourseController')->get($request);

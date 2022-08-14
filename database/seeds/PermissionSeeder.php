@@ -126,6 +126,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/add', 'title' => 'add course' , 'dashboard' => 0, 'icon' => 'Course']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/update', 'title' => 'update course']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/delete', 'title' => 'delete course']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/soft-delete', 'title' => 'soft delete course']); //for ignoring enroll
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/get-all', 'title' => 'All Courses' , 'dashboard' => 1, 'icon' => 'Course']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/all-courses', 'title' => 'get all my courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/my-courses', 'title' => 'get current courses']);
