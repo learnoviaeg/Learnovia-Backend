@@ -18,19 +18,18 @@ class CoursesExport implements FromCollection,WithHeadings
     /**
     * @return \Illuminate\Support\Collection
     */
-
     function __construct($courses) {
         $this->courses = $courses;
- 
     }
+
     public function collection()
     {
         foreach ($this->courses as $course) {
             $course->setHidden([])->setVisible($this->fields);
         }
         return $this->courses;
-        
     }
+
     public function headings(): array
     {
         return $this->fields;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 use App\attachment;
+use App\User;
 use Modules\Assigments\Entities\AssignmentLesson;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +27,7 @@ class AssignmentSubmissionResource extends JsonResource
             'submit_date' => isset($this['userAssignment'][0]['submit_date']) ? $this['userAssignment'][0]['submit_date'] : null,
             'content' => isset($this['userAssignment'][0]['content']) ? $this['userAssignment'][0]['content'] : null,
             'override' => isset($this['userAssignment'][0]['override']) ? $this['userAssignment'][0]['override'] : null,
+            'takenBy' => isset($this['userAssignment'][0]['takenBy']) ? User::find($this['userAssignment'][0]['takenBy']) : null,
             'status_id' => isset($this['userAssignment'][0]['status_id']) ? $this['userAssignment'][0]['status_id'] : 2,
             'feedback' => isset($this['userAssignment'][0]['feedback']) ? $this['userAssignment'][0]['feedback'] : null,
             'grade' => isset($this['userAssignment'][0]['grade']) ? $this['userAssignment'][0]['grade'] : null,

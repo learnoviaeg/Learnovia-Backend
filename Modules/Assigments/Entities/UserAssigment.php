@@ -9,7 +9,8 @@ class UserAssigment extends Model
 {
     use Auditable;
     
-    protected $fillable = ['user_id', 'assignment_id', 'attachment_id','corrected_file', 'submit_date', 'content', 'override', 'status_id', 'feedback', 'grade', 'assignment_lesson_id'];
+    protected $fillable = ['user_id', 'assignment_id', 'attachment_id','corrected_file', 'submit_date', 'content', 'override', 'status_id', 'feedback', 'grade',
+     'assignment_lesson_id', 'takenBy'];
 
     public function assignment()
     {
