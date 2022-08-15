@@ -39,7 +39,8 @@ class CourseResource extends JsonResource
             // 'year' => $segment->academic_year_id,
             'progress' => round($this->courses['progress'],2) ,
             'shared_lesson'=>$this->courses['shared_lesson'],
-            'index'=>$this->courses['index']
+            'index'=>$this->courses['index'],
+            'show' => $this->courses['show']
         ];
     }
 }
