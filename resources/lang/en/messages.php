@@ -105,6 +105,7 @@ return [
         'category_cannot_deleted' => 'This category has related questions, cannot be deleted',
         'cannot_deleted' => 'you can\'t delete this category',
     ],
+    
     'quiz' => [
         'add' => 'Quiz added successfully',
         'update' => 'Quiz updated successfully',
@@ -126,8 +127,10 @@ return [
         'grade_pass_settings' => 'Grade to pass settings added successfully',
         'grade_pass_settings_list' => 'Grade to pass settings',
         'wrong_date' => 'You can\'t update with this date please, Revision duration and end_date',
-        'quiz_notify' => 'You have a new quiz :quizName in course :courseName'
+        'quiz_notify' => 'You have a new quiz :quizName in course :courseName',
+        'error_date' => 'please revision you dates'
     ],
+
     'permissions' => [
         'no_roles_assigned' => 'There is no roles assigned to this permission',
         'user_doesnot_has_permission' => 'You do not have the permission',

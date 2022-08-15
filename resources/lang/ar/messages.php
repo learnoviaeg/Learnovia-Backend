@@ -96,6 +96,7 @@ return [
         'category_cannot_deleted' => 'هذا القسم لديه أسئلة ذات صلة ، لا يمكن حذفه',
         // 'cannot_deleted' => 'you can\'t delete this category',
     ],
+    
     'quiz' => [
         'add' => 'تم اضافة الاختبار بنجاح',
         'update' => 'تم تعديل الاختبار بنجاح',
@@ -116,8 +117,10 @@ return [
         'grade_pass_settings' => 'تم اضافه اعدادات درجه النجاح',
         'grade_pass_settings_list' => ' اعدادات درجه النجاح',
         'wrong_date' => 'من فضلك أعد مراجعة التواريخ ووقت الامتحان',
-        'quiz_notify' => 'لديك اختبار جديد :quizName في مادة :courseName'
+        'quiz_notify' => 'لديك اختبار جديد :quizName في مادة :courseName',
+        'error_date' => 'من قضلك راجع التواريخ'
     ],
+
     'permissions' => [
         'no_roles_assigned' => 'لا توجد وظائف معينة لهذا الإذن',
         'user_doesnot_has_permission' => 'ليس لديك هذه الصلاحية',
