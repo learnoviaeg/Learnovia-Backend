@@ -240,17 +240,17 @@ class QuestionsController extends Controller
             }
            
             //calculte time
-            $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
-            if($endDate < Carbon::today())
-                $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
+            // $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
+            // if($endDate < Carbon::today())
+            //     $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
  
-            $seconds = $endDate->diffInSeconds(Carbon::now());
+            // $seconds = $endDate->diffInSeconds(Carbon::now());
 
-            if($seconds < 0)
-                $seconds = 0 ;
+            // if($seconds < 0)
+            //     $seconds = 0 ;
 
-            $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
-            dispatch($job);
+            // $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
+            // dispatch($job);
 
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }

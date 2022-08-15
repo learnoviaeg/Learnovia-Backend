@@ -35,7 +35,7 @@ class QuizLesson extends Model
         'visible','index','seen_number', 'grade_pass' , 'questions_mark'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status', 'token_attempts', 'ended'];
+    protected $appends = ['started','published','user_seen_number','Status', 'token_attempts', 'ended'];
 
     public function getStartedAttribute(){
 
@@ -52,6 +52,16 @@ class QuizLesson extends Model
         }
 
         return $started;
+    }
+
+    public function getPublishedAttribute(){
+
+        $published = false;
+
+        if($this->publish_date < Carbon::now())
+            $published = true;
+
+        return $published;
     }
 
     public function getEndedAttribute(){

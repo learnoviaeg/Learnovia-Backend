@@ -595,7 +595,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-attendance-report', 'AttendanceReportsController@user_attendance_report')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
     Route::get('user-attendance-report-details', 'AttendanceReportsController@user_attendance_report_details')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
 
-    
     Route::Resource('session', AttendanceSessionController::class);
     Route::Resource('complexity/categories', BloomCategoryController::class);
     Route::post('complexity/report', 'BloomCategoryController@singleReport');
