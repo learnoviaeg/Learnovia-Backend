@@ -153,6 +153,13 @@ class AssignmentController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
+        $publish_date=Carbon::now();
+        if(isset($request->publish_date))
+            $publish_date=$request->publish_date;
+
+        if(Carbon::parse($request->opening_date) < Carbon::parse($publish_date))
+            $publish_date=$request->opening_date;
+
         foreach($request->lesson_id as $key => $lesson){
 
             $lesson_obj = Lesson::find($lesson);
@@ -174,7 +181,7 @@ class AssignmentController extends Controller
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
                 'assignment_id' => $assignment->id,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : Carbon::now(),
+                'publish_date' => $publish_date,
                 'due_date' => isset($request->closing_date) ? $request->closing_date : null,
                 'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
                 'scale_id' => isset($request->scale) ? $request->scale : null,
@@ -334,9 +341,20 @@ class AssignmentController extends Controller
             LastAction::lastActionInCourse($assigmentLesson->Lesson->course_id);
             if(!Carbon::parse($assigmentLesson->start_date) < Carbon::now())
             {
+                $publish_date=$assigmentLesson->publish_date;
+                if(isset($request->publish_date))
+                    $publish_date=$request->publish_date;
+
+                $opening_date=$assigmentLesson->start_date;
+                if(isset($request->opening_date))
+                    $opening_date = $request->opening_date;
+                    
+                if(Carbon::parse($opening_date) < Carbon::parse($publish_date))
+                    return HelperController::api_response_format(400,null,__('messages.quiz.error_date'));
+
                 $assigmentLesson->update([
-                    'start_date' => isset($request->opening_date) ? $request->opening_date : $assigmentLesson->start_date,
-                    'publish_date' => isset($request->publish_date) ? $request->publish_date : $assigmentLesson->publish_date,
+                    'start_date' => $opening_date,
+                    'publish_date' => $publish_date,
                 ]);
             }
     
