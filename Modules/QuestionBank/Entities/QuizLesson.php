@@ -42,14 +42,12 @@ class QuizLesson extends Model
         $started = true;
 
         if(count($this->override) > 0){
-
             $override = $this->override->first();
             $this->start_date = $override->start_date;
         }
 
-        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
+        if(Carbon::parse($this->start_date) > Carbon::now())
             $started = false;
-        }
 
         return $started;
     }
