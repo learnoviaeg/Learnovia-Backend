@@ -13,7 +13,7 @@ class Course extends Model
     use Auditable, SoftDeletes;
     
     protected $fillable = ['name' , 'category_id','mandatory' , 'image' , 'description','short_name','progress','level_id','segment_id',
-    'is_template','classes', 'letter_id','shared_lesson', 'index'];
+    'is_template','classes', 'letter_id','shared_lesson', 'index','show'];
 
     protected $dispatchesEvents = [
         'created' => \App\Events\CourseCreatedEvent::class,
@@ -66,6 +66,14 @@ class Course extends Model
     {
         $content=false;
         if($this->attributes['mandatory']==1)
+            $content = true;
+        return $content;
+    }
+
+    public function getShowAttribute()
+    {
+        $content=false;
+        if($this->attributes['show']==1)
             $content = true;
         return $content;
     }
