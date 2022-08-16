@@ -49,6 +49,8 @@ trait Auditable
             $diff_before['profile_fields'] = null;
             $diff_after         = $model->toArray();
             $diff_after['profile_fields'] = null;
+            unset($diff_after['picture']);
+            // unset($diff_before['picture']);
             $get_diff_before    = array_diff_assoc($diff_before, $diff_after);
 
             $tracked = [
