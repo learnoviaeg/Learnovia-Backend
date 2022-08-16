@@ -148,7 +148,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/template', 'title' => 'apply course template']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/hide-courses', 'title' => 'show hide courses']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/show-hidden-courses', 'title' => 'show hidden courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/sort', 'title' => 'sort courses per level']);
 
         //Enroll Permissions
