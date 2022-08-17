@@ -3,6 +3,8 @@
 namespace App\Repositories;
 use Illuminate\Http\Request;
 
+use Cache;
+use Redis;
 use App\CourseSegment;
 use App\AcademicYear;
 use App\YearLevel;
@@ -197,81 +199,87 @@ class ChainRepository implements ChainRepositoryInterface
 
     public function getEnrollsByManyChain(Request $request){
 
-        $crrent_year = AcademicYear::Get_current();
-        $years = isset($crrent_year) ? [$crrent_year->id] : [];
-        
-        // if(isset($request->filter) && $request->filter == 'all')
-        //     $years = AcademicYear::pluck('id');
-
-        if($request->filled('years'))
-            $years = $request->years;
-
-        if(count($years) == 0)
-            throw new \Exception('There is no active year');
-
-        $enrolls =  Enroll::whereIn('year', $years);
-
-        if(count($enrolls->pluck('year'))==0)
-            throw new \Exception('Please enroll some users in any course of this year');
-
-        if($request->filled('types'))
-            $enrolls->whereIn('type', $request->types);
-        
-        $types = $enrolls->pluck('type')->unique()->values();
-
-        $active_segments = Segment::Get_current_by_many_types($types);
-        
-        if($request->filled('period')){
+        $result=Cache::remember('enrolls_manyChain_cache',1, function() use ($request)
+        {
+            $crrent_year = AcademicYear::Get_current();
+            $years = isset($crrent_year) ? [$crrent_year->id] : [];
             
-            if($request->period == 'no_segment')
-                $active_segments = Segment::whereIn('academic_type_id', $types)->pluck('id'); 
-
-            if($request->period == 'past')
-                $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now())->pluck('id');
-           
-            if($request->period == 'future')
-                $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now())->pluck('id');
-        }
-
-        if($request->filled('segments'))
-            $active_segments = $request->segments;
-        
-        if(count($active_segments) == 0)
-            throw new \Exception('There is no active segment in those types'.$request->type);
-
-        // $enrolls->whereIn('segment', $active_segments);
-
-        if($request->filled('levels'))
-            $enrolls->whereIn('level', $request->levels);
-
-        if($request->filled('classes'))
-            $enrolls->whereIn('group', $request->classes);
-
-        // if($request->filled('courses'))
-        //     $enrolls->whereIn('course', $request->courses);
-
-        if($request->filled('courses')){
-            //to get data of courses on year not current
-            $enrolls =  Enroll::whereIn('course', $request->courses);
+            // if(isset($request->filter) && $request->filter == 'all')
+            //     $years = AcademicYear::pluck('id');
+    
+            if($request->filled('years'))
+                $years = $request->years;
+    
+            if(count($years) == 0)
+                throw new \Exception('There is no active year');
+    
+            $enrolls =  Enroll::whereIn('year', $years);
+    
+            if(count($enrolls->pluck('year'))==0)
+                throw new \Exception('Please enroll some users in any course of this year');
+    
+            if($request->filled('types'))
+                $enrolls->whereIn('type', $request->types);
             
-            $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
-            $enrolls->whereIn('segment', $Course_segments);
-            $enrolls->whereIn('course', $request->courses);
+            $types = $enrolls->pluck('type')->unique()->values();
+    
+            $active_segments = Segment::Get_current_by_many_types($types);
+            
+            if($request->filled('period')){
+                
+                if($request->period == 'no_segment')
+                    $active_segments = Segment::whereIn('academic_type_id', $types)->pluck('id'); 
+    
+                if($request->period == 'past')
+                    $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '<' ,Carbon::now())->where("start_date", '<' ,Carbon::now())->pluck('id');
+               
+                if($request->period == 'future')
+                    $active_segments = Segment::whereIn('academic_type_id', $types)->where("end_date", '>' ,Carbon::now())->where("start_date", '>' ,Carbon::now())->pluck('id');
+            }
+    
+            if($request->filled('segments'))
+                $active_segments = $request->segments;
+            
+            if(count($active_segments) == 0)
+                throw new \Exception('There is no active segment in those types'.$request->type);
+    
+            // $enrolls->whereIn('segment', $active_segments);
+    
+            if($request->filled('levels'))
+                $enrolls->whereIn('level', $request->levels);
+    
             if($request->filled('classes'))
                 $enrolls->whereIn('group', $request->classes);
-        }
+    
+            // if($request->filled('courses'))
+            //     $enrolls->whereIn('course', $request->courses);
+    
+            if($request->filled('courses')){
+                //to get data of courses on year not current
+                $enrolls =  Enroll::whereIn('course', $request->courses);
+                
+                $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
+                $enrolls->whereIn('segment', $Course_segments);
+                $enrolls->whereIn('course', $request->courses);
+                if($request->filled('classes'))
+                    $enrolls->whereIn('group', $request->classes);
+            }
+    
+            if(!$request->filled('courses'))
+                $enrolls->whereIn('segment', $active_segments);
+    
+            if($request->has('user_id'))
+            {
+                // if(!isset($request->user_id))
+                //     $enrolls->where('user_id',Auth::id());
+    
+                $enrolls->where('user_id',$request->user_id);
+            }
 
-        if(!$request->filled('courses'))
-            $enrolls->whereIn('segment', $active_segments);
-
-        if($request->has('user_id'))
-        {
-            // if(!isset($request->user_id))
-            //     $enrolls->where('user_id',Auth::id());
-
-            $enrolls->where('user_id',$request->user_id);
-        }
-
-        return $enrolls;    
+            return $enrolls->get();
+    
+        });
+        return $result;
+        // return $enrolls;    
     }
 }

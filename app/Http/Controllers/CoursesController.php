@@ -70,7 +70,10 @@ class CoursesController extends Controller
         if($request->has('paginate'))
             $paginate = $request->paginate;
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->orderBy('level', 'ASC');
+            // dd($enrolls);
+        $enrolls = $this->chain->getEnrollsByManyChain($request);
+        // return($enrolls->pluck('id'));
+        //->orderBy('level', 'ASC');
 
         if($request->has('role_id'))
             $enrolls->where('role_id',$request->role_id);
@@ -82,6 +85,7 @@ class CoursesController extends Controller
             $templates = Course::where('is_template',1)->get()->pluck('id');
             $enrolls->whereIn('course',$templates);
         }
+        $enrolls=Enroll::whereIn('id',$enrolls->pluck('id'));
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
