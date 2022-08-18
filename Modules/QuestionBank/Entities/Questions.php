@@ -80,20 +80,21 @@ class Questions extends Model
         }
         
         if($this->attributes['question_type_id'] == 2){
-            foreach($content as $key => $con)
-            {
-                if(isset($con->is_true)){
-                    if($con->is_true == 1){
-                        $con->is_true=True;
+            if(isset($content))
+                foreach($content as $key => $con)
+                {
+                    if(isset($con->is_true)){
+                        if($con->is_true == 1){
+                            $con->is_true=True;
+                            if(!isset($con->mark))
+                                $con->mark = null;
+                            continue;
+                        }
+                        $con->is_true=False;
                         if(!isset($con->mark))
                             $con->mark = null;
-                        continue;
                     }
-                    $con->is_true=False;
-                    if(!isset($con->mark))
-                        $con->mark = null;
                 }
-            }
         }
         return $content;
     }

@@ -73,8 +73,7 @@ class TimelineController extends Controller
                             });
 
         if(Auth::user()->can('site/course/student')){
-            $timeline
-            ->where('visible',1);
+            $timeline->where('visible',1);
             // ->where(function($query) {         //Where accessible
             //     $query->whereHasMorph(
             //         'item',

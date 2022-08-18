@@ -10,6 +10,7 @@ use App\Course;
 use Auth;
 use DateTime;
 use DateInterval;
+use App\Enroll;
 use DatePeriod;
 use App\Repositories\ChainRepositoryInterface;
 
@@ -154,8 +155,9 @@ class WeeklyPlanController extends Controller
         ]); 
 
         $segment = Segment::where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())->first();
-        // if($request->user()->can('site/course/student'))
-        //     $segment=Segment::where('current',1)->whereIn('id',Enroll::select('segment')->where('user_id',Auth::id())->pluck('segment'))->first();
+        if($request->user()->can('site/course/student'))
+            $segment=Segment::where("end_date", '>' ,Carbon::now())->where("start_date", '<=' ,Carbon::now())
+            ->whereIn('id',Enroll::select('segment')->where('user_id',Auth::id())->pluck('segment'))->first();
 
         if($request->filled('course_id'))
             $segment = Segment::select('start_date' , 'end_date')->whereId((Course::select('segment_id')->whereId($request->course_id)->first()->segment_id))->first();

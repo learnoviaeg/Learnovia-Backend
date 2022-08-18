@@ -148,6 +148,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/participants', 'title' => 'view course participants']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/progress-bar', 'title' => 'view course progress bar']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/template', 'title' => 'apply course template']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/show-hidden-courses', 'title' => 'show hidden courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'course/sort', 'title' => 'sort courses per level']);
 
         //Enroll Permissions
@@ -203,7 +204,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1,'icon' => 'User']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
         //Components Permissions
@@ -490,14 +491,14 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/delete','title' => 'delete quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/mark-field','title' => 'Mark Field']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get','title' => 'get quiz']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/add-quiz-lesson','title' => 'add quiz lesson']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/grading-method','title' => 'get grading method']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/update-quiz-lesson','title' => 'update quiz lesson']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/destroy-quiz-lesson','title' => 'destroy quiz lesson']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-types','title' => 'get all quiz types']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-categories','title' => 'get all quiz categories']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/sort','title' => 'sort quiz']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-quiz-lesson','title' => 'get quiz lesson']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-all-quizes','title' => 'get all quizes']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-student-in-quiz','title' => 'get student in quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-student-answer-quiz','title' => 'get student answer quiz']);
@@ -511,7 +512,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/get-attempts','title' => 'get all attempts of user']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/getStudentinQuiz','title' => 'get Student in Quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/quiz/store_user_quiz','title' => 'store user quiz']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
+        // Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/grade-user-quiz','title' => 'grade user quiz']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'quiz/override','title' => 'quiz override']);
 
         //Survey permessions

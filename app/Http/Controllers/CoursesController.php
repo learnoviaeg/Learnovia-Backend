@@ -85,6 +85,9 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
+            if($request->user()->can('show-hidden-courses'))
+                $query->where('show',1);
+
         })->join('courses', 'enrolls.course', '=', 'courses.id')
             ->orderBy('courses.index', 'ASC')
             ->groupBy(['course','level'])->get();
@@ -108,6 +111,7 @@ class CoursesController extends Controller
             'mandatory' => 'nullable',
             'short_name' =>'required',
             'is_template' => 'nullable|boolean',
+            'chains' => 'array|required',
             'chains.*.level' => 'array|required',
             'chains.*.level.*' => 'required|exists:levels,id',
             'chains.*.segment' => 'array|required_with:chains.*.level',
@@ -144,6 +148,7 @@ class CoursesController extends Controller
                         'classes' => json_encode($chain['class']),
                         'shared_lesson' => $request->shared_lesson,
                         'index' => isset($index) ? $index+1 : 1 ,
+                        'show' => isset($request->show) ? $request->show : 1
                     ]);
 
                     if ($request->filled('no_of_lessons'))
@@ -198,7 +203,7 @@ class CoursesController extends Controller
                             )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
             $le['teachers']  = $teacher ;
         }
-        return response()->json(['message' => __('messages.course.add'), 'body' => $courses->paginate(HelperController::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.course.add'), 'body' => null], 200);
     }
 
     /**
@@ -241,7 +246,7 @@ class CoursesController extends Controller
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template'];
+        $editable = ['name','show', 'category_id', 'description', 'mandatory','short_name','is_template'];
         $course = Course::find($id);
         // if course has an image
         if ($request->hasFile('image')) 
@@ -256,8 +261,8 @@ class CoursesController extends Controller
             $editable[]='shared_lesson';    
         }
 
-        foreach ($editable as $key) 
-            if ($request->filled($key)) 
+        foreach($editable as $key) 
+            if($request->filled($key)) 
                 $course->$key = $request->$key;
 
         if($request->filled('course_template')){

@@ -247,7 +247,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::get('show-hide-real-pass', 'UserController@Show_and_hide_real_password_with_permission')->name('show/hiderealpass')->middleware('permission:user/show-hide-real-pass');
     Route::post('un-suspend', 'UserController@unsuspend_user')->name('unsuspenduser')->middleware('permission:user/un-suspend');
     Route::get('parent-child', 'UserController@parent_child')->name('parentchild')->middleware('permission:user/parent-child');
-    Route::get('getParents', 'UserController@getParents')->name('getFamily')->middleware('permission:user/parent-child');
+    Route::get('getParents', 'UserController@getParents')->name('getFamily');
     Route::post('set-parent-child', 'UserController@set_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
     Route::post('unset-parent-child', 'UserController@unset_parent_child')->name('setparentchild')->middleware('permission:user/set-parent-child');
     Route::get('get-by-id', 'UserController@GetUserById')->name('getbyid')->middleware('permission:user/get-by-id');
@@ -595,7 +595,6 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-attendance-report', 'AttendanceReportsController@user_attendance_report')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
     Route::get('user-attendance-report-details', 'AttendanceReportsController@user_attendance_report_details')->middleware(['permission:attendance/user_report' , 'ParentCheck']);
 
-    
     Route::Resource('session', AttendanceSessionController::class);
     Route::Resource('complexity/categories', BloomCategoryController::class);
     Route::post('complexity/report', 'BloomCategoryController@singleReport');
