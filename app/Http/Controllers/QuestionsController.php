@@ -240,17 +240,17 @@ class QuestionsController extends Controller
             }
            
             //calculte time
-            $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
-            if($endDate < Carbon::today())
-                $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
+            // $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subDays(1); 
+            // if($endDate < Carbon::today())
+            //     $endDate = Carbon::parse($quiz->quizLesson[0]->due_date)->subHours(12);
  
-            $seconds = $endDate->diffInSeconds(Carbon::now());
+            // $seconds = $endDate->diffInSeconds(Carbon::now());
 
-            if($seconds < 0)
-                $seconds = 0 ;
+            // if($seconds < 0)
+            //     $seconds = 0 ;
 
-            $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
-            dispatch($job);
+            // $job = ( new \App\Jobs\Quiz24Hreminder($quiz))->delay($seconds);
+            // dispatch($job);
 
             return HelperController::api_response_format(200,null , __('messages.quiz.assign'));
         }
@@ -673,50 +673,53 @@ class QuestionsController extends Controller
         ]);
 
         if(count($request->From) != count($request->To))
-            return HelperController::api_response_format(400, $question, __('messages.error.data_invalid'));
+            return HelperController::api_response_format(400, null, __('messages.error.data_invalid'));
 
         foreach($request->From as $key => $from)
         {
             $questions=Questions::whereNull('parent')->where('question_type_id','!=',5)->where('course_id',$from)->get();
-            foreach($questions as $question)
+            if(count($questions) > 0)
             {
-                $existQCategory=QuestionsCategory::find($question->question_category_id);
-                $courseCat=QuestionsCategory::where('course_id',$from)->first();
-                if($courseCat->id == $question->question_category_id)
+                foreach($questions as $question)
                 {
-                    $newQ=Questions::firstOrCreate([
-                        'text' => $question->text,
-                        'mark' => $question->mark,
-                        'course_id' => $request->To[$key],
-                        'content' => json_encode($question->content),
-                        'mcq_type' => $question->mcq_type,
-                        'complexity'=> $question->complexity,
-                        'question_type_id' => $question->question_type_id,
-                        'question_category_id' => QuestionsCategory::where('course_id',$request->To[$key])->first()->id,
-                   ]);
-                }
-                else
-                {
-                    $questionCat=QuestionsCategory::firstOrCreate([
-                        'name' => $existQCategory->name,
-                        'course_id' => $request->To[$key]
-                    ]);
-
-                    // dd($questionCat);
-
-                    $newQ=Questions::firstOrCreate([
-                        'text' => $question->text,
-                        'mark' => $question->mark,
-                        'course_id' => $request->To[$key],
-                        'content' => json_encode($question->content),
-                        'mcq_type' => $question->mcq_type,
-                        'complexity'=> $question->complexity,
-                        'question_type_id' => $question->question_type_id,
-                        'question_category_id' => $questionCat->id
-                    ]);                    
+                    $existQCategory=QuestionsCategory::find($question->question_category_id);
+                    $courseCat=QuestionsCategory::where('course_id',$from)->first();
+                    if($courseCat->id == $question->question_category_id)
+                    {
+                        $newQ=Questions::firstOrCreate([
+                            'text' => $question->text,
+                            'mark' => $question->mark,
+                            'course_id' => $request->To[$key],
+                            'content' => json_encode($question->content),
+                            'mcq_type' => $question->mcq_type,
+                            'complexity'=> $question->complexity,
+                            'question_type_id' => $question->question_type_id,
+                            'question_category_id' => QuestionsCategory::where('course_id',$request->To[$key])->first()->id,
+                       ]);
+                    }
+                    else
+                    {
+                        $questionCat=QuestionsCategory::firstOrCreate([
+                            'name' => $existQCategory->name,
+                            'course_id' => $request->To[$key]
+                        ]);
+    
+                        // dd($questionCat);
+    
+                        $newQ=Questions::firstOrCreate([
+                            'text' => $question->text,
+                            'mark' => $question->mark,
+                            'course_id' => $request->To[$key],
+                            'content' => json_encode($question->content),
+                            'mcq_type' => $question->mcq_type,
+                            'complexity'=> $question->complexity,
+                            'question_type_id' => $question->question_type_id,
+                            'question_category_id' => $questionCat->id
+                        ]);                    
+                    }
                 }
             }
         }
-        return HelperController::api_response_format(200, $question, __('messages.question.transfer'));
+        return HelperController::api_response_format(200, null , __('messages.question.transfer'));
     }
 }

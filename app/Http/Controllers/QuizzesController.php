@@ -174,6 +174,16 @@ class QuizzesController extends Controller
             'users_ids.*' => 'exists:users,id'
         ]);
 
+        $publish_date=Carbon::now();
+        if(isset($request->publish_date))
+            $publish_date=$request->publish_date;
+
+        if(Carbon::parse($request->opening_time) < Carbon::parse($publish_date))
+            $publish_date=$request->opening_time;
+        
+        // if(Carbon::parse($request->opening_time) < Carbon::parse($request->publish_date))
+        //     return HelperController::api_response_format(400,null,__('messages.quiz.error_date'));
+
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
 
@@ -213,7 +223,7 @@ class QuizzesController extends Controller
                 'grading_method_id' => isset($request->grading_method_id)? json_encode((array)$request->grading_method_id) : json_encode(["Last"]),
                 'grade' => isset($request->grade) ? $request->grade : 0,
                 'grade_category_id' => $request->filled('grade_category_id') ? $request->grade_category_id : $grade_Cat->id,
-                'publish_date' => isset($request->publish_date) ? $request->publish_date : Carbon::now(),
+                'publish_date' => $publish_date,
                 'index' => ++$index,
                 'visible' => isset($request->visible)?$request->visible:1,
                 'grade_pass' => isset($request->grade_pass)?$request->grade_pass : null,
@@ -261,11 +271,22 @@ class QuizzesController extends Controller
         {
             LastAction::lastActionInCourse($quiz_lesson->lesson->course_id);
 
-            if(!strtotime($quiz_lesson->start_date) < Carbon::now())
+            if(!strtotime($quiz_lesson->start_date) < Carbon::now() && !strtotime($quiz_lesson->publish_date) < Carbon::now())
             {
+                $publish_date=$quiz_lesson->publish_date;
+                if(isset($request->publish_date))
+                    $publish_date=$request->publish_date;
+
+                $opening_time=$quiz_lesson->start_date;
+                if(isset($request->opening_time))
+                    $opening_time = $request->opening_time;
+                    
+                if(Carbon::parse($opening_time) < Carbon::parse($publish_date))
+                    return HelperController::api_response_format(400,null,__('messages.quiz.error_date'));
+
                 $quiz_lesson->update([
-                    'start_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->start_date,
-                    'publish_date' => isset($request->opening_time) ? $request->opening_time : $quiz_lesson->publish_date,
+                    'start_date' =>$opening_time,
+                    'publish_date' => $publish_date,
                 ]);
             }
     

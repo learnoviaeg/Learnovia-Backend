@@ -35,23 +35,31 @@ class QuizLesson extends Model
         'visible','index','seen_number', 'grade_pass' , 'questions_mark'
     ];
     protected $table = 'quiz_lessons';
-    protected $appends = ['started','user_seen_number','Status', 'token_attempts', 'ended'];
+    protected $appends = ['started','published','user_seen_number','Status', 'token_attempts', 'ended'];
 
     public function getStartedAttribute(){
 
         $started = true;
 
         if(count($this->override) > 0){
-
             $override = $this->override->first();
             $this->start_date = $override->start_date;
         }
 
-        if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now())){
+        if(Carbon::parse($this->start_date) > Carbon::now())
             $started = false;
-        }
 
         return $started;
+    }
+
+    public function getPublishedAttribute(){
+
+        $published = false;
+
+        if($this->publish_date < Carbon::now())
+            $published = true;
+
+        return $published;
     }
 
     public function getEndedAttribute(){
