@@ -16,11 +16,16 @@ use App\Notifications\SendNotification;
 use App\Paginate;
 use Illuminate\Support\Facades\Auth;
 use Modules\QuestionBank\Entities\QuizLesson;
+use Modules\QuestionBank\Entities\userQuiz;
+use App\SecondaryChain;
+use App\Parents;
+use App\Repositories\NotificationRepoInterface;
 
 class NotificationsController extends Controller
 {
-    public function __construct()
+    public function __construct(NotificationRepoInterface $notification)
     {
+        $this->notification = $notification;
         $this->middleware('permission:notifications/send', ['only' => ['store']]);
         $this->middleware('permission:notifications/get-all', ['only' => ['index']]);
         $this->middleware('permission:notifications/seen', ['only' => ['update']]);
@@ -178,17 +183,27 @@ class NotificationsController extends Controller
         if($request->has('message_type') && $request->message_type == 'quiz_notify'){
 
             $quizLesson = QuizLesson::where('quiz_id',$request->id)->where('lesson_id',$request->lesson_id)->first();
+
+            $answeredUsers = userQuiz::select('user_id')->where('quiz_lesson_id',$quizLesson->id)->select('user_id')->distinct()->pluck('user_id');
+           
+            $allUsers = SecondaryChain::where('lesson_id',$quizLesson->lesson_id)->whereNotIn('user_id',$answeredUsers)->where('role_id',3)->whereHas('Teacher')->select('user_id')->distinct()->pluck('user_id');
+           
+            $parents = Parents::select('parent_id')->whereIn('child_id',$allUsers)->pluck('parent_id');
+          
+            $allUsers = $allUsers->merge($parents);
         
-            $message = __('messages.quiz.quiz_notify', ['quizName' => $quizLesson->quiz->name, 'courseName' => $quizLesson->lesson->course->name]);
-
-            //sending notifications     
-            $notification = new QuizNotification($quizLesson,$message);
-
-            if($request->filled('users')){
-                $notification->setUsers($request->users);
+            if(count($allUsers) > 0){
+                $reqNot=[
+                    'message' => 'Quiz '.$quizLesson->quiz->name.' will be closed soon, Hurry up to solve it.',
+                    'item_id' => $quizLesson->quiz->id,
+                    'item_type' => 'quiz',
+                    'type' => 'notification',
+                    'publish_date' => $quizLesson->publish_date,
+                    'lesson_id' => $request->lesson_id,
+                    'course_name' => $quizLesson->quiz->course->name,
+                ];
+                $this->notification->sendNotify($allUsers,$reqNot);
             }
-
-            $notification->send();
 
             return response()->json(['message' => 'Notification sent.','body' => null], 200);           
         }
