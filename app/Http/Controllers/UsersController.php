@@ -169,7 +169,9 @@ class UsersController extends Controller
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 
-        $enrolls =  $enrolls->groupBy('user_id')->distinct()->with(['user.attachment','user.roles', 'classes'])->get()->pluck('user');
+        $enrolls =  $enrolls->groupBy('user_id')->distinct()->whereHas('user',function($q) {
+            $q->whereNull('deleted_at');
+        })->with(['user.attachment' ,'user.roles', 'classes'])->get()->pluck('user');
         // dd($enrolls->pluck('user'));
         if($request->filled('search'))
         {
