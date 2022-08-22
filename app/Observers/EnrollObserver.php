@@ -11,6 +11,7 @@ use App\Log;
 use App\User;
 use PhpParser\Node\Stmt\Continue_;
 use App\Repositories\EnrollmentRepositoryInterface;
+use Redis;
 
 class EnrollObserver
 {
@@ -28,21 +29,7 @@ class EnrollObserver
 
     public function created(Enroll $enroll)
     {
-        // if ($enroll->courseSegment->courses[0]->mandatory == 1) {
-        //     $user = User::find($enroll->user_id);
-        //     $user->update([
-        //         'class_id' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->class_id,
-        //         'level' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->level_id,
-        //         'type' => $enroll->courseSegment->segmentClasses[0]->classLevel[0]->yearLevels[0]->yearType[0]->academic_type_id
-        //     ]);
-        // }
-
-        $log=Log::create([
-            'user' => isset(User::find(Auth::id())->username) ? User::find(Auth::id())->username : 'migrated',
-            'action' => 'created',
-            'model' => 'Enroll',
-            'data' => serialize($enroll),
-        ]);
+        Redis::del(Redis::keys('courses'.$enroll->user_id.':*'));
     }
 
     /**
@@ -71,12 +58,7 @@ class EnrollObserver
      */
     public function deleted(Enroll $req)
     {
-        $log=Log::create([
-            'user' => User::find(Auth::id())->username,
-            'action' => 'deleted',
-            'model' => 'Enroll',
-            'data' => serialize($req),
-        ]);
+        Redis::del(Redis::keys('courses'.$req->user_id.':*'));
 
         $this->unEnroll->RemoveAllDataRelatedToRemovedChain($req);
     }
