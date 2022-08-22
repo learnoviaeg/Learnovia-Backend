@@ -25,6 +25,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
 use App\Level;
+use Redis;
 
 class ScriptsController extends Controller
 {
@@ -507,5 +508,11 @@ class ScriptsController extends Controller
             }
         }
         return 'Done';
+    }
+
+    public function clear_redis_cache()
+    {
+        Redis::command('flushdb');
+        return 'done';
     }
 }
