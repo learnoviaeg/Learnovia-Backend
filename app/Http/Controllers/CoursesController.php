@@ -19,6 +19,7 @@ use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Lesson;
 use App\Enroll;
 use DB;
+use Redis;
 use App\Events\LessonCreatedEvent;
 
 class CoursesController extends Controller
@@ -65,6 +66,10 @@ class CoursesController extends Controller
             'period' => 'in:past,future,no_segment'
         ]); 
 
+        // Redis::set('courses'.Auth::id().json_encode($request->query()), 'mimi');
+
+$getName = Redis::get('courses'.Auth::id().json_encode($request->query()));
+return $getName;
         $paginate = 12;
        
         if($request->has('paginate'))
