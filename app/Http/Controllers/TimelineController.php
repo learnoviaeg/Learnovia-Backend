@@ -20,6 +20,7 @@ use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
 use App\SecondaryChain;
+use Redis;
 
 class TimelineController extends Controller
 {
