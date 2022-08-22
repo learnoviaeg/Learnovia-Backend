@@ -59,6 +59,11 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
+        $chached_timeline = Redis::get('timeline'.Auth::id().json_encode($request->query()));
+
+        if(isset($chached_timeline))
+            return response()->json(['message' => __('Timeline List of items'), 'body' => json_decode($chached_timeline)], 200);
+    
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
         $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
@@ -127,7 +132,9 @@ class TimelineController extends Controller
             return $line;
         });
 
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timelinePaginate->paginate(HelperController::GetPaginate($request)) ], 200);
+        $result = $timelinePaginate->paginate(HelperController::GetPaginate($request));
+        Redis::set('timeline'.Auth::id().json_encode($request->query()), json_encode($result) );
+        return response()->json(['message' => 'Timeline List of items', 'body' => $result  ], 200);
     }
 
     /**
