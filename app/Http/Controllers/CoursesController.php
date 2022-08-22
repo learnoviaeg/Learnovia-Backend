@@ -66,12 +66,13 @@ class CoursesController extends Controller
             'period' => 'in:past,future,no_segment'
         ]); 
 
-        // Redis::set('courses'.Auth::id().json_encode($request->query()), 'mimi');
 
-$getName = Redis::get('courses'.Auth::id().json_encode($request->query()));
-return $getName;
-        $paginate = 12;
-       
+    $chached_courses = Redis::get('courses'.Auth::id().json_encode($request->query()));
+
+    if(isset($chached_courses))
+        return response()->json(['message' => __('messages.course.list'), 'body' => json_decode($chached_courses)], 200);
+
+        $paginate = 12;       
         if($request->has('paginate'))
             $paginate = $request->paginate;
 
@@ -97,7 +98,9 @@ return $getName;
             ->orderBy('courses.index', 'ASC')
             ->groupBy(['course','level'])->get();
 
-        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
+        $result = CourseResource::collection($results)->paginate($paginate);
+        Redis::set('courses'.Auth::id().json_encode($request->query()), json_encode($result) );
+        return response()->json(['message' => __('messages.course.list'), 'body' => $result], 200);
     }
 
     /**
