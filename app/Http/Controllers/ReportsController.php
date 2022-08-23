@@ -90,7 +90,9 @@ class ReportsController extends Controller
                 }]);
         }
 
-        $enrolls =  $enrolls->select('user_id')->distinct()->with(['user.attachment','user.roles'])->get()->pluck('user')->filter()->values();
+        $enrolls =  $enrolls->groupBy('user_id')->distinct()->whereHas('user',function($q) {
+            $q->whereNull('deleted_at');
+        })->with(['user.roles'])->get()->pluck('user');
 
         if($request->filled('search'))
         {
@@ -470,12 +472,21 @@ class ReportsController extends Controller
         if(isset($request->lesson_id))
             $lessons = $request->lesson_id;
         else
-            $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        {
+            if($request->has('quiz_id'))
+                $lessons=QuizLesson::where('quiz_id',$request->quiz_id)->pluck('lesson_id');
+            else
+                $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
+        }
+        // $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id')->toArray())->pluck('lesson_id')->toArray();
         
-        $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id')->toArray())->pluck('lesson_id')->toArray();
+            // dd($lessons);
+        //starting report  query    
+        $startQ = QuizLesson::whereNull('deleted_at');
+        if($request->has('quiz_id'))
+            $startQ->where('quiz_id',$request->quiz_id);
 
-        //starting report  query
-        $quizLessons = QuizLesson::whereIn('lesson_id',$lessons)
+        $quizLessons = $startQ->whereIn('lesson_id',$lessons)
     
                                 ->with(['quiz','lesson.course','lesson' => function($query) use ($usersIds){
 
@@ -509,53 +520,53 @@ class ReportsController extends Controller
 
                                     $q->whereNotNull('grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
 
-                                },'userGrader as got_zero' => function($q) use ($usersIds){
+                                    },'userGrader as got_zero' => function($q) use ($usersIds){
 
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
+
+                                        $q->where('grade', 0)->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
+
+                                    },'userGrader as full_mark' => function($q) use ($usersIds){
+
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
+
+                                        $q->whereColumn('grade','quiz_lessons.grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                     }
+                                    ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
 
-                                    $q->where('grade', 0)->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
 
-                                },'userGrader as full_mark' => function($q) use ($usersIds){
-
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
+                                        $q->whereColumn('grade','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                     }
+                                    ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
 
-                                    $q->whereColumn('grade','quiz_lessons.grade')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
-                                }
-                                ,'userGrader as ‌equals‌_to_‌pass_grade' => function($q) use ($usersIds){
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
 
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
+                                        $q->whereColumn('grade','>','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                     }
+                                    ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
 
-                                    $q->whereColumn('grade','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
-                                }
-                                ,'userGrader as ‌more‌_than‌_grade_to_pass' => function($q) use ($usersIds){
+                                        if(count($usersIds) > 0){
+                                            $q->whereIn('user_id',$usersIds);
+                                        }
 
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
+                                        $q->whereColumn('grade','<','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                     }
+                                ]);
 
-                                    $q->whereColumn('grade','>','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
-                                }
-                                ,'userGrader as less‌_than_‌grading‌_‌pass' => function($q) use ($usersIds){
+        // if($request->has('quiz_id'))
+        //     $quizLessons->where('quiz_id',$request->quiz_id);
 
-                                    if(count($usersIds) > 0){
-                                        $q->whereIn('user_id',$usersIds);
-                                    }
-
-                                    $q->whereColumn('grade','<','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
-                                }
-                            ]);
-
-        if($request->has('quiz_id'))
-            $quizLessons->where('quiz_id',$request->quiz_id);
-
-        if($request->has('lesson_id'))
-            $quizLessons->where('lesson_id',$request->lesson_id);
+        // if($request->has('lesson_id'))
+        //     $quizLessons->where('lesson_id',$request->lesson_id);
 
         if($request->has('from') && $request->has('to'))
             $quizLessons->whereBetween('created_at', [$request->from,$request->to]);
@@ -564,6 +575,7 @@ class ReportsController extends Controller
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
 
+        // dd($quizLessons->get());
         if($request->has('export')){
             $filename = uniqid();
             $file = Excel::store(new QuizAttemptReport($quizLessons->get()), 'reports'.$filename.'.xlsx','public');
@@ -648,6 +660,8 @@ class ReportsController extends Controller
         $enrolledUsers = $this->chain->getEnrollsByChain($request)->select('user_id')->distinct()->whereHas('user.roles', function($query) use ($request){
             if(isset($request->roles))
                 $query->whereIn('id',$request->roles);
+            
+            $query->whereNull('deleted_at');    
         })->with('user.roles')->get()->pluck('user');
 
         //users who doesnt have any logs in system
