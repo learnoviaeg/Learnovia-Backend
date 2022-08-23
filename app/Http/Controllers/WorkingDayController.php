@@ -11,6 +11,7 @@ class WorkingDayController extends Controller
     {
         $this->middleware(['permission:settings/working-days'],   ['only' => ['index','edit']]);
     }
+    
     /**
      * Display a listing of the resource.
      *

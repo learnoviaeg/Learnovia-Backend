@@ -372,9 +372,9 @@ class AssignmentController extends Controller
             if (count($ifStudent) >= 0)
             {
                 if(isset($request->allow_attachment) && $request->allow_attachment == 3)
-                $assigmentLesson->update([
-                    'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
-                ]);
+                    $assigmentLesson->update([
+                        'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+                    ]);
             }
             if (count($ifStudent) <= 0){
                 $description = (isset($request->file_description))? $request->file_description :null;
