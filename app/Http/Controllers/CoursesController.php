@@ -21,6 +21,7 @@ use App\Enroll;
 use DB;
 use Redis;
 use App\Events\LessonCreatedEvent;
+use Cache;
 
 class CoursesController extends Controller
 {
@@ -68,7 +69,6 @@ class CoursesController extends Controller
 
 
     $chached_courses = Redis::get('courses'.Auth::id().json_encode($request->query()));
-
     if(isset($chached_courses))
         return response()->json(['message' => __('messages.course.list'), 'body' => json_decode($chached_courses)], 200);
 

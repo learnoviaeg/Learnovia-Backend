@@ -39,8 +39,10 @@ class UserSeeder extends Seeder
                 'body' => $data
             ]);
 
-        $user = User::create([
-            'firstname' => 'Learnovia',
+        // $user = new User();
+        //::create([
+           $array[] =  
+           ['firstname' => 'Learnovia',
             'lastname' => 'Company',
             'username' => 'Admin',
             'email' => 'admin@learnovia.com',
@@ -49,7 +51,10 @@ class UserSeeder extends Seeder
             'chat_uid' => json_decode($res->getBody(),true)['user_id'],
             'chat_token' => json_decode($res->getBody(),true)['custom_token'],
             'refresh_chat_token' => json_decode($res->getBody(),true)['refresh_token']
-        ]);
+        ];
+        User::insert($array);
+        $user = User::where('firstname', 'Learnovia')->first();
+
        //$Super= \Spatie\Permission\Models\Role::create(['guard_name' => 'api', 'name' => 'Super Admin', 'description' => 'System manager that can monitor everything.']);
         //$Super->givePermissionTo(\Spatie\Permission\Models\Permission::where('name', 'not like', '%user/parent-child%')->where('name', 'not like', '%site/course/student%')->where('name', 'not like', 'user/get-my-child')->where('name', 'not like', '%user/get-current-child%')->where('name', 'not like', '%site/show/as-participant%')->get());
         

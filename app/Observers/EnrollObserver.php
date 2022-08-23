@@ -29,7 +29,9 @@ class EnrollObserver
 
     public function created(Enroll $enroll)
     {
-        Redis::del(Redis::keys('courses'.$enroll->user_id.':*'));
+        $search = 'courses'.$enroll->user_id.':*';
+        Redis::del(Redis::keys($search));
+
     }
 
     /**
