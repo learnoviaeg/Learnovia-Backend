@@ -271,7 +271,8 @@ class QuestionsController extends Controller
         ]);
         foreach($request->questions as $question){
             $quizQuestion = quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->first();
-            $quizQuestion->delete();
+            if(isset($quizQuestion))
+                $quizQuestion->forceDelete();
         }
             
         event(new UpdatedQuizQuestionsEvent($quiz_id));
