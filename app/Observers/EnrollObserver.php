@@ -29,7 +29,6 @@ class EnrollObserver
 
     public function created(Enroll $enroll)
     {
-        Redis::del(Redis::keys('courses'.$enroll->user_id.':*'));
     }
 
     /**
@@ -58,8 +57,7 @@ class EnrollObserver
      */
     public function deleted(Enroll $req)
     {
-        Redis::del(Redis::keys('courses'.$req->user_id.':*'));
-
+        
         $this->unEnroll->RemoveAllDataRelatedToRemovedChain($req);
     }
 
