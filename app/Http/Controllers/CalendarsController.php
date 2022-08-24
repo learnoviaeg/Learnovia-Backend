@@ -26,6 +26,7 @@ class CalendarsController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:calendar/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
+    
     /**
      * Display a listing of the resource.
      *

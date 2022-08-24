@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Attendance;
 use Auth;
 use App\Enroll;
 use App\Classes;
+use App\Attendance;
 use App\UserGrader;
 use App\GradeCategory;
 use App\AttendanceLevel;

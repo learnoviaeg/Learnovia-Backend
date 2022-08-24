@@ -66,7 +66,6 @@ class CoursesController extends Controller
             'period' => 'in:past,future,no_segment'
         ]); 
 
-
         $paginate = 12;       
         if($request->has('paginate'))
             $paginate = $request->paginate;
