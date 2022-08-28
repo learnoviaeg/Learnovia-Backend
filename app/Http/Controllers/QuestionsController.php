@@ -92,12 +92,8 @@ class QuestionsController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
-        // $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
-            // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
 
-        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->where('survey',0)->with(['course','question_category','question_type','children']);
+        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->with(['course','question_category','question_type','children']);
 
         if($request->filled('search'))
            $questions->where('text', 'LIKE' , "%$request->search%")
