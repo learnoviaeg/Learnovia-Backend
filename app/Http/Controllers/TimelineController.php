@@ -60,7 +60,7 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
+        $enrolls = $this->chain->getEnrollsByChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
         $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['lesson_id','group_id']);
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))

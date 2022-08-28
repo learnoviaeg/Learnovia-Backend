@@ -80,7 +80,14 @@ class MaterialsController extends Controller
 
         $materials_query =  Material::whereNull('deleted_at')->orderBy('created_at','desc');
 
-        $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
+        if($request->has('item_type'))
+            $materials_query->where('type',$request->item_type);
+
+        $materials_query->whereIn('lesson_id',$lessons)->skip(($page)*$paginate)->take($paginate);
+
+        // $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
+        $material = $materials_query->with(['lesson','course']);
+
         if($request->user()->can('site/course/student')){
             $material
             ->where('visible',1)
@@ -104,11 +111,7 @@ class MaterialsController extends Controller
             });
         }
 
-
         $query=clone $material;
-
-        if($request->has('item_type'))
-            $material->where('type',$request->item_type);
 
         if($count == 'count'){
              //copy this counts to count it before filteration
@@ -125,7 +128,8 @@ class MaterialsController extends Controller
         $result['last_page'] = Paginate::allPages($material->count(),$paginate);
         $result['total']= $material->count();
 
-        $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get();
+        // $AllMat=$material->skip(($page)*$paginate)->take($paginate)->with(['lesson.SecondaryChain.Class'])->get();
+        $AllMat=$material->with(['lesson.SecondaryChain.Class'])->get();
 
         foreach($AllMat as $one){
             $one->class = $one->lesson->SecondaryChain->pluck('class')->unique();
