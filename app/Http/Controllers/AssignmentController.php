@@ -164,12 +164,12 @@ class AssignmentController extends Controller
 
             $lesson_obj = Lesson::find($lesson);
 
-            $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
-            foreach($secondary_chains as $secondary_chain){
-                $segment = Segment::find($secondary_chain->Enroll->segment);
-                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
-                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
-            }
+            // $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
+            // foreach($secondary_chains as $secondary_chain){
+            //     $segment = Segment::find($secondary_chain->Enroll->segment);
+            //     if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+            //         return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+            // }
 
             $assignment = Assignment::firstOrCreate([
                 'name' => $request->name,
