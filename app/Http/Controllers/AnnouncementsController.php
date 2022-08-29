@@ -212,10 +212,6 @@ class AnnouncementsController extends Controller
                 ]; 
             }
             userAnnouncement::insert($data);
-        
-            //sending Notification
-            // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
-            // $notification->send();
 
             $reqNot=[
                 'message' => $announcement->title.' announcement is created',

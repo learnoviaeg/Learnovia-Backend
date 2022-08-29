@@ -60,8 +60,9 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
-        $enrolls = $this->chain->getEnrollsByChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
-        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['lesson_id','group_id']);
+
+        $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
+        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
                             ->whereIn('class_id',$sec_chain->pluck('group_id'))
@@ -99,8 +100,7 @@ class TimelineController extends Controller
             }
         }
 
-        $timelinePaginate=$timeline->skip(($request->paginate * ($request->page - 1)))
-        ->take($request->paginate)->get()->map(function ($line){
+        $timelinePaginate=$timeline->get()->map(function ($line){
             if($line->type == 'quiz'){
                 $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
                 $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
@@ -112,8 +112,7 @@ class TimelineController extends Controller
             return $line;
         });
 
-        $result = $timelinePaginate->paginate(HelperController::GetPaginate($request));
-        return response()->json(['message' => 'Timeline List of items', 'body' => $result  ], 200);
+        return response()->json(['message' => 'Timeline List of items', 'body' => $timelinePaginate->paginate(HelperController::GetPaginate($request)) ], 200);
     }
 
     /**
