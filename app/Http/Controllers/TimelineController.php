@@ -99,8 +99,10 @@ class TimelineController extends Controller
             }
         }
 
-        $timelinePaginate=$timeline->skip(($request->paginate * ($request->page - 1)))
-        ->take($request->paginate)->get()->map(function ($line){
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+        
+        $timelinePaginate=$timeline->skip(($page)*$paginate)->take($paginate)->get()->map(function ($line){
             if($line->type == 'quiz'){
                 $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
                 $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
