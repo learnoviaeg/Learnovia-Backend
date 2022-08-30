@@ -580,8 +580,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('grades-weight', 'GradeCategoriesController@weight_adjust');
     Route::Resource('user-grade', UserGradeController::class);
     Route::get('grade/export', 'UserGradeController@export')->name('exportGrade')->middleware('permission:grade/export');
-    Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware('permission:grade/report/user');
-    Route::get('user-total-report', 'UserGradeController@user_report_in_all_courses')->middleware('permission:grade/total-report/user');
+    Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware(['permission:grade/report/user' , 'ParentCheck']);
+    Route::get('user-total-report', 'UserGradeController@user_report_in_all_courses')->middleware(['permission:grade/total-report/user' , 'ParentCheck']);
     
 
     Route::get('grader-report-users', 'GraderReportController@user_grades');
