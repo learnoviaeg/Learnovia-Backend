@@ -21,6 +21,7 @@ use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
 use App\SecondaryChain;
 use Redis;
+use App\Paginate;
 
 class TimelineController extends Controller
 {
