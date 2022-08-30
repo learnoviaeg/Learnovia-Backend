@@ -153,47 +153,47 @@ class ChainRepository implements ChainRepositoryInterface
 
     }
 
-    public function getEnrollsByChain(Request $request){
+    // public function getEnrollsByManyChain(Request $request){
 
-        if ($request->filled('courses'))
-        {
-            // because data inside course like material and quizzes of year not current
-            $enrolls =  Enroll::whereIn('course', $request->courses);
-            if ($request->filled('class'))
-                $enrolls->where('group', $request->class);
-            return $enrolls;
-        }
+    //     if ($request->filled('courses'))
+    //     {
+    //         // because data inside course like material and quizzes of year not current
+    //         $enrolls =  Enroll::whereIn('course', $request->courses);
+    //         if ($request->filled('class'))
+    //             $enrolls->where('group', $request->class);
+    //         return $enrolls;
+    //     }
 
-        $year = AcademicYear::Get_current();
-        if ($request->filled('year'))
-            $year = AcademicYear::find($request->year);
-        if (!isset($year)){
-            throw new \Exception('There is no active year');
-        }
-        $enrolls =  Enroll::where('year', $year->id);
+    //     $year = AcademicYear::Get_current();
+    //     if ($request->filled('year'))
+    //         $year = AcademicYear::find($request->year);
+    //     if (!isset($year)){
+    //         throw new \Exception('There is no active year');
+    //     }
+    //     $enrolls =  Enroll::where('year', $year->id);
 
-        if ($request->filled('type'))
-            $enrolls->where('type', $request->type);
+    //     if ($request->filled('type'))
+    //         $enrolls->where('type', $request->type);
 
-        $types = $enrolls->pluck('type')->unique()->values();
+    //     $types = $enrolls->pluck('type')->unique()->values();
 
-        if ($request->filled('segment')){
-            $segment_id = Segment::Get_current_by_one_type($types);
-            if(!isset($segment_id))
-                throw new \Exception('There is no active segment in this type '.$types);
-            // $segment_id = Segment::Get_current($request->type)->id;
-            if ($request->filled('segment'))
-                $segment_id = [$request->segment];
-            $enrolls->whereIn('segment', $segment_id);
-        }
-        if ($request->filled('level'))
-            $enrolls=$enrolls->where('level', $request->level);
+    //     if ($request->filled('segment')){
+    //         $segment_id = Segment::Get_current_by_one_type($types);
+    //         if(!isset($segment_id))
+    //             throw new \Exception('There is no active segment in this type '.$types);
+    //         // $segment_id = Segment::Get_current($request->type)->id;
+    //         if ($request->filled('segment'))
+    //             $segment_id = [$request->segment];
+    //         $enrolls->whereIn('segment', $segment_id);
+    //     }
+    //     if ($request->filled('level'))
+    //         $enrolls=$enrolls->where('level', $request->level);
 
-        if ($request->filled('class'))
-            $enrolls->where('group', $request->class);
+    //     if ($request->filled('class'))
+    //         $enrolls->where('group', $request->class);
 
-        return $enrolls;
-    }
+    //     return $enrolls;
+    // }
 
     public function getEnrollsByManyChain(Request $request){
 
@@ -270,6 +270,69 @@ class ChainRepository implements ChainRepositoryInterface
             // if(!isset($request->user_id))
             //     $enrolls->where('user_id',Auth::id());
 
+            $enrolls->where('user_id',$request->user_id);
+        }
+
+        return $enrolls;    
+    }
+
+
+
+
+    public function getEnrollsByChain(Request $request){
+
+        if($request->filled('courses')){
+            //to get data of courses on year not current
+            $enrolls =  Enroll::whereIn('course', $request->courses);
+            
+            $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
+            $enrolls->whereIn('segment', $Course_segments);
+            $enrolls->whereIn('course', $request->courses);
+            if($request->filled('classes'))
+                $enrolls->whereIn('group', $request->classes);
+            return $enrolls;
+        }
+
+        $crrent_year = AcademicYear::Get_current();
+        $years = isset($crrent_year) ? [$crrent_year->id] : [];
+
+
+        if($request->filled('year'))
+            $years = [$request->year];
+
+        if(count($years) == 0)
+            throw new \Exception('There is no active year');
+
+        $enrolls =  Enroll::whereIn('year', $years);
+        if(count($enrolls->pluck('year'))==0)
+            throw new \Exception('Please enroll some users in any course of this year');
+
+        if($request->filled('type'))
+            $enrolls->where('type', $request->type);
+        
+        $types = $enrolls->pluck('type')->unique()->values();
+
+        $active_segments = Segment::Get_current_by_one_type($types[0]);
+
+        if($request->filled('segment'))
+            $active_segments = $request->segment;
+        
+        if(count($active_segments) == 0)
+            throw new \Exception('There is no active segment in those types'.$request->type);
+
+
+        if($request->filled('level'))
+            $enrolls->where('level', $request->level);
+
+        if($request->filled('classes'))
+            $enrolls->where('group', $request->class);
+
+
+        if(!$request->filled('courses'))
+            $enrolls->whereIn('segment', $active_segments);
+
+        if($request->has('user_id'))
+        {
             $enrolls->where('user_id',$request->user_id);
         }
 
