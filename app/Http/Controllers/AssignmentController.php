@@ -139,6 +139,7 @@ class AssignmentController extends Controller
             'publish_date' => 'date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'grade_category' => 'integer',
             'grade_category' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'allow_edit_answer' => 'boolean',
             'scale' => 'exists:scales,id',
@@ -178,6 +179,8 @@ class AssignmentController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
+            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();    
+            
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
                 'assignment_id' => $assignment->id,
@@ -186,16 +189,13 @@ class AssignmentController extends Controller
                 'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
                 'scale_id' => isset($request->scale) ? $request->scale : null,
                 'visible' => $request->visible,
-                // 'grade_category' => isset($request->grade_category) ? $request->grade_category : $pp->id,
+                'grade_category' => isset($request->grade_category) ? $request->grade_category : $pp->id,
                 'is_graded' => $request->is_graded,
                 'start_date' => $request->opening_date,
                 'mark' => $request->mark,
                 'is_graded' => $request->is_graded,
                 'allow_attachment' => $request->allow_attachment,
             ]);
-            
-            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();
-            $assignment_lesson->grade_category=$pp->id;
 
             if($request->is_graded)
             {
