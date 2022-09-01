@@ -253,10 +253,10 @@ class CoursesController extends Controller
         if ($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
         
-        if(isset($request->shared_lesson) && $request->shared_lesson == 0)
+        if($course->shared_lesson == 1)
         {
             $countAllLessons = Lesson::where('course_id', $id)->where('shared_lesson',1)->count();
-            if($countAllLessons > 0)
+            if($countAllLessons > 0 && $request->shared_lesson != null && $request->shared_lesson == 0)
                 return HelperController::api_response_format(200, $course, __('messages.course.canNot'));
 
             $editable[]='shared_lesson';    
