@@ -478,9 +478,6 @@ class ReportsController extends Controller
             else
                 $lessons = $enrolls->where('user_id',Auth::id())->with('SecondaryChain')->get()->pluck('SecondaryChain.*.lesson_id')->collapse();
         }
-        // $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id')->toArray())->pluck('lesson_id')->toArray();
-        
-            // dd($lessons);
         //starting report  query    
         $startQ = QuizLesson::whereNull('deleted_at');
         if($request->has('quiz_id'))
@@ -561,12 +558,6 @@ class ReportsController extends Controller
                                         $q->whereColumn('grade','<','quiz_lessons.grade_pass')->whereHas('student')->select(DB::raw('count(distinct(user_id))'));
                                     }
                                 ]);
-
-        // if($request->has('quiz_id'))
-        //     $quizLessons->where('quiz_id',$request->quiz_id);
-
-        // if($request->has('lesson_id'))
-        //     $quizLessons->where('lesson_id',$request->lesson_id);
 
         if($request->has('from') && $request->has('to'))
             $quizLessons->whereBetween('created_at', [$request->from,$request->to]);
