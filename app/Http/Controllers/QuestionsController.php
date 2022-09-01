@@ -123,7 +123,7 @@ class QuestionsController extends Controller
         
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
-        $$questions->orderBy('created_at','desc')->skip(($page)*$paginate)->take($paginate)->get();
+        $questions->orderBy('created_at','desc')->skip(($page)*$paginate)->take($paginate)->get();
 
         return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
     }
