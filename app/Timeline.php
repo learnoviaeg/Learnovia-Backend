@@ -40,20 +40,20 @@ class Timeline extends Model
             $status = __('messages.status.not_submitted');
 
             if($this->type == 'assignment'){
-                $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
-                $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id',Auth::id())->whereNotNull('submit_date')->first();
-                if(isset($user_assigment)){
+                $assigLessonID = AssignmentLesson::select('id')->where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id',Auth::id())->whereNotNull('submit_date');
+                if($user_assigment->count() > 0){
                     $status = __('messages.status.submitted');//submitted
-                    if(isset($user_assigment->grade))
+                    if($user_assigment->grade->count() > 0)
                         $status = __('messages.status.graded');//graded
                 }
             }
 
             if($this->type == 'quiz'){
-                $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $quiz_lesson = QuizLesson::select('id')->where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 if(isset($quiz_lesson)){
-                    $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
-                    $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->get();
+                    $user_quiz = userQuiz::select('id')->where('user_id', Auth::id())->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
+                    $user_quiz_asnwer = userQuizAnswer::select('force_submit','user_grade')->whereIn('user_quiz_id',$user_quiz)->get();
                     if(isset($user_quiz) && $quiz_lesson->max_attemp >= count($user_quiz) && count($user_quiz)!=0 &&  !in_array(NULL,$user_quiz_asnwer->pluck('force_submit')->toArray())){
                         $status = __('messages.status.submitted');//submitted
 
@@ -68,7 +68,7 @@ class Timeline extends Model
             $status = __('messages.status.no_answers');
 
             if($this->type == 'assignment'){
-                $assigLessonID = AssignmentLesson::where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $assigLessonID = AssignmentLesson::select('id')->where('assignment_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->whereNotNull('submit_date')->get();
                 if(($user_assigment)->count() != 0){
                 if(count($user_assigment) > 0)
@@ -80,10 +80,10 @@ class Timeline extends Model
             }
 
             if($this->type == 'quiz'){
-                $quiz_lesson = QuizLesson::where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
+                $quiz_lesson = QuizLesson::select('id')->where('quiz_id', $this->item_id)->where('lesson_id', $this->lesson_id)->first();
                 if(isset($quiz_lesson)){
-                    $user_quiz = userQuiz::where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
-                    $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->pluck('user_grade');
+                    $user_quiz = userQuiz::select('id')->where('quiz_lesson_id', $quiz_lesson->id)->pluck('id');
+                    $user_quiz_asnwer = userQuizAnswer::whereIn('user_quiz_id',$user_quiz)->where('force_submit',1)->select('user_grade')->pluck('user_grade');
 
                     if(count($user_quiz_asnwer) > 0)
                         $status = __('messages.status.not_graded');//not_graded
