@@ -91,13 +91,9 @@ class QuestionsController extends Controller
             return response()->json(['message' => __('messages.question.list'), 'body' => $questions], 200);
         }
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request);
-        // $user_course_segments = $this->chain->getCourseSegmentByChain($request);
-        if(!$request->user()->can('site/show-all-courses'))//student
-            $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
-            // $user_course_segments = $user_course_segments->where('user_id',Auth::id());
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
 
-        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->where('survey',0)->with(['course','question_category','question_type','children']);
+        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->with(['course','question_category','question_type','children']);
 
         if($request->filled('search'))
            $questions->where('text', 'LIKE' , "%$request->search%")
@@ -124,8 +120,12 @@ class QuestionsController extends Controller
 
             return response()->json(['message' => __('messages.question.count'), 'body' => $counts], 200);
         }
+        
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+        $$questions->orderBy('created_at','desc')->skip(($page)*$paginate)->take($paginate)->get();
 
-        return response()->json(['message' => __('messages.question.list'), 'body' => $questions->orderBy('created_at','desc')->get()->paginate(Paginate::GetPaginate($request))], 200);
+        return response()->json(['message' => __('messages.question.list'), 'body' => $questions->paginate(Paginate::GetPaginate($request))], 200);
     }
 
      /**
