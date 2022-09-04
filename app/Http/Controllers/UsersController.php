@@ -77,6 +77,8 @@ class UsersController extends Controller
             'search' => 'string',
         ]);
         //using in chat api new route { api/user/all}
+        $enrolls = $this->chain->getEnrollsByChain($request);
+
         if($my_chain == 'all'){
 
             $users = User::with(['attachment','roles']);
@@ -88,11 +90,12 @@ class UsersController extends Controller
                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
                 });
             }
-            return response()->json(['message' => __('messages.users.all_list'), 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+            if($request->user()->can('site/show-all-courses'))
+                return response()->json(['message' => __('messages.users.all_list'), 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+    
+            $courseAuth = $this->chain->getEnrollsByChain($request)->select('course')->where('user_id',Auth::id())->pluck('course');
+            $enrolls = $this->chain->getEnrollsByChain($request)->whereIn('course',$courseAuth);
         }
-
-        $enrolls = $this->chain->getEnrollsByChain($request);
-        //dd($enrolls->pluck('user_id'));
 
         if($my_chain=='count'){
             $count = [];
