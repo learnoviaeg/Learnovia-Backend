@@ -103,7 +103,7 @@ class TimelineController extends Controller
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
         
-        $timelinePaginate=$timeline->skip(($page)*$paginate)->take($paginate)->get()->map(function ($line){
+        $timeline->skip(($page)*$paginate)->take($paginate)->get()->map(function ($line){
             if($line->type == 'quiz'){
                 $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
                 $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
@@ -115,7 +115,7 @@ class TimelineController extends Controller
             return $line;
         });
 
-        $result = $timelinePaginate->paginate(HelperController::GetPaginate($request));
+        $result = $timeline->paginate(HelperController::GetPaginate($request));
         return response()->json(['message' => 'Timeline List of items', 'body' => $result  ], 200);
     }
 
