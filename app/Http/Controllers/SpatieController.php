@@ -1088,7 +1088,7 @@ class SpatieController extends Controller
         $user = Auth::user();
         $allRole = $user->roles;
         foreach ($allRole as $role) {
-            $pers = $role->getAllPermissions();
+            $pers = $role->getAllPermissions()->where('dashboard', 1);
             foreach ($pers as $permission) {
                 if ($permission->dashboard) {
                     if(in_array($permission->id , $ids))
