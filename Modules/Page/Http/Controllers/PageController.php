@@ -129,19 +129,21 @@ class PageController extends Controller
                 $material->restricted=1;
                 $material->save();
             }
-            if(!isset($request->users_ids)){
-                $reqNot=[
-                    'message' => $material->name.' page is added',
-                    'item_id' => $material->id,
-                    'item_type' => 'page',
-                    'type' => 'notification',
-                    'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
-                    'lesson_id' => $lesson,
-                    'course_name' => $TempLesson->course->name,
-                ];
+            if($material->visible == 1){
+                if(!isset($request->users_ids)){
+                    $reqNot=[
+                        'message' => $material->name.' page is added',
+                        'item_id' => $material->id,
+                        'item_type' => 'page',
+                        'type' => 'notification',
+                        'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
+                        'lesson_id' => $lesson,
+                        'course_name' => $TempLesson->course->name,
+                    ];
 
-                $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
-                $this->notification->sendNotify($users->toArray(),$reqNot);
+                    $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                    $this->notification->sendNotify($users->toArray(),$reqNot);
+                }
             }
         }
 
