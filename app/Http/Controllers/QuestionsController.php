@@ -222,7 +222,7 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
-                if(!$quiz->restricted)
+                if(!$quiz->restricted && $newQuizLesson->visible)
                 {
                     $reqNot=[
                         'message' => $quiz->name.' quiz is created',

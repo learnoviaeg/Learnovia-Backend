@@ -440,8 +440,6 @@ class EnrollUserToCourseController extends Controller
         else
             $intersect=$usersall->pluck('id')->toArray();
 
-
-
         $users_student=collect();
         $users_staff=collect();
         $searched=collect();

@@ -19,14 +19,14 @@ class EnrollStudent implements ToModel,WithHeadingRow
     */
     public function model(array $row)
     {
-        // $messages = [
-        //     'exists' => 'user with username '.$row['username'].' not found'
-        // ];
+        $messages = [
+            'exists' => 'user with username '.$row['username'].' not found'
+        ];
         $validator = Validator::make($row,[
             'class_id' => 'exists:classes,id',
             'username' => 'required|exists:users,username',
             'segment_id' => 'required|exists:segments,id'
-        ])->validate();//,$messages)->validate();
+        ],$messages)->validate();
         
         $optional='optional';
 
