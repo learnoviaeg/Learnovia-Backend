@@ -224,7 +224,7 @@ class AssignmentController extends Controller
 
             //sending notifications
             $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
-            if(!isset($request->users_ids))
+            if(!isset($request->users_ids) && $assignment_lesson->visible)
             {
                 $reqNot=[
                     'message' => $assignment->name.' assignment is created',
@@ -260,6 +260,9 @@ class AssignmentController extends Controller
         $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();
         if(!isset($assigLessonID))
             return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
+
+        if($request->user()->can('site/course/student') && !$assigLessonID->visible)
+            return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
 
         $assignment = assignment::where('id',$assignment_id)->with('assignmentLesson','courseItem.courseItemUsers')->first();
         if(!isset($assignment))
@@ -421,16 +424,19 @@ class AssignmentController extends Controller
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-            $reqNot=[
-                'message' => $assignment->name.' assignment is updated',
-                'item_id' => $assignment->id,
-                'item_type' => 'assignment',
-                'type' => 'notification',
-                'publish_date' => $assigmentLesson->publish_date,
-                'lesson_id' => $assigmentLesson->lesson_id,
-                'course_name' => $assigmentLesson->lesson->course->name
-            ];
-            $this->notification->sendNotify($users->toArray(),$reqNot);
+            if($assigmentLesson->visible)
+            {
+                $reqNot=[
+                    'message' => $assignment->name.' assignment is updated',
+                    'item_id' => $assignment->id,
+                    'item_type' => 'assignment',
+                    'type' => 'notification',
+                    'publish_date' => $assigmentLesson->publish_date,
+                    'lesson_id' => $assigmentLesson->lesson_id,
+                    'course_name' => $assigmentLesson->lesson->course->name
+                ];
+                $this->notification->sendNotify($users->toArray(),$reqNot);
+            }
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));
