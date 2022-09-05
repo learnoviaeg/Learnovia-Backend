@@ -221,20 +221,22 @@ class BigbluebuttonController extends Controller
                             }
 
                             //sending Notification
-                            $reqNot=[
-                                'message' => $bigbb->name.' zoom is created',
-                                'item_id' => $bigbb->id,
-                                'item_type' => 'zoom',
-                                'type' => 'notification',
-                                'publish_date' => $bigbb->start_date,
-                                'lesson_id' => null,
-                                'course_name' => Course::find($bigbb->course_id)->name
-                            ];
-        
-                            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
-                            // dd($users);
-                            $this->notification->sendNotify($users->toArray(),$reqNot);
-
+                            if($bigbb->show == 1)
+                            {
+                                $reqNot=[
+                                    'message' => $bigbb->name.' zoom is created',
+                                    'item_id' => $bigbb->id,
+                                    'item_type' => 'zoom',
+                                    'type' => 'notification',
+                                    'publish_date' => $bigbb->start_date,
+                                    'lesson_id' => null,
+                                    'course_name' => Course::find($bigbb->course_id)->name
+                                ];
+            
+                                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
+                                // dd($users);
+                                $this->notification->sendNotify($users->toArray(),$reqNot);
+                            }
                             $created_meetings->push($bigbb);
                             
                             $end_date = Carbon::parse($temp_start)->addMinutes($request->duration);
