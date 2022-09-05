@@ -340,7 +340,7 @@ class QuizzesController extends Controller
             dispatch($userGradesJob);    
 
             //send notification
-            if(!$quiz->draft)
+            if(!$quiz->draft && $quiz_lesson->visible)
             {
                 $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
                 $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
