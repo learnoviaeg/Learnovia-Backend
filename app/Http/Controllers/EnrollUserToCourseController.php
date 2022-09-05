@@ -570,10 +570,12 @@ class EnrollUserToCourseController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        if (isset($request->courses)) {
+        $courses = $this->chain->getEnrollsByManyChain($request)->select('course')->distinct('course')->pluck('course');
+
+        if (isset($courses)) {
             $count = 0;
             foreach ($request->users as $user) {
-                foreach ($request->courses as $course) {
+                foreach ($courses as $course) {
                     foreach ($request->classes as $class) {
                         $coco = Course::find($course);
                         $seg = Segment::find($coco->segment_id);
