@@ -276,9 +276,6 @@ class ChainRepository implements ChainRepositoryInterface
         return $enrolls;    
     }
 
-
-
-
     public function getEnrollsByChain(Request $request){
 
         if($request->filled('courses')){
@@ -315,11 +312,10 @@ class ChainRepository implements ChainRepositoryInterface
         $active_segments = Segment::Get_current_by_one_type($types[0]);
 
         if($request->filled('segment'))
-            $active_segments = $request->segment;
+            $active_segments = [$request->segment];
         
         if(count($active_segments) == 0)
             throw new \Exception('There is no active segment in those types'.$request->type);
-
 
         if($request->filled('level'))
             $enrolls->where('level', $request->level);
