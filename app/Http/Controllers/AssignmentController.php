@@ -247,13 +247,13 @@ class AssignmentController extends Controller
         return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
-    /**
+    /**   
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($assignment_id,$lesson_id)
+    public function show($assignment_id,$lesson_id, Request $request)
     {
         $user = Auth::user();
 
