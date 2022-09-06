@@ -862,7 +862,14 @@ class CourseController extends Controller
         $admins=User::select('id')->whereHas('roles',function($q){  $q->where('id',1);  })->get();
 
         foreach($courses_of_level as $course){
-            foreach($admins as $admin){
+             $class_of_course = Course::whereId($course);
+             $shared_classes = $class_of_course->first()->classes;
+
+             if(!in_array($class->id, $shared_classes))
+                array_push($shared_classes , $class->id);
+             $class_of_course->update(['classes' => json_encode($shared_classes)]);
+
+             foreach($admins as $admin){
                 Enroll::firstOrCreate([
                     'user_id'=> $admin->id,
                     'role_id' => 1,
