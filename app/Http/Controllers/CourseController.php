@@ -850,13 +850,13 @@ class CourseController extends Controller
             'type' => 'required|exists:academic_types,id',
             'segment' => 'required|exists:segments,id',
             'level' => 'required|exists:levels,id',
-            'class_name' => 'required|string',
+            'class' => 'required|exists:classes,id',
         ]);
 
-        $class = Classes::firstOrCreate([
-            'name' => $request->class_name,
-            'level_id' => $request->level
-        ]);
+        // $class = Classes::firstOrCreate([
+        //     'name' => $request->class_name,
+        //     'level_id' => $request->level
+        // ]);
       
         $courses_of_level = Course::where('level_id' , $request->level)->where('segment_id' , $request->segment)->select('id')->pluck('id');
         $admins=User::select('id')->whereHas('roles',function($q){  $q->where('id',1);  })->get();
@@ -865,8 +865,8 @@ class CourseController extends Controller
              $class_of_course = Course::whereId($course);
              $shared_classes = $class_of_course->first()->classes;
 
-             if(!in_array($class->id, $shared_classes))
-                array_push($shared_classes , $class->id);
+             if(!in_array($request->class, $shared_classes))
+                array_push($shared_classes , $request->class);
              $class_of_course->update(['classes' => json_encode($shared_classes)]);
 
              foreach($admins as $admin){
@@ -877,7 +877,7 @@ class CourseController extends Controller
                     'type' => $request->type,
                     'segment' => $request->segment,
                     'level' => $request->level,
-                    'group' => $class->id,
+                    'group' => $request->class,
                     'course' => $course,
                 ]);
             }
