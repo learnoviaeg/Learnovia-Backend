@@ -567,13 +567,6 @@ class BigbluebuttonController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-            
-        $classes = [];
-        if(isset($request->class))
-            $classes = [$request->class];
-
-        if(isset($request->course))
-            $request['courses']= [$request->course];
         
         // if($request->filled('course'))
         //     LastAction::lastActionInCourse($request->course);
@@ -582,12 +575,16 @@ class BigbluebuttonController extends Controller
         // if($request->has('sort_in'))
         //     $sort_in = $request->sort_in;
 
-        self::clear(); 
+        // self::clear(); 
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
 
         $classes = $enrolls->pluck('group')->unique()->values();
         $courses=$enrolls->pluck('course')->unique()->values();
+        if(isset($request->class))
+            $classes = [$request->class];
+        if(isset($request->course))
+            $request['courses']= [$request->course];
 
         $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes);
 
@@ -631,7 +628,6 @@ class BigbluebuttonController extends Controller
                 if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                     $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
-
         }
 
         if($request->has('status')){
