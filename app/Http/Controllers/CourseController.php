@@ -211,7 +211,7 @@ class CourseController extends Controller
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
+        $editable = ['name', 'category_id','show', 'description', 'mandatory','short_name','is_template','shared_lesson'];
         $course = Course::find($request->id);
         // if course has an image
         if ($request->hasFile('image')) 
