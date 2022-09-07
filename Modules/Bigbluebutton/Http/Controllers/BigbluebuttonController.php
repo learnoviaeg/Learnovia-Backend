@@ -221,20 +221,22 @@ class BigbluebuttonController extends Controller
                             }
 
                             //sending Notification
-                            $reqNot=[
-                                'message' => $bigbb->name.' zoom is created',
-                                'item_id' => $bigbb->id,
-                                'item_type' => 'zoom',
-                                'type' => 'notification',
-                                'publish_date' => $bigbb->start_date,
-                                'lesson_id' => null,
-                                'course_name' => Course::find($bigbb->course_id)->name
-                            ];
-        
-                            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
-                            // dd($users);
-                            $this->notification->sendNotify($users->toArray(),$reqNot);
-
+                            if($bigbb->show == 1)
+                            {
+                                $reqNot=[
+                                    'message' => $bigbb->name.' zoom is created',
+                                    'item_id' => $bigbb->id,
+                                    'item_type' => 'zoom',
+                                    'type' => 'notification',
+                                    'publish_date' => $bigbb->start_date,
+                                    'lesson_id' => null,
+                                    'course_name' => Course::find($bigbb->course_id)->name
+                                ];
+            
+                                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
+                                // dd($users);
+                                $this->notification->sendNotify($users->toArray(),$reqNot);
+                            }
                             $created_meetings->push($bigbb);
                             
                             $end_date = Carbon::parse($temp_start)->addMinutes($request->duration);
@@ -565,13 +567,6 @@ class BigbluebuttonController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-            
-        $classes = [];
-        if(isset($request->class))
-            $classes = [$request->class];
-
-        if(isset($request->course))
-            $request['courses']= [$request->course];
         
         // if($request->filled('course'))
         //     LastAction::lastActionInCourse($request->course);
@@ -580,12 +575,16 @@ class BigbluebuttonController extends Controller
         // if($request->has('sort_in'))
         //     $sort_in = $request->sort_in;
 
-        self::clear(); 
+        // self::clear(); 
 
         $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id());
 
         $classes = $enrolls->pluck('group')->unique()->values();
         $courses=$enrolls->pluck('course')->unique()->values();
+        if(isset($request->class))
+            $classes = [$request->class];
+        if(isset($request->course))
+            $request['courses']= [$request->course];
 
         $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes);
 
@@ -629,7 +628,6 @@ class BigbluebuttonController extends Controller
                 if($request->user()->can('bigbluebutton/session-moderator') && $m->started == 0)
                     $m['join'] = true; //startmeeting has arrived but meeting didn't start yet
             }
-
         }
 
         if($request->has('status')){

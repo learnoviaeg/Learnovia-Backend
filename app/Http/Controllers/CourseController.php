@@ -211,7 +211,7 @@ class CourseController extends Controller
             'old_lessons' => 'nullable|boolean|required_with:course_template',
         ]);
 
-        $editable = ['name', 'category_id', 'description', 'mandatory','short_name','is_template','shared_lesson'];
+        $editable = ['name', 'category_id','show', 'description', 'mandatory','short_name','is_template','shared_lesson'];
         $course = Course::find($request->id);
         // if course has an image
         if ($request->hasFile('image')) 
@@ -845,79 +845,44 @@ class CourseController extends Controller
      */
     public function Assgin_course_to(Request $request)
     {
-        $rules = [
-            'year' => 'array',
-            'year.*' => 'exists:academic_years,id',
-            'type' => 'array',
-            'type.*' => 'required|exists:academic_types,id',
-            'level' => 'array',
-            'level.*' => 'required|exists:levels,id',
-            'class' => 'array',
-            'class.*' => 'required|exists:classes,id',
-            'segment' => 'array',
-            'segment.*' => 'exists:segments,id',
-            'course' => 'required|exists:courses,id',
-            'start_date' => 'required|date',
-            'end_date' =>'required|date|after:start_date'
-        ];
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails())
-            return ['result' => false, 'value' => $validator->errors()];
-        $no_of_lessons = 4;
-        if ((count($request->type) == count($request->level)) && (count($request->level) == count($request->segment))) {
-            foreach ($request->class as $class) {
-                $count = 0;
-                while (isset($request->segment[$count])) {
-                    if (isset($request->year[$count]))
-                        $year = $request->year[$count];
-                    else {
-                        $year = AcademicYear::Get_current();
-                        if ($year == null)
-                            return HelperController::api_response_format(404, __('messages.error.no_active_year'));
-                        else
-                            $year = $year->id;
-                    }
-                    if (isset($request->segment[$count]))
-                        $segment = $request->segment[$count];
-                    else {
-                        $segment = Segment::Get_current($request->type[$count])->id;
-                        if ($segment == null)
-                            return HelperController::api_response_format(404, __('messages.error.no_active_segment'));
-                        else
-                            $segment = $segment->id;
-                    }
-                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
-                    $year_level = YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
-                    $class_level = ClassLevel::checkRelation($class, $year_level->id);
-                    $segment_class = SegmentClass::checkRelation($class_level->id, $segment);
-                    $course_Segment = CourseSegment::checkRelation($segment_class->id, $request->course);
-                    $courseSegment = CourseSegment::where('id',$course_Segment->id)->update([
-                        'start_date' => $request->start_date,
-                        'end_date' => $request->end_date,
-                    ]);
+        $request->validate([
+            'year' => 'required|exists:academic_years,id',
+            'type' => 'required|exists:academic_types,id',
+            'segment' => 'required|exists:segments,id',
+            'level' => 'required|exists:levels,id',
+            'class' => 'required|exists:classes,id',
+        ]);
 
-                    if ($request->filled('no_of_lessons')) 
-                        $no_of_lessons = $request->no_of_lessons;
-                    
-                    for ($i = 1; $i <= $no_of_lessons; $i++) {
-                        Lesson::firstOrCreate([
-                            'name' => 'Lesson ' . $i,
-                            'index' => $i,
-                            'course_segment_id' => $course_Segment->id,
-                        ]);
-                    }
-                    $course=Course::find($request->course);
-                    $gradeCat = GradeCategory::firstOrCreate([
-                        'name' => $course->name . ' Total',
-                        'course_segment_id' => $course_Segment->id,
-                        // 'id_number' => $year_level->id
-                    ]);
-                    $count++;
-                }
+        // $class = Classes::firstOrCreate([
+        //     'name' => $request->class_name,
+        //     'level_id' => $request->level
+        // ]);
+      
+        $courses_of_level = Course::where('level_id' , $request->level)->where('segment_id' , $request->segment)->select('id')->pluck('id');
+        $admins=User::select('id')->whereHas('roles',function($q){  $q->where('id',1);  })->get();
+
+        foreach($courses_of_level as $course){
+             $class_of_course = Course::whereId($course);
+             $shared_classes = $class_of_course->first()->classes;
+
+             if(!in_array($request->class, $shared_classes))
+                array_push($shared_classes , $request->class);
+             $class_of_course->update(['classes' => json_encode($shared_classes)]);
+
+             foreach($admins as $admin){
+                Enroll::firstOrCreate([
+                    'user_id'=> $admin->id,
+                    'role_id' => 1,
+                    'year' => $request->year,
+                    'type' => $request->type,
+                    'segment' => $request->segment,
+                    'level' => $request->level,
+                    'group' => $request->class,
+                    'course' => $course,
+                ]);
             }
-        } else {
-            return HelperController::api_response_format(201, __('messages.error.data_invalid'));
         }
+
         return HelperController::api_response_format(201, null ,__('messages.course.assign'));
     }
 

@@ -139,6 +139,7 @@ class AssignmentController extends Controller
             'publish_date' => 'date|date_format:Y-m-d H:i:s|before:closing_date',
             'opening_date' => 'required|date|date_format:Y-m-d H:i:s|before:closing_date',
             'closing_date' => 'date|date_format:Y-m-d H:i:s|after:' . Carbon::now(),
+            'grade_category' => 'integer',
             'grade_category' => 'required_if:is_graded,==,1|exists:grade_categories,id',
             'allow_edit_answer' => 'boolean',
             'scale' => 'exists:scales,id',
@@ -178,6 +179,8 @@ class AssignmentController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
+            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();    
+            
             $assignment_lesson = AssignmentLesson::firstOrCreate([
                 'lesson_id' => $lesson,
                 'assignment_id' => $assignment->id,
@@ -186,16 +189,13 @@ class AssignmentController extends Controller
                 'allow_edit_answer' => isset($request->allow_edit_answer) ? $request->allow_edit_answer : 0,
                 'scale_id' => isset($request->scale) ? $request->scale : null,
                 'visible' => $request->visible,
-                // 'grade_category' => isset($request->grade_category) ? $request->grade_category : $pp->id,
+                'grade_category' => isset($request->grade_category) ? $request->grade_category : $pp->id,
                 'is_graded' => $request->is_graded,
                 'start_date' => $request->opening_date,
                 'mark' => $request->mark,
                 'is_graded' => $request->is_graded,
                 'allow_attachment' => $request->allow_attachment,
             ]);
-            
-            $pp=GradeCategory::where('course_id',$lesson_obj->course->id)->whereNull('parent')->first();
-            $assignment_lesson->grade_category=$pp->id;
 
             if($request->is_graded)
             {
@@ -224,7 +224,7 @@ class AssignmentController extends Controller
 
             //sending notifications
             $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
-            if(!isset($request->users_ids))
+            if(!isset($request->users_ids) && $assignment_lesson->visible)
             {
                 $reqNot=[
                     'message' => $assignment->name.' assignment is created',
@@ -247,19 +247,22 @@ class AssignmentController extends Controller
         return HelperController::api_response_format(200, $body = $assignment, $message = __('messages.assignment.add'));
     }
 
-    /**
+    /**   
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($assignment_id,$lesson_id)
+    public function show($assignment_id,$lesson_id, Request $request)
     {
         $user = Auth::user();
 
         $assigLessonID = AssignmentLesson::where('assignment_id', $assignment_id)->where('lesson_id', $lesson_id)->first();
         if(!isset($assigLessonID))
             return response()->json(['message' => __('messages.assignment.assignment_not_belong'), 'body' => [] ], 400);
+
+        if($request->user()->can('site/course/student') && !$assigLessonID->visible)
+            return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
 
         $assignment = assignment::where('id',$assignment_id)->with('assignmentLesson','courseItem.courseItemUsers')->first();
         if(!isset($assignment))
@@ -372,9 +375,9 @@ class AssignmentController extends Controller
             if (count($ifStudent) >= 0)
             {
                 if(isset($request->allow_attachment) && $request->allow_attachment == 3)
-                $assigmentLesson->update([
-                    'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
-                ]);
+                    $assigmentLesson->update([
+                        'allow_attachment' => isset($request->allow_attachment) ? $request->allow_attachment : $assigmentLesson->allow_attachment,
+                    ]);
             }
             if (count($ifStudent) <= 0){
                 $description = (isset($request->file_description))? $request->file_description :null;
@@ -421,16 +424,19 @@ class AssignmentController extends Controller
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
 
-            $reqNot=[
-                'message' => $assignment->name.' assignment is updated',
-                'item_id' => $assignment->id,
-                'item_type' => 'assignment',
-                'type' => 'notification',
-                'publish_date' => $assigmentLesson->publish_date,
-                'lesson_id' => $assigmentLesson->lesson_id,
-                'course_name' => $assigmentLesson->lesson->course->name
-            ];
-            $this->notification->sendNotify($users->toArray(),$reqNot);
+            if($assigmentLesson->visible)
+            {
+                $reqNot=[
+                    'message' => $assignment->name.' assignment is updated',
+                    'item_id' => $assignment->id,
+                    'item_type' => 'assignment',
+                    'type' => 'notification',
+                    'publish_date' => $assigmentLesson->publish_date,
+                    'lesson_id' => $assigmentLesson->lesson_id,
+                    'course_name' => $assigmentLesson->lesson->course->name
+                ];
+                $this->notification->sendNotify($users->toArray(),$reqNot);
+            }
         }
 
         return HelperController::api_response_format(200, null, $message = __('messages.assignment.update'));

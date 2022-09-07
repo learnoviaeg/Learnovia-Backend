@@ -26,6 +26,7 @@ class CalendarsController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:calendar/get' , 'ParentCheck'],   ['only' => ['index']]);
     }
+    
     /**
      * Display a listing of the resource.
      *
@@ -50,14 +51,12 @@ class CalendarsController extends Controller
         ]);
 
         $calendar['announcements'] = [];
-        $user_course_segments = $enrolls = $this->chain->getEnrollsByChain($request);
+        $enrolls = $this->chain->getEnrollsByChain($request);
 
         if(!$request->user()->can('site/show-all-courses'))//any other user enrolled
-            $user_course_segments = $enrolls = $user_course_segments->where('user_id',Auth::id());
+            $enrolls->where('user_id',Auth::id());
 
-        $enrolls=$enrolls->get();
-
-        if(count($enrolls) > 0){
+        if(($enrolls->count()) > 0){
             //enrolled user announcements
             if(!$request->user()->can('site/show-all-courses'))
             {
@@ -73,7 +72,7 @@ class CalendarsController extends Controller
                 }])->pluck('id');
             }
         }
-        $calendar['lessons'] =SecondaryChain::select('lesson_id')->whereIn('enroll_id',$enrolls->pluck('id'));
+        $calendar['lessons'] =SecondaryChain::select('lesson_id')->where('user_id', Auth::id())->whereIn('enroll_id',$enrolls->pluck('id'));
         
         $timeline = Timeline::with(['class','course','level'])
                             ->where(function ($query) use ($calendar) {

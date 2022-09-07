@@ -254,19 +254,21 @@ class MediaController extends Controller
                     $material->restricted=1;
                     $material->save();
                 }
-                if(!isset($request->users_ids)){
-                    $reqNot=[
-                        'message' => $material->name.' media is added',
-                        'item_id' => $material->id,
-                        'item_type' => 'media',
-                        'type' => 'notification',
-                        'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
-                        'lesson_id' => $lesson,
-                        'course_name' => $tempLesson->course->name,
-                    ];
+                if($material->visible == 1){
+                    if(!isset($request->users_ids)){
+                        $reqNot=[
+                            'message' => $material->name.' media is added',
+                            'item_id' => $material->id,
+                            'item_type' => 'media',
+                            'type' => 'notification',
+                            'publish_date' => Carbon::parse($material->publish_date)->format('Y-m-d H:i:s'),
+                            'lesson_id' => $lesson,
+                            'course_name' => $tempLesson->course->name,
+                        ];
 
-                    $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
-                    $this->notification->sendNotify($users->toArray(),$reqNot);
+                        $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                        $this->notification->sendNotify($users->toArray(),$reqNot);
+                    }
                 }
             }
         }
