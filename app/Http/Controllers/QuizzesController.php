@@ -70,8 +70,8 @@ class QuizzesController extends Controller
             'sort_in' => 'in:asc,desc',
         ]);
 
-           $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
-           $lessons = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get()->pluck('lesson_id')->unique();
+        $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->pluck('id');
+        $lessons = SecondaryChain::select('lesson_id')->whereIn('enroll_id', $enrolls)->pluck('lesson_id');
 
         if($request->filled('lesson')){
             if (!in_array($request->lesson,$lessons->toArray()))
@@ -84,9 +84,7 @@ class QuizzesController extends Controller
         if($request->has('sort_in'))
             $sort_in = $request->sort_in;
 
-        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)
-        ->with(['quiz'])
-        ->orderBy('created_at','desc');
+        $quiz_lessons = QuizLesson::whereIn('lesson_id',$lessons)->with(['quiz'])->orderBy('created_at','desc');
 
         if($request->user()->can('site/course/student')){
             $quiz_lessons
@@ -180,9 +178,6 @@ class QuizzesController extends Controller
 
         if(Carbon::parse($request->opening_time) < Carbon::parse($publish_date))
             $publish_date=$request->opening_time;
-        
-        // if(Carbon::parse($request->opening_time) < Carbon::parse($request->publish_date))
-        //     return HelperController::api_response_format(400,null,__('messages.quiz.error_date'));
 
         $course=  Course::where('id',$request->course_id)->first();
         LastAction::lastActionInCourse($request->course_id);
@@ -231,11 +226,6 @@ class QuizzesController extends Controller
                 'collect_marks' => isset($request->collect_marks) ? $request->collect_marks : 1,
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
-
-            // if(isset($request->users_ids)){
-            //     CoursesHelper::giveUsersAccessToViewCourseItem($quiz->id, 'quiz', $request->users_ids);
-            //     $quiz->restricted=1;
-            // }
         }
         $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
@@ -252,7 +242,7 @@ class QuizzesController extends Controller
     {
         $request->validate([
             'name' => 'string|min:3',
-            'lesson_id' => 'required|exists:lessons,id',
+            'lesson_id' => 'required|exists:lessons,id', //but we update on all lessons
             'is_graded' => 'boolean',
             'collect_marks' => 'integer|in:0,1',
             'duration' => 'integer|min:60',
@@ -350,7 +340,7 @@ class QuizzesController extends Controller
             dispatch($userGradesJob);    
 
             //send notification
-            if(!$quiz->draft)
+            if(!$quiz->draft && $quiz_lesson->visible)
             {
                 $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
                 $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
@@ -495,8 +485,12 @@ class QuizzesController extends Controller
         $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
+        if($request->user()->can('site/course/student') && !$quizLesson->visible)
+            return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
+
         if(!isset($quiz))
             return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
+
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();
         if($grade_Cat->parent != null)
             $quizLesson->Parent_grade_category = $grade_Cat->Parents->id;

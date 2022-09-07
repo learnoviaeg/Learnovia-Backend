@@ -9,6 +9,7 @@ use App\User;
 use App\Segment;
 use App\Classes;
 use App\Course;
+use App\Level;
 use App\CourseSegment;
 use Validator;
 
@@ -42,10 +43,10 @@ class EnrollStaff implements ToModel, WithHeadingRow
                 throw new \Exception('shortname '.$row[$optional.$count].' doesn\'t exist');
 
             $userId =User::FindByName($row['username'])->id;
-
-            $level=Classes::find($row['class_id'])->level_id;
+            $class=Classes::find($row['class_id']);
+            $level=$class->level_id;
             if($coursess->level_id != $level)
-                throw new \Exception('Level on class and this course isn\'t not the same');
+                throw new \Exception('Level'. Level::find($level)->name.' on class '. $class->name.'and course '.$coursess->short_name .'isn\'t not the same');
 
             $segment=Segment::find($row['segment_id']);
             $segment_id=$segment->id;

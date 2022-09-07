@@ -73,9 +73,9 @@ class QuestionBankController extends Controller
 
         $teacher_permissions=['question/category/add','quiz/view-drafts','question/category/delete','question/category/update','question/category/get','question/add','question/update',
         'question/get','question/delete','question/random','question/add-answer','question/delete-answer','quiz/add','quiz/update','quiz/delete','quiz/get',
-        'quiz/add-quiz-lesson','quiz/grading-method','quiz/update-quiz-lesson','quiz/destroy-quiz-lesson','quiz/get-all-types','quiz/get-all-categories',
-        'quiz/sort','quiz/get-quiz-lesson','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
-        'quiz/detailes','quiz/answer','quiz/correct-user-quiz','quiz/get-grade-category','quiz/toggle','quiz/get-attempts','site/quiz/getStudentinQuiz','quiz/grade-user-quiz',
+        'quiz/grading-method','quiz/get-all-types','quiz/get-all-categories',
+        'quiz/sort','quiz/get-all-quizes','quiz/get-student-in-quiz','quiz/get-student-answer-quiz','quiz/get-all-students-answer',
+        'quiz/detailes','quiz/answer','quiz/correct-user-quiz','quiz/get-grade-category','quiz/toggle','quiz/get-attempts','site/quiz/getStudentinQuiz',
         'quiz/override'];
         $tecaher = \Spatie\Permission\Models\Role::find(4);
         $tecaher->givePermissionTo(\Spatie\Permission\Models\Permission::whereIn('name', $teacher_permissions)->get());
@@ -108,12 +108,8 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/update');
         $role->givePermissionTo('quiz/sort');
         $role->givePermissionTo('quiz/delete');
-        $role->givePermissionTo('quiz/add-quiz-lesson');
-        $role->givePermissionTo('quiz/update-quiz-lesson');
-        $role->givePermissionTo('quiz/destroy-quiz-lesson');
         $role->givePermissionTo('quiz/get-all-types');
         $role->givePermissionTo('quiz/get-all-categories');
-        $role->givePermissionTo('quiz/get-quiz-lesson');
         $role->givePermissionTo('quiz/get-all-quizes');
         $role->givePermissionTo('quiz/get-student-in-quiz');
         $role->givePermissionTo('quiz/get-student-answer-quiz');
@@ -124,7 +120,6 @@ class QuestionBankController extends Controller
         $role->givePermissionTo('quiz/toggle');
         $role->givePermissionTo('quiz/grading-method');
         $role->givePermissionTo('quiz/get-attempts');
-        $role->givePermissionTo('quiz/grade-user-quiz');
         $role->givePermissionTo('quiz/override');
         $role->givePermissionTo('quiz/detailes');
 

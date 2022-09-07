@@ -20,6 +20,8 @@ use Modules\QuestionBank\Entities\UserQuiz;
 use Modules\QuestionBank\Entities\Quiz;
 use Modules\Assigments\Entities\Assignment;
 use App\SecondaryChain;
+use Redis;
+use App\Paginate;
 
 class TimelineController extends Controller
 {
@@ -59,9 +61,8 @@ class TimelineController extends Controller
             'start_date' => 'date',
             'due_date' => 'date',
         ]);
-
-        $enrolls = $this->chain->getEnrollsByChain($request)->where('user_id',Auth::id())->get()->pluck('id');
-        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->get();
+        $enrolls = $this->chain->getEnrollsByChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
+        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['lesson_id','group_id']);
         $timeline = Timeline::with(['class','course','level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
                             ->whereIn('class_id',$sec_chain->pluck('group_id'))
@@ -72,24 +73,8 @@ class TimelineController extends Controller
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
 
-        if(Auth::user()->can('site/course/student')){
+        if(Auth::user()->can('site/course/student'))
             $timeline->where('visible',1);
-            // ->where(function($query) {         //Where accessible
-            //     $query->whereHasMorph(
-            //         'item',
-            //         [
-            //             'Modules\QuestionBank\Entities\quiz',
-            //             'Modules\Assigments\Entities\assignment',
-            //         ],
-            //         function($query){
-            //             $query->doesntHave('courseItem')
-            //             ->orWhereHas('courseItem.courseItemUsers', function ($query){
-            //                 $query->where('user_id', Auth::id());
-            //             });
-            //         }
-            //     );
-            // });
-        }
 
         if($request->has('item_type'))
             $timeline->where('type',$request->item_type);
@@ -115,7 +100,10 @@ class TimelineController extends Controller
             }
         }
 
-        $timelinePaginate=$timeline->get()->map(function ($line){
+        $page = Paginate::GetPage($request);
+        $paginate = Paginate::GetPaginate($request);
+        
+        $timeline->skip(($page)*$paginate)->take($paginate)->get()->map(function ($line){
             if($line->type == 'quiz'){
                 $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
                 $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
@@ -127,7 +115,8 @@ class TimelineController extends Controller
             return $line;
         });
 
-        return response()->json(['message' => 'Timeline List of items', 'body' => $timelinePaginate->paginate(HelperController::GetPaginate($request)) ], 200);
+        $result = $timeline->paginate(HelperController::GetPaginate($request));
+        return response()->json(['message' => 'Timeline List of items', 'body' => $result  ], 200);
     }
 
     /**

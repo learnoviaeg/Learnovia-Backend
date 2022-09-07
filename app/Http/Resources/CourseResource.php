@@ -30,11 +30,8 @@ class CourseResource extends JsonResource
             'mandatory' => $this->courses['mandatory'] ,
             'is_template' => $this->courses['is_template'] ,
             'level' => $levels,
-            'teachers' => Enroll::where('role_id',4)->where('course',$this->courses['id'])->with(array('users' => function($query) {
-                        $query->addSelect(array('id', 'firstname', 'lastname', 'picture'))->with('attachment');
-                    }))->get(),
-            
-            'start_date' => $start_date,
+            'teachers' =>null,
+            'start_datea' => $start_date,
             'end_date' => $end_date,
             // 'year' => $segment->academic_year_id,
             'progress' => round($this->courses['progress'],2) ,
