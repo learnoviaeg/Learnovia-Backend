@@ -205,7 +205,7 @@ return [
             'delete' => 'Audio deleted successfully',
         ],
         'link' => [
-            'add' => 'Link uploaded successfully',
+            'add' => 'Link added successfully',
             'update' => 'Media updated successfully',
             'delete' => 'Link deleted successfully',
         ],

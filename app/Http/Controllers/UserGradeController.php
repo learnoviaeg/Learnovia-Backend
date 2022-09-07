@@ -451,16 +451,36 @@ class UserGradeController extends Controller
     {
         $request->validate([
             'course_id'  => 'required|integer|exists:courses,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'exists:users,id',
             ]); 
+            
+        if(!$request->filled('user_id'))
+            $request->user_id = Auth::id();
 
         $GLOBALS['user_id'] = $request->user_id;
+
         $grade_categories = GradeCategory::where('course_id', $request->course_id)->whereNull('parent')
                             ->with(['Children.userGrades' => function($query) use ($request){
                                 $query->where("user_id", $request->user_id);
                             },'GradeItems.userGrades' => function($query) use ($request){
                                 $query->where("user_id", $request->user_id);
                             },'userGrades' => function($query) use ($request){
+                                $query->where("user_id", $request->user_id);
+                            }])->get();
+
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
+
+    }
+
+    public function user_report_in_all_courses(Request $request)
+    {
+        $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->pluck('course');
+        if(!$request->filled('user_id'))
+            $request->user_id = Auth::id();
+
+        $GLOBALS['user_id'] = Auth::id();
+        $grade_categories = GradeCategory::whereIn('course_id', $courses)->whereNull('parent')
+                            ->with(['userGrades' => function($query) use ($request){
                                 $query->where("user_id", $request->user_id);
                             }])->get();
 

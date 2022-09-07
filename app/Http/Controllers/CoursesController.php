@@ -19,6 +19,7 @@ use Modules\QuestionBank\Entities\QuestionsCategory;
 use App\Lesson;
 use App\Enroll;
 use DB;
+use Redis;
 use App\Events\LessonCreatedEvent;
 
 class CoursesController extends Controller
@@ -65,8 +66,7 @@ class CoursesController extends Controller
             'period' => 'in:past,future,no_segment'
         ]); 
 
-        $paginate = 12;
-       
+        $paginate = 12;       
         if($request->has('paginate'))
             $paginate = $request->paginate;
 
@@ -85,14 +85,15 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
-            if(!$request->user()->can('show-hidden-courses'))
+            if(!$request->user()->can('course/show-hidden-courses'))
                 $query->where('show',1);
 
         })->join('courses', 'enrolls.course', '=', 'courses.id')
             ->orderBy('courses.index', 'ASC')
             ->groupBy(['course','level'])->get();
 
-        return response()->json(['message' => __('messages.course.list'), 'body' => CourseResource::collection($results)->paginate($paginate)], 200);
+        $result = CourseResource::collection($results)->paginate($paginate);
+        return response()->json(['message' => __('messages.course.list'), 'body' => $result], 200);
     }
 
     /**
@@ -252,10 +253,10 @@ class CoursesController extends Controller
         if ($request->hasFile('image')) 
             $course->image = attachment::upload_attachment($request->image, 'course')->id;
         
-        if(isset($request->shared_lesson) && $request->shared_lesson == 0)
+        if($course->shared_lesson == 1)
         {
             $countAllLessons = Lesson::where('course_id', $id)->where('shared_lesson',1)->count();
-            if($countAllLessons > 0)
+            if($countAllLessons > 0 && $request->shared_lesson != null && $request->shared_lesson == 0)
                 return HelperController::api_response_format(200, $course, __('messages.course.canNot'));
 
             $editable[]='shared_lesson';    

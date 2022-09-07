@@ -374,8 +374,8 @@ class AttemptsController extends Controller
     public function show($id)
     {
         $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
-        // to prevent any user except auth to review this attempt
 
+        // to prevent any user except auth to review this attempt
         if(Auth::user()->can('site/course/student')){
             if($attempt->user_id != Auth::id())
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
@@ -388,6 +388,21 @@ class AttemptsController extends Controller
         $attempt['quiz_mark'] = $attempt->quiz_lesson->grade;
         foreach($attempt->UserQuizAnswer as $one)
         {
+
+            $question=$one->Question;
+            $children_mark = 0;
+            $attempt->quiz_lesson->quiz->Question;
+            QuestionsController::mark_details_of_question_in_quiz($question ,$attempt->quiz_lesson->quiz);
+            if(isset($question->children)){
+                foreach($question->children as $child){
+                    $childd = QuestionsController::mark_details_of_question_in_quiz($child ,$attempt->quiz_lesson->quiz);
+                    $children_mark += $childd->mark;
+                }
+                $question->mark += $children_mark;
+            }
+
+            $one->Question=$question;
+            
             if(!isset($one->correction))
                 continue;
             $con=($one->correction);

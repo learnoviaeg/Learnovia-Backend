@@ -77,6 +77,8 @@ class UsersController extends Controller
             'search' => 'string',
         ]);
         //using in chat api new route { api/user/all}
+        $enrolls = $this->chain->getEnrollsByChain($request);
+
         if($my_chain == 'all'){
 
             $users = User::with(['attachment','roles']);
@@ -88,11 +90,12 @@ class UsersController extends Controller
                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
                 });
             }
-            return response()->json(['message' => __('messages.users.all_list'), 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+            if($request->user()->can('site/show-all-courses'))
+                return response()->json(['message' => __('messages.users.all_list'), 'body' =>   $users->paginate(Paginate::GetPaginate($request))], 200);
+    
+            $courseAuth = $this->chain->getEnrollsByChain($request)->select('course')->where('user_id',Auth::id())->pluck('course');
+            $enrolls = $this->chain->getEnrollsByChain($request)->whereIn('course',$courseAuth);
         }
-
-        $enrolls = $this->chain->getEnrollsByChain($request);
-        //dd($enrolls->pluck('user_id'));
 
         if($my_chain=='count'){
             $count = [];
@@ -122,14 +125,6 @@ class UsersController extends Controller
         }
         //using in participants api new route { api/user/participants}
         // if($my_chain=='participants' || $my_chain=='seen_report'){
-        //     // site/show/as-participant
-        //     $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
-        //     $roles_id = $permission->roles->pluck('id');
-        //     if(isset($request->roles))
-        //         $roles_id = $permission->roles->whereIn('id',$request->roles)->pluck('id');
-
-        //     $enrolls->whereIn('role_id',$roles_id);
-        // }
         if($my_chain=='participants'){
             // site/show/as-participant
             $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();

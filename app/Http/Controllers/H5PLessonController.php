@@ -107,18 +107,20 @@ class H5PLessonController extends Controller
 
             //sending Notification
             $updatedH5p=h5pLesson::find($h5p_lesson->id);
-            if(!$updatedH5p->restricted){
-                $reqNot=[
-                    'message' => $content->title.' interactive is created',
-                    'item_id' => $h5p_lesson->content_id,
-                    'item_type' => 'h5p_content',
-                    'type' => 'notification',
-                    'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
-                    'lesson_id' => $lesson_id,
-                    'course_name' => Course::find($lesson->course_id)->name
-                ];
-                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
-                $this->notification->sendNotify($users,$reqNot);
+            if($updatedH5p->visible == 1){
+                if(!$updatedH5p->restricted){
+                    $reqNot=[
+                        'message' => $content->title.' interactive is created',
+                        'item_id' => $h5p_lesson->content_id,
+                        'item_type' => 'h5p_content',
+                        'type' => 'notification',
+                        'publish_date' => Carbon::parse($updatedH5p->publish_date)->format('Y-m-d H:i:s'),
+                        'lesson_id' => $lesson_id,
+                        'course_name' => Course::find($lesson->course_id)->name
+                    ];
+                    $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
+                    $this->notification->sendNotify($users,$reqNot);
+                }
             }
         }
 

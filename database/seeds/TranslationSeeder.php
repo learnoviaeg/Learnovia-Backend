@@ -173,5 +173,20 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'Highest', 'language' => 1, 'value' => 'Highest']);
         Dictionary::firstOrCreate(['key' => 'Lowest', 'language' => 2, 'value' => 'الأقل']);
         Dictionary::firstOrCreate(['key' => 'Lowest', 'language' => 1, 'value' => 'Lowest']);
+
+        Dictionary::firstOrCreate(['key' => 'management/transfer_q_cat', 'language' => 2, 'value' => 'نقل الأسئلة']);
+        Dictionary::firstOrCreate(['key' => 'management/transfer_q_cat', 'language' => 1, 'value' => 'Transfer Question Category']);
+        Dictionary::firstOrCreate(['key' => 'school_fees/settings', 'language' => 1, 'value' => 'Installment settings']);
+        Dictionary::firstOrCreate(['key' => 'school_fees/settings', 'language' => 2, 'value' => 'المصاريف']);
+        Dictionary::firstOrCreate(['key' => 'complexity/categories', 'language' => 2, 'value' => 'بلوم']);
+        Dictionary::firstOrCreate(['key' => 'complexity/categories', 'language' => 1, 'value' => 'Bloom Settings']);
+        Dictionary::firstOrCreate(['key' => 'grade/letter/show', 'language' => 2, 'value' => 'التقدير بالدرجات']);
+        Dictionary::firstOrCreate(['key' => 'grade/letter/show', 'language' => 1, 'value' => 'Show Letter']);
+        Dictionary::firstOrCreate(['key' => 'grade/scale/get', 'language' => 2, 'value' => 'التقدير بالحروف']);
+        Dictionary::firstOrCreate(['key' => 'grade/scale/get', 'language' => 1, 'value' => 'Get Scale']);
+        Dictionary::firstOrCreate(['key' => 'weekly_plan', 'language' => 1, 'value' => 'Weekly Plan']);
+        Dictionary::firstOrCreate(['key' => 'weekly_plan', 'language' => 2, 'value' => 'الخطة الأسبوعية']);
+        Dictionary::firstOrCreate(['key' => 'reports/total_attempts_report', 'language' => 2, 'value' => 'تقرير الامتحانات']);
+        Dictionary::firstOrCreate(['key' => 'reports/total_attempts_report', 'language' => 1, 'value' => 'Quiz Attempts Report']);
     }
 }

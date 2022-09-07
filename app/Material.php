@@ -42,9 +42,10 @@ class Material extends Model
 
     public function getAttachmentNameAttribute(){
         if($this->type == 'file')
-            return file::withTrashed()->find($this->item_id)->attachment_name;
+            return file::withTrashed()->where('id',$this->item_id)->select('attachment_name')->first()->attachment_name;
         if($this->type == 'media' && $this->media_type !='Link' && $this->media_type !='media link')
-            return media::withTrashed()->find($this->item_id)->attachment_name;
+            return media::withTrashed()->where('id',$this->item_id)->select('attachment_name')->first()->attachment_name;
+
     }
 
     public function getUserSeenNumberAttribute(){
