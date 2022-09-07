@@ -85,7 +85,7 @@ class CoursesController extends Controller
         $results = $enrolls->whereHas('courses' , function($query)use ($request ) {
             if($request->filled('search'))
                 $query->where('name', 'LIKE' , "%$request->search%");
-            if(!$request->user()->can('show-hidden-courses'))
+            if(!$request->user()->can('course/show-hidden-courses'))
                 $query->where('show',1);
 
         })->join('courses', 'enrolls.course', '=', 'courses.id')
