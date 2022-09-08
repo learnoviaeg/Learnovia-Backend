@@ -59,7 +59,7 @@ class UpdateQuizGradeListener
             ///launching event to recalculate grades in grader setup 
             event(new GraderSetupEvent($quiz_category->first()->Parents));
 
-            if(!$quiz_lesson->collect_marks && $quiz_lesson->marks_of_all_questions > 0 ) // l grade pass lessa ma3amalna4 leha logic aw etkalemna feha
+            if(!$quiz_lesson->collect_marks) // l grade pass lessa ma3amalna4 leha logic aw etkalemna feha
                 $quiz_lesson->grade_pass = $marks_of_all_questions/2;
 
             $quiz_lesson->save();
