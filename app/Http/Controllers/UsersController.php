@@ -115,6 +115,7 @@ class UsersController extends Controller
             return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
         }
 
+        // !!!
         if($request->filled('class') && getType($request->class) == 'array')
         {
             $requ = new Request([

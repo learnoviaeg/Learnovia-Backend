@@ -285,8 +285,8 @@ class ChainRepository implements ChainRepositoryInterface
             $Course_segments=Course::whereIn('id',$request->courses)->pluck('segment_id');
             $enrolls->whereIn('segment', $Course_segments);
             $enrolls->whereIn('course', $request->courses);
-            if($request->filled('classes'))
-                $enrolls->whereIn('group', $request->classes);
+            if($request->filled('class'))
+                $enrolls->where('group', $request->class);
             return $enrolls;
         }
 
@@ -320,9 +320,8 @@ class ChainRepository implements ChainRepositoryInterface
         if($request->filled('level'))
             $enrolls->where('level', $request->level);
 
-        if($request->filled('classes'))
+        if($request->filled('class'))
             $enrolls->where('group', $request->class);
-
 
         if(!$request->filled('courses'))
             $enrolls->whereIn('segment', $active_segments);
