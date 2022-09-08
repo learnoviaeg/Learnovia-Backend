@@ -79,6 +79,8 @@ class UsersController extends Controller
         //using in chat api new route { api/user/all}
         $enrolls = $this->chain->getEnrollsByChain($request);
 
+        return $enrolls->get();
+
         if($my_chain == 'all'){
 
             $users = User::with(['attachment','roles']);
