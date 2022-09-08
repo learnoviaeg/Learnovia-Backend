@@ -79,8 +79,6 @@ class UsersController extends Controller
         //using in chat api new route { api/user/all}
         $enrolls = $this->chain->getEnrollsByChain($request);
 
-        return $enrolls->get();
-
         if($my_chain == 'all'){
 
             $users = User::with(['attachment','roles']);
@@ -117,6 +115,7 @@ class UsersController extends Controller
             return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
         }
 
+        // !!!
         if($request->filled('class') && getType($request->class) == 'array')
         {
             $requ = new Request([
