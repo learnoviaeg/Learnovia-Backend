@@ -217,7 +217,7 @@ Rollback_to_Latest_Version-production:
      when: manual
 #================================================================================
 #=========================================================Testing new management server deployment
-build-code-job-production:
+deploy-code-job-development-mgmt:
      stage: deploy
      tags:
        - learnovia
@@ -227,3 +227,4 @@ build-code-job-production:
        - development
      script:
        - ansible-playbook /backup/playbooks/test-backend.yml
+
