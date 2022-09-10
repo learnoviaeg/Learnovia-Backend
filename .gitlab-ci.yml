@@ -8,5 +8,5 @@ deploy-code-job-development-mgmt:
      only:
        - development
      script:
-       - ansible-playbook /backup/playbooks/test-backend.yml
+       - ansible-playbook /backup/playbooks/development-backend.yml
 
