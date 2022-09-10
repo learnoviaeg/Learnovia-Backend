@@ -1,4 +1,4 @@
-#=========================================================Testing new management server deployment
+#=========================================================Development Branch
 deploy-code-job-development-mgmt:
      stage: deploy
      tags:
@@ -10,3 +10,26 @@ deploy-code-job-development-mgmt:
      script:
        - ansible-playbook /backup/playbooks/development-backend.yml
 
+#=========================================================PreProd branch
+deploy-code-job-preprod-mgmt:
+     stage: deploy
+     tags:
+       - learnovia
+       - backend
+       - mgmt
+     only:
+       - preprod
+     script:
+       - ansible-playbook /backup/playbooks/preprod-backend.yml
+
+#=========================================================Testing new management server deployment
+deploy-code-job-production-mgmt:
+     stage: deploy
+     tags:
+       - learnovia
+       - backend
+       - mgmt
+     only:
+       - production
+     script:
+       - ansible-playbook /backup/playbooks/production-backend.yml
