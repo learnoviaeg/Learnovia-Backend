@@ -216,3 +216,14 @@ Rollback_to_Latest_Version-production:
 #       - cp -R /var/circle-backend-Backup/circle-backend-backend-backup/* /var/www/html/circle-backend 
      when: manual
 #================================================================================
+#=========================================================Testing new management server deployment
+build-code-job-production:
+     stage: deploy
+     tags:
+       - learnovia
+       - backend
+       - mgmt
+     only:
+       - development
+     script:
+       - ansible-playbook /backup/playbooks/test-backend.yml
