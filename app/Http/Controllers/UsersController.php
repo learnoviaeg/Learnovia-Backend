@@ -81,7 +81,7 @@ class UsersController extends Controller
 
         if($my_chain == 'all'){
 
-            $users = User::with(['attachment','roles']);
+            $users = User::with(['roles']);
 
             if($request->filled('search')){
                 $users->where(function($q) use($request){
@@ -104,7 +104,7 @@ class UsersController extends Controller
                 $roles = $roles->whereIn('id',$request->roles);
 
             $roles = $roles->get();
-            $users = User::with(['attachment','roles']);
+            $users = User::with(['roles']);
 
             $all_roles = Role::all();
 
