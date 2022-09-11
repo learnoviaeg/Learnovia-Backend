@@ -161,7 +161,7 @@ class UsersController extends Controller
             $roles_id = $permission->roles->pluck('id');
             $enrolls->whereIn('role_id',$roles_id);
 
-            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['user.attachment', 'classes'])->get()->filter()->values();
+            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['classes'])->get()->filter()->values();
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 
