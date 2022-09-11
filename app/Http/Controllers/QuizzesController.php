@@ -196,13 +196,7 @@ class QuizzesController extends Controller
             'correct_feedback' => $request->correct_feedback,
         ]);
 
-        $lessons = Lesson::whereIn('id', $request->lesson_id)
-                    ->with([
-                        'course.gradeCategory'=> function($query)use ($request){
-                            $query->whereNull('parent');
-                        },'QuizLesson'=>function($q){
-                            $q->orderBy('index','desc')->limit(1);
-                        }])->get();
+        $lessons = Lesson::whereIn('id', $request->lesson_id)->get();
 
         foreach($lessons as $key => $lesson)
         {
@@ -227,7 +221,6 @@ class QuizzesController extends Controller
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
         }
-        $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
     

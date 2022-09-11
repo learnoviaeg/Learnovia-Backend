@@ -469,7 +469,7 @@ class EnrollUserToCourseController extends Controller
                     $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                         ->orWhere('username', 'LIKE' ,"%$request->search%" )
                         ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                    })->with('attachment');
+                    });
                 return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)),__('messages.users.students_list'));
             }
             return HelperController::api_response_format(200, $users_student->paginate(HelperController::GetPaginate($request)), __('messages.users.students_list'));
@@ -485,7 +485,7 @@ class EnrollUserToCourseController extends Controller
                    $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                    ->orWhere('username', 'LIKE' ,"%$request->search%" )
                    ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-               })->with('attachment')->with('roles');
+               })->with('roles');
                 return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
             }
             return HelperController::api_response_format(200, $users_staff->paginate(HelperController::GetPaginate($request)), 'STAFF are ... ');
