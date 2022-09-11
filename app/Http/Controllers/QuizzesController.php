@@ -196,7 +196,7 @@ class QuizzesController extends Controller
             'correct_feedback' => $request->correct_feedback,
         ]);
 
-        $lessons = Lesson::select('id')->whereIn('id', $request->lesson_id)->get();
+        $lessons = Lesson::whereIn('id', $request->lesson_id)->get();
 
         foreach($lessons as $key => $lesson)
         {
@@ -205,7 +205,7 @@ class QuizzesController extends Controller
             //add validations for all the feilds
             $newQuizLesson = QuizLesson::create([
                 'quiz_id' => $quiz->id,
-                'lesson_id' => $lesson,
+                'lesson_id' => $lesson->id,
                 'start_date' => $request->opening_time,
                 'due_date' => $request->closing_time,
                 'max_attemp' => $request->max_attemp,
