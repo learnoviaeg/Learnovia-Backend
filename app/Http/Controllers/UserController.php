@@ -691,7 +691,7 @@ class UserController extends Controller
                     $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                         ->orWhere('username', 'LIKE' ,"%$request->search%" )
                         ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-        })->with('attachment')->get();
+        })->get();
         return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
     }
 
@@ -933,7 +933,7 @@ class UserController extends Controller
                                             $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                                                     ->orWhere('username', 'LIKE' ,"%$request->search%" )
                                                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                                            })->with('attachment')->get();
+                                            })->get();
         }
 
         return HelperController::api_response_format(200,$students ,__('messages.users.list'));

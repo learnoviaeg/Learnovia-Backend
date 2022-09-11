@@ -172,7 +172,7 @@ class CourseController extends Controller
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $teacher = User::whereIn('id',Enroll::where('role_id', '4')->whereIn('course_segment',  $le->courseSegments->pluck('id'))
                                                 ->pluck('user_id')
-                            )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                            )->get(['id', 'username', 'firstname', 'lastname', 'picture']);
             $le['teachers']  = $teacher ;
             unset($le->courseSegments);
         }
