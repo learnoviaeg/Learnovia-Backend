@@ -92,8 +92,12 @@ class QuestionsController extends Controller
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
-
-        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->with(['course','question_category','question_type','children']);
+        
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+        $questions = Questions::whereIn('course_id',$enrolls->pluck('course'))->where('parent',null)->whereHas('course',$callQuery)->with(['course' => $callQuery,'question_category','question_type','children']);
 
         if($request->filled('search'))
            $questions->where('text', 'LIKE' , "%$request->search%")

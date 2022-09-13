@@ -74,7 +74,11 @@ class CalendarsController extends Controller
         }
         $calendar['lessons'] =SecondaryChain::select('lesson_id')->where('user_id', Auth::id())->whereIn('enroll_id',$enrolls->pluck('id'));
         
-        $timeline = Timeline::with(['class','course','level'])
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+        $timeline = Timeline::whereHas('course',$callQuery)->with(['class','course'=>$callQuery,'level'])
                             ->where(function ($query) use ($calendar) {
                                 $query->whereIn('item_id',$calendar['announcements'])->where('type','announcement')->orWhereIn('lesson_id',$calendar['lessons']);
                             })
