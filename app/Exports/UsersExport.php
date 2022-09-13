@@ -34,7 +34,18 @@ class UsersExport implements FromCollection, WithHeadings
             $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
             if(isset($last))
                 $value['last_action'] = $last->date;
-                
+
+
+            $extra_fields = json_decode(json_encode($value->profile_fields), true);
+            if($value->profile_fields != null){
+                        foreach($extra_fields as $key => $field){
+                            if (!in_array( $key, $this->fields)) {
+                                $this->fields[] = $key;
+                            }
+                            $value[$key] = $field;
+                        }
+                    } 
+        
             $value->setHidden([])->setVisible($this->fields);
         }
         
