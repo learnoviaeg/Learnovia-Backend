@@ -13,9 +13,6 @@ use App\Parents;
 
 class UsersExport implements FromCollection, WithHeadings
 {
-
-    protected $x = [];
-
     function __construct($userids,$fields ,$chain) {
         $this->ids = $userids['students'];
         $this->request = $userids['request'];
@@ -54,14 +51,13 @@ class UsersExport implements FromCollection, WithHeadings
                 
         ////parents
         if($role_name == 'Student'){
+            $count = 1;
             foreach(Parents::where('child_id', $value->id)->select('parent_id')->with('parent')->cursor() as $key => $parent){
-                $key =  1;
-
-                if (!in_array( 'parent'.$key , $this->fields)) {
-                    $this->fields[] = 'parent'.$key;
-
+                if (!in_array( 'parent'.$count , $this->fields)) {
+                    $this->fields[] = 'parent'.$count;
                 }
-                $value['parent'.$key] = $parent->parent->fullname;
+                $value['parent'.$count] = $parent->parent->fullname;
+                $count ++;
             }
         }
         
