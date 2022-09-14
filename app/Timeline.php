@@ -44,8 +44,9 @@ class Timeline extends Model
                 $user_assigment = UserAssigment::where('assignment_lesson_id', $assigLessonID->id)->where('user_id',Auth::id())->whereNotNull('submit_date');
                 if($user_assigment->count() > 0){
                     $status = __('messages.status.submitted');//submitted
-                    if($user_assigment->grade->count() > 0)
-                        $status = __('messages.status.graded');//graded
+                    if(isset($user_assigment->grade))
+                        if($user_assigment->grade->count() > 0)
+                            $status = __('messages.status.graded');//graded
                 }
             }
 

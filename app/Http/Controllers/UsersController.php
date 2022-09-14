@@ -81,7 +81,7 @@ class UsersController extends Controller
 
         if($my_chain == 'all'){
 
-            $users = User::with(['attachment','roles']);
+            $users = User::with(['roles']);
 
             if($request->filled('search')){
                 $users->where(function($q) use($request){
@@ -104,7 +104,7 @@ class UsersController extends Controller
                 $roles = $roles->whereIn('id',$request->roles);
 
             $roles = $roles->get();
-            $users = User::with(['attachment','roles']);
+            $users = User::with(['roles']);
 
             $all_roles = Role::all();
 
@@ -115,6 +115,7 @@ class UsersController extends Controller
             return HelperController::api_response_format(200 ,$count,__('messages.users.count'));
         }
 
+        // !!!
         if($request->filled('class') && getType($request->class) == 'array')
         {
             $requ = new Request([
@@ -160,13 +161,13 @@ class UsersController extends Controller
             $roles_id = $permission->roles->pluck('id');
             $enrolls->whereIn('role_id',$roles_id);
 
-            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['user.attachment', 'classes'])->get()->filter()->values();
+            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['classes'])->get()->filter()->values();
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 
-        $enrolls =  $enrolls->groupBy('user_id')->distinct()->whereHas('user',function($q) {
+        $enrolls = $enrolls->groupBy('user_id')->distinct()->whereHas('user',function($q) {
             $q->whereNull('deleted_at');
-        })->with(['user.attachment' ,'user.roles', 'classes'])->get()->pluck('user');
+        })->with(['user.roles', 'classes'])->get()->pluck('user');
         // dd($enrolls->pluck('user'));
         if($request->filled('search'))
         {

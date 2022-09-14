@@ -119,9 +119,16 @@ class QuizzesController extends Controller
 
         $quizzes = collect([]);
 
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::whereId($quiz_lesson->quiz_id)->with(['course','Question.children','quizLesson'])->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children','quizLesson'])->first();
+            if(!isset($quiz))
+                continue;
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
             if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
                 $flag=true;
@@ -227,7 +234,6 @@ class QuizzesController extends Controller
                 'assign_user_gradepass' => isset($request->grade_pass) ? carbon::now() : null,
             ]);
         }
-        $quiz->save();
         return HelperController::api_response_format(200,Quiz::find($quiz->id),__('messages.quiz.add'));
     }
     

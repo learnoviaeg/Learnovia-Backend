@@ -38,9 +38,14 @@ use DB;
 use Str;
 use App\LastAction;
 use App\Installment;
+use App\Repositories\ChainRepositoryInterface;
 
 class UserController extends Controller
 {
+    public function __construct(ChainRepositoryInterface $chain)
+    {
+        $this->chain = $chain;
+    }
     /**
      * create User - and Enroll to optional if there and enroll mandatory if there is class
      *
@@ -420,7 +425,7 @@ class UserController extends Controller
 
             if($request->fees == 'not_paid')
                 $users= $users->whereHas("fees", function ($q) use ($Installment_percentage) {
-                $q->where("percentage", '<',$Installment_percentage);
+                $q->where("percentage", '<',$Installment_percentage); 
             })->orWhereDoesntHave('fees');
         }
       
@@ -468,7 +473,9 @@ class UserController extends Controller
             });
             if($call == 1){
                 $students = $users->pluck('id');
-                return $students;
+                $array['students'] = $students;
+                $array['request'] = $request->query();
+                return $array;
             }
     
         if($request->has('count') && $request->count == 1){
@@ -691,7 +698,7 @@ class UserController extends Controller
                     $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                         ->orWhere('username', 'LIKE' ,"%$request->search%" )
                         ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-        })->with('attachment')->get();
+        })->get();
         return HelperController::api_response_format(201,$parents->paginate(HelperController::GetPaginate($request)),__('messages.users.parents_list'));
     }
 
@@ -933,7 +940,7 @@ class UserController extends Controller
                                             $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                                                     ->orWhere('username', 'LIKE' ,"%$request->search%" )
                                                     ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
-                                            })->with('attachment')->get();
+                                            })->get();
         }
 
         return HelperController::api_response_format(200,$students ,__('messages.users.list'));
@@ -975,14 +982,14 @@ class UserController extends Controller
 
         $userIDs = self::list($request,1);
         if(isset($request->user_ids))
-            $userIDs=$request->user_ids;
+            $userIDs['students']=$request->user_ids;
 
         $filename = uniqid();
 
         if($request->filled('types') && $request->types == 'details')
             $file = Excel::store(new UserDetailsExport($userIDs), 'users'.$filename.'.xlsx','public');
         else
-            $file = Excel::store(new UsersExport($userIDs,$fields), 'users'.$filename.'.xlsx','public');
+            $file = Excel::store(new UsersExport($userIDs,$fields, $this->chain), 'users'.$filename.'.xlsx','public');
 
         $file = url(Storage::url('users'.$filename.'.xlsx'));
         return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
