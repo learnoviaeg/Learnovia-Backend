@@ -19,6 +19,7 @@ use App\Jobs\migrateChainAmdEnrollment;
 use Carbon\Carbon;
 use App\UserGrader;
 use App\Enroll;
+use App\SecondaryChain;
 use App\lesson;
 use App\Events\GradeItemEvent;
 use Modules\QuestionBank\Entities\quiz_questions;
@@ -514,5 +515,37 @@ class ScriptsController extends Controller
     {
         Redis::command('flushdb');
         return 'done';
+    }
+
+    public function enrollLessons()
+    {
+        $courses= Enroll::where('created_at','>=','2022-08-01 16:04:16')->pluck('course');
+        foreach([1] as $course){
+            $lessons=Lesson::where('course_id',$course)->get();
+            foreach($lessons as $lesson)
+            {
+                $enrollsOfCourse=Enroll::where('course',$course);//->get();
+                if(($lesson->shared_classes)!= null)
+                // dd($event->lesson->shared_classes->pluck('id'));
+                    $enrollsOfCourse->whereIn('group',$lesson->shared_classes->pluck('id'));
+                foreach($enrollsOfCourse->cursor() as $enroll)
+                {
+                    // dd($enroll->group);
+                    if(!in_array($enroll->group ,$lesson->shared_classes->pluck('id')->toArray()))
+                        continue;
+
+                    SecondaryChain::firstOrCreate([
+                        'user_id' => $enroll->user_id,
+                        'role_id' => $enroll->role_id,
+                        'group_id' => $enroll->group,
+                        'course_id' => $enroll->course,
+                        'lesson_id' => $lesson->id,
+                        'enroll_id' => $enroll->id
+                    ]);
+                }
+            }
+
+
+        }
     }
 }

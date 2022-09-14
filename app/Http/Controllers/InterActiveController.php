@@ -108,6 +108,10 @@ class InterActiveController extends Controller
             $content->original->class = $classess;
             $content->original->level = Level::where('id',Course::find($content->original->lesson->course_id)->get()->pluck('level_id'))->get();
             $content->original->course = Course::find($content->original->lesson->course_id);
+            if(!$request->user()->can('course/show-hidden-courses') && $content->original->course->show == 0){
+                unset($content);
+                continue;
+            }
             // unset($content->original->lesson->courseSegment);
 
             $h5p_contents[]=$content->original;

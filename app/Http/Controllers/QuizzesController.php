@@ -119,9 +119,16 @@ class QuizzesController extends Controller
 
         $quizzes = collect([]);
 
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::whereId($quiz_lesson->quiz_id)->with(['course','Question.children','quizLesson'])->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children','quizLesson'])->first();
+            if(!isset($quiz))
+                continue;
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
             if(isset($userQuiz->submit_time) && $userQuiz->submit_time !=null)
                 $flag=true;
@@ -196,7 +203,13 @@ class QuizzesController extends Controller
             'correct_feedback' => $request->correct_feedback,
         ]);
 
-        $lessons = Lesson::whereIn('id', $request->lesson_id)->get();
+        $lessons = Lesson::whereIn('id', $request->lesson_id)
+                    ->with([
+                        'course.gradeCategory'=> function($query)use ($request){
+                            $query->whereNull('parent');
+                        },'QuizLesson'=>function($q){
+                            $q->orderBy('index','desc')->limit(1);
+                        }])->get();
 
         foreach($lessons as $key => $lesson)
         {

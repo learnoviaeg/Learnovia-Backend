@@ -63,7 +63,11 @@ class TimelineController extends Controller
         ]);
         $enrolls = $this->chain->getEnrollsByChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
         $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['lesson_id','group_id']);
-        $timeline = Timeline::with(['class','course','level'])
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+        $timeline = Timeline::whereHas('course',$callQuery)->with(['class','course'=>$callQuery,'level'])
                             ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
                             ->whereIn('class_id',$sec_chain->pluck('group_id'))
                             ->where('start_date','<=',Carbon::now())
