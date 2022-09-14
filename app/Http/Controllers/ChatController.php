@@ -94,7 +94,7 @@ class ChatController extends Controller
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
             ]);
-        $user= User::where('id',$request->user_id)->with('attachment')->first();
+        $user= User::where('id',$request->user_id)->first();
         $clientt = new Client();
         $data = array(
             'name' => $user->firstname. " " .$user->lastname, 

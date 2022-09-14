@@ -85,8 +85,12 @@ class MaterialsController extends Controller
 
         $materials_query->whereIn('lesson_id',$lessons)->skip(($page)*$paginate)->take($paginate);
 
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
         // $material = $materials_query->with(['lesson','course.attachment'])->whereIn('lesson_id',$lessons);
-        $material = $materials_query->with(['lesson','course']);
+        $material = $materials_query->whereHas('course',$callQuery)->with(['lesson','course' => $callQuery]);
 
         if($request->user()->can('site/course/student')){
             $material

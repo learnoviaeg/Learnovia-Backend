@@ -133,14 +133,10 @@ class AttemptsController extends Controller
 
             $user_grade=null;
             foreach($attems as $key=>$attem){
-                $user_Attemp["grade"]=null;
-                if($attem->status == 'Graded')
-                {
-                    $user_Attemp["grade"]= $attem->grade;
-                    $usergrader = UserGrader::where('user_id',$user_id)->where('item_type','category')->where('item_id', $quiz_lesson->grade_category_id)->first();
-                    if(isset($usergrader))
-                        $user_grade=$usergrader->grade;
-                }
+                $user_Attemp["grade"]= $attem->grade;
+                $usergrader = UserGrader::where('user_id',$user_id)->where('item_type','category')->where('item_id', $quiz_lesson->grade_category_id)->first();
+                if(isset($usergrader))
+                    $user_grade=$usergrader->grade;
 
                 if($attem->status != 'Graded')
                     $countEss_TF++;

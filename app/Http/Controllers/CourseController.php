@@ -172,7 +172,7 @@ class CourseController extends Controller
             $le['levels'] = $le->courseSegments->pluck('segmentClasses.*.classLevel.*.yearLevels.*.levels')->collapse()->collapse()->unique()->values();
             $teacher = User::whereIn('id',Enroll::where('role_id', '4')->whereIn('course_segment',  $le->courseSegments->pluck('id'))
                                                 ->pluck('user_id')
-                            )->with('attachment')->get(['id', 'username', 'firstname', 'lastname', 'picture']);
+                            )->get(['id', 'username', 'firstname', 'lastname', 'picture']);
             $le['teachers']  = $teacher ;
             unset($le->courseSegments);
         }
@@ -853,15 +853,19 @@ class CourseController extends Controller
             'class' => 'required|exists:classes,id',
         ]);
 
-        // $class = Classes::firstOrCreate([
-        //     'name' => $request->class_name,
-        //     'level_id' => $request->level
-        // ]);
+
       
         $courses_of_level = Course::where('level_id' , $request->level)->where('segment_id' , $request->segment)->select('id')->pluck('id');
         $admins=User::select('id')->whereHas('roles',function($q){  $q->where('id',1);  })->get();
 
         foreach($courses_of_level as $course){
+            $lessons = Lesson::where('course_id', $course)->where('shared_lesson', 1)->select(['shared_classes','course_id','id']);
+            foreach($lessons->cursor() as $lesson){
+                $array = json_decode($lesson->getOriginal('shared_classes'));
+                if(!in_array($request->class, $array))
+                    array_push($array , $request->class);
+                    $lesson->update(['shared_classes' => json_encode($array)]);
+            }
              $class_of_course = Course::whereId($course);
              $shared_classes = $class_of_course->first()->classes;
 
