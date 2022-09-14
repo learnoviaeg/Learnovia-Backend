@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\Enroll;
 use App\User;
 use App\Segment;
+use App\Http\Controllers\HelperController;
 use App\Classes;
 use App\Course;
 use App\Level;

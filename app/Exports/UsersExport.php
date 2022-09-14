@@ -8,13 +8,16 @@ use Auth;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use DB;
 use App\LastAction;
+use Illuminate\Http\Request;
+use App\Parents;
 
 class UsersExport implements FromCollection, WithHeadings
 {
-
-    function __construct($userids,$fields) {
-        $this->ids = $userids;
+    function __construct($userids,$fields ,$chain) {
+        $this->ids = $userids['students'];
+        $this->request = $userids['request'];
         $this->fields=$fields;
+        $this->chain = $chain;
     }
 
     /**
@@ -34,16 +37,51 @@ class UsersExport implements FromCollection, WithHeadings
             $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
             if(isset($last))
                 $value['last_action'] = $last->date;
+
+            $req = new Request($this->request);
+            $enroll = $this->chain->getEnrollsByChain($req)->where('user_id', $value->id)->select('group','level')->with(['levels','classes'])->latest()->first();
+            if(isset($enroll->group)){
+
+                $value['class_id'] = $enroll->classes->name;
+            }
+            if(isset($enroll->group)){
+
+                $value['level'] =  $enroll->levels->name;
+            }
                 
-            $value->setHidden([])->setVisible($this->fields);
+        ////parents
+        if($role_name == 'Student'){
+            $count = 1;
+            foreach(Parents::where('child_id', $value->id)->select('parent_id')->with('parent')->cursor() as $key => $parent){
+                if (!in_array( 'parent'.$count , $this->fields)) {
+                    $this->fields[] = 'parent'.$count;
+                }
+                $value['parent'.$count] = $parent->parent->fullname;
+                $count ++;
+            }
         }
         
+
+            ///////extra profile fields   
+            $extra_fields = json_decode(json_encode($value->profile_fields), true);
+            if($value->profile_fields != null){
+                        foreach($extra_fields as $key => $field){
+                            if (!in_array( $key, $this->fields)) {
+                                $this->fields[] = $key;
+                            }
+                            $value[$key] = $field;
+                        }
+                    }
+                    
+                        
+            $value->setHidden([])->setVisible($this->fields);
+        }
         return $users;
     }
 
     public function headings(): array
-    {   
-        //  dd($this->fields);
-        return $this->fields;
+    {  
+        return array_keys($this->collection()->first()->toArray());
+//    dd($result);
     }
 }

@@ -586,7 +586,11 @@ class BigbluebuttonController extends Controller
         if(isset($request->course))
             $request['courses']= [$request->course];
 
-        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes);
+        $callQuery=function($q) use ($request){
+            if(!$request->user()->can('course/show-hidden-courses'))
+                $q->where('show',1);
+        };
+        $meeting = BigbluebuttonModel::whereIn('course_id',$courses)->whereIn('class_id',$classes)->whereHas('course',$callQuery)->with(['course' =>$callQuery]);
 
         if($request->user()->can('site/course/student'))
             $meeting->where('show',1);

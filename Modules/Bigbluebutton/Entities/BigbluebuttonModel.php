@@ -33,7 +33,10 @@ class BigbluebuttonModel extends Model
 
         if($this->attributes['status'] == 'future')
             return __('messages.virtual.future');
+    }
 
+    public function course(){
+        return $this->belongsTo('App\Course');
     }
 
     public function user(){

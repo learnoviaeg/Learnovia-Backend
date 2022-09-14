@@ -42,31 +42,38 @@ class FeesJob implements ShouldQueue
     {
         if(Installment::count() > 0 && (bool) $this->installment->notified == false){
 
-            $notification_settings_days = 2;
-            $notification_settings =  NotificationSetting::select('after_min')->where('type' , 'fees')->first();
+            // $notification_settings =  NotificationSetting::select('after_min')->where('type' , 'fees')->first();
     
-            if(isset($notification_settings->after_min))
+            // if(isset($notification_settings->after_min))
+            //     $notification_settings_days = $notification_settings->after_min;
+
+
+            $notification_settings =  NotificationSetting::select('after_min')->where('type' , 'fees')->first();
+            if(isset($notification_settings))
                 $notification_settings_days = $notification_settings->after_min;
+    
+            if((isset($notification_settings) && $notification_settings->after_min > 0) )
+            {    
+                $notification_date = Carbon::parse($this->installment->date)->subDays($notification_settings_days);
+                if($notification_date->isToday() )
+                {
+                    $reqNot=[
+                        'message' => 'Fees is due by '.$this->installment->date ,
+                        'item_id' => $this->installment->id,
+                        'item_type' => 'fees',
+                        'type' => 'notification',
+                        'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                    ];
+                    $Installment_percentage = Installment::where('date' , '<=' , Carbon::parse($this->installment->date)->format('Y-m-d'))->sum('percentage');
+                    $students = $this->chain->getEnrollsByManyChain(new Request())->select('user_id')->distinct('user_id')->where('role_id', 3)
+                                ->whereHas('user.fees',function($q) use ($Installment_percentage){  $q->where('percentage', '>', $Installment_percentage );  })->pluck('user_id');
 
-            $notification_date = Carbon::parse($this->installment->date)->subDays($notification_settings_days);
-            if($notification_date->isToday() )
-            {
-                $reqNot=[
-                    'message' => 'Fees is due by '.$this->installment->date ,
-                    'item_id' => $this->installment->id,
-                    'item_type' => 'fees',
-                    'type' => 'notification',
-                    'publish_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                ];
-                $Installment_percentage = Installment::where('date' , '<=' , Carbon::parse($this->installment->date)->format('Y-m-d'))->sum('percentage');
-                $students = $this->chain->getEnrollsByManyChain(new Request())->select('user_id')->distinct('user_id')->where('role_id', 3)
-                            ->whereHas('user.fees',function($q) use ($Installment_percentage){  $q->where('percentage', '>', $Installment_percentage );  })->pluck('user_id');
-
-                $users = Parents::select('parent_id')->distinct('parent_id')->whereIn('child_id', $students)->pluck('parent_id');
-                if($users->count() > 0)
-                    $this->notification->sendNotify($users->toArray(),$reqNot);
-                
-                Installment::where('id',$this->installment->id)->update(['notified' => 1]);
+                    $users = Parents::select('parent_id')->distinct('parent_id')->whereIn('child_id', $students)->pluck('parent_id');
+                    if($users->count() > 0)
+                        $this->notification->sendNotify($users->toArray(),$reqNot);
+                    
+                    Installment::where('id',$this->installment->id)->update(['notified' => 1]);
+                }
             }
         }
     }

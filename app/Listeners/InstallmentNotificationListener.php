@@ -29,19 +29,20 @@ class InstallmentNotificationListener
      */
     public function handle(CreateInstallmentEvent $event)
     {
-        $notification_settings_days = 2;
         $notification_settings =  NotificationSetting::select('after_min')->where('type' , 'fees')->first();
-
-        if(isset($notification_settings->after_min))
+        if(isset($notification_settings))
             $notification_settings_days = $notification_settings->after_min;
-        foreach(Installment::cursor() as $installment)
-        {
 
-            $notification_date = Carbon::parse($installment->date)->subDays($notification_settings_days);
-            $resulted_date = Carbon::parse($notification_date);
-            $seconds = Carbon::parse($resulted_date->diffInSeconds(Carbon::now()));
-            $job = (new \App\Jobs\FeesJob($installment, $event->chain, $event->notification))->delay($seconds);
-            dispatch($job);
+        if((isset($notification_settings) && $notification_settings->after_min > 0) )
+        {    
+            foreach(Installment::cursor() as $installment)
+            {
+                $notification_date = Carbon::parse($installment->date)->subDays($notification_settings_days);
+                $resulted_date = Carbon::parse($notification_date);
+                $seconds = Carbon::parse($resulted_date->diffInSeconds(Carbon::now()));
+                $job = (new \App\Jobs\FeesJob($installment, $event->chain, $event->notification))->delay($seconds);
+                dispatch($job);
+            }
         }
     }
 }
