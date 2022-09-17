@@ -20,15 +20,24 @@ Route::get('h5p_protect', function(Request $request)
     $data = explode('/',request()->data);
     $video_name = $data[count($data) - 1];
 
-    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
-        $filePath=ltrim('./storage/h5p/editor/images/'.$video_name);
-        // $filePath =ltrim( Storage::url('images/'.$video_name), '/');
-    else if(str_contains($video_name,'mp3'))
-        $filePath=ltrim('./storage/h5p/editor/audios/'.$video_name);
-        // $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
-    else
-        $filePath=ltrim('./storage/h5p/editor/videos/'.$video_name);
-        // $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png')){
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/images/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+    }
+    else if(str_contains($video_name,'mp3')){
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/audios/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
+    }
+    else{
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/videos/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+    }
 
     $stream =  new \App\VideoStream($filePath);
     $stream->start();
