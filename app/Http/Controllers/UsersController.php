@@ -210,7 +210,9 @@ class UsersController extends Controller
         if(isset($user->level))
            $user['level_name']=Level::find($user->level)->name;
         $i = 0;
-        foreach ($user->enroll as $enroll) {
+        $enrolls = $this->chain->getEnrollsByManyChain($requ)->where('user_id',$id);
+        
+        foreach ($enrolls->cursor() as $enroll) {
             $all[$i]['role'] = $enroll->roles;
             $all[$i]['enroll_id'] = $enroll->id;
 
