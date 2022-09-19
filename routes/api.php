@@ -425,6 +425,8 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('deleteDuplicatedGrades', 'ScriptsController@delete_duplicated_grades');
     Route::get('redisCache', 'ScriptsController@clear_redis_cache');
     Route::get('secondaruChainMissed', 'ScriptsController@enrollLessons');
+
+    Route::get('lessons_without_desc', 'ScriptsController@lessons_without_decription_having_materials');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {

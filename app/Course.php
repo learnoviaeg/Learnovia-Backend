@@ -57,6 +57,11 @@ class Course extends Model
         return $this->hasMany('Modules\Attendance\Entities\AttendanceSession','course_id','id');
     }
 
+    public function lessons()
+    {
+        return $this->hasMany('App\Lesson','course_id','id');
+    }
+
     public function timeline()
     {
         return $this->hasMany('App\Timeline','course_id','id');
