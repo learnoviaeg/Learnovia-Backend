@@ -27,6 +27,9 @@ use Modules\QuestionBank\Entities\Questions;
 use App\Repositories\ChainRepositoryInterface;
 use App\Level;
 use Redis;
+use App\Exports\LessonEcport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class ScriptsController extends Controller
 {
@@ -547,5 +550,19 @@ class ScriptsController extends Controller
 
 
         }
+    }
+
+    public function lessons_without_decription_having_materials(Request $request){
+        $result= [] ;
+        $courses = $this->chain->getEnrollsByManyChain($request)->select('course')->distinct('course')->pluck('course');
+        $lessons = Lesson::whereIn('course_id' , $courses)->select('id','name', 'course_id')->whereNull('description');//->get();
+        foreach($lessons->cursor() as $lesson){
+            if ($lesson->FileLesson->count() > 0 || $lesson->MediaLesson->count() > 0 || $lesson->QuizLesson->count() > 0 || $lesson->AssignmentLesson->count() > 0 || $lesson->H5PLesson->count() > 0 )
+                $result[] = $lesson;
+        }
+        $filename = uniqid();
+        $file = Excel::store(new LessonEcport($result), 'lesson'.$filename.'.xlsx','public');
+        $file = url(Storage::url('lesson'.$filename.'.xlsx'));
+        return $file;
     }
 }
