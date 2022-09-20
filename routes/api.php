@@ -667,6 +667,7 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
     Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
     Route::post('forsan/monthly-all', 'ReportCardsController@forsanMonthylReportAll');
+    Route::get('courses', 'ReportCardsController@getGradesCourses');
 });
 
 //script for front-end editor

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\LetterDetails;
 use App\ScaleDetails;
 use Spatie\Permission\Models\Permission;
+use App\AcademicYear;
+use Illuminate\Support\Facades\Auth;
 
 class ReportCardsController extends Controller
 { 
@@ -142,44 +144,45 @@ class ReportCardsController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'term'    => 'required|in:first,final',
+            'course_id'=> 'required|exists:courses,id',
         ]);
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
-        if($request->term == 'first'){
-            if($user->can('report_card/mfis/mfisg'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
+        // if($request->term == 'first'){
+        //     if($user->can('report_card/mfis/mfisg'))
+        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
     
-            if($user->can('report_card/mfis/mfisb'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
+        //     if($user->can('report_card/mfis/mfisb'))
+        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
 
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%Grades%");
-                });     
-            };
-        }
+            // $course_callback = function ($qu) use ($request ) {
+            //     $qu->Where(function ($query) {
+            //         $query->where('name', 'LIKE' , "%Grades%");
+            //     });     
+            // };
+        // }
             
-        if($request->term == 'final'){
-            if($user->can('report_card/mfis/mfisg-final'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisg-final')->pluck('allowed_levels')->first();
+        // if($request->term == 'final'){
+        //     if($user->can('report_card/mfis/mfisg-final'))
+        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisg-final')->pluck('allowed_levels')->first();
 
-            if($user->can('report_card/mfis/mfisb-final'))
-                $allowed_levels=Permission::where('name','report_card/mfis/mfisb-final')->pluck('allowed_levels')->first();
+        //     if($user->can('report_card/mfis/mfisb-final'))
+        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisb-final')->pluck('allowed_levels')->first();
 
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%inal-%");
-                });     
-            };
-        }
+        //     $course_callback = function ($qu) use ($request ) {
+        //         $qu->Where(function ($query) {
+        //             $query->where('name', 'LIKE' , "%inal-%");
+        //         });     
+        //     };
+        // }
            
-        $allowed_levels=json_decode($allowed_levels);
-        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        $check=(array_intersect($allowed_levels, $student_levels));
+        // $allowed_levels=json_decode($allowed_levels);
+        // $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        // $check=(array_intersect($allowed_levels, $student_levels));
 
-        if(count($check) == 0)
-            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        // if(count($check) == 0)
+        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
   
 
@@ -201,15 +204,16 @@ class ReportCardsController extends Controller
         //     });     
         // };
 
-        $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
-            $qu->where('role_id', 3);
-            $qu->whereHas('courses' , $course_callback)
-                ->with(['courses' => $course_callback]); 
+        $callback = function ($qu) use ($request , $grade_category_callback) {
+            // $qu->where('role_id', 3);
+            $qu->where('course', $request->course_id);
+            // $qu->whereHas('courses' , $course_callback)
+            $qu->with(['courses']); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
 
-        $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
+        $result = User::select('id','firstname','lastname')->whereId($request->user_id)->whereHas('enroll' , $callback)
                         ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
@@ -229,9 +233,9 @@ class ReportCardsController extends Controller
             'classes.*' => 'exists:classes,id',
             'segments'    => 'nullable|array',
             'segments.*' => 'exists:segments,id',
-            'courses' => 'array',
-            'courses.*' => 'exists:courses,id',
-            'term'    => 'required|in:first,final',
+            'courses' => 'required|array',
+            'courses.*' => 'required|exists:courses,id',
+            // 'term'    => 'required|in:first,final',
         ]);
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
@@ -248,24 +252,24 @@ class ReportCardsController extends Controller
                 }]); 
             };
 
-            if($request->term == 'first')
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%Grades%");
-                });     
-            };
+            // if($request->term == 'first')
+            // $course_callback = function ($qu) use ($request ) {
+            //     $qu->Where(function ($query) {
+            //         $query->where('name', 'LIKE' , "%Grades%");
+            //     });     
+            // };
 
-            if($request->term == 'final')
-                $course_callback = function ($qu) use ($request ) {
-                    $qu->Where(function ($query) {
-                        $query->where('name', 'LIKE' , "%inal-%");
-                    });     
-                };
+            // if($request->term == 'final')
+            //     $course_callback = function ($qu) use ($request ) {
+            //         $qu->Where(function ($query) {
+            //             $query->where('name', 'LIKE' , "%inal-%");
+            //         });     
+            //     };
 
             $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
                 $qu->where('role_id', 3);
-                $qu->whereHas('courses' , $course_callback)
-                    ->with(['courses' => $course_callback]); 
+                // $qu->whereHas('courses' , $course_callback)
+                $q->with(['courses']); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
@@ -493,7 +497,7 @@ class ReportCardsController extends Controller
             'term'    => 'required|in:first,final',
         ]);
 
-///////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////
         if($request->term == 'first'){
             $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
             $course_callback = function ($qu) use ($request ) {
@@ -634,7 +638,8 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:Feb,March,April',
+            'course_id' => 'required|exists:courses,id',
         ]);
 
         $GLOBALS['user_id'] = $request->user_id;
@@ -670,8 +675,9 @@ class ReportCardsController extends Controller
 
         $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
             $qu->where('role_id', 3);
-            $qu->whereHas('courses' , $course_callback)
-                ->with(['courses' => $course_callback]); 
+            $qu->where('course', $request->course_id);
+            // $qu->whereHas('courses' , $course_callback)
+            $qu->with('courses'); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
@@ -686,7 +692,7 @@ class ReportCardsController extends Controller
     public function manaraMonthylReportAll(Request $request)
     {
         $request->validate([
-            'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:Feb,March,April',
             'years'    => 'nullable|array',
             'years.*' => 'exists:academic_years,id',
             'types'    => 'nullable|array',
@@ -697,8 +703,8 @@ class ReportCardsController extends Controller
             'classes.*' => 'exists:classes,id',
             'segments'    => 'nullable|array',
             'segments.*' => 'exists:segments,id',
-            'courses' => 'array',
-            'courses.*' => 'exists:courses,id',
+            'courses' => 'required|array',
+            'courses.*' => 'required|exists:courses,id',
         ]);
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
@@ -721,8 +727,8 @@ class ReportCardsController extends Controller
 
             $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
                 $qu->where('role_id', 3);
-                $qu->whereHas('courses' , $course_callback)
-                    ->with(['courses' => $course_callback]); 
+                // $qu->whereHas('courses' , $course_callback)
+                $qu->with('courses'); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
@@ -1137,6 +1143,24 @@ class ReportCardsController extends Controller
                 $result_collection->push($result);
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
+    }
+
+    public function getGradesCourses(Request $request)
+    {
+        $callback = function ($qu) use ($request ) {
+            $qu->where('short_name','LIKE', "%Grades%")
+                ->orWhere('short_name','LIKE', "%Final%")
+                ->orWhere('short_name','LIKE', "%Feb%")
+                ->orWhere('short_name','LIKE', "%March%")
+                ->orWhere('short_name','LIKE', "%April%")
+                ->select('name','id');
+        };
+        $years = AcademicYear::select('id')->pluck('id');
+        $request->request->add(['years' => $years]);
+        $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
+        ->whereHas('courses' , $callback)
+        ->with(['courses' => $callback ])->get()->pluck('courses');
+        return response()->json(['message' => null, 'body' => $courses ], 200);
     }
 
 }
