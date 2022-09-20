@@ -17,18 +17,18 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        // $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final'],   ['only' => ['manaraReport']]);
-        // $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
-        // $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
-        // $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
-        // $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
-        // $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
-        // $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll|
-        //                     report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
-        // $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
-        // $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
-        // $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
-        // $this->middleware(['permission:report_card/forsan/monthly/printAll'],   ['only' => ['forsanMonthylReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
+        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
+        $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
+        $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll|
+                            report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
+        $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
+        $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
+        $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
+        $this->middleware(['permission:report_card/forsan/monthly/printAll'],   ['only' => ['forsanMonthylReportAll']]);
     }
 
     public function haramainReport(Request $request)
@@ -638,7 +638,8 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:Feb,March,April',
+            'course_id' => 'required|exists:courses,id',
         ]);
 
         $GLOBALS['user_id'] = $request->user_id;
@@ -674,8 +675,9 @@ class ReportCardsController extends Controller
 
         $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
             $qu->where('role_id', 3);
-            $qu->whereHas('courses' , $course_callback)
-                ->with(['courses' => $course_callback]); 
+            $qu->where('course', $request->course_id);
+            // $qu->whereHas('courses' , $course_callback)
+            $qu->with('courses'); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
@@ -690,7 +692,7 @@ class ReportCardsController extends Controller
     public function manaraMonthylReportAll(Request $request)
     {
         $request->validate([
-            'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:Feb,March,April',
             'years'    => 'nullable|array',
             'years.*' => 'exists:academic_years,id',
             'types'    => 'nullable|array',
@@ -701,8 +703,8 @@ class ReportCardsController extends Controller
             'classes.*' => 'exists:classes,id',
             'segments'    => 'nullable|array',
             'segments.*' => 'exists:segments,id',
-            'courses' => 'array',
-            'courses.*' => 'exists:courses,id',
+            'courses' => 'required|array',
+            'courses.*' => 'required|exists:courses,id',
         ]);
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->distinct('user_id')->pluck('user_id');
@@ -725,8 +727,8 @@ class ReportCardsController extends Controller
 
             $callback = function ($qu) use ($request , $course_callback , $grade_category_callback) {
                 $qu->where('role_id', 3);
-                $qu->whereHas('courses' , $course_callback)
-                    ->with(['courses' => $course_callback]); 
+                // $qu->whereHas('courses' , $course_callback)
+                $qu->with('courses'); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
