@@ -268,7 +268,7 @@ class ReportCardsController extends Controller
                     // });     
                 };
 
-            $callback = function ($qu) use ($request  , $grade_category_callback) {
+            $callback = function ($qu) use ($request  ,$course_callback, $grade_category_callback) {
                 $qu->where('role_id', 3);
                 $qu->whereHas('courses' , $course_callback)
                 ->with(['courses' => $course_callback]); 
