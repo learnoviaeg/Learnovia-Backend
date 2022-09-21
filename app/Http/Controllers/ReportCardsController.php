@@ -197,18 +197,20 @@ class ReportCardsController extends Controller
             }]); 
         };
 
-        // $course_callback = function ($qu) use ($request ) {
-        //     $qu->Where(function ($query) {
-        //         $query->where('name', 'LIKE' , "%Grades%")
-        //               ->orWhere('name','LIKE' , "%درجات%"); 
-        //     });     
-        // };
+        $course_callback = function ($qu) use ($request ) {
+            // $qu->Where(function ($query) {
+            //     $qu->where('name', 'LIKE' , "%Grades%")
+            //           ->orWhere('name','LIKE' , "%درجات%"); 
+            // });    
+            $qu->where('id', $request->course_id);
+ 
+        };
 
-        $callback = function ($qu) use ($request , $grade_category_callback) {
-            // $qu->where('role_id', 3);
-            $qu->where('course', $request->course_id);
-            // $qu->whereHas('courses' , $course_callback)
-            $qu->with(['courses']); 
+        $callback = function ($qu) use ($request , $course_callback ,$grade_category_callback) {
+            $qu->where('role_id', 3);
+            // $qu->where('course', $request->course_id);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
@@ -260,16 +262,16 @@ class ReportCardsController extends Controller
             // };
 
             // if($request->term == 'final')
-            //     $course_callback = function ($qu) use ($request ) {
-            //         $qu->Where(function ($query) {
-            //             $query->where('name', 'LIKE' , "%inal-%");
-            //         });     
-            //     };
+                $course_callback = function ($qu) use ($request ) {
+                    // $qu->Where(function ($query) {
+                        $qu->where('id',$request->courses);
+                    // });     
+                };
 
             $callback = function ($qu) use ($request  , $grade_category_callback) {
                 $qu->where('role_id', 3);
-                // $qu->whereHas('courses' , $course_callback)
-                $qu->with(['courses']); 
+                $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
@@ -669,15 +671,19 @@ class ReportCardsController extends Controller
             }]); 
         };
 
-        // $course_callback = function ($qu) use ($request ) { 
-        //     $qu->where('name','LIKE', "%$request->month%");
-        // };
+        $course_callback = function ($qu) use ($request ) { 
+            $qu->where('id',$request->course_id);
+        };
 
-        $callback = function ($qu) use ($request  , $grade_category_callback) {
+        $callback = function ($qu) use ($request, $course_callback , $grade_category_callback) {
             $qu->where('role_id', 3);
-            $qu->where('course', $request->course_id);
-            // $qu->whereHas('courses' , $course_callback)
-            $qu->with('courses'); 
+            // $qu->where('course', $request->course_id);
+            
+            // // $qu->whereHas('courses' , $course_callback)
+            // $qu->with('courses'); 
+            $qu->whereHas('courses' , $course_callback)
+            ->with(['courses' => $course_callback]); 
+
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
@@ -721,13 +727,14 @@ class ReportCardsController extends Controller
                 }]); 
             };
 
-            // $course_callback = function ($qu) use ($request ) {
-            //     $qu->where('name','LIKE', "%$request->month%");
-            // };
+            $course_callback = function ($qu) use ($request ) {
+                $qu->where('id',$request->courses);
+            };
 
-            $callback = function ($qu) use ($request  , $grade_category_callback) {
+            $callback = function ($qu) use ($request ,$course_callback , $grade_category_callback) {
                 $qu->where('role_id', 3);
-                // $qu->whereHas('courses' , $course_callback)
+                $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
                 $qu->with('courses'); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
