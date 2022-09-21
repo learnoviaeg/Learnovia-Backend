@@ -269,7 +269,7 @@ class ReportCardsController extends Controller
             $callback = function ($qu) use ($request  , $grade_category_callback) {
                 $qu->where('role_id', 3);
                 // $qu->whereHas('courses' , $course_callback)
-                $q->with(['courses']); 
+                $qu->with(['courses']); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
