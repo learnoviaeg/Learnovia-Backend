@@ -557,7 +557,8 @@ class ScriptsController extends Controller
         $courses = $this->chain->getEnrollsByManyChain($request)->select('course')->distinct('course')->pluck('course');
         $lessons = Lesson::whereIn('course_id' , $courses)->select('id','name', 'course_id')->whereNull('description');//->get();
         foreach($lessons->cursor() as $lesson){
-            if ($lesson->FileLesson->count() > 0 || $lesson->MediaLesson->count() > 0 || $lesson->QuizLesson->count() > 0 || $lesson->AssignmentLesson->count() > 0 || $lesson->H5PLesson->count() > 0 )
+            //not having materials
+            if ($lesson->FileLesson->count() == 0 || $lesson->MediaLesson->count() == 0 || $lesson->QuizLesson->count() == 0 || $lesson->AssignmentLesson->count() == 0 || $lesson->H5PLesson->count() == 0 )
                 $result[] = $lesson;
         }
         $filename = uniqid();
