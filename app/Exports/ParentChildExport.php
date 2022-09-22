@@ -29,13 +29,16 @@ class ParentChildExport implements FromCollection , WithHeadings
         foreach (Parents::cursor() as $value){
             $parent = User::select('id','firstname','lastname','username','real_password')->whereId($value['parent_id'])->first();
             $child = User::select('id','firstname','lastname','username','real_password')->with(['enroll' => $callback])->whereId($value['child_id'])->first();
+            if($child == null || $parent == null)
+                continue;
             $value['parent_username']=$parent->username;
             $value['parent_name']=$parent->fullname;
             $value['parent_password']=$parent->real_password;
             $value['child_username']=$child->username;
             $value['child_name']=$child->fullname;
             $value['child_password']=$child->real_password;
-            $value['child_class']= $child->enroll[0]->classes->name;
+            if(isset($child->enroll[0]))       
+                $value['child_class']= $child->enroll[0]->classes->name;
 
             $value->setHidden(['lastsction'])->setVisible($this->fields);
             $forSetExport->push($value);
