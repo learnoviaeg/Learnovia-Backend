@@ -948,7 +948,7 @@ class UserController extends Controller
 
     public function exportParentChild(Request $request)
     {
-        $fields = ['username_parent', 'username_child'];
+        $fields = ['parent_username','parent_name','parent_password' ,'child_username','child_name', 'child_password', 'child_class'];
 
         $filename = uniqid();
         $file = Excel::store(new ParentChildExport($fields), 'parent_child'.$filename.'.xlsx','public');
