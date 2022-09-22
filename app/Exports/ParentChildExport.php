@@ -6,14 +6,12 @@ use App\Parents;
 use App\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Illuminate\Http\Request;
 
 class ParentChildExport implements FromCollection , WithHeadings
 {
     function __construct($fields){
         $this->fields=$fields;
     }
-
     /**
     * @return \Illuminate\Support\Collection
     */
@@ -23,6 +21,7 @@ class ParentChildExport implements FromCollection , WithHeadings
             $qu->where('current', 1);
             };
         $callback = function ($qu) use ( $year_callback) {
+            $qu->take(1);
             $qu->whereHas('year' , $year_callback)->with(['classes']); 
             
         };
@@ -49,5 +48,3 @@ class ParentChildExport implements FromCollection , WithHeadings
         return $this->fields;
     }
 }
-
-// $fields = ['parent_username','parent_name','parent_password' ,'child_username','child_name', 'child_password', 'child_class'];
