@@ -19,6 +19,10 @@ class WorkingDayController extends Controller
      */
     public function index()
     {
+        $workingDays=WorkingDay::all();
+        if(isset($request->status))
+            $workingDays=WorkingDay::where('status',$request->status)->get();
+
         return HelperController::api_response_format(200 , WorkingDay::all() , __('messages.working_day.list'));
     }
 
