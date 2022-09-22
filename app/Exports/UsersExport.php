@@ -52,7 +52,6 @@ class UsersExport implements FromCollection, WithHeadings
             if(isset($enroll->enroll[0]->levels)){
                 $value['level'] =  $enroll->enroll[0]->levels->name;
             }
-              dd($value->with(['enroll' => $callback])->first()); 
         ////parents
         if($role_name == 'Student'){
             $count = 1;
