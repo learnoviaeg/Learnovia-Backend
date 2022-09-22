@@ -35,7 +35,6 @@ class UsersExport implements FromCollection, WithHeadings
         // $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
         $forSetExport = collect();
         foreach (User::whereNull('deleted_at')->whereIn('id', $this->ids)->cursor() as $value) {
-
             $role_id = DB::table('model_has_roles')->where('model_id',$value->id)->pluck('role_id')->first();
             $role_name='';
             if(isset($role_id))
@@ -45,20 +44,15 @@ class UsersExport implements FromCollection, WithHeadings
             $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
             if(isset($last))
                 $value['last_action'] = $last->date;
+            $enroll = User::whereId($value->id)->with(['enroll' => $callback])->first();
 
-            // $req = new Request($this->request);
-            // $enroll = $this->chain->getEnrollsByChain($req)->where('user_id', $value->id)->select('group','level')->with(['levels','classes'])->latest()->first();
-            $enroll = $value->with(['enroll' => $callback])->first();
-
-            if(isset($enroll->group)){
-
-                $value['class_id'] = $enroll[0]->classes->name;
+            if(isset($enroll->enroll[0]->classes)){
+                $value['class_id'] = $enroll->enroll[0]->classes->name;
             }
-            if(isset($enroll->group)){
-
-                $value['level'] =  $enroll[0]->levels->name;
+            if(isset($enroll->enroll[0]->levels)){
+                $value['level'] =  $enroll->enroll[0]->levels->name;
             }
-               
+              dd($value->with(['enroll' => $callback])->first()); 
         ////parents
         if($role_name == 'Student'){
             $count = 1;
