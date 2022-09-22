@@ -42,7 +42,10 @@ class RefreshUserGrades implements ShouldQueue
         ]);
         $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         foreach($enrolled_students as $user){
-            event(new UserGradesEditedEvent(User::find($user) , $this->grade_category));
+            $student = User::find($user); 
+            if($student == null)
+                continue;
+            event(new UserGradesEditedEvent($student, $this->grade_category));
         }
     }
 }
