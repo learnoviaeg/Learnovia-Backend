@@ -11,7 +11,7 @@ class NotificationRepo implements NotificationRepoInterface
         $data=[
             'users' => $users,
             'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
-            // 'school_domain'=>'test',
+            // 'school_domain'=>'test', 
             // 'title'=> substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
             'title'=> 'Learnovia',
             'body'=> $reqNot['message'],
@@ -24,7 +24,7 @@ class NotificationRepo implements NotificationRepoInterface
             'publish_date' => $reqNot['publish_date']
         ];
 
-        $curl = curl_init();
+       /* $curl = curl_init();
 
         curl_setopt_array($curl, array(
         CURLOPT_URL => config('NotificationConfig.Notification_url').'send/notifications',
@@ -47,5 +47,6 @@ class NotificationRepo implements NotificationRepoInterface
         curl_close($curl);
 
         return $response;
+ */
     }
 }
