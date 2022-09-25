@@ -251,7 +251,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
 
 //USER CRUD ROUTES
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add','ContractRestrict']);
+    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add']);
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
     Route::get('get-all', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
