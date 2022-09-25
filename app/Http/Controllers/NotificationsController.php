@@ -123,7 +123,12 @@ class NotificationsController extends Controller
         $us['paginate']=isset($request->paginate) ? $request->paginate : 10;
         $us['type']=$request->type;
         $us['seen']=isset($request->seen) ? $request->seen : null;
-        foreach($request->users as $user)
+        $users=$request->users;
+        $child = Parents::whereIn('parent_id',$request->users)->where('current',1)->pluck('child_id');
+        if(isset($child))
+            $users[]=$child;
+
+        foreach($users as $user)
         {
             $data['user_id']=$user;
             // $data['school_domain']='test';

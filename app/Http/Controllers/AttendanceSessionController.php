@@ -41,6 +41,7 @@ class AttendanceSessionController extends Controller
      */
     public function index(Request $request,$reports=0)
     {
+        // dd(Carbon::parse('2022-09-19 23:59:59')->startOfWeek());
         $request->validate([
             'attendance_id' => 'exists:attendances,id',
             'start_date' => 'date',
@@ -79,19 +80,18 @@ class AttendanceSessionController extends Controller
                 $attendanceSession->whereDay('start_date', Carbon::now()->format('j'))->whereMonth('start_date',Carbon::now()->format('m'));
 
             if($request->current == 'week'){
-                // from saterday to friday
+                // from saterday to friday .. all of the following because laravel start week from monday
                 if(Carbon::now()->format('l') == 'Saturday')
                     $attendanceSession->where('start_date', '>=', Carbon::now()->addDay(7))
                         ->where('start_date', '<=', Carbon::now()->addDay(7));
 
+                elseif (Carbon::now()->format('l') == 'Sunday')
+                    $attendanceSession->where('start_date', '>=', Carbon::now()->addDay(8))
+                        ->where('start_date', '<=', Carbon::now()->addDay(8));
+                
                 else
-                    for($i=1;$i<=7;$i++)
-                    {
-                        $day=Carbon::now()->subDay($i)->format('l');
-                        if($day == 'Saturday')
-                            $attendanceSession->where('start_date', '>=', Carbon::now()->subDay($i))
-                                ->where('start_date', '<=', Carbon::now()->subDay($i)->addDay(7));
-                    }
+                    $attendanceSession->where('start_date', '>=', Carbon::now()->startOfWeek()->subDay(2))
+                        ->where('start_date', '<=', Carbon::now()->endOfWeek()->subDay(2));
             }
 
             if($request->current == 'month')

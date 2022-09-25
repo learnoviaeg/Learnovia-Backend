@@ -25,9 +25,16 @@ class UsersExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
-
-        foreach ($users as $value) {
+        $year_callback = function ($qu)  {
+            $qu->where('current', 1);
+            };
+        $callback = function ($qu) use ( $year_callback) {
+            $qu->take(1);
+            $qu->whereHas('year' , $year_callback)->with(['classes','levels']); 
+        };
+        // $users =  User::whereNull('deleted_at')->whereIn('id', $this->ids)->get();
+        $forSetExport = collect();
+        foreach (User::whereNull('deleted_at')->whereIn('id', $this->ids)->cursor() as $value) {
             $role_id = DB::table('model_has_roles')->where('model_id',$value->id)->pluck('role_id')->first();
             $role_name='';
             if(isset($role_id))
@@ -37,18 +44,14 @@ class UsersExport implements FromCollection, WithHeadings
             $last = LastAction::where('user_id',$value->id)->whereNull('course_id')->first();
             if(isset($last))
                 $value['last_action'] = $last->date;
+            $enroll = User::whereId($value->id)->with(['enroll' => $callback])->first();
 
-            $req = new Request($this->request);
-            $enroll = $this->chain->getEnrollsByChain($req)->where('user_id', $value->id)->select('group','level')->with(['levels','classes'])->latest()->first();
-            if(isset($enroll->group)){
-
-                $value['class_id'] = $enroll->classes->name;
+            if(isset($enroll->enroll[0]->classes)){
+                $value['class_id'] = $enroll->enroll[0]->classes->name;
             }
-            if(isset($enroll->group)){
-
-                $value['level'] =  $enroll->levels->name;
+            if(isset($enroll->enroll[0]->levels)){
+                $value['level'] =  $enroll->enroll[0]->levels->name;
             }
-                
         ////parents
         if($role_name == 'Student'){
             $count = 1;
@@ -56,7 +59,8 @@ class UsersExport implements FromCollection, WithHeadings
                 if (!in_array( 'parent'.$count , $this->fields)) {
                     $this->fields[] = 'parent'.$count;
                 }
-                $value['parent'.$count] = $parent->parent->fullname;
+                if(isset($parent->parent))
+                    $value['parent'.$count] = $parent->parent->fullname;
                 $count ++;
             }
         }
@@ -75,8 +79,9 @@ class UsersExport implements FromCollection, WithHeadings
                     
                         
             $value->setHidden([])->setVisible($this->fields);
+            $forSetExport->push($value);
         }
-        return $users;
+        return $forSetExport;
     }
 
     public function headings(): array
