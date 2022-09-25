@@ -20,12 +20,24 @@ Route::get('h5p_protect', function(Request $request)
     $data = explode('/',request()->data);
     $video_name = $data[count($data) - 1];
 
-    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png'))
-        $filePath =ltrim( Storage::url('images/'.$video_name), '/');
-    else if(str_contains($video_name,'mp3'))
-        $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
-    else
-        $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+    if(str_contains($video_name,'jpg') || str_contains($video_name,'jpeg') || str_contains($video_name,'png')){
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/images/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('images/'.$video_name), '/');
+    }
+    else if(str_contains($video_name,'mp3')){
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/audios/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('audios/'.$video_name), '/');
+    }
+    else{
+        if(str_contains(env('APP_URL'),'mfisb') || str_contains(env('APP_URL'),'mfisg'))
+            $filePath=ltrim('./storage/h5p/editor/videos/'.$video_name);
+        else
+            $filePath =ltrim( Storage::url('videos/'.$video_name), '/');
+    }
 
     $stream =  new \App\VideoStream($filePath);
     $stream->start();
@@ -239,7 +251,7 @@ Route::group(['prefix' => 'course', 'middleware' => ['auth:api','LastAction']], 
 
 //USER CRUD ROUTES
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], function () {
-    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add','ContractRestrict']);
+    Route::post('add', 'UserController@create')->name('adduser')->middleware(['permission:user/add']);
     Route::post('update', 'UserController@update')->name('updateuser')->middleware('permission:user/update');
     Route::post('delete', 'UserController@delete')->name('deleteuser')->middleware('permission:user/delete');
     Route::get('get-all', 'UserController@list')->name('listAll')->middleware('permission:user/get-all');
@@ -425,6 +437,8 @@ Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], fu
     Route::get('deleteDuplicatedGrades', 'ScriptsController@delete_duplicated_grades');
     Route::get('redisCache', 'ScriptsController@clear_redis_cache');
     Route::get('secondaruChainMissed', 'ScriptsController@enrollLessons');
+
+    Route::get('lessons_without_desc', 'ScriptsController@lessons_without_decription_having_materials');
 });
 
 Route::group(['prefix' => 'contract', 'middleware' => 'auth:api','LastAction'], function () {
@@ -665,6 +679,7 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
     Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
     Route::post('forsan/monthly-all', 'ReportCardsController@forsanMonthylReportAll');
+    Route::post('courses', 'ReportCardsController@getGradesCourses');
 });
 
 //script for front-end editor

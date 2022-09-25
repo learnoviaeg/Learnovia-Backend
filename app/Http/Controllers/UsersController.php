@@ -56,7 +56,7 @@ class UsersController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:course/teachers|course/participants'],   ['only' => ['index']]);
     }
-    /**
+    /** 
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -130,10 +130,10 @@ class UsersController extends Controller
             // site/show/as-participant
             $permission = Permission::where('name','site/show/as-participant')->with('roles')->first();
             $roles_id = $permission->roles->pluck('id');
-            if(isset($request->roles))
+            if(isset($request->roles)){
                 $roles_id = $permission->roles->whereIn('id',$request->roles)->pluck('id');
-
-            $enrolls->whereIn('role_id',$roles_id);
+                $enrolls->whereIn('role_id',$roles_id);
+            }
         }
         
         //using in chat api new route { api/user/my_chain}
@@ -210,7 +210,9 @@ class UsersController extends Controller
         if(isset($user->level))
            $user['level_name']=Level::find($user->level)->name;
         $i = 0;
-        foreach ($user->enroll as $enroll) {
+        $enrolls = $this->chain->getEnrollsByManyChain($requ)->where('user_id',$id);
+        
+        foreach ($enrolls->cursor() as $enroll) {
             $all[$i]['role'] = $enroll->roles;
             $all[$i]['enroll_id'] = $enroll->id;
 

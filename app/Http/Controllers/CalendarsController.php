@@ -67,7 +67,7 @@ class CalendarsController extends Controller
 
             if($request->user()->can('site/show-all-courses'))//admin
             {
-                $calendar['announcements'] = Announcement::with(['chainAnnouncement' => function ($query) use ($enrolls) {
+                $calendar['announcements'] = Announcement::select('id')->with(['chainAnnouncement' => function ($query) use ($enrolls) {
                     $query->whereIn('year',$enrolls->pluck('year'))->whereIn('segment',$enrolls->pluck('segment'));
                 }])->pluck('id');
             }

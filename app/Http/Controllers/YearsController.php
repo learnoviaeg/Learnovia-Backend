@@ -28,13 +28,14 @@ class YearsController extends Controller
     {
         $request->validate([
             'search' => 'nullable',
-            'filter' => 'in:all,export' //all without current year  //for teacher
+            'filter' => 'in:all,export', //all without current year  //for teacher
+            'for' => 'in:grades',
         ]);
 
         $years=AcademicYear::whereNull('deleted_at');
         if($request->filled('search'))
             $years = $years->where('name', 'LIKE' , "%$request->search%"); 
-        if($request->user()->can('site/show-all-courses'))
+        if($request->user()->can('site/show-all-courses') || ($request->filled('for') && $request->for == 'grades'))
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
