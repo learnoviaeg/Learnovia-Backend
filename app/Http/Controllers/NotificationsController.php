@@ -125,8 +125,9 @@ class NotificationsController extends Controller
         $us['seen']=isset($request->seen) ? $request->seen : null;
         $users=$request->users;
         $child = Parents::whereIn('parent_id',$request->users)->where('current',1)->pluck('child_id');
-        if(isset($child))
+        if(count($child) > 0)
             $users[]=$child;
+
 
         foreach($users as $user)
         {
@@ -149,8 +150,8 @@ class NotificationsController extends Controller
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS =>json_encode($us),
         CURLOPT_HTTPHEADER => array(
-                'username: test',
-                'password: api_test_5eOiG7CTC',
+                'username: dev',
+                'password: api_dev_BBLf4giDY',
                 'Content-Type: application/json'
             ),
         ));
@@ -314,8 +315,8 @@ class NotificationsController extends Controller
         $clientt = new Client();
         $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'update/notifications', [
             'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
+                'username' => 'dev',
+                'password' => 'api_dev_BBLf4giDY',
             ], 
             'form_params' => $us
         ]);

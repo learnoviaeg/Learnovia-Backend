@@ -146,8 +146,8 @@ class AuthController extends Controller
             $clientt = new Client();
             $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
                 'headers'   => [
-                    'username' => 'test',
-                    'password' => 'api_test_5eOiG7CTC',
+                    'username' => 'dev',
+                    'password' => 'api_dev_BBLf4giDY',
                 ], 
                 'form_params' => $data
             ]);
@@ -197,8 +197,8 @@ class AuthController extends Controller
         $clientt = new Client();
         $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
             'headers'   => [
-                'username' => 'test',
-                'password' => 'api_test_5eOiG7CTC',
+                'username' => 'dev',
+                'password' => 'api_dev_BBLf4giDY',
             ], 
             'form_params' => $data
         ]);
