@@ -43,7 +43,7 @@ return [
 
     'seen_report' => [
         'api/materials/{id}',
-        'api/quiz/get-single-quiz',
+        // 'api/quiz/get-single-quiz',
         'api/assignment/get',
         'api/page/get',
         // 'api/interactive/{id}',
