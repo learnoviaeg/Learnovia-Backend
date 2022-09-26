@@ -24,7 +24,7 @@ class NotificationRepo implements NotificationRepoInterface
             'publish_date' => $reqNot['publish_date']
         ];
 
-       /* $curl = curl_init();
+        $curl = curl_init();
 
         curl_setopt_array($curl, array(
         CURLOPT_URL => config('NotificationConfig.Notification_url').'send/notifications',
@@ -37,8 +37,8 @@ class NotificationRepo implements NotificationRepoInterface
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS =>json_encode($data),
         CURLOPT_HTTPHEADER => array(
-                'username: test',
-                'password: api_test_5eOiG7CTC',
+                'username: dev',
+                'password: api_dev_BBLf4giDY',
                 'Content-Type: application/json'
             ),
         ));
@@ -47,6 +47,6 @@ class NotificationRepo implements NotificationRepoInterface
         curl_close($curl);
 
         return $response;
- */
+ 
     }
 }

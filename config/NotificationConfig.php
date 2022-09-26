@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'Notification_url' => 'http://ec2-54-162-91-85.compute-1.amazonaws.com/api/'
+    'Notification_url' => 'http://20.169.178.171/api/'
     ];
