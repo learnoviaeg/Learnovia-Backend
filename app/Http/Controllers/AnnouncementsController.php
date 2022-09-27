@@ -81,10 +81,8 @@ class AnnouncementsController extends Controller
                                             ->sortByDesc('publish_date')
                                             ->unique()->values();
 
-        if($request->user()->can('site/show-all-courses')){ //admin
-
+        if($request->user()->can('site/show-all-courses')) //admin
             $announcements = Announcement::with('chainAnnouncement.level' , 'chainAnnouncement.course')->orderBy('publish_date','desc')->get();
-        }
 
         if($request->filled('search')){
 
@@ -171,9 +169,18 @@ class AnnouncementsController extends Controller
             ]);
 
             //get users that should receive the announcement
-            $enrolls = $this->chain->getEnrollsByChain($chain_request);
+            if(isset($chain['class']) && getType($chain['class']) == 'array')
+            {
+                $requ = new Request([
+                    'classes' => $chain['class'],
+                    'courses' => isset($chain['course']) ? [$chain['course']] : null
+                ]);
+                $enrolls = $this->chain->getEnrollsByManyChain($requ);
+            }
+            else
+                $enrolls = $this->chain->getEnrollsByChain($chain_request);
+
             $query=clone $enrolls;
-            
             $enrolls->where('user_id','!=' ,Auth::id());
 
             if(isset($chain['roles']) && count($chain['roles']) > 0)
