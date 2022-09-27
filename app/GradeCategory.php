@@ -27,7 +27,7 @@ class GradeCategory extends Model
     public function child_without_quizzes()
     {
         if(isset($GLOBALS['user_id']))
-            return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category')->with(['userGrades' => function($query) {
+            return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category')->whereNull('instance_type')->with(['userGrades' => function($query) {
                 $query->where("user_id", $GLOBALS['user_id']);
             }]);
         return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category')->whereNull('instance_type');
@@ -35,7 +35,7 @@ class GradeCategory extends Model
 
     public function Children_categories() 
     { 
-        return $this->child_without_quizzes()->with(['child_without_quizzes','GradeItems']); 
+        return $this->child_without_quizzes()->with(['Children_categories','GradeItems']); 
     }
 
 
