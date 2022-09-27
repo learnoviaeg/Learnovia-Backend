@@ -22,7 +22,7 @@ class InstallmentController extends Controller
         $this->middleware(['permission:school_fees/installment/get'],   ['only' => ['index','show']]);   
         $this->middleware(['permission:school_fees/get'],   ['only' => ['user_installments']]);  
         $this->middleware(['permission:school_fees/installment/reset'],   ['only' => ['reset']]);  
-        
+        $this->middleware(['permission:school_fees/reset'],   ['only' => ['reset_payments']]);  
     }
 
     public function index(Request $request)
@@ -100,4 +100,11 @@ class InstallmentController extends Controller
         $result['total_amount'] = isset($paid->total_amount) ? $paid->total_amount : 0;
         return response()->json(['message' => __('messages.fees.list'), 'body' => $result], 200); 
    }
+
+   public function reset_payments(Request $request)
+   {
+        Fees::truncate();
+        return response()->json(['message' =>'Reset successfuly', 'body' => null], 200); 
+   }
+
 }
