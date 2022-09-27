@@ -584,6 +584,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::Resource('installments', InstallmentController::class);
     Route::get('installment/reset', 'InstallmentController@reset');
     Route::get('fees/profile', 'InstallmentController@user_installments');
+    Route::get('fees/reset', 'InstallmentController@reset_payments');
 
     Route::Resource('grade-category', GradeCategoriesController::class);
     Route::Resource('grading-schema', GradingSchemaController::class);
@@ -598,6 +599,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware(['permission:grade/report/user' , 'ParentCheck']);
     Route::get('user-total-report', 'UserGradeController@user_report_in_all_courses')->middleware(['permission:grade/total-report/user' , 'ParentCheck']);
     
+    Route::get('grader-categories', 'GraderReportController@grader_dropdown_categories');
+
 
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 

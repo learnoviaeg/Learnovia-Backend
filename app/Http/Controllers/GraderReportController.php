@@ -16,7 +16,7 @@ class GraderReportController extends Controller
         $this->chain = $chain;
         $this->middleware('auth');
         $this->middleware(['permission:grade/report/grader'],   ['only' => ['index','show']]);
-        $this->middleware('permission:grade/report/setup', ['only' => ['grade_setup']]);        
+        $this->middleware('permission:grade/report/setup', ['only' => ['grade_setup','grader_dropdown_categories']]);        
     }
 
     /**
@@ -82,6 +82,15 @@ class GraderReportController extends Controller
                                 $query->select('id', 'firstname', 'lastname','username');
                             }]);
                         }])->get();
+
+        $parentt = GradeCategory::where('id',$id)->where('type', 'category')->select('id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
+        {
+            $q->whereIn('user_id',$enrolled_students);
+            $q->with(['user' => function($query) {
+                $query->select('id', 'firstname', 'lastname','username');
+            }]);
+        }])->get();
+
         $items = GradeCategory::where('parent' ,$id)->where('type', 'item')  ->with(['userGrades' => function($q)use ($enrolled_students)
                 {
                     $q->whereIn('user_id',$enrolled_students);
@@ -103,6 +112,7 @@ class GraderReportController extends Controller
         }
         $all['categories'] = $categories;
         $all['items'] = $items;
+        $all['parent'] = $parentt;
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $all ], 200);
 
     }
@@ -157,5 +167,15 @@ class GraderReportController extends Controller
 
         return response()->json(['message' => __('messages.users.all_list'), 'body' => $enrolls ], 200);
     }
+
+    public function grader_dropdown_categories(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+        ]);
+        $categories = GradeCategory::where('course_id' ,$request->course_id)->whereNull('parent')->with('Children_categories','GradeItems')->first()->toArray();
+        return response()->json(['message' => __('messages.grade_category.list'), 'body' => $categories ], 200);
+    }
+
 }
    
