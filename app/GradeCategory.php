@@ -23,6 +23,22 @@ class GradeCategory extends Model
             }]);
         return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category');
     }
+
+    public function child_without_quizzes()
+    {
+        if(isset($GLOBALS['user_id']))
+            return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category')->with(['userGrades' => function($query) {
+                $query->where("user_id", $GLOBALS['user_id']);
+            }]);
+        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'category')->whereNull('instance_type');
+    }
+
+    public function Children_categories() 
+    { 
+        return $this->child_without_quizzes()->with(['child_without_quizzes','GradeItems']); 
+    }
+
+
     public function Parents()
     {
         return $this->hasOne('App\GradeCategory', 'id', 'parent');

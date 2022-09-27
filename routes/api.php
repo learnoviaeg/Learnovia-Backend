@@ -599,6 +599,8 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware(['permission:grade/report/user' , 'ParentCheck']);
     Route::get('user-total-report', 'UserGradeController@user_report_in_all_courses')->middleware(['permission:grade/total-report/user' , 'ParentCheck']);
     
+    Route::get('grader-categories', 'GraderReportController@grader_dropdown_categories');
+
 
     Route::get('grader-report-users', 'GraderReportController@user_grades');
 
