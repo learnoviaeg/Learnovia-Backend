@@ -25,25 +25,26 @@ class LastAction extends Model
         $last_action_update = LastAction::where('user_id',Auth::id())->where('course_id',$course_id)->first();
         if(isset($last_action_update)){
             $last_action_update->update([
-            'user_id' => Auth::id()
-            ,'name' => $last_action_resource->name
-            ,'method'=>$last_action_resource->method
-            ,'uri' =>  $last_action_resource->uri
-            ,'resource' =>  $last_action_resource->resource
-            ,'date' => Carbon::now()
-            ,'course_id'=>$course_id
+                'user_id' => Auth::id(),
+                'name' => $last_action_resource->name,
+                'method'=>$last_action_resource->method,
+                'uri' =>  $last_action_resource->uri,
+                'resource' =>  $last_action_resource->resource,
+                'date' => Carbon::now(),
+                'course_id'=>$course_id
             ]);
         }
 
-        $last_action = LastAction::firstOrCreate([
-            'user_id' => Auth::id()
-            ,'name' => $last_action_resource->name
-            ,'method'=>$last_action_resource->method
-            ,'uri' =>  $last_action_resource->uri
-            ,'resource' =>  $last_action_resource->resource
-            ,'date' => Carbon::now()
-            ,'course_id'=>$course_id
-    ]);
+        if(isset($last_action_resource))
+            $last_action = LastAction::firstOrCreate([
+                'user_id' => Auth::id()
+                ,'name' => $last_action_resource->name
+                ,'method'=>$last_action_resource->method
+                ,'uri' =>  $last_action_resource->uri
+                ,'resource' =>  $last_action_resource->resource
+                ,'date' => Carbon::now()
+                ,'course_id'=>$course_id
+            ]);
     }
     public function user()
     {
