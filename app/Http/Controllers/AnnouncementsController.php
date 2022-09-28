@@ -210,7 +210,7 @@ class AnnouncementsController extends Controller
         //filter users
         $users = $users->collapse()->unique()->values();
 
-        //check if there's a students to send for them or skip that part
+        //check if there's a users to send for them or skip that part
         if(count($users) > 0){
             foreach($users as $user){
                 $data[] = [
@@ -219,10 +219,6 @@ class AnnouncementsController extends Controller
                 ]; 
             }
             userAnnouncement::insert($data);
-        
-            //sending Notification
-            // $notification = new AnnouncementNotification($announcement, $request->title.' announcement is added');
-            // $notification->send();
 
             $reqNot=[
                 'message' => $announcement->title.' announcement is created',
