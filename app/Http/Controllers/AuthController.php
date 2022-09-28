@@ -292,14 +292,18 @@ class AuthController extends Controller
         if(isset($user->attachment))
             $user->picture = $user->attachment->path;
 
-        $level=Level::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('level')->first());
-        $class=Classes::find(Enroll::where('year',AcademicYear::Get_current()->id)->where('user_id',Auth::id())->pluck('group')->first());
-        if(isset($level))
+        $year=AcademicYear::Get_current();
+        if(isset($year))
         {
-            $user['level']=$level->id;
-            $user['level_']=$level;
-            $user['class']=$class->id;  
-            $user['class_']=$class;
+            $level=Level::find(Enroll::where('year',$year->id)->where('user_id',Auth::id())->pluck('level')->first());
+            $class=Classes::find(Enroll::where('year',$year->id)->where('user_id',Auth::id())->pluck('group')->first());
+            if(isset($level))
+            {
+                $user['level']=$level->id;
+                $user['level_']=$level;
+                $user['class']=$class->id;  
+                $user['class_']=$class;
+            }
         }
 
         $user->setHidden(['password']);

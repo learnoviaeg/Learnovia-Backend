@@ -309,6 +309,7 @@ class NotificationsController extends Controller
             foreach($request->notification_ids as $notification_id)
             {
                 $data['notification_id']=$notification_id;
+                $data['auth_user']=Auth::id();
                 $us['notifications'][]=$data;
             }
 
