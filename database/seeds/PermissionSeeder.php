@@ -204,7 +204,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1,'icon' => 'User']);
+        Permission::updateOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent'],['dashboard' => 1,'icon' => 'User']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
         //Components Permissions

@@ -297,7 +297,7 @@ class AuthController extends Controller
         {
             $level=Level::find(Enroll::where('year',$year->id)->where('user_id',Auth::id())->pluck('level')->first());
             $class=Classes::find(Enroll::where('year',$year->id)->where('user_id',Auth::id())->pluck('group')->first());
-            if(isset($level))
+            if(isset($class))
             {
                 $user['level']=$level->id;
                 $user['level_']=$level;
