@@ -128,7 +128,6 @@ class NotificationsController extends Controller
         if(count($child) > 0)
             $users[]=$child;
 
-
         foreach($users as $user)
         {
             $data['user_id']=$user;

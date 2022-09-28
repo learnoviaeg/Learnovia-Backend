@@ -271,7 +271,7 @@ class QuestionsController extends Controller
         //to unAssign questions in quiz id //quizzes/quiz_id/questions'
         $request->validate([
             'questions' => 'required|array',
-            'questions.*' => 'exists:questions,id|exists:quiz_questions,id',
+            'questions.*' => 'exists:questions,id|exists:quiz_questions,question_id',
         ]);
         foreach($request->questions as $question){
             $quizQuestion = quiz_questions::where('question_id',$question)->where('quiz_id',$quiz_id)->first();
