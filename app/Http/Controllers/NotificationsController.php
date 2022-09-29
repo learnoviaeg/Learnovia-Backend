@@ -128,7 +128,6 @@ class NotificationsController extends Controller
         if(count($child) > 0)
             $users[]=$child;
 
-
         foreach($users as $user)
         {
             $data['user_id']=$user;
@@ -309,6 +308,7 @@ class NotificationsController extends Controller
             foreach($request->notification_ids as $notification_id)
             {
                 $data['notification_id']=$notification_id;
+                $data['auth_user']=Auth::id();
                 $us['notifications'][]=$data;
             }
 

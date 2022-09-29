@@ -411,11 +411,6 @@ class UserController extends Controller
             $users = $users->where('religion','LIKE',"%$request->religion%");
         if($request->filled('gender'))
             $users = $users->where('gender','LIKE',"$request->gender");
-        if ($request->filled('roles'))
-            $users= $users->whereHas("roles", function ($q) use ($request) {
-            $q->whereIn("id", $request->roles);
-        });
-
 
         if($request->filled('fees')){
             if($request->fees == 'paid')
@@ -452,12 +447,14 @@ class UserController extends Controller
             $flag=true;
         }if ($request->filled('course')){            
             $enrolled_users=$enrolled_users->where('course',$request->course);
-
             $flag=true;
         }if ($request->filled('year')){            
             $enrolled_users=$enrolled_users->where('year',$request->year);
             $flag=true;
-        }      
+        }if ($request->filled('roles')){            
+            $enrolled_users=$enrolled_users->whereIn('role_id',$request->roles);
+            $flag=true;
+        }
 
         if($flag){
             $intersect = array_intersect($users->pluck('id')->toArray(),$enrolled_users->pluck('user_id')->toArray());

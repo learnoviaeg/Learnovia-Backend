@@ -110,9 +110,10 @@ class LogsFilterController extends Controller
 	    if ($default_filter == 1) {
 		    $data = $common->where(function($query) use ($defaultFilters)
 					{
+						// dd($defaultFilters);
 					    foreach($defaultFilters as $key => $value) 
 					    {
-					    	$query->where($key, $value);//->orWhere('item_name', $value);
+					    	$query->where($key, 'LIKE', "%$value%");//->orWhere('item_name', $value);
 					    }
 					});
 
