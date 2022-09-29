@@ -46,10 +46,10 @@ class EnrollmentRepository implements EnrollmentRepositoryInterface
             
             userAnnouncement::where('user_id',$one->user_id)->whereIn('announcement_id',$final_old_announcements)->delete();
 
-            $announcemnets = $user->notifications()->where('type','announcement')->whereIn('item_id',$final_old_announcements)->pluck('notifications.id');
-            $notifications = $user->notifications()->where('type','notification')->where('course_id',$one->course)->pluck('notifications.id');
-            $notificationIds = $announcemnets->merge($notifications);
-            $user->notifications()->detach($notificationIds);
+            // $announcemnets = $user->notifications()->where('type','announcement')->whereIn('item_id',$final_old_announcements)->pluck('notifications.id');
+            // $notifications = $user->notifications()->where('type','notification')->where('course_id',$one->course)->pluck('notifications.id');
+            // $notificationIds = $announcemnets->merge($notifications);
+            // $user->notifications()->detach($notificationIds);
 
         }
         

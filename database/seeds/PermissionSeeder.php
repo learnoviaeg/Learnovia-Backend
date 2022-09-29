@@ -204,7 +204,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/generate-username-password', 'title' => 'generate username and password']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllCountries', 'title' => 'Get all countries']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/GetAllNationalities', 'title' => 'Get all nationalities']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent','dashboard' => 1,'icon' => 'User']);
+        Permission::updateOrCreate(['guard_name' => 'api', 'name' => 'user/set-parent-child', 'title' => 'Assign Parent'],['dashboard' => 1,'icon' => 'User']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/export', 'title' => 'Export Users']);
 
         //Components Permissions
@@ -577,5 +577,6 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/update', 'title' => 'update installment','icon' => 'school_fees']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/get', 'title' => 'show installments list','icon' => 'school_fees']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/installment/reset', 'title' => 'reset installments list','icon' => 'school_fees']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'school_fees/reset', 'title' => 'reset fees','icon' => 'school_fees']);
     }
 }
