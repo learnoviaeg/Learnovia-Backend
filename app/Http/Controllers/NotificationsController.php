@@ -126,7 +126,7 @@ class NotificationsController extends Controller
         $users=$request->users;
         $child = Parents::whereIn('parent_id',$request->users)->where('current',1)->pluck('child_id');
         if(count($child) > 0)
-            $users[]=$child;
+            $users=array_merge($child->toArray(),$request->users);
 
         foreach($users as $user)
         {
@@ -302,8 +302,11 @@ class NotificationsController extends Controller
         $usersAll=collect();
         $us['all']=0;
         $us['type']=$request->type;
-        if(isset($request->all))
-            $us['all']=1;
+            if(isset($request->all)){
+                $us['all']=1;
+                $us['auth_user']=Auth::id();
+            }
+
         else
             foreach($request->notification_ids as $notification_id)
             {
