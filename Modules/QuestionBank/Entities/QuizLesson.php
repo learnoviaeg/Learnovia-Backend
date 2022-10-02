@@ -32,10 +32,15 @@ class QuizLesson extends Model
         'grade',
         'grade_category_id',
         'publish_date','collect_marks',
-        'visible','index','seen_number', 'grade_pass' , 'questions_mark'
+        'visible','index','seen_number', 'grade_pass' , 'questions_mark',
+        'closing_notification'
     ];
     protected $table = 'quiz_lessons';
     protected $appends = ['started','published','user_seen_number','Status', 'token_attempts', 'ended'];
+
+    // protected $dispatchesEvents = [
+    //     'created' => \App\Events\QuizEndReminderEvent::class,
+    // ];
 
     public function getStartedAttribute(){
 

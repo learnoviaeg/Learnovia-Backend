@@ -21,6 +21,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use App\Events\QuizEndReminderEvent;
 
 class QuestionsController extends Controller
 {
@@ -226,6 +227,8 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
+                event(new QuizEndReminderEvent($newQuizLesson));
+
                 if(!$quiz->restricted && $newQuizLesson->visible)
                 {
                     $reqNot=[
@@ -237,6 +240,9 @@ class QuestionsController extends Controller
                         'lesson_id' => $newQuizLesson->lesson_id,
                         'course_name' => $quiz->course->name
                     ];
+
+                    // if($request->filled('closing_time') && $request->closing_time != $quiz_lesson->due_date)
+                        // event(new QuizEndReminderEvent($newQuizLesson));
 
                     $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
                     $this->notification->sendNotify($users->toArray(),$reqNot);
