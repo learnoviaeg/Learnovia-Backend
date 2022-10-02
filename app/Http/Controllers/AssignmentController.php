@@ -444,8 +444,7 @@ class AssignmentController extends Controller
                     'course_name' => $assigmentLesson->lesson->course->name
                 ];
                 $this->notification->sendNotify($users->toArray(),$reqNot);
-                event(new AssignmentEndReminderEvent($assignment_lesson));
-                event(new AssignmentEndReminderEvent($assignment_lesson));
+                event(new AssignmentEndReminderEvent($assigmentLesson));
             }
         }
 
