@@ -491,7 +491,7 @@ class QuizzesController extends Controller
         $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
-        if($request->user()->can('site/course/student') && !$quizLesson->visible)
+        if($request->user()->can('site/course/student') && isset($quizLesson) && !$quizLesson->visible)
             return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
 
         if(!isset($quiz))
