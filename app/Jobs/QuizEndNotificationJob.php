@@ -47,6 +47,8 @@ class QuizEndNotificationJob implements ShouldQueue
 
         if($interval->days == 1){
             ///send notification before quiz emds by an hour
+            if($difference_between_now_and_due->h != 1)
+                return ;
             $notification_date = Carbon::parse($this->quizLesson->due_date)->subHour();
             $resulted_date = Carbon::parse($notification_date);
             
@@ -70,7 +72,7 @@ class QuizEndNotificationJob implements ShouldQueue
                 ]);
                 $students = $this->chain->getEnrollsByManyChain($req)->select('user_id')->where('role_id', 3)->distinct('user_id')->pluck('user_id');  
             }
-            //not restricted
+            //restricted
             if($this->quizLesson->quiz->restricted == true ){
                 $students = $this->quizLesson->quiz->CourseItem->courseItemUsers->pluck('user_id');
             }

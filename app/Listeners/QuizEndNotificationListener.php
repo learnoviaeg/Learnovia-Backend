@@ -43,7 +43,7 @@ class QuizEndNotificationListener
             $notification_date = Carbon::parse($event->quizLesson->due_date)->subDays(1);
             $resulted_date = Carbon::parse($notification_date);
             $seconds = Carbon::parse($resulted_date->diffInSeconds(Carbon::now()));
-            $job = (new \App\Jobs\QuizEndNotificationJob($event->quizLesson));//->delay($seconds);
+            $job = (new \App\Jobs\QuizEndNotificationJob($event->quizLesson))->delay($seconds);
             dispatch($job);
         }
 
