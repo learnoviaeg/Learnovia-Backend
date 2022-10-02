@@ -38,10 +38,6 @@ class QuizLesson extends Model
     protected $table = 'quiz_lessons';
     protected $appends = ['started','published','user_seen_number','Status', 'token_attempts', 'ended'];
 
-    // protected $dispatchesEvents = [
-    //     'created' => \App\Events\QuizEndReminderEvent::class,
-    // ];
-
     public function getStartedAttribute(){
 
         $started = true;

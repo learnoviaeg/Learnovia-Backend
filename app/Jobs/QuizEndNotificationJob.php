@@ -57,6 +57,8 @@ class QuizEndNotificationJob implements ShouldQueue
             ///send notification before quiz emds by a day
             $notification_date = Carbon::parse($this->quizLesson->due_date)->subDays(1);
             $resulted_date = Carbon::parse($notification_date);
+            if(!$notification_date->isToday())
+                return ;
 
         }
 

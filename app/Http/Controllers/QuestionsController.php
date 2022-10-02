@@ -30,8 +30,8 @@ class QuestionsController extends Controller
         $this->chain = $chain;
         $this->notification = $notification;
         $this->middleware('auth');
-        // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
-        // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
         $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
@@ -240,9 +240,6 @@ class QuestionsController extends Controller
                         'lesson_id' => $newQuizLesson->lesson_id,
                         'course_name' => $quiz->course->name
                     ];
-
-                    // if($request->filled('closing_time') && $request->closing_time != $quiz_lesson->due_date)
-                        // event(new QuizEndReminderEvent($newQuizLesson));
 
                     $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$newQuizLesson->lesson_id)->pluck('user_id');
                     $this->notification->sendNotify($users->toArray(),$reqNot);
