@@ -32,6 +32,7 @@ use App\UserCourseItem;
 use App\Repositories\SettingsReposiotryInterface;
 use App\Events\GraderSetupEvent;
 use Illuminate\Database\Eloquent\Builder;
+use App\Events\AssignmentEndReminderEvent;
 
 class AssignmentController extends Controller
 {
@@ -227,6 +228,8 @@ class AssignmentController extends Controller
 
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
+            if($assignment_lesson->visible)
+                event(new AssignmentEndReminderEvent($assignment_lesson));
             //sending notifications
             $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
             if(!isset($request->users_ids) && $assignment_lesson->visible)
@@ -441,6 +444,7 @@ class AssignmentController extends Controller
                     'course_name' => $assigmentLesson->lesson->course->name
                 ];
                 $this->notification->sendNotify($users->toArray(),$reqNot);
+                event(new AssignmentEndReminderEvent($assigmentLesson));
             }
         }
 

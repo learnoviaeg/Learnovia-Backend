@@ -36,6 +36,7 @@ use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
 use Illuminate\Database\Eloquent\Builder;
 use App\LessonComponent;
+use App\Events\QuizEndReminderEvent;
 
 class QuizzesController extends Controller
 {
@@ -296,7 +297,10 @@ class QuizzesController extends Controller
                 if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
                     return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
             }
-    
+
+            if($request->filled('closing_time') && $request->closing_time != $quiz_lesson->due_date)
+                event(new QuizEndReminderEvent($quiz_lesson));
+
             $quiz_lesson->update([
                 'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
                 // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
