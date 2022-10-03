@@ -45,7 +45,7 @@ class QuizEndNotificationJob implements ShouldQueue
         if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days <= 1){
+        if($interval->days < 1 && $interval->h > 1 ){
             ///send notification before quiz emds by an hour
             if($difference_between_now_and_due->h != 1)
                 return ;
@@ -55,7 +55,7 @@ class QuizEndNotificationJob implements ShouldQueue
         }
 
 
-        if($interval->days > 1){
+        if($interval->days >= 1){
             ///send notification before quiz emds by a day
             $notification_date = Carbon::parse($this->quizLesson->due_date)->subDays(1);
             $resulted_date = Carbon::parse($notification_date);

@@ -28,8 +28,11 @@ class AssignmentEndNotificationListener
     public function handle(AssignmentEndReminderEvent $event)
     {
         $interval = (new \DateTime($event->assignmentLesson->due_date))->diff(new \DateTime($event->assignmentLesson->start_date));
-        if($interval->days == 1){
-            ///send notification before assignment emds by an hour
+        if($interval->days == 0 && $interval->h < 1 )
+            return ;
+
+        if($interval->days < 1 && $interval->h > 1 ){
+                ///send notification before assignment emds by an hour
             $notification_date = Carbon::parse($event->assignmentLesson->due_date)->subHour();
             $resulted_date = Carbon::parse($notification_date);
             $seconds = Carbon::parse($resulted_date->diffInSeconds(Carbon::now()));
@@ -37,7 +40,7 @@ class AssignmentEndNotificationListener
             dispatch($job);
         }
 
-        if($interval->days > 1){
+        if($interval->days >= 1){
             ///send notification before assignment emds by a day
             $notification_date = Carbon::parse($event->assignmentLesson->due_date)->subDays(1);
             $resulted_date = Carbon::parse($notification_date);
