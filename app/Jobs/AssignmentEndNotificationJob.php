@@ -41,10 +41,11 @@ class AssignmentEndNotificationJob implements ShouldQueue
         $interval = (new \DateTime($this->assignmentLesson->due_date))->diff(new \DateTime($this->assignmentLesson->start_date));
         $difference_between_now_and_due = (new \DateTime($this->assignmentLesson->due_date))->diff(carbon::now());
         // dd($difference_between_now_and_due);
-        if($interval->days < 1)
+    
+        if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days == 1){
+        if($interval->days <= 1){
             if($difference_between_now_and_due->h != 1)
                 return ;
             ///send notification before assignment emds by an hour

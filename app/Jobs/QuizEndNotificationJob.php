@@ -42,10 +42,10 @@ class QuizEndNotificationJob implements ShouldQueue
         $difference_between_now_and_due = (new \DateTime($this->quizLesson->due_date))->diff(carbon::now());
         // dd($difference_between_now_and_due);
 
-        if($interval->days < 1)
+        if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days == 1){
+        if($interval->days <= 1){
             ///send notification before quiz emds by an hour
             if($difference_between_now_and_due->h != 1)
                 return ;
