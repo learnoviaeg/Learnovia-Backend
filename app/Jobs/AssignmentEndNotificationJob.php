@@ -92,7 +92,7 @@ class AssignmentEndNotificationJob implements ShouldQueue
                 'course_id' => $this->assignmentLesson->Lesson->course_id,
             ];
 
-           dd($this->notification->sendNotify($users,$reqNot));
+           $this->notification->sendNotify($users,$reqNot);
            $this->assignmentLesson->update(['closing_notification' => 1]);
         }
 
