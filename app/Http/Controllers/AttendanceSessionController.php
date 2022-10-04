@@ -110,7 +110,7 @@ class AttendanceSessionController extends Controller
         };
 
         $result=$attendanceSession->whereHas('attendance', $callback)
-                ->with(['class','course','attendance.courses','attendance'=>$callback])->get();
+                ->with(['class','course','attendance'=>$callback])->get();
 
         if($reports)
             return $result;
