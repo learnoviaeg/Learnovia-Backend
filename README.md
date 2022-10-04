@@ -7,6 +7,7 @@
 - Build docker image by running `make build`
 - Install dependencies `make install`
 - Run the project `make run`
+- Run migration `make migrate`
 
 #### 2- Testing
 
