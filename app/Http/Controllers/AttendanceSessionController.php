@@ -387,7 +387,7 @@ class AttendanceSessionController extends Controller
         $request->validate([
             'session_id' => 'required|exists:attendance_sessions,id'
         ]);
-        $all=SessionLog::where('session_id',$request->session_id)->with('user','session')->get();
+        $all=SessionLog::where('session_id',$request->session_id)->whereHas('user')->with('user','session')->get();
         if($export == 1)
             return $all;
         
