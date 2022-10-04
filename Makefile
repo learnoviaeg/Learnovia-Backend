@@ -59,13 +59,6 @@ else
 	docker-compose run --rm laravel php artisan migrate $(filter-out $@,$(MAKECMDGOALS))
 endif
 
-swagger:
-ifeq ($(IS_RUNNING), $(RUNNING))
-	docker-compose exec laravel php artisan l5-swagger:generate
-else
-	docker-compose run --rm laravel php artisan l5-swagger:generate
-endif
-
 fresh-migrate:
 ifeq ($(IS_RUNNING), $(RUNNING))
 	docker-compose exec laravel bash -c "php artisan env:setup && php artisan migrate:fresh --path=database/testing-migrations -vvv"
