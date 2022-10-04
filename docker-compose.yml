@@ -1,0 +1,105 @@
+version: "3.6"
+
+services:
+  nginx:
+    image: nginx:1.19-alpine
+    container_name: learnovia-nginx
+    restart: unless-stopped
+    networks:
+      - learnovia
+    links:
+      - laravel
+    depends_on:
+      - laravel
+    ports:
+      - 8000:80
+    volumes:
+      - .:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+  laravel: &BASE
+    image: learnovia-api:${NODE_IMAGE_TAG:-latest}
+    build:
+      dockerfile: docker/php/Dockerfile
+      context: .
+      args:
+        UID: ${UID}
+        UNAME: learnovia
+        LARAVEL_ENV: DEVELOPMENT
+    container_name: learnovia-laravel
+    restart: unless-stopped
+    networks:
+      - learnovia
+    depends_on:
+      - mysql
+      - mysql-test
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./docker/php/docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+  worker:
+    <<: *BASE
+    container_name: learnovia-worker
+    command: [ "php", "artisan", "queue:work", "--tries=3", "--timeout=0", "--queue=high,default,low" ]
+    depends_on:
+      - laravel
+
+  mysql:
+    image: mysql:5.7
+    command: --max_allowed_packet=32505856
+    platform: linux/amd64
+    container_name: learnovia-mysql
+    restart: unless-stopped
+    networks:
+      - learnovia
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    env_file:
+      - .env
+
+  mysql-test:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: learnovia-mysql-test
+    restart: unless-stopped
+    networks:
+      - learnovia
+    tmpfs: /var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 33061:3306
+
+  mailhog:
+    image: mailhog/mailhog
+    networks:
+      - learnovia
+    container_name: learnovia-mailhog
+    restart: unless-stopped
+    ports:
+      - 8025:8025
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: learnovia-phpmyadmin
+    restart: unless-stopped
+    networks:
+      - learnovia
+    depends_on:
+      - mysql
+      - mysql-test
+    environment:
+      - PMA_HOSTS=mysql,mysql-test
+    ports:
+      - 8001:80
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  learnovia:
+    name: learnovia-network

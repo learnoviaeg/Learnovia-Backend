@@ -1,0 +1,6 @@
+#!/bin/bash
+
+args="$@"
+command="./vendor/bin/phpunit --testdox --testsuite API $args"
+echo "$command"
+docker exec  laravel-app $command
