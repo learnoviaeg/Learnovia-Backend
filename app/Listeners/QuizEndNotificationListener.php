@@ -29,9 +29,9 @@ class QuizEndNotificationListener
     {
         $interval = (new \DateTime($event->quizLesson->due_date))->diff(new \DateTime($event->quizLesson->start_date));
         if($interval->days == 0 && $interval->h < 1 )
-            return ;
-        
-        if($interval->days < 1 && $interval->h > 1 ){
+            return ;       
+            
+        if($interval->days < 1 && $interval->h >= 1 ){
             ///send notification before quiz emds by an hour
             $notification_date = Carbon::parse($event->quizLesson->due_date)->subHour();
             $resulted_date = Carbon::parse($notification_date);
