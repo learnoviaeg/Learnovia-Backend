@@ -601,8 +601,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     
     Route::get('grader-categories', 'GraderReportController@grader_dropdown_categories');
 
-
-    Route::get('grader-report-users', 'GraderReportController@user_grades');
+    Route::get('grader-report-users', 'GraderReportController@user_grades')->middleware(['permission:grade/user-report']);
 
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
     Route::delete('session', 'AttendanceSessionController@deleteAll');

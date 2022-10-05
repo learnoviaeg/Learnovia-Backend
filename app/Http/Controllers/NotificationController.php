@@ -25,6 +25,8 @@ use Modules\QuestionBank\Entities\Quiz;
 use Modules\UploadFiles\Entities\media;
 use App\Notifications\SendNotification;
 use Modules\UploadFiles\Entities\MediaLesson;
+use GuzzleHttp\Client;
+
 class NotificationController extends Controller
 {
     public function get_google_token()
@@ -269,6 +271,24 @@ class NotificationController extends Controller
         $user=$request->user();
         $user->token=$request->token;
         $user->save();
+
+        $fcm_tokens=[
+            'fcm_token' => $request->token,
+        ];
+        $data=[
+            'user_id' => Auth::id(),
+            'school_domain'=>'test',
+            // 'school_domain'=>'test',
+            'fcm_tokens'=> array($fcm_tokens)
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+            'headers'   => [
+                'username' => 'dev',
+                'password' => 'api_dev_BBLf4giDY',
+            ], 
+            'form_params' => $data
+        ]);
         
         return HelperController::api_response_format(200, 'token added Done');
     }
