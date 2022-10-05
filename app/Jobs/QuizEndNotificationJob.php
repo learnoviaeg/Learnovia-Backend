@@ -45,7 +45,7 @@ class QuizEndNotificationJob implements ShouldQueue
         if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days < 1 && $interval->h > 1 ){
+        if($interval->days < 1 && $interval->h >= 1 ){
             ///send notification before quiz emds by an hour
             if($difference_between_now_and_due->h != 1)
                 return ;
