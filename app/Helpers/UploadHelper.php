@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Storage;
 
 class UploadHelper
 {
-    public static function upload($file, $type): string
+    public static function upload($file, $type, $fileName): string
     {
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        $fileName = time() . '_' . $fileName;
         switch ($type)
         {
             case StorageTypes::ASSIGNMENT:
@@ -25,7 +25,13 @@ class UploadHelper
                 $path = StorageTypes::DEFAULT . '/' . $fileName;
                 break;
         }
-        Storage::disk('azure')->put($path, file_get_contents($file));
+        try {
+            Storage::disk('azure')->put($path, file_get_contents($file));
+        }
+        catch (\Exception $e)
+        {
+            logger()->info(json_encode($e));
+        }
         return Storage::disk('azure')->url($path);
     }
 }
