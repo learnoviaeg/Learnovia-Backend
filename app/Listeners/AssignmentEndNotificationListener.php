@@ -31,7 +31,7 @@ class AssignmentEndNotificationListener
         if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days < 1 && $interval->h > 1 ){
+        if($interval->days < 1 && $interval->h >= 1 ){
                 ///send notification before assignment emds by an hour
             $notification_date = Carbon::parse($event->assignmentLesson->due_date)->subHour();
             $resulted_date = Carbon::parse($notification_date);
