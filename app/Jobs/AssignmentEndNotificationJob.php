@@ -45,9 +45,9 @@ class AssignmentEndNotificationJob implements ShouldQueue
         if($interval->days == 0 && $interval->h < 1 )
             return ;
 
-        if($interval->days < 1 && $interval->h > 1 ){
+        if($interval->days < 1 && $interval->h >= 1 ){
             if($difference_between_now_and_due->h != 1)
-                return ;
+            return ;
             ///send notification before assignment emds by an hour
             $notification_date = Carbon::parse($this->assignmentLesson->due_date)->subHour();
             $resulted_date = Carbon::parse($notification_date);
