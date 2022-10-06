@@ -96,8 +96,8 @@ class MigrateStorageFromDisk extends Command
                 array_shift($filePath);
                 $file = public_path($row->path);
                 $fileName = implode('/', $filePath);
-                UploadHelper::upload($file, $type, $fileName);
-                $bulkUpdateRawQuery .= "\n when id={$row->id} then 'newValuesssss'";
+                $imgUrl = UploadHelper::upload($file, $type, $fileName);
+                $bulkUpdateRawQuery .= "\n when id={$row->id} then '{$imgUrl}'";
             }
             $bulkUpdateRawQuery .= "\n else {$table['field']} end";
             $this->info("Bulk updating {$table['name']} with new {$table['field']} values....");
