@@ -18,6 +18,10 @@ class Questions extends Model
     //count of all quizzes
     protected $appends = ['count_quizzes'];
 
+    protected $casts = [
+        'question_type_id'  => 'integer',
+    ];
+
     public function getCountQuizzesAttribute()
     {
         $count_quest = 0;
