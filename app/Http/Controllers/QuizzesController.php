@@ -396,6 +396,8 @@ class QuizzesController extends Controller
         $quiz_lesson->update([
             'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
         ]);
+
+        TimeLine::where('item_id',$request->quiz_id)->where('type','quiz')->where('lesson_id',$request->lesson_id)->update(['lesson_id',$request->updated_lesson_id]);
         
         $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->updated_lesson_id)->first();
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
