@@ -10,8 +10,7 @@ class UploadHelper
     public static function upload($file, $type, $fileName): string
     {
         $fileName = time() . '_' . $fileName;
-        switch ($type)
-        {
+        switch ($type) {
             case StorageTypes::ASSIGNMENT:
                 $path = StorageTypes::ASSIGNMENT . '/' . $fileName;
                 break;
@@ -27,9 +26,7 @@ class UploadHelper
         }
         try {
             Storage::disk('azure')->put($path, file_get_contents($file));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             logger()->info(json_encode($e));
         }
         return Storage::disk('azure')->url($path);
