@@ -60,23 +60,50 @@ class TimelineController extends Controller
             'sort_in' => 'in:asc,desc|required_with:sort_by',
             'start_date' => 'date',
             'due_date' => 'date',
+            'date_filter' => 'in:week,month',
         ]);
-        $enrolls = $this->chain->getEnrollsByChain($request)->select('id')->where('user_id',Auth::id())->pluck('id');
-        $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['lesson_id','group_id']);
+
+        // if(!Auth::user()->can('site/course/student')){
+        //     $request->validate([
+        //         'level' => 'required|exists:levels,id',
+        //     ]);
+        // }
+        $end = Carbon::now()->endOfWeek(Carbon::SATURDAY);
+
+        if($request->filled('date_filter') && $request->date_filter == 'week'){
+            $end = Carbon::now()->addDays(7);
+        }
+        if($request->filled('date_filter') && $request->date_filter == 'month'){
+            $end = Carbon::now()->addDays(30);
+        }
+
+        $enrolls = $this->chain->getEnrollsByChain($request)->select('course','id')->where('user_id',Auth::id());
+      //  $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->select(['course']);
         $callQuery=function($q) use ($request){
             if(!$request->user()->can('course/show-hidden-courses'))
                 $q->where('show',1);
         };
+        
         $timeline = Timeline::whereHas('course',$callQuery)->with(['class','course'=>$callQuery,'level'])
-                            ->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
-                            ->whereIn('class_id',$sec_chain->pluck('group_id'))
+                            //->whereIn('lesson_id',$sec_chain->pluck('lesson_id'))
+                            ->whereIn('course_id',$enrolls->pluck('course'))
                             ->where('start_date','<=',Carbon::now())
                             ->where('due_date','>=',Carbon::now())
-                            ->whereIn('type', ['quiz','assignment'])
+                            ->where('due_date','<=',$end )
                             ->where(function ($query) {
                                 $query->whereNull('overwrite_user_id')->orWhere('overwrite_user_id', Auth::id());
                             });
 
+        if(!$request->user()->can('site/show-all-courses')){
+            $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->distinct('group_id')->select('group_id');
+            $timeline->where('class_id',$sec_chain->group_id);
+        }
+        if(!$request->filled('item_type'))
+            $timeline->where('type', 'quiz');
+
+        if($request->filled('item_type'))
+            $timeline->where('type', $request->item_type);
+                 
         if(Auth::user()->can('site/course/student'))
             $timeline->where('visible',1);
 
@@ -106,18 +133,14 @@ class TimelineController extends Controller
 
         $page = Paginate::GetPage($request);
         $paginate = Paginate::GetPaginate($request);
-        
         $timeline->skip(($page)*$paginate)->take($paginate)->get()->map(function ($line){
             if($line->type == 'quiz'){
                 $quizLesson=QuizLesson::where('quiz_id',$line->item_id)->where('lesson_id',$line->lesson_id)->first();
-                if(isset($quizLesson))
-                {
-                    $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
-                        ->whereNotNull('submit_time')->count();
-                    $line['max_attemp']=$quizLesson->max_attemp;
-                    $line['token_attempts']=$user_quiz;
-                    return $line;
-                }
+                $user_quiz = userQuiz::where('user_id', Auth::id())->where('quiz_lesson_id', $quizLesson->id)
+                    ->whereNotNull('submit_time')->count();
+                $line['max_attemp']=$quizLesson->max_attemp;
+                $line['token_attempts']=$user_quiz;
+                return $line;
             }
             return $line;
         });
@@ -125,6 +148,7 @@ class TimelineController extends Controller
         $result = $timeline->paginate(HelperController::GetPaginate($request));
         return response()->json(['message' => 'Timeline List of items', 'body' => $result  ], 200);
     }
+
 
     /**
      * Store a newly created resource in storage.
