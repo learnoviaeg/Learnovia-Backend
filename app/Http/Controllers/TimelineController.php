@@ -99,16 +99,13 @@ class TimelineController extends Controller
             $timeline->where('class_id',$sec_chain->group_id);
         }
         if(!$request->filled('item_type'))
-            $timeline->where('type', 'quiz');
+            $timeline->whereIn('type', ['quiz','assignment']);
 
         if($request->filled('item_type'))
             $timeline->where('type', $request->item_type);
                  
         if(Auth::user()->can('site/course/student'))
             $timeline->where('visible',1);
-
-        if($request->has('item_type'))
-            $timeline->where('type',$request->item_type);
 
         if($request->has('start_date'))
             $timeline->whereDate('start_date', '=', $request->start_date);
