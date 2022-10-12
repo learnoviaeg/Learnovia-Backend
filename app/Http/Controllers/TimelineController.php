@@ -63,11 +63,11 @@ class TimelineController extends Controller
             'date_filter' => 'in:week,month',
         ]);
 
-        if(!Auth::user()->can('site/course/student')){
-            $request->validate([
-                'level' => 'required|exists:levels,id',
-            ]);
-        }
+        // if(!Auth::user()->can('site/course/student')){
+        //     $request->validate([
+        //         'level' => 'required|exists:levels,id',
+        //     ]);
+        // }
         $end = Carbon::now()->endOfWeek(Carbon::SATURDAY);
 
         if($request->filled('date_filter') && $request->date_filter == 'week'){
