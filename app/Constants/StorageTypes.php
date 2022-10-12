@@ -4,11 +4,21 @@ namespace App\Constants;
 
 final class StorageTypes
 {
-    CONST MEDIA = 'media';
+    const ASSIGNMENT = 'assignment';
 
-    CONST FILE = 'files';
+    const FILE = 'files';
 
-    CONST ASSIGNMENT = 'ASSIGMENT';
+    const MEDIA = 'media';
 
-    CONST DEFAULT = 'public';
+    const ANNOUNCEMENT = 'announcement';
+
+    const COURSE = 'course';
+
+    const LOGO = 'logo';
+
+    const USER = 'User';
+
+    const FOR_EDITOR = 'for-editor';
+
+    const DEFAULT = 'public';
 }
