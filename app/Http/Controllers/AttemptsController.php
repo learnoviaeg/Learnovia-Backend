@@ -484,7 +484,8 @@ class AttemptsController extends Controller
         ]);
 
         $user_quiz = userQuiz::find($id);
-        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
+        if(isset($user_quiz))
+            LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);
         if(isset($request->Questions))
