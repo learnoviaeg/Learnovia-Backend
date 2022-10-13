@@ -72,7 +72,11 @@ class MigrateStorageFromDisk extends Command
             $type = strtolower($row->{$typeColumn});
             $type = $type === 'assigment' ? StorageTypes::ASSIGNMENT : $type;
             $fileName = $row->{$nameColumn};
-            try {
+            if(!file_exists($file))
+            {
+                continue;
+            }
+                try {
                 $imgUrl = UploadHelper::upload($file, $type, $fileName);
 
             } catch (\Exception $e) {
