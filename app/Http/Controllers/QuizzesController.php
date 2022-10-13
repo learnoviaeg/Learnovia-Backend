@@ -386,9 +386,6 @@ class QuizzesController extends Controller
             return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
 
         $check = QuizLesson::where('lesson_id',$request->updated_lesson_id)->where('quiz_id',$request->quiz_id)->first();
-        Timeline::where('item_id',$request->quiz_id)->where('type','quiz')->where('lesson_id',$request->lesson_id)
-            ->update(['lesson_id',$request->updated_lesson_id]);
-            
         if(isset($check))
             return HelperController::api_response_format(400,[], $message = __('messages.error.assigned_before'));
 
@@ -398,6 +395,9 @@ class QuizzesController extends Controller
         $quiz_lesson->update([
             'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
         ]);
+
+        Timeline::where('item_id',$request->quiz_id)->where('type','quiz')->where('lesson_id',$request->lesson_id)
+        ->update(['lesson_id' => $request->updated_lesson_id]);
         
         $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->updated_lesson_id)->first();
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
