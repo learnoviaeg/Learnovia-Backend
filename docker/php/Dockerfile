@@ -17,8 +17,10 @@ RUN apt-get update -qq \
                            pdo_mysql shmop sockets sysvmsg sysvsem sysvshm xsl zip mbstring \
     && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/bin --filename=composer --version=1.10.1
-
+RUN cd /usr/local/etc/php/conf.d/ && \
+  echo 'memory_limit = -1' >> /usr/local/etc/php/conf.d/docker-php-ram-limit.ini
 COPY ["docker/php/entrypoint", "/usr/local/bin"]
+
 
 RUN chmod +x /usr/local/bin/entrypoint
 
