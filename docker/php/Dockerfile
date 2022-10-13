@@ -16,11 +16,11 @@ RUN apt-get update -qq \
     && install-php-extensions bcmath bz2 calendar exif ffi gettext gd intl mysqli opcache pcntl \
                            pdo_mysql shmop sockets sysvmsg sysvsem sysvshm xsl zip mbstring \
     && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/bin --filename=composer --version=2.4.2
+    && php composer-setup.php --install-dir=/usr/bin --filename=composer --version=1.10.1
 
 COPY ["docker/php/entrypoint", "/usr/local/bin"]
 
-RUN chmod +x /usr/local/bin/entrypocint
+RUN chmod +x /usr/local/bin/entrypoint
 
 WORKDIR /app
 

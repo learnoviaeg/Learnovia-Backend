@@ -24,7 +24,7 @@
         "laravel/tinker": "^1.0",
         "league/flysystem-aws-s3-v3": "^1.0",
         "maatwebsite/excel": "^3.1",
-        "matthewbdaly/laravel-azure-storage": "1.6.*",
+        "matthewbdaly/laravel-azure-storage": "1.6.3",
         "ncjoes/office-converter": "^1.0",
         "nwidart/laravel-modules": "^6.2",
         "org_heigl/ghostscript": "^2.3",
