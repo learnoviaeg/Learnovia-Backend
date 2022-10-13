@@ -1,4 +1,4 @@
-IS_RUNNING := $(shell docker inspect dm-laravel 2>/dev/null | grep "Running" | xargs | sed "s/.$$//")
+IS_RUNNING := $(shell docker inspect learnovia-laravel 2>/dev/null | grep "Running" | xargs | sed "s/.$$//")
 RUNNING := Running: true
 $(if $(IS_RUNNING), $(info ### Laravel container ${IS_RUNNING} ###), $(info ### Laravel container Running: false ###))
 
