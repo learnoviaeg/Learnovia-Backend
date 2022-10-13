@@ -20,9 +20,9 @@ class MigrateStorageFromDisk extends Command
      */
     protected $signature = 'storage:migrate
                             {table : The table name}
-                            {-P|--path= : The file path field in the table}
-                            {-N|--name= : The file name field in the table}
-                            {-T|--type= : The file type filed in the table}';
+                            {--path= : The file path field in the table}
+                            {--name= : The file name field in the table}
+                            {--type= : The file type filed in the table}';
 
     /**
      * The console command description.
@@ -51,6 +51,7 @@ class MigrateStorageFromDisk extends Command
     public function handle()
     {
         $noOfSuccessUploads = 0;
+        $noOfAlreadyMigrated = 0;
         $table = $this->argument('table');
         $pathColumn = $this->option('path');
         $nameColumn = $this->option('name');
@@ -63,7 +64,8 @@ class MigrateStorageFromDisk extends Command
         foreach ($rows as $index => $row) {
             $rowAlreadyMigrated = str_contains($row->{$pathColumn}, env('AZURE_STORAGE_URL'));
             if ($rowAlreadyMigrated) {
-                $this->info("Row {$index} of {$totalNumberOfRows} already migrated");
+                $this->info("Row {$index} already migrated");
+                $noOfAlreadyMigrated++;
                 continue;
             }
             $this->printLine("Upload progress in {$table} table: {$index} out of: {$totalNumberOfRows} files uploaded...", 'default', 'upload_progress');
@@ -72,11 +74,10 @@ class MigrateStorageFromDisk extends Command
             $type = strtolower($row->{$typeColumn});
             $type = $type === 'assigment' ? StorageTypes::ASSIGNMENT : $type;
             $fileName = $row->{$nameColumn};
-            if(!file_exists($file))
-            {
+            if (!file_exists($file)) {
                 continue;
             }
-                try {
+            try {
                 $imgUrl = UploadHelper::upload($file, $type, $fileName);
 
             } catch (\Exception $e) {
@@ -86,14 +87,14 @@ class MigrateStorageFromDisk extends Command
             }
 
             $bulkUpdateRawQuery .= "\n WHEN id={$row->id} then '{$imgUrl}'";
-            $noOfSuccessUploads += 1;
+            $noOfSuccessUploads++;
         }
         $this->info("Bulk updating {$table} with new {$pathColumn} values....");
         if ($noOfSuccessUploads > 0) {
             $bulkUpdateRawQuery .= "\n ELSE {$pathColumn} END";
             DB::update($bulkUpdateRawQuery);
         }
-        $this->info("Done migrating {$table} table! {$noOfSuccessUploads} records migrated successfully");
+        $this->info("Done migrating {$table} table!\n{$noOfAlreadyMigrated} already migrated before\n{$noOfSuccessUploads} records migrated successfully");
     }
 
 
