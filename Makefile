@@ -23,11 +23,9 @@ logs:
 install:
 ifeq ($(IS_RUNNING), $(RUNNING))
 	docker-compose exec laravel composer install --no-cache --optimize-autoloader --prefer-dist
-	docker-compose exec laravel composer validate --strict
 	docker-compose exec laravel php artisan optimize:clear
 else
 	docker-compose run --rm laravel composer install --no-cache --optimize-autoloader --prefer-dist
-	docker-compose run --rm laravel composer validate --strict
 	docker-compose run --rm laravel php artisan optimize:clear
 endif
 
