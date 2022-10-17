@@ -2,8 +2,7 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\Storage;
-
+use App\Helpers\UploadHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class attachment extends Model
@@ -33,19 +32,22 @@ class attachment extends Model
         $size = $singlefile->getSize();
         if($school_name != null)
             $description=$school_name;
+
+        $url=UploadHelper::upload($singlefile,$type,$fileName);
+
         $attachment->name = $Name;
-        $attachment->path = $type . '/' . $fileName;
+        $attachment->path = $url;
         $attachment->description = $description;
         $attachment->type = $type;
         $attachment->extension = $extension;
         $attachment->mime_type = $file->getClientMimeType();
         $attachment->save();
-        Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
+        // Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
 
         return $attachment;
     }
     
-    public function getPathAttribute() {
-      return url(Storage::url($this->attributes['path']));
-    }
+    // public function getPathAttribute() {
+    //   return url(Storage::url($this->attributes['path']));
+    // }
 }

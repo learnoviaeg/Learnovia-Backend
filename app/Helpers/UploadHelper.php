@@ -40,6 +40,7 @@ class UploadHelper
                 break;
         }
         try {
+            // dd($file);
             Storage::disk('azure')->put($path, file_get_contents($file));
         } catch (\Exception $e) {
             logger()->error($e->getMessage(), [
