@@ -20,6 +20,7 @@ class Questions extends Model
 
     protected $casts = [
         'question_type_id'  => 'integer',
+        'mcq_type'  => 'integer',
     ];
 
     public function getCountQuizzesAttribute()

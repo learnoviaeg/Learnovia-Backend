@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use function count;
 
-
 class MigrateStorageFromDisk extends Command
 {
 
