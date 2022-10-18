@@ -111,7 +111,7 @@ class TimelineController extends Controller
             $timeline->whereDate('start_date', '=', $request->start_date);
 
         if($request->has('due_date'))
-            $timeline->whereDate('due_date', '=', $request->due_date);
+            $timeline->whereDate('due_date', '=', $request->due_date); 
 
         if($request->has('sort_by') && $request->sort_by != 'course' && $request->has('sort_in'))
             $timeline->orderBy($request->sort_by, $request->sort_in);
