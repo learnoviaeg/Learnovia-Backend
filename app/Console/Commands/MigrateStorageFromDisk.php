@@ -72,7 +72,7 @@ class MigrateStorageFromDisk extends Command
             $this->printLine("Upload progress in {$table} table: {$index} out of: {$totalNumberOfRows} files uploaded...", 'default', 'upload_progress');
             $this->printLine("Currently Processing File: {$row->{$pathColumn}}", 'default', 'file_name');
             $file = "public/storage/{$row->{$pathColumn}}";
-            if($row->{$typeColumn})
+            if($row->{$typeColumn} == null)
                 continue;
             $type = strtolower($row->{$typeColumn});
             $type = $type === 'assigment' ? StorageTypes::ASSIGNMENT : $type;
