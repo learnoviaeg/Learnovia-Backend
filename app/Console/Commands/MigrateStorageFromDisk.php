@@ -61,6 +61,8 @@ class MigrateStorageFromDisk extends Command
         $totalNumberOfRows = count($rows);
         $bulkUpdateRawQuery = "UPDATE {$table} SET {$pathColumn} = CASE";
         foreach ($rows as $index => $row) {
+            if($row->{$pathColumn} == null)
+                continue;
             $rowAlreadyMigrated = str_contains($row->{$pathColumn}, env('AZURE_STORAGE_URL'));
             if ($rowAlreadyMigrated) {
                 $this->info("Row {$index} already migrated");
@@ -70,6 +72,8 @@ class MigrateStorageFromDisk extends Command
             $this->printLine("Upload progress in {$table} table: {$index} out of: {$totalNumberOfRows} files uploaded...", 'default', 'upload_progress');
             $this->printLine("Currently Processing File: {$row->{$pathColumn}}", 'default', 'file_name');
             $file = "public/storage/{$row->{$pathColumn}}";
+            if($row->{$typeColumn})
+                continue;
             $type = strtolower($row->{$typeColumn});
             $type = $type === 'assigment' ? StorageTypes::ASSIGNMENT : $type;
             $fileName = $row->{$nameColumn};
