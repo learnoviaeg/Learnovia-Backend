@@ -414,8 +414,10 @@ class QuizzesController extends Controller
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
 
         $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
-        $parent_Category = GradeCategory::find($grade_category->parent);
-        $grade_category->delete();
+        if(isset($grade_category)){
+            $parent_Category = GradeCategory::find($grade_category->parent);
+            $grade_category->delete();
+        }
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
