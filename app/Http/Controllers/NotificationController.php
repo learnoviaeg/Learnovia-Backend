@@ -253,10 +253,6 @@ class NotificationController extends Controller
             'token' => 'required|string',
         ]);
 
-        $user=$request->user();
-        $user->token=$request->token;
-        $user->save();
-
         $fcm_tokens=[
             'fcm_token' => $request->token,
         ];

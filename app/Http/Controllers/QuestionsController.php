@@ -141,29 +141,29 @@ class QuestionsController extends Controller
     public static function mark_details_of_question_in_quiz($question ,$quiz){
         $quiz_question=quiz_questions::where('quiz_id',$quiz->id)->where('question_id',$question->id)->first();
         if(isset($quiz_question->grade_details)){
-        $question['grade_details']=$quiz_question->grade_details;
-        if($question['question_type_id'] == 3){
-            if(!$question['update_shuffle']){
-                $questi['match_a']=collect($question['content']['match_a'])->shuffle();
-                $questi['match_b']=collect($question['content']['match_b'])->shuffle();
-                $question['content']= json_encode($questi);
-            }
-            $question->mark = $quiz_question->grade_details->total_mark;
-        }
-        if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
-            if(isset($quiz_question->grade_details->total_mark))
+            $question['grade_details']=$quiz_question->grade_details;
+            if($question['question_type_id'] == 3){
+                if(!$question['update_shuffle']){
+                    $questi['match_a']=collect($question['content']['match_a'])->shuffle();
+                    $questi['match_b']=collect($question['content']['match_b'])->shuffle();
+                    $question['content']= json_encode($questi);
+                }
                 $question->mark = $quiz_question->grade_details->total_mark;
-            $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
-            $question['content']= json_encode($combined_content);
-        }
-        if($question['question_type_id'] == 2 ){
-            if(($quiz_question->grade_details != null)){
-                $question->content = json_encode($quiz_question->grade_details->details);
-                $question->mark = $quiz_question->grade_details->total_mark;
-                $question->mcq_type = $quiz_question->grade_details->type;
+            }
+            if($question['question_type_id'] == 1 || $question['question_type_id'] == 4){
+                if(isset($quiz_question->grade_details->total_mark))
+                    $question->mark = $quiz_question->grade_details->total_mark;
+                $combined_content =(object) array_merge((array) $quiz_question->grade_details, (array) $question->content);
+                $question['content']= json_encode($combined_content);
+            }
+            if($question['question_type_id'] == 2 ){
+                if(($quiz_question->grade_details != null)){
+                    $question->content = json_encode($quiz_question->grade_details->details);
+                    $question->mark = $quiz_question->grade_details->total_mark;
+                    $question->mcq_type = $quiz_question->grade_details->type;
+                }
             }
         }
-    }
         return $question;
     }
 
