@@ -49,6 +49,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'suspend'           => 'integer',
+        'class_id' => 'integer'
     ];
 
     protected $appends = ['fullname','lastaction'];
