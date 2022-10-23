@@ -250,7 +250,7 @@ class QuizzesController extends Controller
         $request->validate([
             'name' => 'string|min:3',
             'lesson_id' => 'required|exists:lessons,id', //but we update on all lessons
-            'is_graded' => 'boolean',
+            'is_graded' => 'integer|in:0,1',
             'collect_marks' => 'integer|in:0,1',
             'duration' => 'integer|min:60',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',

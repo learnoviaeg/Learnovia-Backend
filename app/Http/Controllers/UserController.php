@@ -399,7 +399,11 @@ class UserController extends Controller
 
         $Installment_percentage = Installment::where('date' , '>=' , Carbon::now()->format('Y-m-d'))->sum('percentage');
 
-        $users = User::where('id','!=',0)->with('roles');
+        $users = User::where('id','!=',0)->whereHas('roles', function($q){
+            if(isset($request->roles))
+                $q->whereIn('id',$request->roles);
+        })->with('roles');
+        
         if(Auth::id() != 1)
             $users = $users->where('id','!=',1);
             
@@ -461,19 +465,19 @@ class UserController extends Controller
             $users=$users->whereIn('id',$intersect);
         }
         
-        if ($request->filled('search'))
-        
+        if($request->filled('search'))
             $users=$users->where(function($q) use($request){
                 $q->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
                 ->orWhere('username', 'LIKE' ,"%$request->search%" )
                 ->orWhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ");
             });
-            if($call == 1){
-                $students = $users->pluck('id');
-                $array['students'] = $students;
-                $array['request'] = $request->query();
-                return $array;
-            }
+
+        if($call == 1){
+            $students = $users->pluck('id');
+            $array['students'] = $students;
+            $array['request'] = $request->query();
+            return $array;
+        }
     
         if($request->has('count') && $request->count == 1){
             $count = [];
