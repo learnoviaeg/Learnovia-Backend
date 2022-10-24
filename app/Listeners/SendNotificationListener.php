@@ -16,6 +16,7 @@ use Modules\QuestionBank\Entities\QuizLesson;
 use Modules\Assigments\Entities\AssignmentLesson;
 use App\Lesson;
 use App\h5pLesson;
+use App\Material;
 
 class SendNotificationListener
 {
@@ -41,6 +42,7 @@ class SendNotificationListener
         {
             $QuizLesson=QuizLesson::where('quiz_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
+            $item_id = $event->usercourseItem->courseItem->item_id;
             $publish_date=$QuizLesson->publish_date;
         }
         if($event->usercourseItem->courseItem->type == 'assignment')
@@ -48,24 +50,28 @@ class SendNotificationListener
             $AssignmentLesson=AssignmentLesson::where('assignment_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
             $publish_date=$AssignmentLesson->publish_date;
+            $item_id = $event->usercourseItem->courseItem->item_id;
         }
         if($event->usercourseItem->courseItem->type == 'file')
         {
             $FileLesson=FileLesson::where('file_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
             $publish_date=$FileLesson->publish_date;
+            $item_id = Material::where('item_id',$event->usercourseItem->courseItem->item_id)->where('type','file')->select('id')->first()->id;
         }
         if($event->usercourseItem->courseItem->type == 'media')
         {
             $MediaLesson=MediaLesson::where('media_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
             $publish_date=$MediaLesson->publish_date;
+            $item_id = Material::where('item_id',$event->usercourseItem->courseItem->item_id)->where('type','media')->select('id')->first()->id;
         }
         if($event->usercourseItem->courseItem->type == 'page')
         {
             $PageLesson=PageLesson::where('page_id',$event->usercourseItem->courseItem->item_id)
                 ->where('lesson_id',$event->usercourseItem->courseItem->item->Lesson[0]->id)->first();
             $publish_date=$PageLesson->publish_date;
+            $item_id = Material::where('item_id',$event->usercourseItem->courseItem->item_id)->where('type','page')->select('id')->first()->id;
         }
         if($event->usercourseItem->courseItem->type == 'h5p_content'){
             $h5pLesson=h5pLesson::find($event->usercourseItem->courseItem->item_id);
@@ -85,7 +91,7 @@ class SendNotificationListener
             $reqNot=[
                 'message' => isset($event->usercourseItem->courseItem->item->name) ? $event->usercourseItem->courseItem->item->name . ' ' . $event->usercourseItem->courseItem->type . ' is created' :
                             $event->usercourseItem->courseItem->item->title . ' ' . $event->usercourseItem->courseItem->type . ' is created',
-                'item_id' => $event->usercourseItem->courseItem->item_id,
+                'item_id' => $item_id,
                 'item_type' => $event->usercourseItem->courseItem->type,
                 'type' => 'notification',
                 'publish_date' => $publish_date,
@@ -93,6 +99,7 @@ class SendNotificationListener
                 'course_name' => $event->usercourseItem->courseItem->item->Lesson[0]->course->name,
                 'course_id' => $event->usercourseItem->courseItem->item->Lesson[0]->course->id,
             ];
+
         $users=[$event->usercourseItem->user_id];
 
         $this->notification->sendNotify($users,$reqNot);
