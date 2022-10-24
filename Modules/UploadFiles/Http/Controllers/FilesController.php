@@ -265,6 +265,8 @@ class FilesController extends Controller
             $file->user_id = Auth::user()->id;
             // $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
             $file->url2 = 'files/' . $name;
+            $url=UploadHelper::upload($singlefile,'files',$fileName);
+            $file->url=$url;
             $check = $file->save();
 
             if ($check) {
@@ -287,10 +289,6 @@ class FilesController extends Controller
                     //     $singlefile,
                     //     $name
                     // );
-
-                    $url=UploadHelper::upload($singlefile,'files',$fileName);
-                    $file->url=$url;
-                    $file->save();
 
                     $material=Material::where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
                     if(isset($request->users_ids))
