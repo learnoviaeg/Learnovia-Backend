@@ -566,4 +566,17 @@ class ScriptsController extends Controller
         $file = url(Storage::url('lesson'.$filename.'.xlsx'));
         return $file;
     }
+
+    public function quizzesDoesntHasGradeCat(Request $request)
+    {
+        $result=[];
+        $quizLessonsGrades=QuizLesson::select('grade_category_id')->pluck('grade_category_id');
+        $grade_category = GradeCategory::select('id')->whereIn('id',$quizLessonsGrades)->pluck('id');
+        foreach($grade_category as $one){
+            $parent_Category = GradeCategory::find($one);
+            if($parent_Category->parent == null)
+                $result[]=$parent_Category->id;
+        }
+        return $result;
+    }
 }

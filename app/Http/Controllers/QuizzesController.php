@@ -250,7 +250,7 @@ class QuizzesController extends Controller
         $request->validate([
             'name' => 'string|min:3',
             'lesson_id' => 'required|exists:lessons,id', //but we update on all lessons
-            'is_graded' => 'boolean',
+            'is_graded' => 'integer|in:0,1',
             'collect_marks' => 'integer|in:0,1',
             'duration' => 'integer|min:60',
             'shuffle' => 'string|in:No Shuffle,Questions,Answers,Questions and Answers',
@@ -386,7 +386,6 @@ class QuizzesController extends Controller
             return HelperController::api_response_format(400,[], $message = __('messages.error.not_allowed_to_edit'));
 
         $check = QuizLesson::where('lesson_id',$request->updated_lesson_id)->where('quiz_id',$request->quiz_id)->first();
-            
         if(isset($check))
             return HelperController::api_response_format(400,[], $message = __('messages.error.assigned_before'));
 
@@ -396,6 +395,9 @@ class QuizzesController extends Controller
         $quiz_lesson->update([
             'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
         ]);
+
+        Timeline::where('item_id',$request->quiz_id)->where('type','quiz')->where('lesson_id',$request->lesson_id)
+        ->update(['lesson_id' => $request->updated_lesson_id]);
         
         $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->updated_lesson_id)->first();
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , GradeCategory::find($gradeCat->parent)));
@@ -418,8 +420,10 @@ class QuizzesController extends Controller
         Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
 
         $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
-        $parent_Category = GradeCategory::find($grade_category->parent);
-        $grade_category->delete();
+        if(isset($grade_category)){
+            $parent_Category = GradeCategory::find($grade_category->parent);
+            $grade_category->delete();
+        }
         event(new GraderSetupEvent($parent_Category));
         $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
         dispatch($userGradesJob);
@@ -501,6 +505,7 @@ class QuizzesController extends Controller
         if(!isset($quiz))
             return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
+        $quizLesson->Parent_grade_category = $quizLesson->grade_category_id;
         $grade_Cat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz->id)->where('lesson_id', $request->lesson_id)->first();
         if($grade_Cat->parent != null)
             $quizLesson->Parent_grade_category = $grade_Cat->Parents->id;

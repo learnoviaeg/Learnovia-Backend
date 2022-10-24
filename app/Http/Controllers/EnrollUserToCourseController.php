@@ -198,7 +198,7 @@ class EnrollUserToCourseController extends Controller
                 return HelperController::api_response_format(400, [], __('messages.enroll.error'));
 
         foreach ($request->users as $user) {
-            $courses=Course::where('segment_id',$request->segment)->where('level_id',$request->level)->where('mandatory',1)->get();
+            $courses=Course::where('classes','LIKE',"%$request->class%")->where('segment_id',$request->segment)->where('level_id',$request->level)->where('mandatory',1)->get();
 
             if (count($courses) > 0) {
                 foreach($courses as $course){
