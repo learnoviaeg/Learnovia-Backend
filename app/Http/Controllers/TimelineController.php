@@ -280,8 +280,8 @@ class TimelineController extends Controller
                             });
 
         if(!$request->user()->can('site/show-all-courses')){
-            $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls)->where('user_id',Auth::id())->distinct('group_id')->select('group_id');
-            $timeline->where('class_id',$sec_chain->group_id);
+            $sec_chain = SecondaryChain::whereIn('enroll_id', $enrolls->pluck('id'))->where('user_id',Auth::id())->distinct('group_id')->select('group_id');
+            $timeline->where('class_id',$sec_chain->pluck('group_id'));
         }
         if(!$request->filled('item_type'))
             $timeline->where('type', 'quiz');
