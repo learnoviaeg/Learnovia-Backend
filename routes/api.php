@@ -492,6 +492,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
 
     Route::Resource('timeline', TimelineController::class);
+    Route::get('timelines', 'TimelineController@get_timeline_for_web');
+    Route::get('timelines/quiz_details', 'TimelineController@quiz_details_for_timeline');
+
+    
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
