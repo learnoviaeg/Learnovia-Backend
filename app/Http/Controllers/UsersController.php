@@ -82,7 +82,7 @@ class UsersController extends Controller
         if($my_chain == 'all'){
 
             $users = User::whereHas('roles', function($q){
-                if(isset($reuesy->roles))
+                if(isset($request->roles))
                     $q->whereIn('id',$request->roles);
             })->with('roles');
 
@@ -164,7 +164,7 @@ class UsersController extends Controller
             $roles_id = $permission->roles->pluck('id');
             $enrolls->whereIn('role_id',$roles_id);
 
-            $enrolls =  $enrolls->select('user_id','group')->distinct()->ehereHas('user')->with(['classes'])->get()->filter()->values();
+            $enrolls =  $enrolls->select('user_id','group')->distinct()->whereHas('user')->with(['classes'])->get()->filter()->values();
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 
