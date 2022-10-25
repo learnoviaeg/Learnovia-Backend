@@ -182,6 +182,8 @@ class H5PLessonController extends Controller
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
+            $url= substr($request->url(), 0, strpos($request->url(), "/api"));
+            $content->link =  $url.'/api/h5p/'.$request->content_id;
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
 
