@@ -76,6 +76,11 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
+    public function parent()
+    {
+        return $this->hasOne('Modules\QuestionBank\Entities\Questions','id', 'parent');
+    }
+
     public function getContentAttribute()
     {
         $content= json_decode($this->attributes['content']);

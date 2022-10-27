@@ -369,7 +369,7 @@ class AttemptsController extends Controller
      */
     public function show($id)
     {
-        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson','UserQuizAnswer.Question.parent')->first();
 
         // to prevent any user except auth to review this attempt
         if(Auth::user()->can('site/course/student')){
