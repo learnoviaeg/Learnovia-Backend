@@ -369,7 +369,7 @@ class AttemptsController extends Controller
      */
     public function show($id)
     {
-        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson','UserQuizAnswer.Question.parent')->first();
+        $attempt=UserQuiz::whereId($id)->with('UserQuizAnswer.Question','user','quiz_lesson')->first();
 
         // to prevent any user except auth to review this attempt
         if(Auth::user()->can('site/course/student')){
@@ -484,8 +484,7 @@ class AttemptsController extends Controller
         ]);
 
         $user_quiz = userQuiz::find($id);
-        if(isset($user_quiz))
-            LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
+        LastAction::lastActionInCourse($user_quiz->quiz_lesson->lesson->course_id);
 
         $allData = collect([]);
         if(isset($request->Questions))
