@@ -1067,25 +1067,25 @@ class UserController extends Controller
         return HelperController::api_response_format(200 ,$nationals, 'Nationalities are ...');
     }
 
-    public function enroll_parents_script(){
-        $students = Enroll::where('role_id',3)->with('user.parents')->get();
-        foreach($students as $student){
-            if(isset($student->user)){
-                foreach($student->user->parents as $parent){
-                    Enroll::firstOrCreate([
-                        // 'course_segment' => $student->course_segment,
-                        'user_id' => $parent->id,
-                        'role_id'=> 7,
-                        'year' => $student->year,
-                        'type' => $student->type,
-                        'level' => $student->level,
-                        'group' => $student->group,
-                        'segment' => $student->segment,
-                        'course' => $student->course
-                    ]);
-                }
-            }
-        }
-        return 'done';
-    }
+    // public function enroll_parents_script(){
+    //     $students = Enroll::where('role_id',3)->with('user.parents')->get();
+    //     foreach($students as $student){
+    //         if(isset($student->user)){
+    //             foreach($student->user->parents as $parent){
+    //                 Enroll::firstOrCreate([
+    //                     // 'course_segment' => $student->course_segment,
+    //                     'user_id' => $parent->id,
+    //                     'role_id'=> 7,
+    //                     'year' => $student->year,
+    //                     'type' => $student->type,
+    //                     'level' => $student->level,
+    //                     'group' => $student->group,
+    //                     'segment' => $student->segment,
+    //                     'course' => $student->course
+    //                 ]);
+    //             }
+    //         }
+    //     }
+    //     return 'done';
+    // }
 }

@@ -164,6 +164,7 @@ class H5PLessonController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         if($request->filled('content_id') && $request->filled('lesson_id')){
             $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id)->first();
             if(!isset($h5p_lesson))
@@ -182,12 +183,10 @@ class H5PLessonController extends Controller
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
-            $url= substr($request->url(), 0, strpos($request->url(), "/api"));
-            $content->link =  $url.'/api/interactive/'.$request->content_id;
+            $h5p_lesson->link =  $url.'/api/interactive/'.$request->content_id;
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
 
-        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();
         $h5p_content= collect();
         foreach($h5p_lesson as $h5p){

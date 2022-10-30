@@ -76,7 +76,7 @@ class Questions extends Model
             ->where('user_quiz_id',$id)->first();
     }
 
-    public function parent()
+    public function Parent()
     {
         return $this->hasOne('Modules\QuestionBank\Entities\Questions','id', 'parent');
     }
