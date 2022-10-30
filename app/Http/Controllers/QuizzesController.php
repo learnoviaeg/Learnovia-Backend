@@ -127,7 +127,7 @@ class QuizzesController extends Controller
 
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children','quizLesson'])->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children.Parent','quizLesson'])->first();
             if(!isset($quiz))
                 continue;
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
