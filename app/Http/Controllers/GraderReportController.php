@@ -28,9 +28,11 @@ class GraderReportController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
+            'class' =>'required'
         ]);
         $req = new Request([
-                'courses' => [$request->course_id],
+            'courses' => [$request->course_id],
+            'class' =>isset($request->class) ? $request->class : $request->class
         ]);
         $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         $main_category = GradeCategory::select('id','name','min','max','parent')->where('course_id' ,$request->course_id)->where('type', 'category')->whereNull('parent')
