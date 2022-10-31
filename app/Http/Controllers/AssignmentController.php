@@ -393,7 +393,7 @@ class AssignmentController extends Controller
                 $assignment->update([
                     'content' => isset($request->content) ? $request->content : $assignment->content,
                     'name' => isset($request->name) ? $request->name : $assignment->name,
-                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
+                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : $assignment->attachment_id,
                 ]);
                 $assigmentLesson->update([
                     'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
@@ -404,8 +404,8 @@ class AssignmentController extends Controller
                 ]);
             }
     
-            // if($request->file == 'No_file')
-            //     $assignment->attachment_id=null;
+            if($request->file == 'No_file')
+                $assignment->attachment_id=null;
     
             $assignment->save();
     
