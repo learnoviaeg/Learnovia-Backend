@@ -81,10 +81,7 @@ class UsersController extends Controller
 
         if($my_chain == 'all'){
 
-            $users = User::whereHas('roles', function($q){
-                if(isset($request->roles))
-                    $q->whereIn('id',$request->roles);
-            })->with('roles');
+            $users = User::with(['roles']);
 
             if($request->filled('search')){
                 $users->where(function($q) use($request){
@@ -164,7 +161,7 @@ class UsersController extends Controller
             $roles_id = $permission->roles->pluck('id');
             $enrolls->whereIn('role_id',$roles_id);
 
-            $enrolls =  $enrolls->select('user_id','group')->distinct()->whereHas('user')->with(['classes'])->get()->filter()->values();
+            $enrolls =  $enrolls->select('user_id','group')->distinct()->with(['classes'])->get()->filter()->values();
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
 

@@ -148,19 +148,13 @@ class H5PLessonController extends Controller
     public function get (Request $request){
 
         $rules = [
-            // 'content_id' => 'exists:h5p_contents,id|required_with:lesson_id',
-            'content_id' => 'required_with:lesson_id',
+            'content_id' => 'exists:h5p_contents,id|required_with:lesson_id',
             'lesson_id' => 'integer|exists:h5p_lessons,lesson_id|required_with:content_id',
         ];
 
-
         $customMessages = [
-            // 'content_id.exists' => 'This item has been removed.'
+            'content_id.exists' => 'This item has been removed.'
         ];
-
-        $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id);
-        if($h5p_lesson->count() < 1)
-            return HelperController::api_response_format(404, null ,__('messages.error.item_deleted'));
 
         $this->validate($request, $rules, $customMessages);
 
