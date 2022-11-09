@@ -1160,6 +1160,7 @@ class ReportCardsController extends Controller
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%")
+                ->orWhere('short_name','LIKE', "%Oct_mfisg%")
                 ->select('name','id');
         };
         $years = AcademicYear::select('id')->pluck('id');
