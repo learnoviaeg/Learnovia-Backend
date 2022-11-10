@@ -71,10 +71,7 @@ class GraderReportController extends Controller
     public function show(Request $request ,$id)
     {
         $category = GradeCategory::where('parent',$id)->where('type', 'category');
-        $req = new Request([
-            'courses' =>[$request->course_id],
-        ]);
-        $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
+        $enrolled_students = $this->chain->getEnrollsByChain($request)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         $categories = $category->select('id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
                         {
                             $q->whereIn('user_id',$enrolled_students);
