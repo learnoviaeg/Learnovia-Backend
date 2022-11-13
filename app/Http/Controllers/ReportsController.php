@@ -45,7 +45,7 @@ class ReportsController extends Controller
             'segment' => 'exists:segments,id',
             'courses' => ['array',Rule::requiredIf($option === 'seen_report' || $option === 'seen_report_chart')],
             'courses.*' => 'exists:courses,id',
-            'class' => ['exists:classes,id',Rule::requiredIf($option === 'seen_report' || $option === 'seen_report_chart')],
+            'class' => ['exists:classes,id',Rule::requiredIf($option === 'seen_recourseProgressReportport' || $option === 'seen_report_chart')],
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
             'search' => 'string',
@@ -349,7 +349,7 @@ class ReportsController extends Controller
 
             if($request->has('details')){
                 $exportDetails = 1;
-                $fields = ['level','course','class','type','item_name','item_id','created_at','teacher'];
+                $fields = ['level','level_id','course','course_id','class','class_id','type','item_name','item_id','created_at','teacher'];
             }
 
             $filename = uniqid();
