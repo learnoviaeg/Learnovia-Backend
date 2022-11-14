@@ -492,7 +492,7 @@ class QuizzesController extends Controller
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
-        $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
+        $quiz = quiz::where('id',$id)->with(['Question.children.Parent','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
         if($request->user()->can('site/course/student') && isset($quizLesson) && !$quizLesson->visible)
