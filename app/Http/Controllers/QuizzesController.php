@@ -36,6 +36,7 @@ use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
 use Illuminate\Database\Eloquent\Builder;
 use App\LessonComponent;
+use App\Events\QuizEndReminderEvent;
 
 class QuizzesController extends Controller
 {
@@ -126,7 +127,7 @@ class QuizzesController extends Controller
 
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children','quizLesson'])->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children.Parent','quizLesson'])->first();
             if(!isset($quiz))
                 continue;
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
@@ -296,7 +297,10 @@ class QuizzesController extends Controller
                 if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
                     return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
             }
-    
+
+            if($request->filled('closing_time') && $request->closing_time != $quiz_lesson->due_date)
+                event(new QuizEndReminderEvent($quiz_lesson));
+
             $quiz_lesson->update([
                 'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
                 // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
@@ -491,7 +495,7 @@ class QuizzesController extends Controller
         $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
-        if($request->user()->can('site/course/student') && !$quizLesson->visible)
+        if($request->user()->can('site/course/student') && isset($quizLesson) && !$quizLesson->visible)
             return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
 
         if(!isset($quiz))

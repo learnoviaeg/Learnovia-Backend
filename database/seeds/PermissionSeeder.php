@@ -299,6 +299,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'grader report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/overview', 'title' => 'overview report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/user', 'title' => 'get user grades']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/user-report', 'title' => 'User Report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/total-report/user', 'title' => 'get user total report']);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);

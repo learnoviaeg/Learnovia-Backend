@@ -114,13 +114,11 @@ class FetchOneLogApiController extends Controller
                 //unset($diff_before['shared_classes']);
                 //unset($diff_after['shared_classes']);
           }
-          // case updated subject is lesson
 
           // case updated subject is course
           if ($log->subject_type == 'Course') {
                 $diff_after['classes']  = implode(',', $log->class_id);
           }
-          // case updated subject is course
 
           // case updated subject is Announcement
           if ($log->subject_type == 'Announcement') {
@@ -134,19 +132,20 @@ class FetchOneLogApiController extends Controller
                 unset($diff_before['topic']);
                 unset($diff_before['created_by']);
           }
-          // case updated subject is Announcement
 
-          // case updated subject is Announcement
+          // case updated subject is Questions
           if ($log->subject_type == 'Questions') {
               $diff_after['content']  = json_encode($diff_after['content']);
           }
-          // case updated subject is Announcement
-
-            $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
-            $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
             // start handle user
               if ($log->subject_type == 'User') {
+                unset($diff_after['roles']);
+                unset($diff_before['roles']);
+                unset($diff_before['profile_fields']);
+                unset($diff_after['profile_fields']);
+                $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
+                $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
                 if ( (!isset($get_diff_before['real_password'])) && (!isset($get_diff_after['real_password'])) ) {
                   unset($get_diff_before['password']);
                   unset($get_diff_after['password']);
@@ -154,20 +153,21 @@ class FetchOneLogApiController extends Controller
                 unset($get_diff_before['remember_token']);
                 unset($get_diff_before['chat_uid']);
                 unset($get_diff_before['refresh_chat_token']); 
-                unset($get_diff_after['lastaction']); 
+                unset($get_diff_after['lastaction']);
                 unset($get_diff_after['roles']); 
                 unset($get_diff_after['fullname']); 
-                  foreach ($get_diff_before as $key => $value) {
-                    /*if( ($get_diff_before[$key] == null)  && !isset($get_diff_after[$key]) ){
-                      continue;
-                    }*/
-                    if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
-                      unset($get_diff_after[$key]);
-                      unset($get_diff_before[$key]);
-                    }
+                foreach ($get_diff_before as $key => $value) {
+                  /*if( ($get_diff_before[$key] == null)  && !isset($get_diff_after[$key]) ){
+                    continue;
+                  }*/
+                  if($get_diff_before[$key] == null && $get_diff_after[$key] == "null"){
+                    unset($get_diff_after[$key]);
+                    unset($get_diff_before[$key]);
                   }
+                }
               }
-                 // end handle user
+              $get_diff_before    = array_diff_assoc($diff_before, $diff_after); 
+              $get_diff_after     = array_diff_assoc($diff_after, $diff_before);
 
                // start handle announcement
                 if ($log->subject_type == 'Announcement') {

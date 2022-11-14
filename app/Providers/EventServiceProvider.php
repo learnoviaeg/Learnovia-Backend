@@ -101,6 +101,12 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\CreateInstallmentEvent' => [
             'App\Listeners\InstallmentNotificationListener',
         ],
+        'App\Events\QuizEndReminderEvent' => [
+            'App\Listeners\QuizEndNotificationListener',
+        ],
+        'App\Events\AssignmentEndReminderEvent' => [
+            'App\Listeners\AssignmentEndNotificationListener',
+        ],
     ];
 
     /**

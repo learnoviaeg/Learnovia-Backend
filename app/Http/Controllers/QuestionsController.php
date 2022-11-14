@@ -21,6 +21,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use App\Events\QuizEndReminderEvent;
 
 class QuestionsController extends Controller
 {
@@ -29,8 +30,8 @@ class QuestionsController extends Controller
         $this->chain = $chain;
         $this->notification = $notification;
         $this->middleware('auth');
-        // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
-        // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
         $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }
@@ -226,6 +227,8 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
+                event(new QuizEndReminderEvent($newQuizLesson));
+
                 if(!$quiz->restricted && $newQuizLesson->visible)
                 {
                     $reqNot=[
