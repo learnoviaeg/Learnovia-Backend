@@ -22,6 +22,7 @@ deploy-code-job-preprod-mgmt:
      script:
        - ansible-playbook /backup/playbooks/preprod-backend.yml
 
+
 #=========================================================Testing new management server deployment
 deploy-code-job-production-mgmt:
      stage: deploy

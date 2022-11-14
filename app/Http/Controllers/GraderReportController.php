@@ -27,14 +27,12 @@ class GraderReportController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'class' =>'required'
+            'courses' => 'required|array',
+            'courses.*' => 'exists:courses,id',
+            'class' => 'required|exists:classes,id'
         ]);
-        $req = new Request([
-            'courses' => [$request->course_id],
-            'class' =>isset($request->class) ? $request->class : $request->class
-        ]);
-        $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
+
+        $enrolled_students = $this->chain->getEnrollsByChain($request)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         $main_category = GradeCategory::select('id','name','min','max','parent')->where('course_id' ,$request->course_id)->where('type', 'category')->whereNull('parent')
                         ->with(['userGrades' => function($q)use ($enrolled_students)
                         {
@@ -73,10 +71,7 @@ class GraderReportController extends Controller
     public function show(Request $request ,$id)
     {
         $category = GradeCategory::where('parent',$id)->where('type', 'category');
-        $req = new Request([
-            'courses' =>[$request->course_id],
-        ]);
-        $enrolled_students = $this->chain->getEnrollsByChain($req)->where('role_id' , 3)->get('user_id')->pluck('user_id');
+        $enrolled_students = $this->chain->getEnrollsByChain($request)->where('role_id' , 3)->get('user_id')->pluck('user_id');
         $categories = $category->select('id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
                         {
                             $q->whereIn('user_id',$enrolled_students);
