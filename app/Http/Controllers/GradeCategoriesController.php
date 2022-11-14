@@ -75,7 +75,7 @@ class GradeCategoriesController extends Controller
             'category.*.parent' => 'exists:grade_categories,id',
             'category.*.aggregation' => 'in:Value,Scale',
             'category.*.hidden' => 'boolean',
-            'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean',
+            'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean,Max',
             'category.*.locked' => 'boolean',
             'category.*.min'=>'between:0,100',
             'category.*.max'=>'between:0,100',
