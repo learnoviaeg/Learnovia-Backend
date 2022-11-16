@@ -23,7 +23,7 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll|
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|
                             report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
@@ -1161,6 +1161,8 @@ class ReportCardsController extends Controller
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%")
                 ->orWhere('short_name','LIKE', "%Oct_mfisg%")
+                // ->orWhere('short_name','LIKE', "%Grades_mfisb%")
+                ->orWhere('short_name','LIKE', "%Oct_mfisb%")
                 ->select('name','id');
         };
         $years = AcademicYear::select('id')->pluck('id');
