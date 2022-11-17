@@ -22,9 +22,14 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
-        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|
-                            report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|
+                            report_card/mfis/mfisb-monthly-2022|
+                            report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|
+                            report_card/mfis/manara-girls/monthly/printAll|
+                            report_card/mfis/manara-girls/monthly/printAll-2022|
+                            report_card/mfis/manara-boys/monthly/printAll-final|
+                            report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
         $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
@@ -652,6 +657,9 @@ class ReportCardsController extends Controller
         
         if($user->can('report_card/mfis/mfisg-monthly-2022'))
             $allowed_levels=Permission::where('name','report_card/mfis/mfisg-monthly-2022')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/mfis/mfisb-monthly-2022'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisb-monthly-2022')->pluck('allowed_levels')->first();
         
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
@@ -746,8 +754,6 @@ class ReportCardsController extends Controller
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
-
-
 
     public function fglFinalReport(Request $request)
     {
@@ -1033,7 +1039,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-
     public function forsanMonthlyReport(Request $request)
     {
         $request->validate([
@@ -1161,7 +1166,6 @@ class ReportCardsController extends Controller
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%")
                 ->orWhere('short_name','LIKE', "%Oct_mfisg%")
-                // ->orWhere('short_name','LIKE', "%Grades_mfisb%")
                 ->orWhere('short_name','LIKE', "%Oct_mfisb%")
                 ->select('name','id');
         };
@@ -1172,5 +1176,4 @@ class ReportCardsController extends Controller
         ->with(['courses' => $callback ])->get()->pluck('courses');
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
-
 }
