@@ -546,17 +546,9 @@ class ScriptsController extends Controller
                         ]);
                     }
                 }
-                // $enrollsOfCourse=SecondaryChain::where('user_id',1)->where('course',$course)->pluck('group');
-                // foreach($lesson->shared_classes )
-                // if(($lesson->shared_classes)!= null)
-                //     $enrollsOfCourse->whereIn('group',$lesson->shared_classes->pluck('id'));
-                // foreach($enrollsOfCourse->cursor() as $enroll)
-                // {
-                //     if(!in_array($enroll->group ,$lesson->shared_classes->pluck('id')->toArray()))
-                //         continue;
-                // }
             }
         }
+        return $result;
     }
 
     public function lessons_without_decription_having_materials(Request $request){

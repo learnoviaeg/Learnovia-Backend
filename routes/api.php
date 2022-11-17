@@ -195,7 +195,6 @@ Route::group(['prefix' => 'class', 'middleware' => ['auth:api','LastAction']], f
     Route::get('get-all', 'ClassController@index')->name('getallclass')->middleware('permission:class/get-all');
     Route::post('update', 'ClassController@update')->name('updateclass')->middleware('permission:class/update');
     Route::post('delete', 'ClassController@destroy')->name('deleteclass')->middleware('permission:class/delete');
-    Route::post('assign', 'ClassController@Assign_class_to')->name('assignclass')->middleware('permission:class/assign');
     Route::get('get-lessons', 'ClassController@get_lessons_of_class')->middleware('permission:class/get-lessons');
     Route::get('export', 'ClassController@export')->name('exportClasses')->middleware('permission:class/export');
 });
@@ -279,7 +278,6 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('generate-username-password', 'UserController@generate_username_password')->name('generateusernamepassword')->middleware('permission:user/generate-username-password');
     Route::get('GetAllCountries', 'UserController@GetAllCountries')->name('GetAllCountries')->middleware('permission:user/GetAllCountries');
     Route::get('GetAllNationalities', 'UserController@GetAllNationalities')->name('GetAllNationalities')->middleware('permission:user/GetAllNationalities');
-    Route::get('enroll_parent_script', 'UserController@enroll_parents_script')->middleware('permission:site/show-all-courses');
 });
 
 //Enroll Routes
@@ -291,9 +289,6 @@ Route::group(['prefix' => 'enroll', 'middleware' => ['auth:api','LastAction']], 
     Route::get('get-enrolled-courses', 'EnrollUserToCourseController@ViewAllCoursesThatUserEnrollment')->name('EnrolledCourse')->middleware('permission:enroll/get-enrolled-courses');
     //de enroll student
     Route::post('mandatory-course', 'EnrollUserToCourseController@EnrollInAllMandatoryCourses')->name('EnrollMandatory')->middleware('permission:enroll/mandatory');
-    Route::post('bulk-of-exist-users', 'EnrollUserToCourseController@EnrollExistUsersFromExcel')->name('enrollexcel')->middleware('permission:enroll/bulk-of-exist-users');
-    Route::post('add-and-enroll-bulk-of-new-users', 'EnrollUserToCourseController@AddAndEnrollBulkOfNewUsers')->name('usertech')->middleware('permission:enroll/add-and-enroll-bulk-of-new-users');
-    Route::get('enrolled-users', 'EnrollUserToCourseController@GetEnrolledStudents')->name('enrolledusers')->middleware('permission:enroll/enrolled-users');
     Route::get('get-unenroll-users', 'EnrollUserToCourseController@getUnEnroll')->name('getUnEnroll')->middleware('permission:enroll/get-unenroll-users');
     Route::get('get-unenroll-users-role', 'EnrollUserToCourseController@UnEnrolledUsers')->name('UnEnrolledUsers')->middleware('permission:enroll/get-unenroll-users-role');
     Route::get('get-unenrolled-users-Bulk', 'EnrollUserToCourseController@unEnrolledUsersBulk')->name('getUnEnrolleduser')->middleware('permission:enroll/get-unenrolled-users-Bulk');
@@ -494,6 +489,10 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('assignmentss/{count}', 'AssignmentController@index')->middleware(['permission:assignment/get' , 'ParentCheck']);
 
     Route::Resource('timeline', TimelineController::class);
+    Route::get('timelines', 'TimelineController@get_timeline_for_web');
+    Route::get('timelines/quiz_details', 'TimelineController@quiz_details_for_timeline');
+
+    
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
@@ -601,8 +600,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     
     Route::get('grader-categories', 'GraderReportController@grader_dropdown_categories');
 
-
-    Route::get('grader-report-users', 'GraderReportController@user_grades');
+    Route::get('grader-report-users', 'GraderReportController@user_grades')->middleware(['permission:grade/user-report']);
 
     Route::post('session/take_attendance', 'AttendanceSessionController@takeAttendance');
     Route::delete('session', 'AttendanceSessionController@deleteAll');

@@ -1039,7 +1039,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-
     public function forsanMonthlyReport(Request $request)
     {
         $request->validate([
@@ -1177,5 +1176,4 @@ class ReportCardsController extends Controller
         ->with(['courses' => $callback ])->get()->pluck('courses');
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
-
 }
