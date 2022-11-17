@@ -61,10 +61,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/printAll-final', 'language' => 1, 'value' => 'All Final term Reports']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisg-monthly-2022', 'language' => 1, 'value' => 'Monthly Report(mfisg) 2022']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll-2022','language'=> 1, 'value' => 'monthly report print all girls 2022']);
-<<<<<<< HEAD
-=======
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisb-monthly-2022', 'language' => 1, 'value' => 'Monthly Report(mfisb) 2022']);
->>>>>>> 948dddc2668d65674c0d2ae8bc5fee22054e51f0
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-boys/monthly/printAll-2022','language'=> 1, 'value' => 'monthly report print all boys 2022']);
 
         Dictionary::firstOrCreate(['key' => 'report_card/forsan/monthly', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
@@ -72,10 +69,7 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll', 'language' => 2, 'value' => 'جميع التقارير الشهرية']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll-2022', 'language' => 2, 'value' => ' 2022 جميع التقارير الشهرية']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisg-monthly-2022', 'language' => 2, 'value' => '2022 التقرير الشهري']);
-<<<<<<< HEAD
-=======
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-boys/monthly/printAll-2022', 'language' => 2, 'value' => ' 2022 جميع التقارير الشهرية']);
->>>>>>> 948dddc2668d65674c0d2ae8bc5fee22054e51f0
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisb-monthly-2022', 'language' => 2, 'value' => '2022 التقرير الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisg-monthly', 'language' => 2, 'value' => 'التقرير الشهري']);
         Dictionary::firstOrCreate(['key' => 'reports/course_progress', 'language' => 2, 'value' => 'تقرير المتابعه']);
