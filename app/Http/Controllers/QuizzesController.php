@@ -338,7 +338,7 @@ class QuizzesController extends Controller
     
             $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
             $gradeCat->update([
-                'name' ->$quiz->name,
+                'name' => $quiz->name,
                 'hidden' => $quiz_lesson->visible,
                 'calculation_type' => json_encode($quiz_lesson->grading_method_id),
                 'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
