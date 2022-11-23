@@ -29,8 +29,8 @@ class QuestionsController extends Controller
         $this->chain = $chain;
         $this->notification = $notification;
         $this->middleware('auth');
-        // $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
-        // $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
+        $this->middleware(['permission:question/get' , 'ParentCheck'],   ['only' => ['index']]);
+        $this->middleware(['permission:question/add' ],   ['only' => ['store']]);
         $this->middleware(['permission:question/delete'],   ['only' => ['destroy']]);
         $this->middleware(['permission:question/update'],   ['only' => ['update']]);
     }

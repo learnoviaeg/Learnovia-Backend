@@ -670,7 +670,9 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain|report_card/haramain/final');
     Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
     Route::get('manara', 'ReportCardsController@manaraReport');
+    Route::get('oct-2022', 'ReportCardsController@manaraReport');
     Route::post('manara-all', 'ReportCardsController@manaraReportAll');
+    Route::post('oct-2022-all', 'ReportCardsController@manaraReportAll');
     Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
     Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
     Route::post('fgl-all', 'ReportCardsController@fglsReportAll');

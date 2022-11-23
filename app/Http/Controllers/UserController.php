@@ -362,8 +362,9 @@ class UserController extends Controller
             if ($enroll != null) {
                 $enroll->delete();
             }
-            $user    = User::find($user_id);
-            $user->delete();
+            $user = User::find($user_id);
+            if(isset($user))
+                $user->delete();
         }
         return HelperController::api_response_format(201, null, __('messages.users.delete'));
     }
