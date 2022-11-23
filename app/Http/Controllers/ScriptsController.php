@@ -535,32 +535,21 @@ class ScriptsController extends Controller
                         $check=SecondaryChain::where('user_id',$enrolaya->user_id)->where('group_id',$class)->where('course_id',$course)
                             ->where('lesson_id',$lesson->id)->first();
 
-                            if($check == null)
-                            {
-                                $result['class'][$key]=$class;
-                                $result['lesson'][$key]=$lesson->id;
-                                SecondaryChain::firstOrCreate([
-                                    'user_id' => $enrolaya->user_id,
-                                    'role_id' => 3,
-                                    'group_id' => $class,
-                                    'course_id' => $course,
-                                    'lesson_id' => $lesson->id,
-                                    'enroll_id' => $enrolaya->id
-                                ]);
-                            }
+                        if($check == null)
+                        {
+                            $result['class'][$key]=$class;
+                            $result['lesson'][$key]=$lesson->id;
+                            SecondaryChain::firstOrCreate([
+                                'user_id' => $enrolaya->user_id,
+                                'role_id' => 3,
+                                'group_id' => $class,
+                                'course_id' => $course,
+                                'lesson_id' => $lesson->id,
+                                'enroll_id' => $enrolaya->id
+                            ]);
+                        }
                     }
-
-
                 }
-                // $enrollsOfCourse=SecondaryChain::where('user_id',1)->where('course',$course)->pluck('group');
-                // foreach($lesson->shared_classes )
-                // if(($lesson->shared_classes)!= null)
-                //     $enrollsOfCourse->whereIn('group',$lesson->shared_classes->pluck('id'));
-                // foreach($enrollsOfCourse->cursor() as $enroll)
-                // {
-                //     if(!in_array($enroll->group ,$lesson->shared_classes->pluck('id')->toArray()))
-                //         continue;
-                // }
             }
         }
     }
