@@ -328,8 +328,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/feb', 'title' => 'February report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/march', 'title' => 'March report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/april', 'title' => 'April report','icon' => 'Report-Card']);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/oct-2022', 'title' => 'October report 2022','icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/oct-2022-all', 'title' => 'October report 2022','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022', 'title' => 'October report 2022','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022-all', 'title' => 'October report 2022','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/monthly/printAll', 'title' => 'monthly report print all girls','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/monthly/printAll-2022', 'title' => 'monthly report print all girls 2022','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/monthly/printAll-2022', 'title' => 'monthly report print all boys 2022','icon' => 'Report-Card','dashboard'=>1]);

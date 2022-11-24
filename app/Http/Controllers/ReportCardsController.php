@@ -24,11 +24,11 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|
                             report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|
-                            report_card/monthly/oct-2022'],   ['only' => ['manaraMonthlyReport']]);
+                            report_card/nile-garden/monthly/oct-2022'],   ['only' => ['manaraMonthlyReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|
                             report_card/mfis/manara-girls/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll-2022|
                             report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-boys/monthly/printAll-final|
-                            report_card/monthly/oct-2022-all'],   ['only' => ['manaraMonthylReportAll']]);
+                            report_card/nile-garden/monthly/oct-2022-all'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
         $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
@@ -607,8 +607,11 @@ class ReportCardsController extends Controller
         if($user->can('report_card/mfis/mfisb-monthly-2022'))
             $allowed_levels=Permission::where('name','report_card/mfis/mfisb-monthly-2022')->pluck('allowed_levels')->first();
         
-        if($user->can('report_card/monthly/oct-2022'))
+        if($user->can('report_card/nile-garden/monthly/oct-2022'))
             $allowed_levels=Permission::where('name','report_card/monthly/oct-2022')->pluck('allowed_levels')->first();
+
+        // if($user->can('report_card/monthly/oct-2022'))
+        //     $allowed_levels=Permission::where('name','report_card/monthly/oct-2022')->pluck('allowed_levels')->first();
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
