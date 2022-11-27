@@ -670,9 +670,7 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('haramain', 'ReportCardsController@haramainReport')->middleware('permission:report_card/haramain|report_card/haramain/final');
     Route::get('forsan', 'ReportCardsController@forsanReport')->middleware('permission:report_card/forsan');
     Route::get('manara', 'ReportCardsController@manaraReport');
-    Route::get('oct-2022', 'ReportCardsController@manaraReport');
     Route::post('manara-all', 'ReportCardsController@manaraReportAll');
-    Route::post('oct-2022-all', 'ReportCardsController@manaraReportAll');
     Route::post('haramain-all', 'ReportCardsController@haramaninReportAll');
     Route::post('forsan-all', 'ReportCardsController@forsanReportAll');
     Route::post('fgl-all', 'ReportCardsController@fglsReportAll');
@@ -680,6 +678,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
     Route::get('mfis/monthly', 'ReportCardsController@manaraMonthlyReport');
     Route::post('manara-monthly-all', 'ReportCardsController@manaraMonthylReportAll');
+    Route::get('oct-2022', 'ReportCardsController@manaraMonthlyReport');
+    Route::post('oct-2022-all', 'ReportCardsController@manaraMonthylReportAll');
     Route::get('fgl-final-kg', 'ReportCardsController@fglFinalReport');
     Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
     Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
