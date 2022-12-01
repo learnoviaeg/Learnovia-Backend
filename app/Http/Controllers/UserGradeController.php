@@ -437,7 +437,7 @@ class UserGradeController extends Controller
         $headers =array_merge(array('fullname','username' , 'course'), $grade_Categroies_ids);
 
         $students = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
-        ->with(array('user' => function($query) {
+        ->whereHas('user')->with(array('user' => function($query) {
             $query->addSelect(array('id' , 'username' , 'firstname' , 'lastname'));
         }))->get();
         $course_shortname = GradeCategory::whereIn('course_id', $request->courses)->first()->course->short_name;

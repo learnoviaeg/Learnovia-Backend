@@ -299,6 +299,7 @@ class FilesController extends Controller
                         $material->save();
                     }
                     if($material->visible == 1){
+                        //it's Not in observer because if there is restriction material was updated after creation so after observer runs
                         if(!isset($request->users_ids)){
                             $reqNot=[
                                 'message' => $material->name.' file is added',
@@ -309,8 +310,7 @@ class FilesController extends Controller
                                 'lesson_id' => $lesson,
                                 'course_name' => $tempLesson->course->name,
                             ];
-
-                            $users=SecondaryChain::select('user_id')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
+                            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id', 3)->where('lesson_id',$lesson)->pluck('user_id');
                             $this->notification->sendNotify($users->toArray(),$reqNot);
                         }
                     }

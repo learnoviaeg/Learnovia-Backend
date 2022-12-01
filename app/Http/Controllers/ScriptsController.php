@@ -522,28 +522,32 @@ class ScriptsController extends Controller
 
     public function enrollLessons()
     {
-        $courses= Course::where('created_at','>=','2022-08-01 16:04:16')->pluck('id');
+        // $courses= Course::where('created_at','>=','2022-08-01 16:04:16')->pluck('id');
+        $courses= Course::whereId($request->course_id)->pluck('id');
         $result=[];
         foreach($courses as $key => $course){
             $lessons=Lesson::where('course_id',$course)->get();
             foreach($lessons as $lesson){
                 foreach($lesson->shared_classes->pluck('id') as $class){
-                    $check=SecondaryChain::where('user_id',1)->where('group_id',$class)->where('course_id',$course)
-                                            ->where('lesson_id',$lesson->id)->first();
-                    $enroll=Enroll::where('user_id',1)->where('course',$course)->where('group',$class)->first();
-
-                    if($check == null)
+                    $enroll=Enroll::where('role_id',3)->where('course',$course)->where('group',$class)->select('id','user_id')->get();
+                    foreach($enroll as $enrolaya)
                     {
-                        $result['class'][$key]=$class;
-                        $result['lesson'][$key]=$lesson->id;
-                        SecondaryChain::firstOrCreate([
-                            'user_id' => 1,
-                            'role_id' => 1,
-                            'group_id' => $class,
-                            'course_id' => $course,
-                            'lesson_id' => $lesson->id,
-                            'enroll_id' => $enroll->id
-                        ]);
+                        $check=SecondaryChain::where('user_id',$enrolaya->user_id)->where('group_id',$class)->where('course_id',$course)
+                            ->where('lesson_id',$lesson->id)->first();
+
+                        if($check == null)
+                        {
+                            $result['class'][$key]=$class;
+                            $result['lesson'][$key]=$lesson->id;
+                            SecondaryChain::firstOrCreate([
+                                'user_id' => $enrolaya->user_id,
+                                'role_id' => 3,
+                                'group_id' => $class,
+                                'course_id' => $course,
+                                'lesson_id' => $lesson->id,
+                                'enroll_id' => $enrolaya->id
+                            ]);
+                        }
                     }
                 }
             }
