@@ -106,7 +106,7 @@ class InterActiveController extends Controller
             $sec_chain = SecondaryChain::where('lesson_id',$h5p->lesson_id)->get();
             $classess = Classes::whereIn('id', $sec_chain->pluck('group_id'))->get();
             $content->original->class = $classess;
-            $content->original->level = Level::where('id',Course::find($content->original->lesson->course_id)->get()->pluck('level_id'))->get();
+            $content->original->level = Level::where('id',Course::find($content->original->lesson->course_id)->level_id)->get();
             $content->original->course = Course::find($content->original->lesson->course_id);
             if(!$request->user()->can('course/show-hidden-courses') && $content->original->course->show == 0){
                 unset($content);
