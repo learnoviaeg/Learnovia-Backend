@@ -53,18 +53,6 @@ class FileLessonObserver
             ], [
                 'index'     => LessonComponent::getNextIndex($fileLesson->lesson_id)
                 ]);
-
-            // $courseItem=CourseItem::where('item_id',$fileLesson->file_id)->where('type','file')->first();
-            // if(isset($courseItem))
-            // {
-            //     $material->restricted=1;
-            //     $material->save();
-            // }
-            // if($courseItem == null)
-            // {
-            //     $users=SecondaryChain::select('user_id')->where('lesson_id',$material->lesson_id)->pluck('user_id');
-            //     $this->notification->sendNotify($users->toArray(),$material->name. " ". $material->type.' is created',$material->item_id,'notification',$material->type);    
-            // }
         }
     }
 

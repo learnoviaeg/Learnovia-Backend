@@ -228,7 +228,7 @@ class AssignmentController extends Controller
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
             //sending notifications
-            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
             if(!isset($request->users_ids) && $assignment_lesson->visible)
             {
                 $reqNot=[
@@ -424,7 +424,7 @@ class AssignmentController extends Controller
             //     }
             // }
 
-            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');

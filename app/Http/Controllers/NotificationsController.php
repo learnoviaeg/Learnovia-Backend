@@ -191,7 +191,7 @@ class NotificationsController extends Controller
 
             $answeredUsers = userQuiz::select('user_id')->where('quiz_lesson_id',$quizLesson->id)->select('user_id')->distinct()->pluck('user_id');
            
-            $allUsers = SecondaryChain::where('lesson_id',$quizLesson->lesson_id)->whereNotIn('user_id',$answeredUsers)->where('role_id',3)->whereHas('Teacher')->select('user_id')->distinct()->pluck('user_id');
+            $allUsers = SecondaryChain::whereHas('Enroll')->where('lesson_id',$quizLesson->lesson_id)->whereNotIn('user_id',$answeredUsers)->where('role_id',3)->whereHas('Teacher')->select('user_id')->distinct()->pluck('user_id');
            
             $parents = Parents::select('parent_id')->whereIn('child_id',$allUsers)->pluck('parent_id');
           
