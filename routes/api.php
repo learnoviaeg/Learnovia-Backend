@@ -10,7 +10,7 @@ Route::get('/interactive/{id}', 'InterActiveController@show')->middleware(['geta
 //install all permissions and roles of system Route
 // Route::get('install', 'SpatieController@install');
 //Login and Signup
-Route::group(['prefix' => 'auth'], function () {
+Route::group(['prefix' => 'auth','namespace'=>'Auth','as'=>'api.auth'], function () {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('signup', 'AuthController@signup')->name('signup');
 });
