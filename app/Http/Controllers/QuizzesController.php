@@ -349,7 +349,7 @@ class QuizzesController extends Controller
             //send notification
             if(!$quiz->draft && $quiz_lesson->visible)
             {
-                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
                 $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
                 if(isset($courseItem))
                     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
