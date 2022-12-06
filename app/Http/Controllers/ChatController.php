@@ -130,8 +130,9 @@ class ChatController extends Controller
             'file.*' => 'distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga',
         ]);
 
+        $attachment=[];
         foreach($request->file as $file)
-            $attachment = attachment::upload_attachment($file, 'Message');
+            $attachment[] = attachment::upload_attachment($file, 'Message');
 
         return HelperController::api_response_format(201,$attachment, 'file');
     }
