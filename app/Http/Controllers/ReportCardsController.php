@@ -1010,7 +1010,6 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/forsan/monthly'))
             $allowed_levels=Permission::where('name','report_card/forsan/monthly')->pluck('allowed_levels')->first();
-        
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();

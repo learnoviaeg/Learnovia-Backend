@@ -65,7 +65,11 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll-2022','language'=> 1, 'value' => 'monthly report print all girls 2022']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/mfisb-monthly-2022', 'language' => 1, 'value' => 'Monthly Report(mfisb) 2022']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-boys/monthly/printAll-2022','language'=> 1, 'value' => 'monthly report print all boys 2022']);
+        Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report','language'=> 1, 'value' => 'Progress Report (Monthly)']);
+        Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report-all','language'=> 1, 'value' => 'Progress Report All(Monthly)']);
 
+        Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
+        Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report-all', 'language' => 2, 'value' => ' تقرير الدرجات الشهري للجميع']);
         Dictionary::firstOrCreate(['key' => 'report_card/forsan/monthly', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/forsan/monthly/printAll', 'language' => 2, 'value' => 'جميع التقارير الشهرية']);
         Dictionary::firstOrCreate(['key' => 'report_card/mfis/manara-girls/monthly/printAll', 'language' => 2, 'value' => 'جميع التقارير الشهرية']);
