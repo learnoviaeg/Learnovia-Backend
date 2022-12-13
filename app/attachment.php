@@ -4,6 +4,7 @@ namespace App;
 
 use App\Helpers\UploadHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class attachment extends Model
 {
@@ -33,7 +34,10 @@ class attachment extends Model
         if($school_name != null)
             $description=$school_name;
 
-        $url=UploadHelper::upload($singlefile,$type,$fileName);
+        if(env('UPLOAD_TYPE') ==' AZURE')
+            $url=UploadHelper::upload($singlefile,$type,$fileName);
+        else
+            $url = Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
 
         $attachment->name = $Name;
         $attachment->path = $url;
@@ -42,12 +46,11 @@ class attachment extends Model
         $attachment->extension = $extension;
         $attachment->mime_type = $file->getClientMimeType();
         $attachment->save();
-        // Storage::disk('public')->putFileAs($type, $singlefile, $fileName);
 
         return $attachment;
     }
     
-    // public function getPathAttribute() {
-    //   return url(Storage::url($this->attributes['path']));
-    // }
+    public function getPathAttribute() {
+      return url(Storage::url($this->attributes['path']));
+    }
 }
