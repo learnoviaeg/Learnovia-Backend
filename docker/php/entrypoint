@@ -1,7 +1,0 @@
-#!/bin/bash
-set -e
-
-## Wait for mysql to be up and running
-while ! mysqladmin ping --host mysql --silent; do sleep 1; done
-
-exec "$@"
