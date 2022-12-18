@@ -1116,9 +1116,14 @@ class ReportCardsController extends Controller
                 ->orWhere('short_name','LIKE', "%Final%")
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
-                ->orWhere('short_name','LIKE', "%April%")
-                ->orWhere('short_name','LIKE', "%Oct%")
-                ->select('name','id');
+                ->orWhere('short_name','LIKE', "%April%");
+
+                if(isset($request->month)){
+                    $qu->orWhere('short_name','LIKE', $request->month)
+                        ->orWhere('short_name','LIKE', $request->month);
+                }
+
+                $qu->select('name','id');
         };
         $years = AcademicYear::select('id')->pluck('id');
         $request->request->add(['years' => $years]);
