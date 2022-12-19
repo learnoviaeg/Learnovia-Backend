@@ -1118,12 +1118,12 @@ class ReportCardsController extends Controller
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%");
 
-                if(isset($request->month)){
-                    $qu->orWhere('short_name','LIKE', $request->month)
-                        ->orWhere('short_name','LIKE', $request->month);
-                }
+            if(isset($request->month)){
+                $qu->orWhere('short_name','LIKE', $request->month)
+                    ->orWhere('short_name','LIKE', $request->month);
+            }
 
-                $qu->select('name','id');
+            $qu->select('name','id');
         };
         $years = AcademicYear::select('id')->pluck('id');
         $request->request->add(['years' => $years]);
@@ -1132,5 +1132,4 @@ class ReportCardsController extends Controller
         ->with(['courses' => $callback ])->get()->pluck('courses');
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
-
 }
