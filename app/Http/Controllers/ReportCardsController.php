@@ -1111,20 +1111,23 @@ class ReportCardsController extends Controller
 
     public function getGradesCourses(Request $request)
     {
+        //old courses
         $callback = function ($qu) use ($request ) {
             $qu->where('short_name','LIKE', "%Grades%")
                 ->orWhere('short_name','LIKE', "%Final%")
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
-                ->orWhere('short_name','LIKE', "%April%");
-
-            if(isset($request->month)){
-                $qu->orWhere('short_name','LIKE', $request->month)
-                    ->orWhere('short_name','LIKE', $request->month);
-            }
-
-            $qu->select('name','id');
+                ->orWhere('short_name','LIKE', "%April%")
+            ->select('name','id');
         };
+
+        //for new that depend on key from frontend
+        if(isset($request->month)){
+            $callback = function ($qu) use ($request ) {
+                $qu->Where('short_name','LIKE', $request->month)->select('name','id');
+            };
+        }
+        
         $years = AcademicYear::select('id')->pluck('id');
         $request->request->add(['years' => $years]);
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
