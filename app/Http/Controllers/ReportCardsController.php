@@ -591,7 +591,7 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'month'   => 'required|in:November,December,October',
+            // 'month'   => 'required|in:November,December,October',
             'course_id' => 'required|exists:courses,id',
         ]);
 
