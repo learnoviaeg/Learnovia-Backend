@@ -613,8 +613,8 @@ class ReportCardsController extends Controller
         if($user->can('report_card/nile-garden/monthly/oct-2022'))
             $allowed_levels=Permission::where('name','report_card/nile-garden/monthly/oct-2022')->pluck('allowed_levels')->first();
 
-        if($user->can('report_card/mfis/mfisg-monthly/'.$request->month))
-            $allowed_levels=Permission::where('name','report_card/mfis/mfisg-monthly/'.$request->month)->pluck('allowed_levels')->first();
+        if($user->can('report_card/monthly/'.$request->month))
+            $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
 
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
