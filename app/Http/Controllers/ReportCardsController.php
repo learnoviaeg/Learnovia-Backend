@@ -591,9 +591,12 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            // 'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:November,December,October',
             'course_id' => 'required|exists:courses,id',
         ]);
+
+        $allowed_levels=null;
+        $check=[];
 
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
@@ -610,12 +613,14 @@ class ReportCardsController extends Controller
         if($user->can('report_card/nile-garden/monthly/oct-2022'))
             $allowed_levels=Permission::where('name','report_card/nile-garden/monthly/oct-2022')->pluck('allowed_levels')->first();
 
-        // if($user->can('report_card/monthly/oct-2022'))
-        //     $allowed_levels=Permission::where('name','report_card/monthly/oct-2022')->pluck('allowed_levels')->first();
+        if($user->can('report_card/monthly/'.$request->month))
+            $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
 
-        $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        $check=(array_intersect($allowed_levels, $student_levels));
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+        }
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
@@ -1111,15 +1116,23 @@ class ReportCardsController extends Controller
 
     public function getGradesCourses(Request $request)
     {
+        //old courses
         $callback = function ($qu) use ($request ) {
             $qu->where('short_name','LIKE', "%Grades%")
                 ->orWhere('short_name','LIKE', "%Final%")
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%")
-                ->orWhere('short_name','LIKE', "%Oct%")
-                ->select('name','id');
+            ->select('name','id');
         };
+
+        //for new that depend on key from frontend
+        if(isset($request->month)){
+            $callback = function ($qu) use ($request ) {
+                $qu->Where('short_name','LIKE', $request->month)->select('name','id');
+            };
+        }
+        
         $years = AcademicYear::select('id')->pluck('id');
         $request->request->add(['years' => $years]);
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
@@ -1127,5 +1140,4 @@ class ReportCardsController extends Controller
         ->with(['courses' => $callback ])->get()->pluck('courses');
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
-
 }
