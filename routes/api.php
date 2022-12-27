@@ -678,8 +678,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::post('fgl-all-prep3', 'ReportCardsController@fglsPrep3ReportAll');
     Route::get('mfis/monthly', 'ReportCardsController@manaraMonthlyReport'); //we must use api oct-2022
     Route::post('manara-monthly-all', 'ReportCardsController@manaraMonthylReportAll'); //we must use oct-2022-all
-    Route::get('oct-2022', 'ReportCardsController@manaraMonthlyReport');
-    Route::post('oct-2022-all', 'ReportCardsController@manaraMonthylReportAll');
+    Route::get('oct-2022', 'ReportCardsController@manaraMonthlyReport');  //we must change name of this route
+    Route::post('oct-2022-all', 'ReportCardsController@manaraMonthylReportAll');  //we must change name of this route
     Route::get('fgl-final-kg', 'ReportCardsController@fglFinalReport');
     Route::post('fgl-final-kg-all', 'ReportCardsController@fglsFinalReportAll');
     Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
