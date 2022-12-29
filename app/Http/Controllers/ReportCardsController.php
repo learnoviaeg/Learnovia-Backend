@@ -991,7 +991,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-
     public function forsanMonthlyReport(Request $request)
     {
         $request->validate([

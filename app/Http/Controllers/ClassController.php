@@ -251,53 +251,6 @@ class ClassController extends Controller
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.delete'));
     }
-    /**
-     * @Description :assigns a class to certain year, type and level.
-     * @param : year, type, level and class.
-     * @return : A string message which indicates if class assigned successfully or not.
-     */
-    public function Assign_class_to(Request $request)
-    {
-        $rules =[
-            'year' => 'array',
-            'year.*' => 'exists:academic_years,id',
-            'type' => 'required|array',
-            'type.*' => 'required|exists:academic_types,id',
-            'level' => 'required|array',
-            'level.*' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id'
-        ];
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails())
-            return ['result' => false, 'value' => $validator->errors()];
-
-        $count=0;
-        if(count($request->type) == count ($request->level))
-        {
-            while(isset($request->type[$count]))
-                {
-                    if (isset($request->year[$count])) {
-                        $year = $request->year[$count];
-                    }
-                    else
-                    {
-                        $year = AcademicYear::Get_current();
-                        if(!isset($year))
-                            return HelperController::api_response_format(201, __('messages.error.no_active_year'));
-                        else
-                            $year=$year->id;
-                    }
-                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
-                    $Year_level=YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
-                    $Class_level=ClassLevel::checkRelation($request->class, $Year_level->id);
-                    $count++;
-                }
-        }
-        else {
-             return HelperController::api_response_format(201, __('messages.error.data_invalid'));
-        }
-        return HelperController::api_response_format(201, 'Class Assigned Successfully');
-    }
 
     public function get_lessons_of_class(Request $request){
         $request->validate([

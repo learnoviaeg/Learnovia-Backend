@@ -853,7 +853,6 @@ class CourseController extends Controller
             'class' => 'required|exists:classes,id',
         ]);
 
-      
         $courses_of_level = Course::where('level_id' , $request->level)->where('segment_id' , $request->segment)->select('id')->pluck('id');
         $admins=User::select('id')->whereHas('roles',function($q){  $q->where('id',1);  })->get();
 
