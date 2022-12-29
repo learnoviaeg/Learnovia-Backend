@@ -34,7 +34,7 @@ class GradesImport implements  ToModel, WithHeadingRow
             $item_id = substr($key,strrpos($key,"_")+1);
             $user = User::select('id')->where('username' , $row['username'])->first();
 
-            if(is_string($item)){
+            if(is_string($item) && !ctype_space($item)){
                 if(GradeCategory::find($item_id)->scale_id == null)
                     dd('Cannot add scale for this item');
 
@@ -54,7 +54,5 @@ class GradesImport implements  ToModel, WithHeadingRow
             ]);
             app('App\Http\Controllers\UserGradeController')->store($request);
         }
-        
-
     }
 }
