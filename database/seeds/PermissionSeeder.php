@@ -304,6 +304,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls', 'title' => 'First term report card', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain', 'title' => 'First term report card (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/monthly/printAll', 'title' => 'Monthly Report printAll(haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain-monthly', 'title' => 'Monthly Report(haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan', 'title' => 'First term report card (Forsan)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisb', 'title' => 'First term report card (mfisb)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg', 'title' => 'First term report card (mfisg)', 'icon' => 'Report-Card','dashboard'=>1]);
