@@ -196,15 +196,30 @@ class AnnouncementsController extends Controller
 
             $users->push($enrolls->whereHas('user')->select('user_id')->distinct()->pluck('user_id'));
 
-            $announcement_chain = AnnouncementsChain::create([
-                'announcement_id' => $announcement->id,
-                'year' => $chain['year'],
-                'type'=> isset($chain['type']) ? $chain['type'] : null,
-                'level' => isset($chain['level']) ? $chain['level'] : null,
-                'class' => isset($chain['class']) ? $chain['class'] : null,
-                'segment' => isset($chain['segment']) ? $chain['segment'] : null,
-                'course' => isset($chain['course']) ? $chain['course'] : null,
-            ]);
+            if(isset($chain['class']) && getType($chain['class']) == 'array')
+            {
+                foreach($chain['class'] as $class)
+                    $announcement_chain = AnnouncementsChain::create([
+                        'announcement_id' => $announcement->id,
+                        'year' => $chain['year'],
+                        'type'=> isset($chain['type']) ? $chain['type'] : null,
+                        'level' => isset($chain['level']) ? $chain['level'] : null,
+                        'class' => $class,
+                        'segment' => isset($chain['segment']) ? $chain['segment'] : null,
+                        'course' => isset($chain['course']) ? $chain['course'] : null,
+                    ]);   
+            }
+
+            else
+                $announcement_chain = AnnouncementsChain::create([
+                    'announcement_id' => $announcement->id,
+                    'year' => $chain['year'],
+                    'type'=> isset($chain['type']) ? $chain['type'] : null,
+                    'level' => isset($chain['level']) ? $chain['level'] : null,
+                    'class' => isset($chain['class']) ? $chain['class'] : null,
+                    'segment' => isset($chain['segment']) ? $chain['segment'] : null,
+                    'course' => isset($chain['course']) ? $chain['course'] : null,
+                ]);
         }
 
         //filter users
