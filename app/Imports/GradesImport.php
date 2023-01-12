@@ -48,11 +48,13 @@ class GradesImport implements  ToModel, WithHeadingRow
             }
 
             $req[0]['item_id'] = $item_id;
-            $req[0]['user_id'] = $user->id;
-            $request = new Request([
-                'user' => $req,
-            ]);
-            app('App\Http\Controllers\UserGradeController')->store($request);
+            if(isset($user)){
+                $req[0]['user_id'] = $user->id;
+                $request = new Request([
+                    'user' => $req,
+                ]);
+                app('App\Http\Controllers\UserGradeController')->store($request);
+            }
         }
     }
 }
