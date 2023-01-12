@@ -90,14 +90,17 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/all', 'language' => 1, 'value' => 'All First term Reports']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/final', 'language' => 1, 'value' => 'Final Report']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain', 'language' => 1, 'value' => 'First term Reports']);
+        Dictionary::firstOrCreate(['key' => 'report_card/haramain/first-2022', 'language' => 1, 'value' => 'First term Report 2022/2023']);
+        Dictionary::firstOrCreate(['key' => 'report_card/haramain/first-printAll-2022', 'language' => 1, 'value' => 'All First term Reports 2022/2023']);
 
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/all-final', 'language' => 2, 'value' => 'جميع شهادات اخر العام']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/all', 'language' => 2, 'value' =>  'جميع الشهادات']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain/final', 'language' => 2, 'value' => 'شهاده اخر العام']);
         Dictionary::firstOrCreate(['key' => 'report_card/haramain', 'language' => 2, 'value' =>'الشهادة']);
+        Dictionary::firstOrCreate(['key' => 'report_card/haramain/first-2022', 'language' => 2, 'value' =>'شهادة الترم الأول 2022/2023']);
+        Dictionary::firstOrCreate(['key' => 'report_card/haramain/first-printAll-2022', 'language' => 2, 'value' =>'حميع شهادات الترم الأول 2022/2023']);
 
-
-        //wated to change
+        //wanted to change
         Dictionary::firstOrCreate(['key' => 'report_card/monthly/oct-2022', 'language' => 1, 'value' => 'October Report 2022']);
         Dictionary::firstOrCreate(['key' => 'report_card/monthly/oct-2022-all', 'language' => 1, 'value' => 'October Report 2022']);
 
