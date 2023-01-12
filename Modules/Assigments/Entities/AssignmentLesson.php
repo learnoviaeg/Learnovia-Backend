@@ -18,7 +18,7 @@ class AssignmentLesson extends Model
 {
     use Auditable, SoftDeletes;
     
-    protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number'];
+    protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number','closing_notification'];
 
     protected $appends = ['started','published','user_seen_number','Status'];
 
