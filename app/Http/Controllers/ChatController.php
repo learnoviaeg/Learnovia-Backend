@@ -126,8 +126,8 @@ class ChatController extends Controller
     public function UploadFiles(Request $request)
     {
         $request->validate([
-            'file' => 'required',
-            'file.*' => 'distinct|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga,mp3,webm',
+            'file' => 'required|array',
+            'file.*' => 'file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga,mp3,webm',
         ]);
 
         $attachment=[];
