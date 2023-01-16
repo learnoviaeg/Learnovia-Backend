@@ -22,8 +22,8 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
-        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly'],   ['only' => ['manaraMonthlyReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-boys/monthly/printAll-final|report_card/nile-garden/monthly/printAll-2022|report_card/green-city/monthly/printAll'],   ['only' => ['manaraMonthylReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly|report_card/nile-garden/first-term'],   ['only' => ['manaraMonthlyReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-boys/monthly/printAll-final|report_card/nile-garden/monthly/printAll-2022|report_card/green-city/monthly/printAll|report_card/nile-garden/first-term-all'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
         $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
@@ -610,6 +610,9 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/monthly/'.$request->month))
             $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/nile-garden/first-term'))
+            $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
 
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
