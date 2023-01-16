@@ -17,9 +17,9 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final'],   ['only' => ['manaraReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
-        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final|report_card/mfisg/first-term-2022'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022'],   ['only' => ['manaraReportAll']]);
+        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final|report_card/haramain/first-printAll-2022'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly|report_card/nile-garden/first-term'],   ['only' => ['manaraMonthlyReport']]);
@@ -142,11 +142,13 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'term'    => 'required|in:first,final',
-            'course_id'=> 'required|exists:courses,id',
+            // 'term'    => 'required|in:first,final',
+            // 'course_id'=> 'required|exists:courses,id',
         ]);
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
+
+        $courses=self::getGradesCourses($request,1);
 
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
@@ -159,8 +161,8 @@ class ReportCardsController extends Controller
             }]); 
         };
 
-        $course_callback = function ($qu) use ($request ) {
-            $qu->where('id', $request->course_id);
+        $course_callback = function ($qu) use ($courses) {
+            $qu->whereIn('id', $courses);
         };
 
         $callback = function ($qu) use ($request , $course_callback ,$grade_category_callback) {
@@ -994,7 +996,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-
     public function forsanMonthlyReport(Request $request)
     {
         $request->validate([
@@ -1112,7 +1113,7 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-    public function getGradesCourses(Request $request)
+    public function getGradesCourses(Request $request,$ids=null)
     {
         //old courses
         $callback = function ($qu) use ($request ) {
@@ -1136,6 +1137,10 @@ class ReportCardsController extends Controller
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
         ->whereHas('courses' , $callback)
         ->with(['courses' => $callback ])->get()->pluck('courses');
+
+        if($ids !=null)
+            return $courses->pluck('id');
+
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
 }
