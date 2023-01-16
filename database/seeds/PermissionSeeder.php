@@ -331,8 +331,10 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/monthly/printAll-2022', 'title' => 'monthly report print all boys 2022','icon' => 'Report-Card','dashboard'=>1]);
 
         // nileGarden
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022', 'title' => 'October report 2022 (single)','icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022-all', 'title' => 'October report 2022 (all)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022', 'title' => 'Monthly report 2022 (nile-garden-single)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/monthly/oct-2022-all', 'title' => 'Monthly report 2022 (nile-garden-all)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/first-term', 'title' => 'First Term 2022/2023(nile Garden)','icon' => 'Report-Card','dashboard'=>1]);        
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/nile-garden/first-term-all', 'title' => 'First Term 2022/2023(nile Garden) all','icon' => 'Report-Card','dashboard'=>1]);
 
         // green-city national w international
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/gci/progress-report', 'title' => 'Progress Report (gci)','icon' => 'Report-Card','dashboard'=>1]);
