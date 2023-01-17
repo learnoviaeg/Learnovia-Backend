@@ -143,7 +143,7 @@ class ReportCardsController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             // 'term'    => 'required|in:first,final',
-            // 'course_id'=> 'required|exists:courses,id',
+            'course_id'=> 'exists:courses,id',
         ]);
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
@@ -164,6 +164,13 @@ class ReportCardsController extends Controller
         $course_callback = function ($qu) use ($courses) {
             $qu->whereIn('id', $courses);
         };
+
+        if(isset($request->course_id))
+        {
+            $course_callback = function ($qu) use ($request) {
+                $qu->whereIn('id', $request->course_id);
+            };
+        }
 
         $callback = function ($qu) use ($request , $course_callback ,$grade_category_callback) {
             $qu->where('role_id', 3);
