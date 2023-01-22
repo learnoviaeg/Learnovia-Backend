@@ -19,7 +19,7 @@ class ReportCardsController extends Controller
         $this->middleware('auth');
         $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final|report_card/mfisg/first-term-2022-g|report_card/mfisb/first-term-2022-b'],   ['only' => ['manaraReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022-g|report_card/mfisb/first-printAll-2022-b'],   ['only' => ['manaraReportAll']]);
-        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
+        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final|report_card/haramain/first-printAll-2022'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly|report_card/nile-garden/first-term'],   ['only' => ['manaraMonthlyReport']]);
@@ -45,6 +45,16 @@ class ReportCardsController extends Controller
                         ->orWhere('name','LIKE' , "%ترم الاول%");
                 });     
             };
+            if(!isset($allowed_levels))
+            {
+                $allowed_levels=Permission::where('name','report_card/haramain/first-2022')->pluck('allowed_levels')->first();
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%First term%")
+                            ->orWhere('name','LIKE' , "%ترم الاول%");
+                    });     
+                };
+            }
         }
 
         if($request->term == 'final'){

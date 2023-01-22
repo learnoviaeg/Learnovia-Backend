@@ -35,9 +35,7 @@ class EnrollStaff implements ToModel, WithHeadingRow
         $optional='course';
         $count=1;
         while(isset($row[$optional.$count])){
-            $coursess=Course::where('short_name',$row[$optional.$count])->first();
-            if($coursess->segment_id != $row['segment_id'])
-                return HelperController::api_response_format(400, [], __('messages.enroll.error'));
+            $coursess=Course::where('segment_id',$row['segment_id'])->where('short_name',$row[$optional.$count])->first();
 
             $course_id=$coursess->id;
             if(!isset($course_id))
