@@ -118,8 +118,8 @@ class TranslationSeeder extends Seeder
 
         Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report-all', 'language' => 2, 'value' => 'تقرير الدرجات الشهري للجميع']);
-        Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly','language'=> 1, 'value' => 'تقرير الدرجات الشهري']);
-        Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly/printAll','language'=> 1, 'value' => 'تقرير الدرجات الشهري للجميع']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly','language'=> 2, 'value' => 'تقرير الدرجات الشهري']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly/printAll','language'=> 2, 'value' => 'تقرير الدرجات الشهري للجميع']);
 
         // nile-garden
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022','language'=> 1, 'value' => 'nile garden Report (Monthly)']);
@@ -129,8 +129,8 @@ class TranslationSeeder extends Seeder
 
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022', 'language' => 2, 'value' => 'تقرير الدرجات الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022-all', 'language' => 2, 'value' => 'تقرير الدرجات الشهري للجميع']);
-        Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/first-term','language'=> 1, 'value' => 'تقرير الدرجات الترم الاول 2022-2023']);
-        Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/first-term-all','language'=> 1, 'value' => 'تقرير الدرجات للجميع']);
+        Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/first-term','language'=> 2, 'value' => 'تقرير الدرجات الترم الاول 2022-2023']);
+        Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/first-term-all','language'=> 2, 'value' => 'تقرير الدرجات للجميع']);
 
 
         Dictionary::firstOrCreate(['key' => 'quiz_grade', 'language' => 2, 'value' => 'درجة الاختبار']);
