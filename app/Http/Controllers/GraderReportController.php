@@ -157,7 +157,7 @@ class GraderReportController extends Controller
         if(Auth::user()->can('site/course/student'))
             $request->request->add(['user_id' => Auth::id()]);
 
-        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->select('user_id')->distinct('user_id')->whereHas('user')
                     ->with(array('user' => function($query) {
                         $query->addSelect(array('id', 'firstname', 'lastname'));
                     }))->get();

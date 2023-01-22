@@ -684,7 +684,7 @@ class EnrollUserToCourseController extends Controller
         // if(isset($courses))
         //     $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
         // if(isset($course_segments))
-            $enrolls = Enroll::where('role_id',4)->with(['user','classes','courses'])->get();
+            $enrolls = Enroll::where('role_id',4)->whereHas('user')->with(['user','classes','courses'])->get();
 
             // return $enrolls;
         $filename = uniqid();

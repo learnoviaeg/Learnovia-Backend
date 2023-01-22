@@ -10,7 +10,7 @@ class teacherwithcourse implements FromCollection,WithHeadings
 {
 
     use Exportable;
-    protected $fields = ['teacher','classname','coursename'];
+    protected $fields = ['teacher','classId','coursename'];
 
     function __construct($enrolls) {
         $this->enroll = $enrolls;
@@ -25,7 +25,7 @@ class teacherwithcourse implements FromCollection,WithHeadings
             // dd($en['class']['name']);
             $enrolls->push([
                 'teacher' => $en['user'] ? $en['user']['username'] : '-',
-                'classname' => $en['classes']? $en['classes']['name'] : '-',
+                'classname' => $en['classes']? $en['classes']['id'] : '-',
                 'coursename' => $en['courses'] ? $en['courses']['short_name'] : '-',
             ]);
         }
