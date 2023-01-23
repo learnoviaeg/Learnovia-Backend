@@ -38,15 +38,16 @@ class ReportCardsController extends Controller
         ]);
 
         if($request->term == 'first'){
-            $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%First term%")
-                        ->orWhere('name','LIKE' , "%ترم الاول%");
-                });     
-            };
-            if(!isset($allowed_levels))
-            {
+            if($request->user()->can('report_card/haramain')){
+                $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%First term%")
+                            ->orWhere('name','LIKE' , "%ترم الاول%");
+                    });     
+                };
+            }
+            if($request->user()->can('report_card/haramain/first-2022')){
                 $allowed_levels=Permission::where('name','report_card/haramain/first-2022')->pluck('allowed_levels')->first();
                 $course_callback = function ($qu) use ($request ) {
                     $qu->Where(function ($query) {
