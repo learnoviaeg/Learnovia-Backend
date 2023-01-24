@@ -227,6 +227,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Fees');
     }
 
+    public function cardComment()
+    {
+        return $this->hasMany('App\CardComment', 'user_id', 'id');
+    }
+
     // start function get name and value f attribute
     public static function get_year_name($old, $new)
     {
