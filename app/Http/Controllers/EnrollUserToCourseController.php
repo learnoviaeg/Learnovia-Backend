@@ -236,100 +236,6 @@ class EnrollUserToCourseController extends Controller
     }
 
     /**
-     * Enroll bulk of users from excel sheet
-     *
-     * @param  [excel] all data of user
-     * @return [string] done depended on Import files {enroll/users/courses}
-     */
-    public function EnrollExistUsersFromExcel(Request $request)
-    {
-        $ExcelCntrlVar = new ExcelController();
-        $ExcelCntrlVar->import($request);
-    }
-
-    public function AddAndEnrollBulkOfNewUsers(Request $request)
-    {
-        $ExcelCntrlVar = new ExcelController();
-        $ExcelCntrlVar->import($request);
-    }
-
-    /**
-     * Get Enrolled student in this course
-     *
-     * @param  [int] course .. id
-     * @param  [int] class .. id
-     * @return if given class [string] filtered just students in this class
-     * @return if these users enrolled before [string] those users already enrolled
-     * @return [string] students
-     */
-    public function GetEnrolledStudents(Request $request)
-    {
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'search' => 'nullable'
-        ]);
-        LastAction::lastActionInCourse($request->course_id);
-        if ($request->class_id == null) {
-            $course_seg_id = CourseSegment::getidfromcourse($request->course_id);
-
-            $users_id = Enroll::whereIn('course_segment', $course_seg_id)->where('role_id', 3)->pluck('user_id');
-
-            if ($request->filled('search')) {
-
-                $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
-                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
-                    ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
-                    ->orWhere('username', 'LIKE', "%$request->search%");
-                })->get();
-
-                return HelperController::api_response_format(200, $users);
-            }
-
-            $users = User::whereIn('id', $users_id)->get();
-
-            //return all users that enrolled in this course
-            return HelperController::api_response_format(200, $users, __('messages.users.students_list'));
-        }
-        //if was send class_id and course_id
-        else {
-            $request->validate([
-                'class_id' => 'required|exists:classes,id'
-            ]);
-
-            $course_seg = CourseSegment::GetWithClassAndCourse($request->class_id, $request->course_id);
-
-            //$usersByClass --> all users in this class
-            $usersByClass = User::GetUsersByClass_id($request->class_id);
-            //$usersByClass --> all users in this course
-            $users_id = Enroll::GetUsers_id($course_seg->id);
-
-            $result = array_intersect($usersByClass->toArray(), $users_id->toArray());
-
-            if ($request->filled('search')) {
-
-                $users = User::whereIn('id', $users_id)->where(function ($query) use ($request) {
-                    $query->WhereRaw("concat(firstname, ' ', lastname) like '%$request->search%' ")
-                    ->orWhere('arabicname', 'LIKE' ,"%$request->search%" )
-                    ->orWhere('username', 'LIKE', "%$request->search%");
-                })->get();
-
-                return HelperController::api_response_format(200, $users);
-            }
-
-            if ($usersByClass->isEmpty())
-                return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
-
-            foreach ($result as $users)
-                $Usersenrolled[] = User::findOrFail($users);
-
-            if (!isset($Usersenrolled))
-                return HelperController::api_response_format(200, null, __('messages.error.no_available_data'));
-
-            return HelperController::api_response_format(200, $Usersenrolled, __('messages.users.students_list'));
-        }
-    }
-
-    /**
      * Get UnEnroll uses/s in these course/s
      *
      * @param  [array] users .. id
@@ -684,7 +590,7 @@ class EnrollUserToCourseController extends Controller
         // if(isset($courses))
         //     $course_segments = CourseSegment::whereIn('course_id',$courses)->pluck('id');
         // if(isset($course_segments))
-            $enrolls = Enroll::where('role_id',4)->with(['user','classes','courses'])->get();
+            $enrolls = Enroll::where('role_id',4)->whereHas('user')->with(['user','classes','courses'])->get();
 
             // return $enrolls;
         $filename = uniqid();

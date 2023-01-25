@@ -17,14 +17,13 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final'],   ['only' => ['manaraReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll'],   ['only' => ['manaraReportAll']]);
-        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final'],   ['only' => ['haramaninReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final|report_card/mfisg/first-term-2022-g|report_card/mfisb/first-term-2022-b'],   ['only' => ['manaraReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022-g|report_card/mfisb/first-printAll-2022-b'],   ['only' => ['manaraReportAll']]);
+        $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final|report_card/haramain/first-printAll-2022'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
-        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisb-monthly'],   ['only' => ['manaraMonthlyReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll|
-                            report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-girls/monthly/printAll-final'],   ['only' => ['manaraMonthylReportAll']]);
+        $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly|report_card/nile-garden/first-term'],   ['only' => ['manaraMonthlyReport']]);
+        $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-boys/monthly/printAll-final|report_card/nile-garden/monthly/printAll-2022|report_card/green-city/monthly/printAll|report_card/nile-garden/first-term-all'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
         $this->middleware(['permission:report_card/fgls/all-final'],   ['only' => ['fglsFinalReportAll']]);       
         $this->middleware(['permission:report_card/forsan/monthly'],   ['only' => ['forsanMonthlyReport']]);
@@ -39,13 +38,24 @@ class ReportCardsController extends Controller
         ]);
 
         if($request->term == 'first'){
-            $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
-            $course_callback = function ($qu) use ($request ) {
-                $qu->Where(function ($query) {
-                    $query->where('name', 'LIKE' , "%First term%")
-                        ->orWhere('name','LIKE' , "%ترم الاول%");
-                });     
-            };
+            if($request->user()->can('report_card/haramain')){
+                $allowed_levels=Permission::where('name','report_card/haramain')->pluck('allowed_levels')->first();
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%First term%")
+                            ->orWhere('name','LIKE' , "%ترم الاول%");
+                    });     
+                };
+            }
+            if($request->user()->can('report_card/haramain/first-2022')){
+                $allowed_levels=Permission::where('name','report_card/haramain/first-2022')->pluck('allowed_levels')->first();
+                $course_callback = function ($qu) use ($request ) {
+                    $qu->Where(function ($query) {
+                        $query->where('name', 'LIKE' , "%First term%")
+                            ->orWhere('name','LIKE' , "%ترم الاول%");
+                    });     
+                };
+            }
         }
 
         if($request->term == 'final'){
@@ -143,48 +153,13 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'term'    => 'required|in:first,final',
-            'course_id'=> 'required|exists:courses,id',
+            // 'term'    => 'required|in:first,final',
+            'course_id'=> 'exists:courses,id',
         ]);
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
-        // if($request->term == 'first'){
-        //     if($user->can('report_card/mfis/mfisg'))
-        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisg')->pluck('allowed_levels')->first();
-    
-        //     if($user->can('report_card/mfis/mfisb'))
-        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
-
-            // $course_callback = function ($qu) use ($request ) {
-            //     $qu->Where(function ($query) {
-            //         $query->where('name', 'LIKE' , "%Grades%");
-            //     });     
-            // };
-        // }
-            
-        // if($request->term == 'final'){
-        //     if($user->can('report_card/mfis/mfisg-final'))
-        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisg-final')->pluck('allowed_levels')->first();
-
-        //     if($user->can('report_card/mfis/mfisb-final'))
-        //         $allowed_levels=Permission::where('name','report_card/mfis/mfisb-final')->pluck('allowed_levels')->first();
-
-        //     $course_callback = function ($qu) use ($request ) {
-        //         $qu->Where(function ($query) {
-        //             $query->where('name', 'LIKE' , "%inal-%");
-        //         });     
-        //     };
-        // }
-           
-        // $allowed_levels=json_decode($allowed_levels);
-        // $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        // $check=(array_intersect($allowed_levels, $student_levels));
-
-        // if(count($check) == 0)
-        //     return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
-
-  
+        $courses=self::getGradesCourses($request,1);
 
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
@@ -197,18 +172,19 @@ class ReportCardsController extends Controller
             }]); 
         };
 
-        $course_callback = function ($qu) use ($request ) {
-            // $qu->Where(function ($query) {
-            //     $qu->where('name', 'LIKE' , "%Grades%")
-            //           ->orWhere('name','LIKE' , "%درجات%"); 
-            // });    
-            $qu->where('id', $request->course_id);
- 
+        $course_callback = function ($qu) use ($courses) {
+            $qu->where('id', $courses);
         };
+
+        if(isset($request->course_id))
+        {
+            $course_callback = function ($qu) use ($request) {
+                $qu->whereIn('id', $request->course_id);
+            };
+        }
 
         $callback = function ($qu) use ($request , $course_callback ,$grade_category_callback) {
             $qu->where('role_id', 3);
-            // $qu->where('course', $request->course_id);
             $qu->whereHas('courses' , $course_callback)
                 ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
@@ -254,19 +230,9 @@ class ReportCardsController extends Controller
                 }]); 
             };
 
-            // if($request->term == 'first')
-            // $course_callback = function ($qu) use ($request ) {
-            //     $qu->Where(function ($query) {
-            //         $query->where('name', 'LIKE' , "%Grades%");
-            //     });     
-            // };
-
-            // if($request->term == 'final')
-                $course_callback = function ($qu) use ($request ) {
-                    // $qu->Where(function ($query) {
-                        $qu->where('id',$request->courses);
-                    // });     
-                };
+            $course_callback = function ($qu) use ($request ) {
+                    $qu->where('id',$request->courses);
+            };
 
             $callback = function ($qu) use ($request  ,$course_callback, $grade_category_callback) {
                 $qu->where('role_id', 3);
@@ -640,9 +606,12 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            // 'month'   => 'required|in:Feb,March,April',
+            // 'month'   => 'required|in:November,December,October',
             'course_id' => 'required|exists:courses,id',
         ]);
+
+        $allowed_levels=null;
+        $check=[];
 
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
@@ -650,12 +619,32 @@ class ReportCardsController extends Controller
         if($user->can('report_card/mfis/mfisg-monthly'))
             $allowed_levels=Permission::where('name','report_card/mfis/mfisg-monthly')->pluck('allowed_levels')->first();
         
-        // if($user->can('report_card/mfis/mfisb'))
-        //     $allowed_levels=Permission::where('name','report_card/mfis/mfisb')->pluck('allowed_levels')->first();
+        if($user->can('report_card/mfis/mfisg-monthly-2022'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisg-monthly-2022')->pluck('allowed_levels')->first();
 
-        $allowed_levels=json_decode($allowed_levels);
+        if($user->can('report_card/mfis/mfisb-monthly-2022'))
+            $allowed_levels=Permission::where('name','report_card/mfis/mfisb-monthly-2022')->pluck('allowed_levels')->first();
+        
+        if($user->can('report_card/nile-garden/monthly/oct-2022'))
+            $allowed_levels=Permission::where('name','report_card/nile-garden/monthly/oct-2022')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/monthly/'.$request->month))
+            $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/nile-garden/first-term'))
+            $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/mfisb/first-term-2022-b'))
+            $allowed_levels=Permission::where('name','report_card/mfisb/first-term-2022-b')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/mfisg/first-term-2022-g'))
+            $allowed_levels=Permission::where('name','report_card/mfisg/first-term-2022-g')->pluck('allowed_levels')->first();
+
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        $check=(array_intersect($allowed_levels, $student_levels));
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+        }
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
@@ -746,8 +735,6 @@ class ReportCardsController extends Controller
         }
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
-
-
 
     public function fglFinalReport(Request $request)
     {
@@ -1033,7 +1020,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-
     public function forsanMonthlyReport(Request $request)
     {
         $request->validate([
@@ -1053,7 +1039,6 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/forsan/monthly'))
             $allowed_levels=Permission::where('name','report_card/forsan/monthly')->pluck('allowed_levels')->first();
-        
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
@@ -1152,22 +1137,34 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result_collection ], 200);
     }
 
-    public function getGradesCourses(Request $request)
+    public function getGradesCourses(Request $request,$ids=null)
     {
+        //old courses
         $callback = function ($qu) use ($request ) {
             $qu->where('short_name','LIKE', "%Grades%")
                 ->orWhere('short_name','LIKE', "%Final%")
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
                 ->orWhere('short_name','LIKE', "%April%")
-                ->select('name','id');
+            ->select('name','id');
         };
+
+        //for new that depend on key from frontend
+        if(isset($request->month)){
+            $callback = function ($qu) use ($request ) {
+                $qu->Where('short_name','LIKE', "%$request->month%")->select('name','id');
+            };
+        }
+        
         $years = AcademicYear::select('id')->pluck('id');
         $request->request->add(['years' => $years]);
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
         ->whereHas('courses' , $callback)
         ->with(['courses' => $callback ])->get()->pluck('courses');
+
+        if($ids !=null)
+            return $courses->pluck('id');
+
         return response()->json(['message' => null, 'body' => $courses ], 200);
     }
-
 }

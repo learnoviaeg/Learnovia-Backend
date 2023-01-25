@@ -233,7 +233,7 @@ class BigbluebuttonController extends Controller
                                     'course_name' => Course::find($bigbb->course_id)->name
                                 ];
             
-                                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
+                                $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('group_id',$class)->where('course_id',$bigbb->course_id)->pluck('user_id');
                                 // dd($users);
                                 $this->notification->sendNotify($users->toArray(),$reqNot);
                             }

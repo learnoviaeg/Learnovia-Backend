@@ -2,34 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Course;
-use App\Segment;
-use App\GradeCategory;
-use Modules\QuestionBank\Entities\QuizLesson;
-use Modules\Assigments\Entities\AssignmentLesson;
-use Modules\QuestionBank\Entities\Quiz;
-use App\Events\UpdatedAttemptEvent;
-use App\LetterDetails;
-use Modules\QuestionBank\Entities\QuestionsCategory;
-use Modules\QuestionBank\Entities\userQuiz;
-use App\GradeItems;
 use Auth;
-use App\Jobs\migrateChainAmdEnrollment;
-use Carbon\Carbon;
-use App\UserGrader;
-use App\Enroll;
-use App\SecondaryChain;
-use App\lesson;
-use App\Events\GradeItemEvent;
-use Modules\QuestionBank\Entities\quiz_questions;
-use Modules\QuestionBank\Entities\Questions;
-use App\Repositories\ChainRepositoryInterface;
-use App\Level;
 use Redis;
+use App\Level;
+use App\Course;
+use App\Enroll;
+use App\lesson;
+use App\Segment;
+use Carbon\Carbon;
+use App\GradeItems;
+use App\UserGrader;
+use App\GradeCategory;
+use App\LetterDetails;
+use App\SecondaryChain;
+use Illuminate\Http\Request;
 use App\Exports\LessonEcport;
+use App\Events\GradeItemEvent;
+use App\Events\UpdatedAttemptEvent;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Jobs\migrateChainAmdEnrollment;
 use Illuminate\Support\Facades\Storage;
+use Modules\QuestionBank\Entities\Quiz;
+use Modules\QuestionBank\Entities\userQuiz;
+use Modules\QuestionBank\Entities\Questions;
+use Modules\QuestionBank\Entities\QuizLesson;
+use App\Repositories\ChainRepositoryInterface;
+use Modules\Assigments\Entities\AssignmentLesson;
+use Modules\QuestionBank\Entities\quiz_questions;
+use Modules\QuestionBank\Entities\QuestionsCategory;
 
 class ScriptsController extends Controller
 {
@@ -522,34 +522,37 @@ class ScriptsController extends Controller
 
     public function enrollLessons()
     {
-        $courses= Enroll::where('created_at','>=','2022-08-01 16:04:16')->pluck('course');
-        foreach([1] as $course){
+        // $courses= Course::where('created_at','>=','2022-08-01 16:04:16')->pluck('id');
+        $courses= Course::whereId($request->course_id)->pluck('id');
+        $result=[];
+        foreach($courses as $key => $course){
             $lessons=Lesson::where('course_id',$course)->get();
-            foreach($lessons as $lesson)
-            {
-                $enrollsOfCourse=Enroll::where('course',$course);//->get();
-                if(($lesson->shared_classes)!= null)
-                // dd($event->lesson->shared_classes->pluck('id'));
-                    $enrollsOfCourse->whereIn('group',$lesson->shared_classes->pluck('id'));
-                foreach($enrollsOfCourse->cursor() as $enroll)
-                {
-                    // dd($enroll->group);
-                    if(!in_array($enroll->group ,$lesson->shared_classes->pluck('id')->toArray()))
-                        continue;
+            foreach($lessons as $lesson){
+                foreach($lesson->shared_classes->pluck('id') as $class){
+                    $enroll=Enroll::where('role_id',3)->where('course',$course)->where('group',$class)->select('id','user_id')->get();
+                    foreach($enroll as $enrolaya)
+                    {
+                        $check=SecondaryChain::where('user_id',$enrolaya->user_id)->where('group_id',$class)->where('course_id',$course)
+                            ->where('lesson_id',$lesson->id)->first();
 
-                    SecondaryChain::firstOrCreate([
-                        'user_id' => $enroll->user_id,
-                        'role_id' => $enroll->role_id,
-                        'group_id' => $enroll->group,
-                        'course_id' => $enroll->course,
-                        'lesson_id' => $lesson->id,
-                        'enroll_id' => $enroll->id
-                    ]);
+                        if($check == null)
+                        {
+                            $result['class'][$key]=$class;
+                            $result['lesson'][$key]=$lesson->id;
+                            SecondaryChain::firstOrCreate([
+                                'user_id' => $enrolaya->user_id,
+                                'role_id' => 3,
+                                'group_id' => $class,
+                                'course_id' => $course,
+                                'lesson_id' => $lesson->id,
+                                'enroll_id' => $enrolaya->id
+                            ]);
+                        }
+                    }
                 }
             }
-
-
         }
+        return $result;
     }
 
     public function lessons_without_decription_having_materials(Request $request){

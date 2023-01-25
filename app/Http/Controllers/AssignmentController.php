@@ -32,6 +32,7 @@ use App\UserCourseItem;
 use App\Repositories\SettingsReposiotryInterface;
 use App\Events\GraderSetupEvent;
 use Illuminate\Database\Eloquent\Builder;
+use App\Events\AssignmentEndReminderEvent;
 
 class AssignmentController extends Controller
 {
@@ -172,9 +173,11 @@ class AssignmentController extends Controller
 
             $secondary_chains = SecondaryChain::where('lesson_id',$lesson_obj->id)->get()->keyBy('group_id');
             foreach($secondary_chains as $secondary_chain){
-                $segment = Segment::find($secondary_chain->Enroll->segment);
-                if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
-                    return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+                if(isset($secondary_chain->Enroll)){
+                    $segment = Segment::find($secondary_chain->Enroll->segment);
+                    if( $request->filled('closing_date') && $segment->end_date < Carbon::parse($request->closing_date))
+                        return HelperController::api_response_format(400, null ,  __('messages.date.end_before').$segment->end_date);
+                }
             }
 
             $assignment = Assignment::firstOrCreate([
@@ -227,8 +230,10 @@ class AssignmentController extends Controller
 
             LastAction::lastActionInCourse($assignment_lesson->lesson->course_id);
 
+            if($assignment_lesson->visible)
+                event(new AssignmentEndReminderEvent($assignment_lesson));
             //sending notifications
-            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$lesson)->pluck('user_id');
             if(!isset($request->users_ids) && $assignment_lesson->visible)
             {
                 $reqNot=[
@@ -390,7 +395,7 @@ class AssignmentController extends Controller
                 $assignment->update([
                     'content' => isset($request->content) ? $request->content : $assignment->content,
                     'name' => isset($request->name) ? $request->name : $assignment->name,
-                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : null,
+                    'attachment_id' => $request->hasFile('file') ? attachment::upload_attachment($request->file, 'assignment', $description)->id : $assignment->attachment_id,
                 ]);
                 $assigmentLesson->update([
                     'mark' => isset($request->mark) ? $request->mark : $assigmentLesson->mark,
@@ -401,8 +406,8 @@ class AssignmentController extends Controller
                 ]);
             }
     
-            // if($request->file == 'No_file')
-            //     $assignment->attachment_id=null;
+            if($request->file == 'No_file')
+                $assignment->attachment_id=null;
     
             $assignment->save();
     
@@ -424,7 +429,7 @@ class AssignmentController extends Controller
             //     }
             // }
 
-            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $courseItem = CourseItem::where('item_id', $assignment->id)->where('type', 'assignment')->first();
             if(isset($courseItem))
                 $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
@@ -441,6 +446,7 @@ class AssignmentController extends Controller
                     'course_name' => $assigmentLesson->lesson->course->name
                 ];
                 $this->notification->sendNotify($users->toArray(),$reqNot);
+                event(new AssignmentEndReminderEvent($assigmentLesson));
             }
         }
 

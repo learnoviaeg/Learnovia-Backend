@@ -118,7 +118,7 @@ class H5PLessonController extends Controller
                         'lesson_id' => $lesson_id,
                         'course_name' => Course::find($lesson->course_id)->name
                     ];
-                    $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
+                    $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$lesson_id)->pluck('user_id');
                     $this->notification->sendNotify($users,$reqNot);
                 }
             }
@@ -158,6 +158,7 @@ class H5PLessonController extends Controller
 
         $this->validate($request, $rules, $customMessages);
 
+        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         if($request->filled('content_id') && $request->filled('lesson_id')){
             $h5p_lesson =  h5pLesson::where('lesson_id',$request->lesson_id)->where('content_id',$request->content_id)->first();
             if(!isset($h5p_lesson))
@@ -176,10 +177,10 @@ class H5PLessonController extends Controller
                     return HelperController::api_response_format(301,null, __('messages.interactive.hidden'));
             }
 
+            $h5p_lesson->link =  $url.'/api/interactive/'.$request->content_id;
             return HelperController::api_response_format(200, $h5p_lesson, __('messages.interactive.list'));
         }
 
-        $url= substr($request->url(), 0, strpos($request->url(), "/api"));
         $h5p_lesson =  h5pLesson::get();
         $h5p_content= collect();
         foreach($h5p_lesson as $h5p){
@@ -256,7 +257,7 @@ class H5PLessonController extends Controller
                 'lesson_id' => $request->lesson_id,
                 'course_name' => Course::find($lesson->course_id)->name
             ];
-            $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
+            $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
             $this->notification->sendNotify($users,$reqNot); 
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
