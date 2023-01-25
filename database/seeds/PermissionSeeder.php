@@ -354,6 +354,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/all-final', 'title' => 'Fgls Final Report (print all)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgl/all', 'title' => 'print all fgl','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls', 'title' => 'First term report card', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/first-term-2022', 'title' => 'First term report card(fgl) 2022/2023', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/first-term-2022-all', 'title' => 'First term report card All(fgl) 2022/2023', 'icon' => 'Report-Card','dashboard'=>1]);
 
         // forsan
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/monthly', 'title' => 'Forsan monthly report','icon' => 'Report-Card','dashboard'=>1]);

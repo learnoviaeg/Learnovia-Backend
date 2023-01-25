@@ -21,7 +21,7 @@ class ReportCardsController extends Controller
         $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022-g|report_card/mfisb/first-printAll-2022-b'],   ['only' => ['manaraReportAll']]);
         $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final|report_card/haramain/first-printAll-2022'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
-        $this->middleware(['permission:report_card/fgls/all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
+        $this->middleware(['permission:report_card/fgls/all|report_card/fgls/first-term-2022-all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
         $this->middleware(['permission:report_card/mfis/mfisg-monthly|report_card/mfis/mfisg-monthly-2022|report_card/mfis/mfisb-monthly|report_card/mfis/mfisb-monthly-2022|report_card/mfis/mfisb-monthly|report_card/nile-garden/monthly-2022|report_card/green-city/monthly|report_card/nile-garden/first-term'],   ['only' => ['manaraMonthlyReport']]);
         $this->middleware(['permission:report_card/mfis/manara-boys/monthly/printAll|report_card/mfis/manara-boys/monthly/printAll-2022|report_card/mfis/manara-girls/monthly/printAll|report_card/mfis/manara-girls/monthly/printAll-2022|report_card/mfis/manara-boys/monthly/printAll-final|report_card/mfis/manara-boys/monthly/printAll-final|report_card/nile-garden/monthly/printAll-2022|report_card/green-city/monthly/printAll|report_card/nile-garden/first-term-all'],   ['only' => ['manaraMonthylReportAll']]);
         $this->middleware(['permission:report_card/fgls/final'],   ['only' => ['fglFinalReport']]);
@@ -395,7 +395,7 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
+        // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
             
@@ -403,7 +403,7 @@ class ReportCardsController extends Controller
             $total = 0;
             $student_mark = 0;
             $grade_category_callback = function ($qu) use ($request, $user_id ) {
-                $qu->where('name', 'First Term');
+                $qu->where('name','LIKE', "%First Term%");
                 $qu->with(['userGrades' => function($query) use ($request , $user_id){
                     $query->where("user_id", $user_id);
                 }]);     
@@ -416,8 +416,9 @@ class ReportCardsController extends Controller
     
             };
     
-            $result = User::whereId($user_id)->whereHas('enroll' , $callback)
-                            ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
+            $result = User::whereId($user_id)->whereHas('enroll')
+                            ->with(['enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
+                            // dd($result);
             $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
     
             foreach($result->enrolls as $enroll){ 
@@ -448,8 +449,8 @@ class ReportCardsController extends Controller
             $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
-            if(count($total_check) == 0)
-                $result->add_total = false;
+            // if(count($total_check) == 0)
+            //     $result->add_total = false;
             ///////////////////////////////////////////////////
             if($result != null)
                 $result_collection->push($result);
