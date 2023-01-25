@@ -21,6 +21,7 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use App\Events\QuizEndReminderEvent;
 
 class QuestionsController extends Controller
 {
@@ -57,7 +58,7 @@ class QuestionsController extends Controller
         //to get all questions in quiz id //quizzes/{quiz_id}/{questions}'
         if($question=='questions'){
             $quset=array();
-            $quiz = Quiz::where('id',$quiz_id)->with('Question.children')->first();
+            $quiz = Quiz::where('id',$quiz_id)->with('Question.children.Parent')->first();
             $questions = $quiz->Question;
             if($quiz->shuffle == 'Questions'|| $quiz->shuffle == 'Questions and Answers')
                 $questions =$questions->shuffle();
@@ -226,6 +227,8 @@ class QuestionsController extends Controller
 
             foreach($quiz->quizLesson as $newQuizLesson){
                 //sending notifications
+                event(new QuizEndReminderEvent($newQuizLesson));
+
                 if(!$quiz->restricted && $newQuizLesson->visible)
                 {
                     $reqNot=[

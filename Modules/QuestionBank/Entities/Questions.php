@@ -18,6 +18,10 @@ class Questions extends Model
     //count of all quizzes
     protected $appends = ['count_quizzes'];
 
+    protected $casts = [
+        'question_type_id'  => 'integer',
+    ];
+
     public function getCountQuizzesAttribute()
     {
         $count_quest = 0;
@@ -69,6 +73,11 @@ class Questions extends Model
     {
         return $this->hasOne('Modules\QuestionBank\Entities\userQuizAnswer', 'question_id', 'id')
             ->where('user_quiz_id',$id)->first();
+    }
+
+    public function Parent()
+    {
+        return $this->hasOne('Modules\QuestionBank\Entities\Questions','id', 'parent');
     }
 
     public function getContentAttribute()

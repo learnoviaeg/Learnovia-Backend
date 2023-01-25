@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 // use Illuminate\Routing\Controller;
 use App\Http\Controllers\Controller;
+use App\Helpers\UploadHelper;
 use Modules\UploadFiles\Entities\file;
 use Modules\UploadFiles\Entities\media;
 use Modules\UploadFiles\Entities\FileLesson;
@@ -52,31 +53,6 @@ class FilesController extends Controller
 
     public function install_file()
     {
-        // if (\Spatie\Permission\Models\Permission::whereName('file/add')->first() != null) {
-        //     return \App\Http\Controllers\HelperController::api_response_format(400, null, 'This Component is installed before');
-        // }
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/add', 'title' => 'add file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/assign', 'title' => 'assign file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/update', 'title' => 'update file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/delete', 'title' => 'delete file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/toggle', 'title' => 'toggle file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/add', 'title' => 'add media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/update', 'title' => 'update media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/delete', 'title' => 'delete media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/toggle', 'title' => 'toggle media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/media/get', 'title' => 'get file and media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/add', 'title' => 'add link']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'link/update', 'title' => 'update link']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/sort', 'title' => 'sort file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/sort', 'title' => 'sort media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get-all', 'title' => 'get all files']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get-all', 'title' => 'get all media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/get', 'title' => 'get media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'file/get', 'title' => 'get file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/file/edit', 'title' => 'update file']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'site/media/edit', 'title' => 'update media']);
-        // \Spatie\Permission\Models\Permission::create(['guard_name' => 'api', 'name' => 'media/assign', 'title' => 'assign media']);
-
         $teacher_permissions=['file/add','file/assign','file/update','file/delete','file/toggle','media/add','media/update','media/delete',
         'media/toggle','file/media/get','link/add','link/update','file/sort','media/sort','media/get','file/get','site/file/edit','site/media/edit',
         'media/assign'];
@@ -262,14 +238,17 @@ class FilesController extends Controller
             $file->size = $size;
             $file->attachment_name = $fileName;
             $file->user_id = Auth::user()->id;
-            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
             $file->url2 = 'files/' . $name;
+            if(env('UPLOAD_TYPE') == 'AZURE'){
+                $url=UploadHelper::upload($singlefile,'files',$fileName);
+                $file->url=$url;
+            }
+            else{
+                Storage::disk('public')->putFileAs('files/', $singlefile, $name);
+                $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+            }
             $check = $file->save();
-
             if ($check) {
-                // if(isset($request->users_ids))
-                //     CoursesHelper::giveUsersAccessToViewCourseItem($file->id, 'file', $request->users_ids);
-
                 foreach ($request->lesson_id as $lesson) {
                     $tempLesson = Lesson::find($lesson);
 
@@ -278,14 +257,8 @@ class FilesController extends Controller
                     $fileLesson->file_id = $file->id;
                     $fileLesson->index = FileLesson::getNextIndex($lesson);
                     $fileLesson->publish_date = $publishdate;
-                    $fileLesson->visible = isset($request->visible)?$request->visible:1;
-
+                    $fileLesson->visible = isset($request->visible) ? $request->visible : 1;
                     $fileLesson->save();
-                    Storage::disk('public')->putFileAs(
-                        'files/' . $request->$lesson,
-                        $singlefile,
-                        $name
-                    );
 
                     $material=Material::where('item_id' ,$fileLesson->file_id)->where('lesson_id' ,$fileLesson->lesson_id)->where('type' , 'file')->first();
                     if(isset($request->users_ids))
@@ -444,14 +417,19 @@ class FilesController extends Controller
         if (isset($request->Imported_file)) {
             $extension = $request->Imported_file->getClientOriginalExtension();
             $name = uniqid() . '.' . $extension;
-            Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
-            $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
             $file->url2 = 'files/' . $name;
             $file->type = $extension;
             $fileName =  $request->Imported_file->getClientOriginalName();
             $file->description = $name;
             $file->attachment_name = $fileName;
-
+            if(env('UPLOAD_TYPE') == 'AZURE'){
+                $url=UploadHelper::upload($request->Imported_file,'files',$fileName);
+                $file->url=$url;
+            }
+            else{
+                Storage::disk('public')->putFileAs('files/', $request->Imported_file, $name);
+                $file->url = 'https://docs.google.com/viewer?url=' . url('storage/files/' . $name);
+            }
         }
         $tempReturn = null;
         $fileLesson = FileLesson::where('file_id', $request->id)->where('lesson_id', $request->lesson_id)->first();

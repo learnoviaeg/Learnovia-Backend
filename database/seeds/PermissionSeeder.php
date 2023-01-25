@@ -300,6 +300,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/grader', 'title' => 'grader report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/overview', 'title' => 'overview report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/user', 'title' => 'get user grades']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/user-report', 'title' => 'User Report']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/report/over-all', 'title' => 'get all users grades in courses']);
 
         //report card
@@ -331,7 +332,10 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/march', 'title' => 'March report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly/april', 'title' => 'April report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/monthly/printAll', 'title' => 'monthly report print all girls','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisg-monthly-2022', 'title' => 'Monthly Report(mfisg) 2022','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-girls/monthly/printAll-2022', 'title' => 'monthly report print all girls 2022','icon' => 'Report-Card','dashboard'=>1]);
+        
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisb-monthly-2022', 'title' => 'Monthly Report(mfisb) 2022','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/manara-boys/monthly/printAll-2022', 'title' => 'monthly report print all boys 2022','icon' => 'Report-Card','dashboard'=>1]);
 
         // nileGarden
