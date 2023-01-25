@@ -36,6 +36,7 @@ use App\Helpers\CoursesHelper;
 use App\UserCourseItem;
 use Illuminate\Database\Eloquent\Builder;
 use App\LessonComponent;
+use App\Events\QuizEndReminderEvent;
 
 class QuizzesController extends Controller
 {
@@ -126,7 +127,7 @@ class QuizzesController extends Controller
 
         foreach($quiz_lessons->cursor() as $quiz_lesson){
             $flag=false;
-            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children','quizLesson'])->first();
+            $quiz=quiz::whereId($quiz_lesson->quiz_id)->whereHas('course',$callQuery)->with(['course' => $callQuery,'Question.children.Parent','quizLesson'])->first();
             if(!isset($quiz))
                 continue;
             $userQuiz=UserQuiz::where('user_id',Auth::id())->where('quiz_lesson_id',$quiz_lesson->id)->first();
@@ -296,7 +297,10 @@ class QuizzesController extends Controller
                 if(carbon::parse($request->closing_time) < Carbon::parse($request->opening_time)->addSeconds($request->duration))
                     return HelperController::api_response_format(200,null,__('messages.quiz.wrong_date'));
             }
-    
+
+            if($request->filled('closing_time') && $request->closing_time != $quiz_lesson->due_date)
+                event(new QuizEndReminderEvent($quiz_lesson));
+
             $quiz_lesson->update([
                 'due_date' => isset($request->closing_time) ? $request->closing_time : $quiz_lesson->due_date,
                 // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $quiz_lesson->lesson_id,
@@ -334,11 +338,12 @@ class QuizzesController extends Controller
     
             $gradeCat=GradeCategory::where('instance_type','Quiz')->where('instance_id',$quiz_lesson->quiz_id)->where('lesson_id', $request->lesson_id)->first();
             $gradeCat->update([
-                        'hidden' => $quiz_lesson->visible,
-                        'calculation_type' => json_encode($quiz_lesson->grading_method_id),
-                        'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
-                        // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
-                    ]);
+                'name' => $quiz->name,
+                'hidden' => $quiz_lesson->visible,
+                'calculation_type' => json_encode($quiz_lesson->grading_method_id),
+                'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $gg->id,
+                    // 'lesson_id' => isset($request->updated_lesson_id) ? $request->updated_lesson_id : $gradeCat->lesson_id
+            ]);
     
             // update timeline object and sending notifications
             event(new UpdatedQuizQuestionsEvent($quiz->id));
@@ -348,7 +353,7 @@ class QuizzesController extends Controller
             //send notification
             if(!$quiz->draft && $quiz_lesson->visible)
             {
-                $users=SecondaryChain::select('user_id')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
+                $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
                 $courseItem = CourseItem::where('item_id', $quiz->id)->where('type', 'quiz')->first();
                 if(isset($courseItem))
                     $users = UserCourseItem::where('course_item_id', $courseItem->id)->pluck('user_id');
@@ -488,10 +493,10 @@ class QuizzesController extends Controller
                 return HelperController::api_response_format(404, __('messages.error.data_invalid'));
         }
 
-        $quiz = quiz::where('id',$id)->with(['Question.children','courseItem.courseItemUsers'])->first();
+        $quiz = quiz::where('id',$id)->with(['Question.children.Parent','courseItem.courseItemUsers'])->first();
         $quizLesson=QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id)->first();
 
-        if($request->user()->can('site/course/student') && !$quizLesson->visible)
+        if($request->user()->can('site/course/student') && isset($quizLesson) && !$quizLesson->visible)
             return HelperController::api_response_format(404, null ,__('messages.error.not_available_now'));
 
         if(!isset($quiz))

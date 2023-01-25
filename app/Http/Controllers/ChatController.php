@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use App\User;
+use App\attachment;
 
 class ChatController extends Controller
 {
@@ -120,5 +121,30 @@ class ChatController extends Controller
         unset($user->roles,$user->attachment);
 
         return response()->json(['message' => 'chat token is created....', 'body' => $user], 200);
+    }
+
+    public function UploadFiles(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|array',
+            'file.*' => 'file|mimes:pdf,docx,doc,xls,xlsx,ppt,pptx,zip,rar,jpeg,jpg,png,gif,mp4,avi,flv,wav,mpga,ogg,ogv,oga,mp3,webm',
+        ]);
+
+        $attachment=[];
+        foreach($request->file as $file)
+            $attachment[] = attachment::upload_attachment($file, 'Message');
+
+        return HelperController::api_response_format(201,$attachment, 'file');
+    }
+
+    public function getFiles(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:attachments,id',
+        ]);
+        
+        $attachment=attachment::find($request->id);
+        
+        return HelperController::api_response_format(201,$attachment, 'file');
     }
 }
