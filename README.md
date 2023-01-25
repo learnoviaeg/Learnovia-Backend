@@ -13,3 +13,7 @@
 
 - `cp .env.testing.example .env.testing`
 - Run tests using `make test`, This will run all tests in the project.
+
+
+#### package
+- `composer require matthewbdaly/laravel-azure-storage`

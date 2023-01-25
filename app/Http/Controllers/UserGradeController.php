@@ -47,27 +47,31 @@ class UserGradeController extends Controller
             'user.*.scale_id'     => 'nullable|exists:scale_details,id',
         ]);
         foreach($request->user as $user){
-            $percentage = 0;
+            $percentage = null;
             $instance = GradeCategory::find($user['item_id']);
 
             if($instance->max != null && $instance->max > 0){
 
                 if($instance->aggregation == 'Scale'){
-                    $scale = ScaleDetails::find( $user['scale_id']);
-                    $user['grade'] = $scale->grade;
-                    $percentage = ($scale->grade / $instance->max) * 100;
+                    $scale=null;
+                    if(isset($user['scale_id'])){
+                        $scale = ScaleDetails::find($user['scale_id']);
+                        $user['grade'] = $scale->grade;
+                        $percentage = ($scale->grade / $instance->max) * 100;
+                    }
 
                     UserGrader::updateOrCreate(
                         ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                        ['scale' =>  $scale->evaluation , 'scale_id' => $scale->id ]
+                        ['scale' =>  ($scale != null) ? $scale->evaluation : null ,
+                         'scale_id' => ($scale != null) ? $scale->id : null ]
                     );
-
                 }
-                $percentage = ($user['grade'] / $instance->max) * 100;
+                if(isset($user['scale_id']))
+                    $percentage = ($user['grade'] / $instance->max) * 100;
             }            
             $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
+                ['grade' =>  isset($user['grade']) ? $user['grade'] : null , 'percentage' => $percentage ]
             );
             if($instance->parent != null)
                 event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));

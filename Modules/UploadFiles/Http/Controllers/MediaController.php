@@ -196,11 +196,15 @@ class MediaController extends Controller
                 // $media->name = $name;
                 $media->size = $size;
                 $media->attachment_name = $fileName;
-                // $url=Storage::disk('public')->putFileAs('media/', $item, $name);
-                // $media->link = url('storage/media/' . $name);
 
-                $url=UploadHelper::upload($item,'files',$fileName);
-                $media->link=$url;
+                if(env('UPLOAD_TYPE') == 'AZURE'){
+                    $url=UploadHelper::upload($item,'media',$fileName);
+                    $media->link=$url;
+                }
+                else{
+                    $url=Storage::disk('public')->putFileAs('media/', $item, $name);;
+                    $media->link = url('storage/media/' . $name);
+                }
             }
 
             if ($request->type == 1) {
@@ -352,10 +356,15 @@ class MediaController extends Controller
             $media->type = $request->Imported_file->getClientMimeType();
             $media->size = $size;
             $media->attachment_name = $fileName;
-            // $media->link = url('storage/media/' . $name);
-            // Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
-            $url=UploadHelper::upload($request->Imported_file,'files',$fileName);
-            $media->link=$url;
+
+            if(env('UPLOAD_TYPE') == 'AZURE'){
+                $url=UploadHelper::upload($request->Imported_file,'files',$fileName);
+                $media->link=$url;
+            }
+            else{
+                Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+                $media->link = url('storage/media/' . $name);
+            }
         }
 
         if ($request->filled('url')){
