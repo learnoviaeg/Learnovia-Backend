@@ -49,9 +49,7 @@ class UserGradeController extends Controller
         foreach($request->user as $user){
             $percentage = null;
             $instance = GradeCategory::find($user['item_id']);
-
             if($instance->max != null && $instance->max > 0){
-
                 if($instance->aggregation == 'Scale'){
                     $scale=null;
                     if(isset($user['scale_id'])){
