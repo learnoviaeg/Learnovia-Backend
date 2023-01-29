@@ -159,6 +159,26 @@ class ReportCardsController extends Controller
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
 
+        $allowed_levels=null;
+        $check=[];
+        if($user->can('report_card/mfisb/first-term-2022-b'))
+            $allowed_levels=Permission::where('name','report_card/mfisb/first-term-2022-b')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/mfisg/first-term-2022-g'))
+            $allowed_levels=Permission::where('name','report_card/mfisg/first-term-2022-g')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/green-city/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/green-city/first-term-2022')->pluck('allowed_levels')->first();
+
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+        }
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+
         $courses=self::getGradesCourses($request,1);
 
         $grade_category_callback = function ($qu) use ($request ) {
