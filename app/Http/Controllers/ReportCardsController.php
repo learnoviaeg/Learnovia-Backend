@@ -156,8 +156,26 @@ class ReportCardsController extends Controller
             // 'term'    => 'required|in:first,final',
             'course_id'=> 'exists:courses,id',
         ]);
+        
         $GLOBALS['user_id'] = $request->user_id;
         $user = User::find($request->user_id);
+
+        $allowed_levels=null;
+        $check=[];
+        if($user->can('report_card/mfisb/first-term-2022-b'))
+            $allowed_levels=Permission::where('name','report_card/mfisb/first-term-2022-b')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/mfisg/first-term-2022-g'))
+            $allowed_levels=Permission::where('name','report_card/mfisg/first-term-2022-g')->pluck('allowed_levels')->first();
+
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+        }
+
+        if(count($check) == 0)
+            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $courses=self::getGradesCourses($request,1);
 
@@ -396,6 +414,7 @@ class ReportCardsController extends Controller
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
         // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
+        // dd($user_ids);
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
             
@@ -403,7 +422,7 @@ class ReportCardsController extends Controller
             $total = 0;
             $student_mark = 0;
             $grade_category_callback = function ($qu) use ($request, $user_id ) {
-                $qu->where('name','LIKE', "%First Term%");
+                $qu->where('name','LIKE', "%1st Term%");
                 $qu->with(['userGrades' => function($query) use ($request , $user_id){
                     $query->where("user_id", $user_id);
                 }]);     
@@ -413,28 +432,27 @@ class ReportCardsController extends Controller
                 $qu->where('role_id', 3);
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
-    
             };
     
-            $result = User::whereId($user_id)->whereHas('enroll')
-                            ->with(['enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
-                            // dd($result);
+            $result = User::whereId($user_id)->whereHas('enroll' , $callback)
+                            ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
+            if($result == null)
+                continue;
             $result->enrolls =  collect($result->enroll)->sortBy('courses.created_at')->values();
     
             foreach($result->enrolls as $enroll){ 
                 if($enroll->courses->gradeCategory != null)
                     $total += $enroll->courses->gradeCategory[0]->max;
     
-                if($enroll->courses->gradeCategory[0]->userGrades != null)
+                if(count($enroll->courses->gradeCategory[0]->userGrades) > 0)
                     $student_mark += $enroll->courses->gradeCategory[0]->userGrades[0]->grade;
                 
                 if(str_contains($enroll->courses->name, 'O.L'))
                     break;
-    
             }
     
-             $percentage = 0;
-             if($total != 0)
+            $percentage = 0;
+            if($total != 0)
                 $percentage = ($student_mark /$total)*100;
     
             $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
@@ -443,7 +461,7 @@ class ReportCardsController extends Controller
             if($percentage == 100)
                 $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
                 ->where('higher_boundary', '>=', $percentage)->first();
-    
+
             $result->total = $total;
             $result->student_total_mark = $student_mark;
             $result->evaluation = $evaluation->evaluation;
@@ -607,7 +625,7 @@ class ReportCardsController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            // 'month'   => 'required|in:November,December,October',
+            // 'month'   => 'in:November,December,October',
             'course_id' => 'required|exists:courses,id',
         ]);
 
@@ -625,21 +643,12 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/mfis/mfisb-monthly-2022'))
             $allowed_levels=Permission::where('name','report_card/mfis/mfisb-monthly-2022')->pluck('allowed_levels')->first();
-        
-        if($user->can('report_card/nile-garden/monthly/oct-2022'))
-            $allowed_levels=Permission::where('name','report_card/nile-garden/monthly/oct-2022')->pluck('allowed_levels')->first();
-
-        if($user->can('report_card/monthly/'.$request->month))
-            $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
 
         if($user->can('report_card/nile-garden/first-term'))
             $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
 
-        if($user->can('report_card/mfisb/first-term-2022-b'))
-            $allowed_levels=Permission::where('name','report_card/mfisb/first-term-2022-b')->pluck('allowed_levels')->first();
-
-        if($user->can('report_card/mfisg/first-term-2022-g'))
-            $allowed_levels=Permission::where('name','report_card/mfisg/first-term-2022-g')->pluck('allowed_levels')->first();
+        if($user->can('report_card/monthly/'.$request->month))
+            $allowed_levels=Permission::where('name','report_card/monthly/'.$request->month)->pluck('allowed_levels')->first();
 
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
