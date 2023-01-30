@@ -361,8 +361,6 @@ class PermissionSeeder extends Seeder
 
         // forsan
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/monthly', 'title' => 'Forsan monthly report','icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/monthly/printAll', 'title' => 'Forsan monthly report(print all)','icon' => 'Report-Card','dashboard'=>1]);
-        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan/all', 'title' => 'print all forsan','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/forsan', 'title' => 'First term report card (Forsan)', 'icon' => 'Report-Card','dashboard'=>1]);
 
         // haramain
