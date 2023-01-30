@@ -44,7 +44,7 @@ class CalculateUserGradesListener
                 );
             }
             if($event->grade_category->parent != null)
-                    event(new UserGradesEditedEvent($event->user ,GradeCategory::find($event->grade_category->parent)));
+                event(new UserGradesEditedEvent($event->user ,GradeCategory::find($event->grade_category->parent)));
         }
     }
 }
