@@ -413,7 +413,7 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $request->levels));
+        $total_check=(array_intersect([ 7 ,8 , 9, 10 , 11 , 12, 21 ,22 , 23, 24 , 25 , 26], $request->levels));
         // dd($user_ids);
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
@@ -427,9 +427,16 @@ class ReportCardsController extends Controller
                     $query->where("user_id", $user_id);
                 }]);     
             };
+            $course_callback = function ($qu) use ($request ) {
+                $qu->Where(function ($query) {
+                    $query->where('name', 'NOT LIKE' , "%*%");
+                });     
+            };
     
-            $callback = function ($qu) use ($request , $grade_category_callback) {
+            $callback = function ($qu) use ($request , $grade_category_callback,$course_callback) {
                 $qu->where('role_id', 3);
+                $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                     ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
@@ -464,11 +471,12 @@ class ReportCardsController extends Controller
 
             $result->total = $total;
             $result->student_total_mark = $student_mark;
-            $result->evaluation = $evaluation->evaluation;
+            if($evaluation != null)
+                $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
-            // if(count($total_check) == 0)
-            //     $result->add_total = false;
+            if(count($total_check) == 0)
+                $result->add_total = false;
             ///////////////////////////////////////////////////
             if($result != null)
                 $result_collection->push($result);
