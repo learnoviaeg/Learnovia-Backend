@@ -290,27 +290,46 @@ class UserGradeController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
-        $allowed_levels=json_decode($allowed_levels);
-        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        $check=(array_intersect($allowed_levels, $student_levels));
+        $allowed_levels=null;
+        $check=[];
+        
+        if($request->user()->can('report_card/fgls'))
+            $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
 
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
+        if($request->user()->can('report_card/fgls/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/fgls/first-term-2022')->pluck('allowed_levels')->first();
+
+        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+        }
+
+        // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
 
         if(count($check) == 0)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
-            $qu->where('name', 'First Term');
+            $qu->where('name','LIKE', "%1st Term%");
             $qu->with(['userGrades' => function($query) use ($request){
                 $query->where("user_id", $request->user_id);
             }]);     
         };
 
+        $course_callback = function ($qu) use ($request ) {
+            $qu->Where(function ($query) {
+                $query->where('short_name', 'NOT LIKE' , "%*%");
+            });     
+        };
+
         $callback = function ($qu) use ($request , $grade_category_callback) {
             // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
 
@@ -329,7 +348,6 @@ class UserGradeController extends Controller
             
             if(str_contains($enroll->courses->name, 'O.L'))
                 break;
-
         }
 
          $percentage = 0;
@@ -345,10 +363,11 @@ class UserGradeController extends Controller
 
         $result->total = $total;
         $result->student_total_mark = $student_mark;
-        $result->evaluation = $evaluation->evaluation;
+        if($evaluation != null)
+            $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
         unset($result->enroll);
-        if(count($total_check) == 0)
+        if(count($check) == 0)
             $result->add_total = false;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
