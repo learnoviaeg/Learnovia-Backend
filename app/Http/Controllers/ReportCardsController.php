@@ -475,8 +475,8 @@ class ReportCardsController extends Controller
                 $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
-            if(count($total_check) == 0)
-                $result->add_total = false;
+            // if(count($total_check) == 0)
+            //     $result->add_total = false;
             ///////////////////////////////////////////////////
             if($result != null)
                 $result_collection->push($result);
