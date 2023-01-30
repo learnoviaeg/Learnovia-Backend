@@ -301,9 +301,6 @@ class UserGradeController extends Controller
         if($request->user()->can('report_card/fgls/first-term-2022'))
             $allowed_levels=Permission::where('name','report_card/fgls/first-term-2022')->pluck('allowed_levels')->first();
 
-        if($user->can('report_card/nile-garden/first-term'))
-            $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
-
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);
@@ -318,15 +315,23 @@ class UserGradeController extends Controller
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
-            $qu->where('name','LIKE', "%First Term%");
+            $qu->where('name','LIKE', "%1st Term%");
             $qu->with(['userGrades' => function($query) use ($request){
                 $query->where("user_id", $request->user_id);
             }]);     
         };
 
+        $course_callback = function ($qu) use ($request ) {
+            $qu->Where(function ($query) {
+                $query->where('name', 'NOT LIKE' , "%*%");
+            });     
+        };
+
         $callback = function ($qu) use ($request , $grade_category_callback) {
             // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
 
@@ -345,7 +350,6 @@ class UserGradeController extends Controller
             
             if(str_contains($enroll->courses->name, 'O.L'))
                 break;
-
         }
 
          $percentage = 0;
@@ -361,7 +365,8 @@ class UserGradeController extends Controller
 
         $result->total = $total;
         $result->student_total_mark = $student_mark;
-        $result->evaluation = $evaluation->evaluation;
+        if($evaluation != null)
+            $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
         unset($result->enroll);
         if(count($check) == 0)
