@@ -301,6 +301,9 @@ class UserGradeController extends Controller
         if($request->user()->can('report_card/fgls/first-term-2022'))
             $allowed_levels=Permission::where('name','report_card/fgls/first-term-2022')->pluck('allowed_levels')->first();
 
+        if($user->can('report_card/nile-garden/first-term'))
+            $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
+
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);
