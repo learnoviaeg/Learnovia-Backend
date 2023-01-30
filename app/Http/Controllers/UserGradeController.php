@@ -323,7 +323,7 @@ class UserGradeController extends Controller
 
         $course_callback = function ($qu) use ($request ) {
             $qu->Where(function ($query) {
-                $query->where('name', 'NOT LIKE' , "%*%");
+                $query->where('short_name', 'NOT LIKE' , "%*%");
             });     
         };
 
