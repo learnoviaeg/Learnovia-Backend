@@ -15,10 +15,8 @@ class CreateCardCommentsTable extends Migration
     {
         Schema::create('card_comments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('permission_id');
-            $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->integer('permission_id');
+            $table->integer('user_id');
             $table->longText('comment');
             $table->timestamps();
         });

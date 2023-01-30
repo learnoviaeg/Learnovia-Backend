@@ -6,8 +6,8 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Validator;
 use App\User;
-use App\cardComment;
-
+use App\CardComment;
+use Spatie\Permission\Models\Permission;
 
 class cardCommentsImport implements ToModel , WithHeadingRow
 {
@@ -18,12 +18,15 @@ class cardCommentsImport implements ToModel , WithHeadingRow
     */
     public function model(array $row)
     {
-        $validator = Validator::make($row,[
+        $messages = [
+            'exists' => $row['username'],
+        ];
+        Validator::make($row,[
             'username' => 'required|exists:users,username',
         ],$messages)->validate();
 
-        cardComment::firstOrCreate([
-            'permission_id' => $row['name'],
+        CardComment::firstOrCreate([
+            'permission_id' =>  Permission::where('name',$row['permission_name'])->first()->id,
             'user_id' => User::find($row['username'])->id,
             'comment' => $row['comment'],
         ]);
