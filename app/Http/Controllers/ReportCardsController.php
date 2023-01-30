@@ -429,7 +429,7 @@ class ReportCardsController extends Controller
             };
             $course_callback = function ($qu) use ($request ) {
                 $qu->Where(function ($query) {
-                    $query->where('name', 'NOT LIKE' , "%*%");
+                    $query->where('short_name', 'NOT LIKE' , "%*%");
                 });     
             };
     
@@ -475,8 +475,8 @@ class ReportCardsController extends Controller
                 $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
-            // if(count($total_check) == 0)
-            //     $result->add_total = false;
+            if(count($total_check) == 0)
+                $result->add_total = false;
             ///////////////////////////////////////////////////
             if($result != null)
                 $result_collection->push($result);
@@ -651,6 +651,9 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/mfis/mfisb-monthly-2022'))
             $allowed_levels=Permission::where('name','report_card/mfis/mfisb-monthly-2022')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/nile-garden/monthly/oct-2022'))
+            $allowed_levels=Permission::where('name','report_card/nile-garden/monthly/oct-2022')->pluck('allowed_levels')->first();
 
         if($user->can('report_card/nile-garden/first-term'))
             $allowed_levels=Permission::where('name','report_card/nile-garden/first-term')->pluck('allowed_levels')->first();
