@@ -413,7 +413,7 @@ class ReportCardsController extends Controller
         $result_collection = collect([]);
         $user_ids = $this->chain->getEnrollsByManyChain($request)->where('role_id',3)->distinct('user_id')->pluck('user_id');
 
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12,19,20, 21 ,22 , 23, 24 , 25 , 26], $request->levels));
+        $total_check=(array_intersect([ 7 ,8 , 9, 10 , 11 , 12, 21 ,22 , 23, 24 , 25 , 26], $request->levels));
         // dd($user_ids);
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
@@ -471,7 +471,8 @@ class ReportCardsController extends Controller
 
             $result->total = $total;
             $result->student_total_mark = $student_mark;
-            $result->evaluation = $evaluation->evaluation;
+            if($evaluation != null)
+                $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
             if(count($total_check) == 0)
