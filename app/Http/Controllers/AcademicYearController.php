@@ -154,35 +154,12 @@ class AcademicYearController extends Controller
 
     public function GetMyYears(Request $request)
     {
-        // $result=array();
-        // $CS=array();
-
-        // if($request->user()->can('site/show-all-courses'))
-        // {
-        //     $year = AcademicYear::get();
-        //     if(count($year) == 0)
-        //         return HelperController::api_response_format(201,null, __('messages.error.not_found'));
-
-        //     return HelperController::api_response_format(201,$year, __('messages.year.list'));
-        // }
-
-        // $course_segments = Enroll::where('user_id',Auth::id())->with(['courseSegment' => function($query){
-        //     //validate that course in my current course start < now && now < end
-        //     $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());}])->get();
-        //     foreach($course_segments as $course_segment){
-        //         array_push($CS , $course_segment->course_segment);
-        //     }
-        // $years = Enroll::where('user_id',Auth::id())->whereIn('course_segment' ,$CS)->pluck('year');
-
         $currentSegment= Segment::where('start_date', '<=',Carbon::now())
                         ->where('end_date','>=',Carbon::now())->pluck('academic_year_id');
         $myYears=Enroll::where('user_id',Auth::id())->whereIn('year',$currentSegment)->pluck('year');
 
         $yearr = AcademicYear::whereIn('id', $myYears)->get();
-        // if(isset($yearr) && count($yearr) > 0)
         return HelperController::api_response_format(201,$yearr, __('messages.year.list'));
-        
-        // return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
     }
 
     public function export(Request $request)

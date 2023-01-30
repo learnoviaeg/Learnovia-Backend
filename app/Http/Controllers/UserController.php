@@ -354,7 +354,7 @@ class UserController extends Controller
                 if(in_array(1,$user->roles->pluck('id')->toArray()))
                     return HelperController::api_response_format(201, $user->username , __('messages.users.cannot_delete'));
         }
-        //$all=Enroll::whereIn('user_id',$request->users_id)->delete();
+        $all=Enroll::whereIn('user_id',$request->users_id)->delete();
         //$user = User::whereIn('id', $request->users_id)->delete();
         foreach($request->users_id as $user_id)
         {
@@ -708,41 +708,25 @@ class UserController extends Controller
     public function set_parent_child(Request $request)
     {
         $request->validate([
-            'parent_id' => 'required|array|exists:users,id',
-            'child_id' => 'required|array|exists:users,id'
+            'parent_id' => 'required|array',
+            'parent_id.*' => 'exists:users,id',
+            'child_id' => 'required|array',
+            'child_id.*' => 'exists:users,id'
         ]);
 
         foreach($request->parent_id as $parent){
-
             foreach($request->child_id as $child){
                 
                 Parents::firstOrCreate([
                     'child_id' => $child,
                     'parent_id' => $parent
                 ]);
-
-                $students = Enroll::where('user_id',$child)->get();
-
-                foreach($students as $student){
-
-                    Enroll::firstOrCreate([
-                        // 'course_segment' => $student->course_segment,
-                        'user_id' => $parent,
-                        'role_id'=> 7,
-                        'year' => $student->year,
-                        'type' => $student->type,
-                        'level' => $student->level,
-                        'group' => $student->group,
-                        'segment' => $student->segment,
-                        'course' => $student->course
-                    ]);
-                }
             }
         }
         return HelperController::api_response_format(201,null,__('messages.users.parent_assign_child'));
     }
 
-        /**
+    /**
      * set paresnt's child
      *
      * @return unAssigned Successfully
@@ -1064,26 +1048,4 @@ class UserController extends Controller
         );
         return HelperController::api_response_format(200 ,$nationals, 'Nationalities are ...');
     }
-
-    // public function enroll_parents_script(){
-    //     $students = Enroll::where('role_id',3)->with('user.parents')->get();
-    //     foreach($students as $student){
-    //         if(isset($student->user)){
-    //             foreach($student->user->parents as $parent){
-    //                 Enroll::firstOrCreate([
-    //                     // 'course_segment' => $student->course_segment,
-    //                     'user_id' => $parent->id,
-    //                     'role_id'=> 7,
-    //                     'year' => $student->year,
-    //                     'type' => $student->type,
-    //                     'level' => $student->level,
-    //                     'group' => $student->group,
-    //                     'segment' => $student->segment,
-    //                     'course' => $student->course
-    //                 ]);
-    //             }
-    //         }
-    //     }
-    //     return 'done';
-    // }
 }
