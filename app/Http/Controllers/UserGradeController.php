@@ -361,8 +361,8 @@ class UserGradeController extends Controller
         $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
         unset($result->enroll);
-        // if(count($total_check) == 0)
-        //     $result->add_total = false;
+        if(count($check) == 0)
+            $result->add_total = false;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
