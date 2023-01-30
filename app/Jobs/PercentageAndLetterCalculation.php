@@ -42,8 +42,8 @@ class PercentageAndLetterCalculation implements ShouldQueue
                     $user_grader->update([
                         'percentage' => $percentage,
                     ]);
+                    $user_grader->save();
                     event(new GradeCalculatedEvent($user_grader));
-
                 }           
             }
         }  
