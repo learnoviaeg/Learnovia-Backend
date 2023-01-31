@@ -50,7 +50,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['fullname','lastaction'];
+    protected $appends = ['fullname','lastaction','comment'];
 
     private static function getUserCounter($lastid)
     {
@@ -165,6 +165,10 @@ class User extends Authenticatable
         return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname);
     }
 
+    public function getCommentAttribute() {
+        return CardComment::where('user_id',$this->id)->first();
+    }
+
     public function getLastActionAttribute() {
        $last_action  = LastAction :: where('user_id',$this->id)->where('course_id',null)->first();
        if (isset($last_action))
@@ -225,11 +229,6 @@ class User extends Authenticatable
     public function fees()
     {
         return $this->hasOne('App\Fees');
-    }
-
-    public function cardComment()
-    {
-        return $this->hasMany('App\CardComment', 'user_id', 'id');
     }
 
     // start function get name and value f attribute

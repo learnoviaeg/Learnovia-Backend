@@ -25,10 +25,12 @@ class cardCommentsImport implements ToModel , WithHeadingRow
             'username' => 'required|exists:users,username',
         ],$messages)->validate();
 
-        CardComment::firstOrCreate([
-            'permission_id' =>  Permission::where('name',$row['permission_name'])->first()->id,
-            'user_id' => User::find($row['username'])->id,
-            'comment' => $row['comment'],
-        ]);
+        $user= User::where('username',$row['username'])->first();
+        if($user !=null && $row['comment'] !=null)
+            CardComment::firstOrCreate([
+                'permission_id' =>  Permission::where('name',$row['permission_name'])->first()->id,
+                'user_id' => $user->id,
+                'comment' => $row['comment'],
+            ]);
     }
 }
