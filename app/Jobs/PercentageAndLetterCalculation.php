@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Events\GradeCalculatedEvent;
 use App\Events\UserGradesEditedEvent;
 use App\Course;
+use App\User;
 
 class PercentageAndLetterCalculation implements ShouldQueue
 {
