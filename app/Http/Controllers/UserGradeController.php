@@ -294,7 +294,6 @@ class UserGradeController extends Controller
 
         $allowed_levels=null;
         $check=[];
-        
         if($request->user()->can('report_card/fgls'))
             $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
 
@@ -305,13 +304,9 @@ class UserGradeController extends Controller
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);
             $check=(array_intersect($allowed_levels, $student_levels));
+            if(count($check) == 0)
+                return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
         }
-
-        // $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
-
-        if(count($check) == 0)
-            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
-
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
@@ -334,7 +329,6 @@ class UserGradeController extends Controller
                 ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
-
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
@@ -369,7 +363,9 @@ class UserGradeController extends Controller
             $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
         unset($result->enroll);
-        if(count($check) == 0)
+
+        $total_check=(array_intersect([ 7 ,8 , 9, 10 , 11 , 12, 21 ,22 , 23, 24 , 25 , 26], $student_levels));
+        if(count($total_check) == 0)
             $result->add_total = false;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
