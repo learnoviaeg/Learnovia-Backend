@@ -48,6 +48,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'suspend'           => 'integer',
     ];
 
     protected $appends = ['fullname','lastaction','comment'];
@@ -122,10 +123,6 @@ class User extends Authenticatable
         return $this->belongsToMany('App\User' , 'contacts' , 'Person_id' , 'Friend_id');
     }
 
-    public function coursesegnments()
-    {
-        return $this->hasMany('App\CourseSegment');
-    }
     public function lastactionincourse()
     {
         return $this->hasMany('App\LastAction');

@@ -570,6 +570,7 @@ class ScriptsController extends Controller
                 }
             }
         }
+        return $result;
     }
 
     public function lessons_without_decription_having_materials(Request $request){
