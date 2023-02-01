@@ -445,7 +445,8 @@ class ReportCardsController extends Controller
     
             $result->total = $total;
             $result->student_total_mark = round($student_mark,2);
-            $result->evaluation = $evaluation->evaluation;
+            if($evaluation != null)
+                $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;
             unset($result->enroll);
             if(count($total_check) == 0)
