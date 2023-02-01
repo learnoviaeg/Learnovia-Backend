@@ -470,7 +470,7 @@ class ReportCardsController extends Controller
                 ->where('higher_boundary', '>=', $percentage)->first();
 
             $result->total = $total;
-            $result->student_total_mark = $student_mark;
+            $result->student_total_mark = round($student_mark,2);
             if($evaluation != null)
                 $result->evaluation = $evaluation->evaluation;
             $result->add_total = true;

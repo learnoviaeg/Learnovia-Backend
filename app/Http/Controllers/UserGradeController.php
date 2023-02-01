@@ -283,7 +283,6 @@ class UserGradeController extends Controller
         return HelperController::api_response_format(200, array_values($cour));
     }
 
-
     public function fglReport(Request $request)
     {
         $request->validate([
@@ -356,7 +355,7 @@ class UserGradeController extends Controller
             ->where('higher_boundary', '>=', $percentage)->first();
 
         $result->total = $total;
-        $result->student_total_mark = $student_mark;
+        $result->student_total_mark = round($student_mark,2);
         if($evaluation != null)
             $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
@@ -368,7 +367,6 @@ class UserGradeController extends Controller
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
-
 
     public function export(Request $request)
     {
@@ -421,7 +419,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 
     public function user_report_in_all_courses(Request $request)
@@ -437,7 +434,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 }
 

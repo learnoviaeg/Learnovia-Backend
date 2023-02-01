@@ -51,7 +51,7 @@ class User extends Authenticatable
         'suspend'           => 'integer',
     ];
 
-    protected $appends = ['fullname','lastaction'];
+    protected $appends = ['fullname','lastaction','comment'];
 
     private static function getUserCounter($lastid)
     {
@@ -160,6 +160,12 @@ class User extends Authenticatable
         if($this->nickname)
             return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname).' ( ' . ucfirst($this->nickname) . ' )' ;
         return ucfirst($this->firstname) . ' ' . ucfirst($this->lastname);
+    }
+
+    public function getCommentAttribute() {
+        $comment=CardComment::where('user_id',$this->id)->first();
+        if($comment != null)
+            return $comment->comment;
     }
 
     public function getLastActionAttribute() {
