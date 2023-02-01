@@ -166,7 +166,9 @@ class User extends Authenticatable
     }
 
     public function getCommentAttribute() {
-        return CardComment::where('user_id',$this->id)->first();
+        $comment=CardComment::where('user_id',$this->id)->first();
+        if($comment != null)
+            return $comment->comment;
     }
 
     public function getLastActionAttribute() {
