@@ -348,11 +348,11 @@ class UserGradeController extends Controller
             $percentage = ($student_mark /$total)*100;
 
         $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-                    ->where('higher_boundary', '>', $percentage)->first();
+                    ->where('higher_boundary', '>', $percentage)->latest()->first();
 
         if($percentage == 100)
             $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-            ->where('higher_boundary', '>=', $percentage)->first();
+            ->where('higher_boundary', '>=', $percentage)->latest()->first();
 
         $result->total = $total;
         $result->student_total_mark = round($student_mark,2);
