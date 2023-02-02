@@ -319,7 +319,7 @@ class UserGradeController extends Controller
             });     
         };
 
-        $callback = function ($qu) use ($request , $grade_category_callback) {
+        $callback = function ($qu) use ($request , $grade_category_callback,$course_callback) {
             // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses' , $course_callback)
