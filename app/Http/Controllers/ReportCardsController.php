@@ -17,8 +17,8 @@ class ReportCardsController extends Controller
     {
         $this->chain = $chain;
         $this->middleware('auth');
-        $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final|report_card/mfisg/first-term-2022-g|report_card/mfisb/first-term-2022-b'],   ['only' => ['manaraReport']]);
-        $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022-g|report_card/mfisb/first-printAll-2022-b'],   ['only' => ['manaraReportAll']]);
+        // $this->middleware(['permission:report_card/mfis/mfisg|report_card/mfis/mfisb|report_card/mfis/mfisb-final|report_card/mfis/mfisg-final|report_card/mfisg/first-term-2022-g|report_card/mfisb/first-term-2022-b'],   ['only' => ['manaraReport']]);
+        // $this->middleware(['permission:report_card/mfis/manara-boys/printAll|report_card/mfis/manara-girls/printAll|report_card/mfisg/first-printAll-2022-g|report_card/mfisb/first-printAll-2022-b'],   ['only' => ['manaraReportAll']]);
         $this->middleware(['permission:report_card/haramain/all|report_card/haramain/all-final|report_card/haramain/first-printAll-2022'],   ['only' => ['haramaninReportAll']]);
         $this->middleware(['permission:report_card/forsan/all'],   ['only' => ['forsanReportAll']]);
         $this->middleware(['permission:report_card/fgls/all|report_card/fgls/first-term-2022-all'],   ['only' => ['fglsReportAll', 'fglsPrep3ReportAll']]);
@@ -167,6 +167,9 @@ class ReportCardsController extends Controller
 
         if($user->can('report_card/mfisg/first-term-2022-g'))
             $allowed_levels=Permission::where('name','report_card/mfisg/first-term-2022-g')->pluck('allowed_levels')->first();
+
+        if($user->can('report_card/green-city/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/green-city/first-term-2022')->pluck('allowed_levels')->first();
 
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){

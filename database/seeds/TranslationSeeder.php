@@ -115,11 +115,15 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report-all','language'=> 1, 'value' => 'Progress Report All 2022/2023']);
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly','language'=> 1, 'value' => 'Monthly Report(Green City National)']);
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly/printAll','language'=> 1, 'value' => 'Monthly Report All(Green City National)']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022','language'=> 1, 'value' => 'First Term Report 2022-2023(Green City National)']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022-all','language'=> 1, 'value' => 'First Term Report 2022-2023 All(Green City National)']);
 
         Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report', 'language' => 2, 'value' => 'تقرير الدرجات']);
         Dictionary::firstOrCreate(['key' => 'report_card/gci/progress-report-all', 'language' => 2, 'value' => 'تقرير الدرجات للجميع']);
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly','language'=> 2, 'value' => 'تقرير الدرجات الشهري']);
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/monthly/printAll','language'=> 2, 'value' => 'تقرير الدرجات الشهري للجميع']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022','language'=> 2, 'value' => 'تقرير الدرجات']);
+        Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022-all','language'=> 2, 'value' => 'تقرير الدرجات للجميع']);
 
         // nile-garden
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022','language'=> 1, 'value' => 'nile garden Report (Monthly)']);
