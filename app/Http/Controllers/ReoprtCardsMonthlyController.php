@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 use App\Repositories\ChainRepositoryInterface;
 use App\User;
+use Spatie\Permission\Models\Permission;
+use App\Enroll;
+use Illuminate\Support\Facades\Auth;
+
 
 use Illuminate\Http\Request;
 
@@ -85,7 +89,7 @@ class ReoprtCardsMonthlyController extends Controller
             'trimester' => 'required|in:T2,T3'
         ]);
 
-        if($user->can('report_card/gci/progress-report'))
+        if($request->user()->can('report_card/gci/progress-report'))
             $allowed_levels=Permission::where('name','report_card/gci/progress-report')->pluck('allowed_levels')->first();
 
         $allowed_levels=json_decode($allowed_levels);
