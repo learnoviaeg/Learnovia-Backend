@@ -39,6 +39,7 @@ class ReoprtCardsMonthlyController extends Controller
             $GLOBALS['user_id'] = $user_id;
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 // $qu->whereNull('parent')
+                $qu->where('name','LIKE',"%$request->trimester%");
                 $qu->with(['Children.userGrades' => function($query) use ($user_id , $request){
                     $query->where("user_id", $user_id);
                 },'GradeItems.userGrades' => function($query) use ($user_id , $request){
@@ -48,25 +49,10 @@ class ReoprtCardsMonthlyController extends Controller
                 }]); 
             };
 
-            $callbackNames = function ($req) use($request,$grade_CatsT2,$grade_CatsT3){
-                // if($request->trimester == 'T2')
-                //     $req->whereIn('name',$grade_CatsT2);
-                // if($request->trimester == 'T3')
-                //     $req->whereIn('name',$grade_CatsT3);
-
-                $req->where('name','LIKE',"%$request->trimester%");
-
-            };
-            // $callbackMonth = function ($req) use($request){
-            //     $req->where('name',$request->month);
-            // };
-
-            $callback = function ($qu) use ($request ,$callbackNames) {
-                // $callback = function ($qu) use ($request ,$callbackNames, $callbackMonth) {
+            $callback = function ($qu) use ($request ,$grade_category_callback) {
                 $qu->where('role_id', 3);
-                $qu->whereHas('courses.gradeCategory',$callbackNames)
-                    // ->with(['courses.gradeCategory' => $callbackNames,'courses.gradeCategory.GradeItems' => $callbackMonth]); 
-                    ->with(['courses.gradeCategory' => $callbackNames]); 
+                $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                    ->with(['courses.gradeCategory' => $grade_category_callback]); 
             };
             $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                             ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
@@ -89,13 +75,16 @@ class ReoprtCardsMonthlyController extends Controller
             'trimester' => 'required|in:T2,T3'
         ]);
 
+        $check=null;
+        $allowed_levels=null;
         if($request->user()->can('report_card/gci/progress-report'))
             $allowed_levels=Permission::where('name','report_card/gci/progress-report')->pluck('allowed_levels')->first();
 
         $allowed_levels=json_decode($allowed_levels);
         $student_levels = Enroll::where('user_id',Auth::id())->pluck('level')->toArray();
-        $check=array_intersect($allowed_levels, $student_levels);
-        if(count($check) == 0)
+        if($allowed_levels != null)
+            $check=array_intersect($allowed_levels, $student_levels);
+        if($check !=null)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $result_collection = collect([]);
@@ -107,6 +96,7 @@ class ReoprtCardsMonthlyController extends Controller
         $GLOBALS['user_id'] = $user_id;
         $grade_category_callback = function ($qu) use ($user_id , $request) {
             // $qu->whereNull('parent')
+            $qu->where('name','LIKE',"%$request->trimester%");
             $qu->with(['Children.userGrades' => function($query) use ($user_id , $request){
                 $query->where("user_id", $user_id);
             },'GradeItems.userGrades' => function($query) use ($user_id , $request){
@@ -116,25 +106,10 @@ class ReoprtCardsMonthlyController extends Controller
             }]); 
         };
 
-        $callbackNames = function ($req) use($request,$grade_CatsT2,$grade_CatsT3){
-            // if($request->trimester == 'T2')
-            //     $req->whereIn('name',$grade_CatsT2);
-            // if($request->trimester == 'T3')
-            //     $req->whereIn('name',$grade_CatsT3);
-
-            $req->where('name','LIKE',"%$request->trimester%");
-
-        };
-        // $callbackMonth = function ($req) use($request){
-        //     $req->where('name',$request->month);
-        // };
-
-        // $callback = function ($qu) use ($request ,$callbackNames, $callbackMonth) {
-        $callback = function ($qu) use ($request ,$callbackNames) {
+        $callback = function ($qu) use ($request ,$grade_category_callback) {
             $qu->where('role_id', 3);
-            $qu->whereHas('courses.gradeCategory',$callbackNames)
-                // ->with(['courses.gradeCategory' => $callbackNames,'courses.gradeCategory.GradeItems' => $callbackMonth]); 
-                ->with(['courses.gradeCategory' => $callbackNames]); 
+            $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
+                ->with(['courses.gradeCategory' => $grade_category_callback]); 
         };
         $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                         ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
