@@ -375,6 +375,11 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/first-2022', 'title' => 'First term report card 2022/2023 (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/first-printAll-2022', 'title' => 'First term report card 2022/2023 (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
 
+        // alraya        
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-2022', 'title' => 'First term report card 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-printAll-2022', 'title' => 'First term report card All 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
+
+
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/edit', 'title' => 'Edit letter', 'icon' => 'grade']);

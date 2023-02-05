@@ -171,6 +171,9 @@ class ReportCardsController extends Controller
         if($user->can('report_card/green-city/first-term-2022'))
             $allowed_levels=Permission::where('name','report_card/green-city/first-term-2022')->pluck('allowed_levels')->first();
 
+        if($user->can('report_card/alraya/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/alraya/first-term-2022')->pluck('allowed_levels')->first();
+
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);

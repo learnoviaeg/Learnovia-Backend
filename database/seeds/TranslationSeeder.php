@@ -125,6 +125,15 @@ class TranslationSeeder extends Seeder
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022','language'=> 2, 'value' => 'تقرير الدرجات']);
         Dictionary::firstOrCreate(['key' => 'report_card/green-city/first-term-2022-all','language'=> 2, 'value' => 'تقرير الدرجات للجميع']);
 
+
+        // alraya
+        Dictionary::firstOrCreate(['key' => 'report_card/alraya/first-term-2022','language'=> 1, 'value' => 'First term report card 2022/2023 (alraya)']);
+        Dictionary::firstOrCreate(['key' => 'report_card/alraya/first-term-printAll-2022','language'=> 1, 'value' => 'All First term report card 2022/2023 (alraya)']);
+
+        Dictionary::firstOrCreate(['key' => 'report_card/alraya/first-term-2022', 'language' => 2, 'value' => 'تقرير الدرجات']);
+        Dictionary::firstOrCreate(['key' => 'report_card/alraya/first-term-printAll-2022', 'language' => 2, 'value' => 'تقرير الدرجات للجميع']);
+
+
         // nile-garden
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022','language'=> 1, 'value' => 'nile garden Report (Monthly)']);
         Dictionary::firstOrCreate(['key' => 'report_card/nile-garden/monthly/oct-2022-all','language'=> 1, 'value' => 'nile garden Report All(Monthly)']);
