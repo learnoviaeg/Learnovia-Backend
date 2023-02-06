@@ -40,13 +40,17 @@ class ReoprtCardsMonthlyController extends Controller
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 // $qu->whereNull('parent')
                 $qu->where('name','LIKE',"%$request->trimester%");
-                $qu->with(['Children.userGrades' => function($query) use ($user_id , $request){
+                $qu->with([
+                    // 'Children.userGrades' => function($query) use ($user_id , $request){
+                //     $query->where("user_id", $user_id);
+                // }
+                // ,'GradeItems.userGrades' => function($query) use ($user_id , $request){
+                //     $query->where("user_id", $user_id);
+                // },
+                'userGrades' => function($query) use ($user_id , $request){
                     $query->where("user_id", $user_id);
-                },'GradeItems.userGrades' => function($query) use ($user_id , $request){
-                    $query->where("user_id", $user_id);
-                },'userGrades' => function($query) use ($user_id , $request){
-                    $query->where("user_id", $user_id);
-                }]); 
+                }
+            ]); 
             };
 
             $callback = function ($qu) use ($request ,$grade_category_callback) {
@@ -97,13 +101,17 @@ class ReoprtCardsMonthlyController extends Controller
         $grade_category_callback = function ($qu) use ($user_id , $request) {
             // $qu->whereNull('parent')
             $qu->where('name','LIKE',"%$request->trimester%");
-            $qu->with(['Children.userGrades' => function($query) use ($user_id , $request){
+            $qu->with([
+            //     'Children.userGrades' => function($query) use ($user_id , $request){
+            //     $query->where("user_id", $user_id);
+            // }
+            // ,'GradeItems.userGrades' => function($query) use ($user_id , $request){
+            //     $query->where("user_id", $user_id);
+            // },
+            'userGrades' => function($query) use ($user_id , $request){
                 $query->where("user_id", $user_id);
-            },'GradeItems.userGrades' => function($query) use ($user_id , $request){
-                $query->where("user_id", $user_id);
-            },'userGrades' => function($query) use ($user_id , $request){
-                $query->where("user_id", $user_id);
-            }]); 
+            }
+        ]); 
         };
 
         $callback = function ($qu) use ($request ,$grade_category_callback) {
