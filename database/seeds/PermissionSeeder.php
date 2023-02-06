@@ -427,6 +427,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/user-grade', 'title' => 'course grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/edit_restriction', 'title' => 'Edit Restriction']);
