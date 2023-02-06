@@ -350,6 +350,8 @@ class PermissionSeeder extends Seeder
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/monthly', 'title' => 'Monthly Report(Green City National)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/monthly/printAll', 'title' => 'Monthly Report All(Green City National)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/first-term-2022', 'title' => 'First Term Report 2022-2023(Green City National)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/first-term-2022-all', 'title' => 'First Term Report 2022-2023 All(Green City National)','icon' => 'Report-Card','dashboard'=>1]);
 
         // fgl
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/fgls/final', 'title' => 'Fgls Final Report','icon' => 'Report-Card','dashboard'=>1]);
@@ -372,6 +374,11 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain', 'title' => 'First term report card (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/first-2022', 'title' => 'First term report card 2022/2023 (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/haramain/first-printAll-2022', 'title' => 'First term report card 2022/2023 (haramain)', 'icon' => 'Report-Card','dashboard'=>1]);
+
+        // alraya        
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-2022', 'title' => 'First term report card 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-printAll-2022', 'title' => 'First term report card All 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
+
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/add', 'title' => 'Add letter', 'icon' => 'grade']);
@@ -420,6 +427,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show-all-courses', 'title' => 'admin permission']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/update-password', 'title' => 'update password']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/update-username', 'title' => 'update username']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'user/user-grade', 'title' => 'course grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/username', 'title' => 'show username']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/show/as-participant', 'title' => 'show as participant']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'site/edit_restriction', 'title' => 'Edit Restriction']);

@@ -283,7 +283,6 @@ class UserGradeController extends Controller
         return HelperController::api_response_format(200, array_values($cour));
     }
 
-
     public function fglReport(Request $request)
     {
         $request->validate([
@@ -320,7 +319,7 @@ class UserGradeController extends Controller
             });     
         };
 
-        $callback = function ($qu) use ($request , $grade_category_callback) {
+        $callback = function ($qu) use ($request , $grade_category_callback,$course_callback) {
             // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
             $qu->whereHas('courses' , $course_callback)
@@ -349,14 +348,14 @@ class UserGradeController extends Controller
             $percentage = ($student_mark /$total)*100;
 
         $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-                    ->where('higher_boundary', '>', $percentage)->first();
+                    ->where('higher_boundary', '>', $percentage)->latest()->first();
 
         if($percentage == 100)
             $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-            ->where('higher_boundary', '>=', $percentage)->first();
+            ->where('higher_boundary', '>=', $percentage)->latest()->first();
 
         $result->total = $total;
-        $result->student_total_mark = $student_mark;
+        $result->student_total_mark = round($student_mark,2);
         if($evaluation != null)
             $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
@@ -368,7 +367,6 @@ class UserGradeController extends Controller
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
-
 
     public function export(Request $request)
     {
@@ -421,7 +419,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 
     public function user_report_in_all_courses(Request $request)
@@ -437,7 +434,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 }
 

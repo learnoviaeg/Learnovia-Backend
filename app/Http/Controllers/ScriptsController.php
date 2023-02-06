@@ -7,6 +7,7 @@ use Redis;
 use App\Level;
 use App\Course;
 use App\Enroll;
+use App\User;
 use App\lesson;
 use App\Segment;
 use Carbon\Carbon;
@@ -18,6 +19,8 @@ use App\SecondaryChain;
 use Illuminate\Http\Request;
 use App\Exports\LessonEcport;
 use App\Events\GradeItemEvent;
+use App\Events\UserGradesEditedEvent;
+use App\Events\GradeCalculatedEvent;
 use App\Events\UpdatedAttemptEvent;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Jobs\migrateChainAmdEnrollment;
@@ -274,8 +277,27 @@ class ScriptsController extends Controller
         $request->validate([
             'course'  => 'required|integer|exists:courses,id',
         ]);
-        $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course)->first()));
-        dispatch($userGradesJob);
+        // $userGradesJob = (new \App\Jobs\PercentageAndLetterCalculation(Course::where('id' , $request->course)->first()));
+        // dispatch($userGradesJob);
+
+        $course=Course::where('id' , $request->course)->first();
+        foreach($course->gradeCategory as $cat)
+        {
+            foreach($cat->userGrades as $user_grader){
+                if($cat->max != null && $cat->max > 0){
+                    $percentage = ($user_grader->grade / $cat->max) * 100;
+                    $user_grader->update([
+                        'percentage' => $percentage,
+                    ]);
+
+                   $user=User::whereNull('deleted_at')->whereId($user_grader->user_id)->first();
+                   if($user !=null && $cat->Parents != null)
+                        event(new UserGradesEditedEvent($user, $cat->Parents));
+
+                    event(new GradeCalculatedEvent($user_grader));
+                }           
+            }
+        }
         return 'done';
     }
 
