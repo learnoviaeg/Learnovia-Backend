@@ -88,7 +88,7 @@ class ReoprtCardsMonthlyController extends Controller
         $student_levels = Enroll::where('user_id',Auth::id())->pluck('level')->toArray();
         if($allowed_levels != null)
             $check=array_intersect($allowed_levels, $student_levels);
-        if($check !=null)
+        if($check == null)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $result_collection = collect([]);
