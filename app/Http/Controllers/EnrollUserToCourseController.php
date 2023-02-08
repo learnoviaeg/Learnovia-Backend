@@ -337,7 +337,7 @@ class EnrollUserToCourseController extends Controller
         }if($request->filled('class')){
             $users->where('group',$request->class);
             $flg=true;
-        }if($request->filled('courses')){
+        }if($request->filled('course')){
             $users->where('course',$request->course);
             $flg=true;
         }
