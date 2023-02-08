@@ -40,6 +40,8 @@ class ReoprtCardsMonthlyController extends Controller
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 // $qu->whereNull('parent')
                 $qu->where('name','LIKE',"%$request->trimester%");
+                $qu->where('name','NOT LIKE',"%Total coursework%");
+                $qu->where('name','NOT LIKE',"%Trimester exam%");
                 $qu->with([
                     // 'Children.userGrades' => function($query) use ($user_id , $request){
                 //     $query->where("user_id", $user_id);
@@ -101,6 +103,8 @@ class ReoprtCardsMonthlyController extends Controller
         $grade_category_callback = function ($qu) use ($user_id , $request) {
             // $qu->whereNull('parent')
             $qu->where('name','LIKE',"%$request->trimester%");
+            $qu->where('name','NOT LIKE',"%Total coursework%");
+            $qu->where('name','NOT LIKE',"%Trimester exam%");
             $qu->with([
             //     'Children.userGrades' => function($query) use ($user_id , $request){
             //     $query->where("user_id", $user_id);
