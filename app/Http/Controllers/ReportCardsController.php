@@ -9,6 +9,7 @@ use App\LetterDetails;
 use App\ScaleDetails;
 use Spatie\Permission\Models\Permission;
 use App\AcademicYear;
+use App\Segment;
 use Illuminate\Support\Facades\Auth;
 
 class ReportCardsController extends Controller
