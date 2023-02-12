@@ -9,6 +9,7 @@ use App\LetterDetails;
 use App\ScaleDetails;
 use Spatie\Permission\Models\Permission;
 use App\AcademicYear;
+use App\Segment;
 use Illuminate\Support\Facades\Auth;
 
 class ReportCardsController extends Controller
@@ -1184,7 +1185,12 @@ class ReportCardsController extends Controller
         }
         
         $years = AcademicYear::select('id')->pluck('id');
-        $request->request->add(['years' => $years]);
+        $request->request->add(['years' => AcademicYear::where('current',1)->pluck('id')]);
+
+        // these to handle that front-end not sent segments
+        $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
+        $request->request->add(['segments' => $segments]);
+        
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
         ->whereHas('courses' , $callback)
         ->with(['courses' => $callback ])->get()->pluck('courses');

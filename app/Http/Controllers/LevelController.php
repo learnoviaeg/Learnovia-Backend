@@ -8,7 +8,8 @@ use App\Repositories\ChainRepositoryInterface;
 use App\Level;
 use App\Course;
 use App\AcademicType;
-// use Auth;
+use App\AcademicYear;
+use App\Segment;
 use App\Classes;
 use App\Exports\LevelsExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -50,6 +51,13 @@ class LevelController extends Controller
 
             return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
+
+        // for reports that forntend not handle it and they weren't sending "segments" 
+        $years = AcademicYear::select('id')->pluck('id');
+        $request->request->add(['years' => AcademicYear::where('current',1)->pluck('id')]);
+        $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
+        $request->request->add(['segments' => $segments]);
+
         $enrolls = $this->chain->getEnrollsByManyChain($request);
 
         if(!$request->has('user_id'))
