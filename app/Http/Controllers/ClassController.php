@@ -10,7 +10,6 @@ use App\Level;
 use App\SegmentClass;
 use Illuminate\Http\Request;
 use App\Classes;
-use App\CourseSegment;
 use App\Segment;
 use App\User;
 use App\ClassLevel;
@@ -251,53 +250,6 @@ class ClassController extends Controller
         $class->delete();
         return HelperController::api_response_format(200, Classes::get()->paginate(HelperController::GetPaginate($request)), __('messages.class.delete'));
     }
-    /**
-     * @Description :assigns a class to certain year, type and level.
-     * @param : year, type, level and class.
-     * @return : A string message which indicates if class assigned successfully or not.
-     */
-    public function Assign_class_to(Request $request)
-    {
-        $rules =[
-            'year' => 'array',
-            'year.*' => 'exists:academic_years,id',
-            'type' => 'required|array',
-            'type.*' => 'required|exists:academic_types,id',
-            'level' => 'required|array',
-            'level.*' => 'required|exists:levels,id',
-            'class' => 'required|exists:classes,id'
-        ];
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails())
-            return ['result' => false, 'value' => $validator->errors()];
-
-        $count=0;
-        if(count($request->type) == count ($request->level))
-        {
-            while(isset($request->type[$count]))
-                {
-                    if (isset($request->year[$count])) {
-                        $year = $request->year[$count];
-                    }
-                    else
-                    {
-                        $year = AcademicYear::Get_current();
-                        if(!isset($year))
-                            return HelperController::api_response_format(201, __('messages.error.no_active_year'));
-                        else
-                            $year=$year->id;
-                    }
-                    $academic_year_type = AcademicYearType::checkRelation($year, $request->type[$count]);
-                    $Year_level=YearLevel::checkRelation($academic_year_type->id, $request->level[$count]);
-                    $Class_level=ClassLevel::checkRelation($request->class, $Year_level->id);
-                    $count++;
-                }
-        }
-        else {
-             return HelperController::api_response_format(201, __('messages.error.data_invalid'));
-        }
-        return HelperController::api_response_format(201, 'Class Assigned Successfully');
-    }
 
     public function get_lessons_of_class(Request $request){
         $request->validate([
@@ -305,79 +257,6 @@ class ClassController extends Controller
         ]);
         $lessons = Lesson::where('course_id',$request->course)->get();
         return HelperController::api_response_format(200, $lessons,__('messages.lesson.list'));
-    }
-
-    public function GetMyclasses(Request $request)
-    {
-        $request->validate([
-            'type' => 'array',
-            'type.*' => 'exists:academic_types,id',
-            'level' => 'array',
-            'level.*' => 'exists:levels,id',
-        ]);
-        $result=array();
-        $class=array();
-        $users = User::whereId(Auth::id())->with(['enroll.courseSegment' => function($query){
-            //validate that course in my current course start < now && now < end
-            $query->where('end_date', '>', Carbon::now())->where('start_date' , '<' , Carbon::now());
-        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels' => function($query) use ($request){
-            if ($request->filled('level'))
-                $query->whereIn('level_id', $request->level);
-        },'enroll.courseSegment.segmentClasses.classLevel.yearLevels.yearType' => function($query) use ($request){
-            if ($request->filled('type'))
-                $query->whereIn('academic_type_id', $request->type);            
-        }])->first();
-
-        if($request->user()->can('site/show-all-courses'))
-        {
-            $year = AcademicYear::where('current',1)->first();
-            if($request->filled('year'))
-                $year = AcademicYear::where('id',$request->year)->first();
-
-            if(isset($year))
-                $year_type = $year->YearType->pluck('id');
-
-            if ($request->filled('type'))
-                $year_type = AcademicYearType::whereIn('academic_type_id',$request->type)->pluck('id');
-
-            if(!isset($year_type))
-                return HelperController::api_response_format(200,null, __('messages.error.no_active_year'));
-            
-            $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->pluck('id');
-
-            if($request->has('level') && count($request->level)>0)    
-                $year_levels = YearLevel::whereIn('academic_year_type_id', $year_type)->whereIn('level_id',$request->level)->pluck('id');
-            
-
-            if(isset($year_levels))
-                $classes = ClassLevel::whereIn('year_level_id',$year_levels)->pluck('class_id');
-
-            if(isset($classes))
-                $classes = Classes::whereIn('id',$classes)->get();
-            if(count($classes) == 0)
-                return HelperController::api_response_format(201,null, __('messages.error.no_available_data'));
-
-            return HelperController::api_response_format(200,$classes, __('messages.class.list'));
-        }
-
-        foreach($users->enroll as $enrolls){
-            if(isset($enrolls->courseSegment) && isset($enrolls->courseSegment->segmentClasses)){
-                foreach($enrolls->courseSegment->segmentClasses as $segmetClas)
-                    foreach($segmetClas->classLevel as $clas)
-                        if(isset($clas->yearLevels))
-                            foreach($clas->yearLevels as $level)
-                                if(count($level->yearType) > 0)
-                                    if(!in_array($clas->class_id, $result))
-                                    {
-                                        $result[]=$clas->class_id;
-                                        $class[]=Classes::find($clas->class_id);
-                                    }
-            }
-        }
-        if(count($class) > 0)
-            return HelperController::api_response_format(201,$class, __('messages.class.list'));
-        
-        return HelperController::api_response_format(201, $class,__('messages.error.no_available_data'));
     }
 
     public function export(Request $request)

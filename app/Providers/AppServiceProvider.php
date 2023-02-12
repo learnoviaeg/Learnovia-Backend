@@ -16,6 +16,7 @@ use App\Grader\FirstGrade;
 use App\Grader\LastGrade;
 use App\GradesSetup\NaturalMethod;
 use App\GradesSetup\SimpleWeightedMethod;
+use App\GradesSetup\MaxMethod;
 use App\Enroll;
 use App\Observers\EnrollObserver;
 use App\GradeItems;
@@ -85,6 +86,9 @@ class AppServiceProvider extends ServiceProvider
 
         $SimpleWeightedMethod = new SimpleWeightedMethod();
         $this->app->instance('Simple_weighted_mean', $SimpleWeightedMethod);
+
+        $MaxMethod = new MaxMethod();
+        $this->app->instance('Max', $MaxMethod);
 
         $TypeGrader = new TypeGrader();
         $this->app->instance(TypeGrader::class, $TypeGrader);
