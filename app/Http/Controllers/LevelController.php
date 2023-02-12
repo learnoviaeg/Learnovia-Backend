@@ -53,10 +53,15 @@ class LevelController extends Controller
         }
 
         // for reports that forntend not handle it and they weren't sending "segments" 
-        $years = AcademicYear::select('id')->pluck('id');
-        $request->request->add(['years' => AcademicYear::where('current',1)->pluck('id')]);
-        $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
-        $request->request->add(['segments' => $segments]);
+        if(!isset($request->years)){
+            $years = AcademicYear::where('current',1)->pluck('id');
+            $request->request->add(['years' => $years]);
+        }
+
+        if(!isset($request->segments)){
+            $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
+            $request->request->add(['segments' => $segments]);
+        }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
 
