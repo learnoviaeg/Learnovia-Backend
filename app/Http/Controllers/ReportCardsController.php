@@ -1176,13 +1176,11 @@ class ReportCardsController extends Controller
                 $qu->Where('short_name','LIKE', "%$request->month%")->select('name','id');
             };
         }
-        
-        if(!isset($request->years)){
+
+        // for reports that forntend not handle it and they weren't sending "segments" 
+        if(!isset($request->segments)){
             $years = AcademicYear::where('current',1)->pluck('id');
             $request->request->add(['years' => $years]);
-        }
-
-        if(!isset($request->segments)){
             $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
             $request->request->add(['segments' => $segments]);
         }
