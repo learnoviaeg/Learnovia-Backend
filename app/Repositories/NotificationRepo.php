@@ -21,7 +21,7 @@ class NotificationRepo implements NotificationRepoInterface
             'course_name' => isset($reqNot['course_name']) ? $reqNot['course_name'] :null,
             'lesson_id' => isset($reqNot['lesson_id']) ? $reqNot['lesson_id'] : null,
             'class_id' => isset($reqNot['class_id']) ? $reqNot['class_id'] :null,
-            'publish_date' => $reqNot['publish_date']
+            'publish_date' => $reqNot['publish_date'] 
         ];
 
         $curl = curl_init();

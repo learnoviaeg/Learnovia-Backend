@@ -8,7 +8,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Events\GradeCalculatedEvent;
+use App\Events\UserGradesEditedEvent;
 use App\Course;
+use App\User;
 
 class PercentageAndLetterCalculation implements ShouldQueue
 {
@@ -38,12 +40,15 @@ class PercentageAndLetterCalculation implements ShouldQueue
             foreach($cat->userGrades as $user_grader){
                 if($cat->max != null && $cat->max > 0){
                     $percentage = ($user_grader->grade / $cat->max) * 100;
-
                     $user_grader->update([
                         'percentage' => $percentage,
                     ]);
-                    event(new GradeCalculatedEvent($user_grader));
 
+                    $user=User::whereNull('deleted_at')->whereId($user_grader->user_id)->first();
+                    if($user !=null && $cat->Parents != null)
+                        event(new UserGradesEditedEvent($user, $cat->Parents));
+
+                    event(new GradeCalculatedEvent($user_grader));
                 }           
             }
         }  

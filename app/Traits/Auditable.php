@@ -11,21 +11,28 @@ trait Auditable
     public static function bootAuditable()
     {
         static::created(function (Model $model) {
-            self::audit('created', $model);
+            // self::audit('created', $model);
+            $userGradesJob = (new \App\Jobs\AuditLogsJob(auth()->user() , 'created', $model ,request()->ip() ?? null));
+            dispatch($userGradesJob)->onQueue('auditLogs');
         });
     
 
         static::updated(function (Model $model) {
-            self::audit('updated', $model);
+            // self::audit('updated', $model);
+            $userGradesJob = (new \App\Jobs\AuditLogsJob(auth()->user() , 'updated', $model ,request()->ip() ?? null));
+            dispatch($userGradesJob)->onQueue('auditLogs');
         });
 
         static::deleted(function (Model $model) {
-            self::audit('deleted', $model);
+            // self::audit('deleted', $model);
+            $userGradesJob = (new \App\Jobs\AuditLogsJob(auth()->user() , 'deleted', $model ,request()->ip() ?? null));
+            dispatch($userGradesJob)->onQueue('auditLogs');
         });
     }
 
     protected static function audit($description, $model)
     {
+        
         $subject_model = substr(get_class($model),strripos(get_class($model),'\\')+1);
         $user_fullname = auth()->user()->fullname;
 
@@ -89,7 +96,7 @@ trait Auditable
                         'hole_description' => $hole_description,
                     ]);
                 }
-        }else{  // end to exclude refresh tokens of firebase*/
+        }else{  // end to exclude refresh tokens of firebase
             $notes = null;
             if ($subject_model == 'page' || $subject_model == 'Announcement') {
                 $item_name = $model->title;
@@ -135,6 +142,6 @@ trait Auditable
                 'item_id'      => $item_id,
                 'hole_description' => $hole_description,
             ]);
-        }
+        } 
     }
 }

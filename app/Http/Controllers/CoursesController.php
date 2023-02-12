@@ -403,4 +403,12 @@ class CoursesController extends Controller
         return response()->json(['message' => 'Sorted successfully', 'body' =>  null ], 200);
     }
 
+    // courses without pagination
+    public function myCourses(Request $request)
+    {
+        $enrolls = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id());
+       $courses=Enroll::whereIn('id',$enrolls->pluck('id'))->with('courses')->get();
+
+        return response()->json(['message' => 'successfully', 'body' =>  $courses ], 200);
+    }
 }

@@ -47,27 +47,29 @@ class UserGradeController extends Controller
             'user.*.scale_id'     => 'nullable|exists:scale_details,id',
         ]);
         foreach($request->user as $user){
-            $percentage = 0;
+            $percentage = null;
             $instance = GradeCategory::find($user['item_id']);
-
             if($instance->max != null && $instance->max > 0){
-
                 if($instance->aggregation == 'Scale'){
-                    $scale = ScaleDetails::find( $user['scale_id']);
-                    $user['grade'] = $scale->grade;
-                    $percentage = ($scale->grade / $instance->max) * 100;
+                    $scale=null;
+                    if(isset($user['scale_id'])){
+                        $scale = ScaleDetails::find($user['scale_id']);
+                        $user['grade'] = $scale->grade;
+                        $percentage = ($scale->grade / $instance->max) * 100;
+                    }
 
                     UserGrader::updateOrCreate(
                         ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                        ['scale' =>  $scale->evaluation , 'scale_id' => $scale->id ]
+                        ['scale' =>  ($scale != null) ? $scale->evaluation : null ,
+                         'scale_id' => ($scale != null) ? $scale->id : null ]
                     );
-
                 }
-                $percentage = ($user['grade'] / $instance->max) * 100;
+                if(isset($user['scale_id']))
+                    $percentage = ($user['grade'] / $instance->max) * 100;
             }            
             $grader = UserGrader::updateOrCreate(
                 ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                ['grade' =>  $user['grade'] , 'percentage' => $percentage ]
+                ['grade' =>  isset($user['grade']) ? $user['grade'] : null , 'percentage' => $percentage ]
             );
             if($instance->parent != null)
                 event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
@@ -128,71 +130,6 @@ class UserGradeController extends Controller
     {
         $grade = UserGrade::all();
         return HelperController::api_response_format(200, $grade);
-    }
-
-    public function graderReport(Request $request)
-    {
-        $request->validate([
-            'course' => 'required|exists:courses,id',
-            'class'  => 'required|exists:classes,id',
-            'user'   => 'nullable|exists:users,id',
-            'search' => 'nullable|string'
-        ]);
-        $courseSegment = CourseSegment::GetWithClassAndCourse($request->class, $request->course);
-        if ($courseSegment == null)
-            return HelperController::api_response_format(200, null, 'This Course not assigned to this class');
-        LastAction::lastActionInCourse($request->course);
-        $users = User::whereIn('id', Enroll::where('course_segment', $courseSegment->id)->where('role_id', 3)->pluck('user_id'));
-        if($request->filled('user'))
-            $users->whereId($request->user);
-
-        if($request->filled('search'))
-            $users->where('username' , 'like', '%' . $request->search. '%');
-        $users = $users->get(['id', 'firstname', 'lastname', 'username', 'arabicname', 'picture']);
-        $gradeCategories = $courseSegment->where('id', $courseSegment->id)->with('GradeCategory.GradeItems')->get()->pluck('GradeCategory')[0];
-        $first = true;
-        $grades = [];
-        $ids = [];
-        foreach ($users as $user) {
-            UserGrade::quizUserGrade($user);
-            $user->grades = collect();
-            $i = 0;
-            if(isset($user->attachment))
-                $user->picture=$user->attachment->path;
-            foreach ($gradeCategories as $category) {
-                $grades[$i]['items'] = collect();
-                $grades[$i]['name'] = $category->name;
-                $grades[$i]['id'] = $category->id;
-                $grades[$i]['weight'] = $category->weight();
-                $grades[$i]['max'] = $category->total();
-                $user->grades[$i] = collect();
-                $user->grades[$i]['total'] = 0;
-                $user->grades[$i]['name'] = $category->name;
-                $user->grades[$i]['id'] = $category->id;
-                $user->grades[$i]['data'] = collect();
-                foreach ($category->GradeItems as $item) {
-                    $temp = UserGrade::where('user_id', $user->id)->where('grade_item_id', $item->id)->first();
-                    if ($temp != null && $first) {
-                        $user->grades[$i]['total'] = $temp->calculateGrade();
-                        $first = false;
-                        $temp->grade_items = null;
-                    }
-                    $usergrade = new stdClass();
-                    $usergrade->name = $item->name;
-                    $usergrade->id = $item->id;
-                    $ids[] = $item->id;
-                    $usergrade->final_grade = null;
-                    $usergrade->max = $item->grademax;
-                    if ($temp != null)
-                        $usergrade->final_grade = $temp->final_grade;
-                    $user->grades[$i]['data']->push($usergrade);
-                    $grades[$i]['items']->push(collect(['name' => $item->name, 'id' => $item->id, 'max' => $item->grademax, 'weight' => $item->weight()]));
-                }
-                $first = true;
-                $i++;
-            }
-        }
-        return HelperController::api_response_format(200, ['schema' => $grades, 'users' => $users, 'ids' => array_unique($ids)]);
     }
 
     public function SingleUserInSingleCourse(Request $request)
@@ -346,37 +283,49 @@ class UserGradeController extends Controller
         return HelperController::api_response_format(200, array_values($cour));
     }
 
-
     public function fglReport(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
-        $allowed_levels=json_decode($allowed_levels);
+        $allowed_levels=null;
+        $check=[];
+        if($request->user()->can('report_card/fgls'))
+            $allowed_levels=Permission::where('name','report_card/fgls')->pluck('allowed_levels')->first();
+
+        if($request->user()->can('report_card/fgls/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/fgls/first-term-2022')->pluck('allowed_levels')->first();
+
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
-        $check=(array_intersect($allowed_levels, $student_levels));
-
-        $total_check=(array_intersect([6, 7 ,8 , 9, 10 , 11 , 12], $student_levels));
-
-        if(count($check) == 0)
-            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        if($allowed_levels != null){
+            $allowed_levels=json_decode($allowed_levels);
+            $check=(array_intersect($allowed_levels, $student_levels));
+            if(count($check) == 0)
+                return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+        }
         $total = 0;
         $student_mark = 0;
         $grade_category_callback = function ($qu) use ($request ) {
-            $qu->where('name', 'First Term');
+            $qu->where('name','LIKE', "%1st Term%");
             $qu->with(['userGrades' => function($query) use ($request){
                 $query->where("user_id", $request->user_id);
             }]);     
         };
 
-        $callback = function ($qu) use ($request , $grade_category_callback) {
+        $course_callback = function ($qu) use ($request ) {
+            $qu->Where(function ($query) {
+                $query->where('short_name', 'NOT LIKE' , "%*%");
+            });     
+        };
+
+        $callback = function ($qu) use ($request , $grade_category_callback,$course_callback) {
             // $qu->orderBy('course', 'Asc');
             $qu->where('role_id', 3);
+            $qu->whereHas('courses' , $course_callback)
+                ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
                 ->with(['courses.gradeCategory' => $grade_category_callback]); 
-
         };
 
         $result = User::whereId($request->user_id)->whereHas('enroll' , $callback)
@@ -392,7 +341,6 @@ class UserGradeController extends Controller
             
             if(str_contains($enroll->courses->name, 'O.L'))
                 break;
-
         }
 
          $percentage = 0;
@@ -400,23 +348,25 @@ class UserGradeController extends Controller
             $percentage = ($student_mark /$total)*100;
 
         $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-                    ->where('higher_boundary', '>', $percentage)->first();
+                    ->where('higher_boundary', '>', $percentage)->latest()->first();
 
         if($percentage == 100)
             $evaluation = LetterDetails::select('evaluation')->where('lower_boundary', '<=', $percentage)
-            ->where('higher_boundary', '>=', $percentage)->first();
+            ->where('higher_boundary', '>=', $percentage)->latest()->first();
 
         $result->total = $total;
-        $result->student_total_mark = $student_mark;
-        $result->evaluation = $evaluation->evaluation;
+        $result->student_total_mark = round($student_mark,2);
+        if($evaluation != null)
+            $result->evaluation = $evaluation->evaluation;
         $result->add_total = true;
         unset($result->enroll);
+
+        $total_check=(array_intersect([ 7 ,8 , 9, 10 , 11 , 12, 21 ,22 , 23, 24 , 25 , 26], $student_levels));
         if(count($total_check) == 0)
             $result->add_total = false;
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
-
 
     public function export(Request $request)
     {
@@ -469,7 +419,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 
     public function user_report_in_all_courses(Request $request)
@@ -485,7 +434,6 @@ class UserGradeController extends Controller
                             }])->get();
 
         return response()->json(['message' => __('messages.grade_category.list'), 'body' => $grade_categories], 200);
-
     }
 }
 
