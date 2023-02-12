@@ -1176,9 +1176,15 @@ class ReportCardsController extends Controller
                 $qu->Where('short_name','LIKE', "%$request->month%")->select('name','id');
             };
         }
-        
-        $years = AcademicYear::select('id')->pluck('id');
-        $request->request->add(['years' => $years]);
+
+        // for reports that forntend not handle it and they weren't sending "segments" 
+        if(!isset($request->segments)){
+            $years = AcademicYear::where('current',1)->pluck('id');
+            $request->request->add(['years' => $years]);
+            $segments=Segment::whereIn('academic_year_id',$years)->pluck('id');
+            $request->request->add(['segments' => $segments]);
+        }
+
         $courses = $this->chain->getEnrollsByManyChain($request)->where('user_id',Auth::id())->distinct('course')->select('course')
         ->whereHas('courses' , $callback)
         ->with(['courses' => $callback ])->get()->pluck('courses');
