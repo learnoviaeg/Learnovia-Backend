@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Course;
-use App\CourseSegment;
 use App\Segment;
 use App\AcademicYear;
 use Maatwebsite\Excel\Concerns\FromCollection;

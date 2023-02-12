@@ -25,6 +25,8 @@ use Modules\QuestionBank\Entities\Quiz;
 use Modules\UploadFiles\Entities\media;
 use App\Notifications\SendNotification;
 use Modules\UploadFiles\Entities\MediaLesson;
+use GuzzleHttp\Client;
+
 class NotificationController extends Controller
 {
     public function get_google_token()
@@ -116,7 +118,6 @@ class NotificationController extends Controller
                         $data[$i]['item_lesson_id'] = Attendance::where('id', $not->data['id'])->pluck('id')->first();
 
                     $deleted = 0 ;
-                    // if object doesnot deleted or this student not enrolled in this course
                     if(!isset($data[$i]['item_lesson_id']) || ($not->data['type'] != 'meeting' && !in_array($item_course_segment,$course_segments_ids->toArray()))){
                         $deleted = 1;
                     }
@@ -202,7 +203,6 @@ class NotificationController extends Controller
         if($check > 0)
             event(new MassLogsEvent($logsbefore,'deleted'));
         return HelperController::api_response_format(200, $body = [], $message = 'notifications deleted');
-
     }
 
    /**
@@ -213,7 +213,6 @@ class NotificationController extends Controller
     public function SeenNotifications(Request $request)
     {
         $request->validate([
-            // 'id' => 'exists:notifications,id',
             'type' => 'string|in:assignment,Attendance,meeting,Page,quiz,file,media|required_with:id',
             'id' => 'int',
             'message' => 'string|required_with:id'
@@ -227,14 +226,8 @@ class NotificationController extends Controller
                 $not->data= json_decode($not->data, true);
                 if($not->data['type'] != 'announcement')
                 {
-                    //for log event
-                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
-
                     if($not->data['id'] == $request->id && $not->data['type'] == $request->type && $not->data['message'] == $request->message)
                         $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                
-                    // if($check > 0)
-                    //     event(new MassLogsEvent($logsbefore,'updated'));
                 }
             }
             $print=self::getallnotifications($request);
@@ -242,17 +235,11 @@ class NotificationController extends Controller
         }
         else
         {
-            // $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->update(array('read_at' => Carbon::now()->toDateTimeString()));
             $noti = DB::table('notifications')->where('notifiable_id', $request->user()->id)->get();
             foreach ($noti as $not) {
                 $not->data= json_decode($not->data, true);
-                if($not->data['type'] != 'announcement'){
-                    //for log event
-                    // $logsbefore=DB::table('notifications')->where('id', $not->id)->get();
+                if($not->data['type'] != 'announcement')
                     $check=DB::table('notifications')->where('id', $not->id)->update(['read_at' => Carbon::now()->toDateTimeString()]);
-                    // if($check > 0)
-                    //     event(new MassLogsEvent($logsbefore,'updated'));
-                }
             }
             $print=self::getallnotifications($request);
             return $print;
@@ -269,6 +256,24 @@ class NotificationController extends Controller
         $user=$request->user();
         $user->token=$request->token;
         $user->save();
+
+        $fcm_tokens=[
+            'fcm_token' => $request->token,
+        ];
+        $data=[
+            'user_id' => Auth::id(),
+            'school_domain'=>substr(request()->getHost(),0,strpos(request()->getHost(),'api')),
+            // 'school_domain'=>'test',
+            'fcm_tokens'=> array($fcm_tokens)
+        ];
+        $clientt = new Client();
+        $res = $clientt->request('POST', config('NotificationConfig.Notification_url').'register', [
+            'headers'   => [
+                'username' => 'dev',
+                'password' => 'api_dev_BBLf4giDY',
+            ], 
+            'form_params' => $data
+        ]);
         
         return HelperController::api_response_format(200, 'token added Done');
     }

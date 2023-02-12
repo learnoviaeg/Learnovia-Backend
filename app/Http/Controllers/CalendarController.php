@@ -86,57 +86,6 @@ class CalendarController extends Controller
         return  $withdatesannounce;
     }
 
-    /**
-     * components in calendar
-     *
-     * @param  [int] auth
-     * @param  [date] date
-     * @return [objects] all components belongs to this user
-     */
-    public function Component_calendar($auth, $date)
-    {
-        $CourseSeg = Enroll::where('user_id', $auth)->pluck('course_segment');
-
-        $Lessons = array();
-        foreach ($CourseSeg as $cour) {
-            $checkLesson = Lesson::where('course_segment_id', $cour)->get();
-
-            if ($checkLesson->isEmpty())
-                continue;
-
-            $Lessons[] = $checkLesson;
-        }
-        $components  = Component::where('active', 1)->where('type', 3)->get();
-        $result = [];
-        foreach ($components as $component) {
-            $result[$component->name] = [];
-        }
-        $user = User::whereId(Auth::user()->id)->with(['enroll.courseSegment'])->first();
-        foreach ($user->enroll as $enroll) {
-            if ($enroll->courseSegment != null) {
-                foreach ($enroll->courseSegment->lessons as $lesson) {
-                    foreach ($components as $component) {
-                        $temp = $lesson->module($component->module, $component->model);
-                        $temp->whereMonth('start_date', '=', $date)
-                        ->orderBy('start_date')
-                        ->withPivot('start_date');
-                        if ($user->can('site/course/student')) {
-                            $temp->where('visible', '=', 1)
-                                ->where('publish_date', '<=', Carbon::now());
-                        }
-                        if(count($temp->get()) == 0)
-                            continue;
-                        $tempBulk = $temp->get();
-                        foreach($tempBulk as $item){
-                            $result[$component->name][] = $item;
-                        }
-                    }
-                }
-            }
-        }
-        return $result;
-    }
-
     public function weeklyCalender(Request $request)
     {
         $days = collect();

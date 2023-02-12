@@ -13,6 +13,7 @@ use checkEnroll;
 use URL;
 use App\Classes;
 use App\CourseItem;
+use App\Helpers\UploadHelper;
 use App\CourseSegment;
 use App\Enroll;
 use App\User;
@@ -195,7 +196,15 @@ class MediaController extends Controller
                 // $media->name = $name;
                 $media->size = $size;
                 $media->attachment_name = $fileName;
-                $media->link = url('storage/media/' . $name);
+
+                if(env('UPLOAD_TYPE') == 'AZURE'){
+                    $url=UploadHelper::upload($item,'media',$fileName);
+                    $media->link=$url;
+                }
+                else{
+                    $url=Storage::disk('public')->putFileAs('media/', $item, $name);;
+                    $media->link = url('storage/media/' . $name);
+                }
             }
 
             if ($request->type == 1) {
@@ -239,12 +248,7 @@ class MediaController extends Controller
                 $mediaLesson->index = MediaLesson::getNextIndex($lesson);
                 $mediaLesson->publish_date = $publishdate;
                 $mediaLesson->visible = isset($request->visible)?$request->visible:1;
-
                 $mediaLesson->save();
-
-                if ($request->type == 0) {
-                    Storage::disk('public')->putFileAs('media/', $item, $name);
-                }
 
                 $material=Material::where('item_id' ,$mediaLesson->media_id)->where('lesson_id' ,$mediaLesson->lesson_id)->where('type' , 'media')->first();
                 if(isset($request->users_ids))
@@ -352,8 +356,15 @@ class MediaController extends Controller
             $media->type = $request->Imported_file->getClientMimeType();
             $media->size = $size;
             $media->attachment_name = $fileName;
-            $media->link = url('storage/media/' . $name);
-            Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+
+            if(env('UPLOAD_TYPE') == 'AZURE'){
+                $url=UploadHelper::upload($request->Imported_file,'files',$fileName);
+                $media->link=$url;
+            }
+            else{
+                Storage::disk('public')->putFileAs('media/', $request->Imported_file, $name);
+                $media->link = url('storage/media/' . $name);
+            }
         }
 
         if ($request->filled('url')){

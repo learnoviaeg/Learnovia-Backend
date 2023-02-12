@@ -239,9 +239,7 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Zipper' => Chumper\Zipper\Zipper::class,
         'TXPDF' => Elibyy\TCPDF\Facades\TCPDF::class,
-        'checkEnroll' => App\Http\Controllers\checkEnrollController::class,
         'Browser' => \hisorange\BrowserDetect\Facade::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
-
     ],
 ];
