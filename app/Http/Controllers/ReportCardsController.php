@@ -207,7 +207,7 @@ class ReportCardsController extends Controller
         if(isset($request->course_id))
         {
             $course_callback = function ($qu) use ($request) {
-                $qu->whereIn('id', $request->course_id);
+                $qu->where('id', $request->course_id);
             };
         }
 
