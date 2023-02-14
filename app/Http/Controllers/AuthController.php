@@ -173,6 +173,7 @@ class AuthController extends Controller
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
             'language' => Language::find($user->language),
+            'user' => User::select('id','firstname','lastname','picture')->whereId($user->id)->first(),
             // 'dictionary' => self::Get_Dictionary(1,$request),
         ], __('messages.auth.login'));
     }
