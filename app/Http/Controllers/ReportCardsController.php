@@ -175,6 +175,9 @@ class ReportCardsController extends Controller
         if($user->can('report_card/alraya/first-term-2022'))
             $allowed_levels=Permission::where('name','report_card/alraya/first-term-2022')->pluck('allowed_levels')->first();
 
+        if($user->can('report_card/child-palace/first-term-2022'))
+            $allowed_levels=Permission::where('name','report_card/child-palace/first-term-2022')->pluck('allowed_levels')->first();
+
         $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);
@@ -204,7 +207,7 @@ class ReportCardsController extends Controller
         if(isset($request->course_id))
         {
             $course_callback = function ($qu) use ($request) {
-                $qu->whereIn('id', $request->course_id);
+                $qu->where('id', $request->course_id);
             };
         }
 
@@ -1170,6 +1173,7 @@ class ReportCardsController extends Controller
         //old courses
         $callback = function ($qu) use ($request ) {
             $qu->where('short_name','LIKE', "%Grades%")
+                ->where('short_name','LIKE', "%درجات%")
                 ->orWhere('short_name','LIKE', "%Final%")
                 ->orWhere('short_name','LIKE', "%Feb%")
                 ->orWhere('short_name','LIKE', "%March%")
