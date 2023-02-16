@@ -268,8 +268,13 @@ class MaterialsController extends Controller
 
         if($attachment->path == null)
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+    
+        $fileName = $attachment->name;
+        $path = public_path('/storage')."/assignment".substr($attachment->path,strrpos($attachment->path,"/"));
+        $headers = ['Content-Type' => 'application/'.$attachment->extension];
 
-        return \Redirect::away($attachment->path);
+        // return \Redirect::away($attachment->path);
+        return response()->download($path , $fileName , $headers);
     }
 
     public function getMaterials(Request $request,$count = null)
