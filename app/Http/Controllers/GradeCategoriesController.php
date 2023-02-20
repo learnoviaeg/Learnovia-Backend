@@ -77,6 +77,7 @@ class GradeCategoriesController extends Controller
             'category.*.hidden' => 'boolean',
             'category.*.calculation_type' => 'nullable|in:Natural,Simple_weighted_mean,Max',
             'category.*.locked' => 'boolean',
+            'category.*.allow_comment' => 'boolean',
             'category.*.min'=>'between:0,100',
             'category.*.max'=>'between:0,100',
             'category.*.weight_adjust' => 'boolean',
@@ -93,6 +94,7 @@ class GradeCategoriesController extends Controller
                 'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
                 'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
                 'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+                'allow_comment' =>isset($category['allow_comment']) ? $category['allow_comment'] : 0,
                 'min' =>isset($category['min']) ? $category['min'] : 0,
                 'max' =>isset($category['max']) ? $category['max'] : null,
                 'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
@@ -122,6 +124,7 @@ class GradeCategoriesController extends Controller
                     'hidden' =>isset($category['hidden']) ? $category['hidden'] : 0,
                     'calculation_type' =>isset($category['calculation_type']) ? json_encode([$category['calculation_type']]) : json_encode(['Natural']),
                     'locked' =>isset($category['locked']) ? $category['locked'] : 0,
+                    'allow_comment' =>isset($category['allow_comment']) ? $category['allow_comment'] : 0,
                     'min' =>isset($category['min']) ? $category['min'] : 0,
                     'max' =>isset($category['max']) ? $category['max'] : null,
                     'aggregation' =>isset($category['aggregation']) ? $category['aggregation'] : 'Value',
@@ -138,7 +141,8 @@ class GradeCategoriesController extends Controller
                         'user_id'   => $student,
                         'item_type' => 'category',
                         'item_id'   => $cat->id,
-                        'grade'     => null
+                        'grade'     => null,
+                        'comment' => null
                     ]);
                 }
                 event(new GraderSetupEvent($cat));
@@ -238,7 +242,6 @@ class GradeCategoriesController extends Controller
 
         return response()->json(['message' => __('messages.grade_category.delete'), 'body' => null], 200);
     }
-
 
     public function weight_adjust(Request $request)
     {
