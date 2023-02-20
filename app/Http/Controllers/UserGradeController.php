@@ -45,6 +45,7 @@ class UserGradeController extends Controller
             'user.*.item_id'   => 'required|exists:grade_categories,id',
             'user.*.grade'     => 'nullable',
             'user.*.scale_id'     => 'nullable|exists:scale_details,id',
+            'user.*.comment'     => 'nullable',
         ]);
         foreach($request->user as $user){
             $percentage = null;
@@ -59,17 +60,26 @@ class UserGradeController extends Controller
                     }
 
                     UserGrader::updateOrCreate(
-                        ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                        ['scale' =>  ($scale != null) ? $scale->evaluation : null ,
-                         'scale_id' => ($scale != null) ? $scale->id : null ]
+                        [
+                            'item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']
+                        ],
+                        [
+                            'scale' =>  ($scale != null) ? $scale->evaluation : null ,
+                            'comment' => isset($user['comment']) ? $user['comment'] : null,
+                            'scale_id' => ($scale != null) ? $scale->id : null 
+                        ]
                     );
                 }
                 if(isset($user['scale_id']))
                     $percentage = ($user['grade'] / $instance->max) * 100;
             }            
             $grader = UserGrader::updateOrCreate(
-                ['item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']],
-                ['grade' =>  isset($user['grade']) ? $user['grade'] : null , 'percentage' => $percentage ]
+                [
+                    'item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']
+                ],[
+                    'grade' =>  isset($user['grade']) ? $user['grade'] : null , 'percentage' => $percentage,
+                    'comment' => isset($user['comment']) ? $user['comment'] : null
+                ]
             );
             if($instance->parent != null)
                 event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));

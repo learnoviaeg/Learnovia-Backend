@@ -353,9 +353,9 @@ class QuizLessonController extends Controller
                             'user_id'   => $user_id,
                             'item_type' => 'Item',
                             'item_id'   => $gradeItem->id
-                        ],
-                        [
-                            'grade'     => null
+                        ],[
+                            'grade'     => null,
+                            'comment' => null
                         ]);
                     event(new GradeItemEvent($gradeItem));
                 }
