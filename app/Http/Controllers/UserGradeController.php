@@ -76,11 +76,15 @@ class UserGradeController extends Controller
             $grader = UserGrader::updateOrCreate(
                 [
                     'item_id'=>$user['item_id'], 'item_type' => 'category', 'user_id' => $user['user_id']
-                ],[
-                    'grade' =>  isset($user['grade']) ? $user['grade'] : null , 'percentage' => $percentage,
-                    'comment' => isset($user['comment']) ? $user['comment'] : null
+                ],[ 
+                    'percentage' => $percentage,'comment' => isset($user['comment']) ? $user['comment'] : null
                 ]
             );
+            // because grade of parent-category's comment is recalculated auto so, we dont have grade in request
+            if(isset($user['grade']))
+                $grader->grade=$user['grade'];
+            $grader->save();
+
             if($instance->parent != null)
                 event(new UserGradesEditedEvent(User::find($user['user_id']) , $instance->Parents));
             event(new GradeCalculatedEvent($grader));
