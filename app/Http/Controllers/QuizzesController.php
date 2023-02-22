@@ -416,14 +416,18 @@ class QuizzesController extends Controller
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
         ]);
-        Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->delete();
-
-        $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
-        $parent_Category = GradeCategory::find($grade_category->parent);
-        $grade_category->delete();
-        event(new GraderSetupEvent($parent_Category));
-        $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
-        dispatch($userGradesJob);
+        $targetQuiz = Quiz::where('id',$id)->first();
+        $timeline=Timeline::where('type', 'quiz')->where('item_id', $id)->where('lesson_id', $request->lesson_id)->first();
+        if(isset($timeline))
+            $timeline->delete();
+        if(!$targetQuiz->draft){
+            $grade_category = GradeCategory::where('instance_id',$id )->where('instance_type', 'Quiz')->first();
+            $parent_Category = GradeCategory::find($grade_category->parent);
+            $grade_category->delete();
+            event(new GraderSetupEvent($parent_Category));
+            $userGradesJob = (new \App\Jobs\RefreshUserGrades($this->chain , $parent_Category));
+            dispatch($userGradesJob);
+        }
         $quizLesson = QuizLesson::where('quiz_id',$id)->where('lesson_id',$request->lesson_id);
         
         $LessonComponent =  LessonComponent::where('comp_id',$quizLesson->first()->quiz_id)
@@ -441,10 +445,7 @@ class QuizzesController extends Controller
         $quizlesson=QuizLesson::where('quiz_id',$id)->get();
         // if(!isset($quizlesson))
         if( count($quizlesson) <= 0)
-        {
-            $targetQuiz = Quiz::where('id',$id)->first();
             $targetQuiz->delete();
-        }
 
         return HelperController::api_response_format(200, null,__('messages.quiz.delete'));
     }
