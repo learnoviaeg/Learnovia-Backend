@@ -200,6 +200,7 @@ class GradeCategoriesController extends Controller
             'calculation_type' =>isset($request->calculation_type) ? json_encode([$request->calculation_type]) : json_encode($grade_category['calculation_type']),
             'locked' =>isset($request->locked) ? $request->locked  : $grade_category['locked'],
             'min' =>isset($request->min) ? $request->min : $grade_category['min'],
+            'allow_comment' =>isset($request->allow_comment) ? $request->allow_comment : $grade_category['allow_comment'],
             'max' =>isset($request->max) ? $request->max : $grade_category['max'],
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : $grade_category['weight_adjust'],
             'weights' =>isset($request->weight) ? $request->weight : $grade_category['weights'],
