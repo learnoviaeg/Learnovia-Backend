@@ -27,6 +27,11 @@ class UserGrader extends Model
         return $this->belongsTo('App\GradeCategory', 'item_id', 'id');//->where('item_type', 'category');
     }
 
+    public function course()
+    {
+        return $this->belongsTo('App\Course', 'course_id', 'id');
+    }
+
     public function student()
     {
         return $this->belongsTo('App\User', 'user_id', 'id')->whereHas('roles', function($q){
@@ -49,5 +54,4 @@ class UserGrader extends Model
             $content = round($value , 2);
         return $content;
     }
-
 }

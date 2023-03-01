@@ -52,7 +52,7 @@ Route::group(['prefix' => 'question', 'middleware' => ['auth:api','LastAction']]
         Route::get('migration', 'QuestionCategoryController@MigrationScript')->middleware('permission:site/show-all-courses');
     });
 
-    Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
+    // Route::get('get', 'QuestionBankController@index')->middleware(['permission:question/get' , 'ParentCheck']);
     Route::post('delete', 'QuestionBankController@destroy')->middleware('permission:question/delete');
     Route::get('random', 'QuestionBankController@getRandomQuestion')->middleware('permission:question/random');
     Route::post('delete-answer', 'QuestionBankController@deleteAnswer')->middleware('permission:question/delete-answer');

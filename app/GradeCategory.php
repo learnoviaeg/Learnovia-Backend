@@ -52,9 +52,9 @@ class GradeCategory extends Model
     public function GradeItems()
     {
         if(isset($GLOBALS['user_id']))
-        return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item')->with(['userGrades' => function($query) {
-            $query->where("user_id", $GLOBALS['user_id']);
-        }]);
+            return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item')->with(['userGrades' => function($query) {
+                $query->where("user_id", $GLOBALS['user_id']);
+            }]);
         return $this->hasMany('App\GradeCategory', 'parent', 'id')->where('type' , 'item');
     }
 

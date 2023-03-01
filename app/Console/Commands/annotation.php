@@ -63,7 +63,6 @@ class annotation extends Command
         shell_exec('sudo service php7.4-fpm restart');
         $this->info('PHP  restart successfully');
         shell_exec('service apache2 restart');
-        $this->info('apache2  restart successfully');
-       
+        $this->info('apache2  restart successfully');       
     }
 }

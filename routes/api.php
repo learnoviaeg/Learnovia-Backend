@@ -457,7 +457,7 @@ Route::group(['prefix' => 'chat', 'middleware' => ['auth:api','LastAction']], fu
     Route::post('add-room', 'ChatController@chat_room')->name('addroom')->middleware('permission:chat/add-room');
     Route::post('refresh-token', 'ChatController@refresh_token')->name('refreshtoken')->middleware('permission:chat/add-room');
     Route::post('chat-token', 'ChatController@chat_token')->name('chattohen');
-    Route::post('upload-file-message', 'ChatController@UploadFiles')->name('uploadFiles');
+    Route::post('upload-file-message', 'ChatController@UploadFiles')->name('uploadFiles')->middleware('cors');
     Route::get('get-file-message', 'ChatController@getFiles')->name('getFiles');
 });
 
@@ -684,5 +684,8 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('gci/progress-report', 'ReoprtCardsMonthlyController@gciProgressReport')->middleware(['ParentCheck']); //single
 });
 
+Route::group(['prefix' => 'cards', 'middleware' => ['auth:api']], function () {
+    Route::Resource('template', CardsTemplateController::class);
+});
 //script for front-end editor
 Route::get('editor' , 'SettingsController@editor');

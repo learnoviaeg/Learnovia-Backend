@@ -332,7 +332,8 @@ class ScriptsController extends Controller
                 'is_template' => $course->is_template,
                 'classes' => json_encode($course->classes),
                 'segment_id' => $newSegment->id,
-                'letter_id' => $course->letter_id
+                'letter_id' => $course->letter_id,
+                'shared_lesson' =>$course->shared_lesson,
             ]);
 
             for ($i = 1; $i <= 4; $i++) {
