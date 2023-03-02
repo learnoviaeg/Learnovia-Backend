@@ -80,7 +80,7 @@ class GraderReportController extends Controller
                             }]);
                         }])->get();
 
-        $parentt = GradeCategory::where('id',$id)->where('type', 'category')->select('id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
+        $parentt = GradeCategory::where('id',$id)->where('type', 'category')->select('allow_comment','id','name','min','max','parent')->with(['userGrades' => function($q)use ($enrolled_students)
         {
             $q->whereIn('user_id',$enrolled_students);
             $q->with(['user' => function($query) {

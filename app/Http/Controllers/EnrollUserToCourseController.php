@@ -305,7 +305,7 @@ class EnrollUserToCourseController extends Controller
             'level' => 'exists:levels,id|required_with:class',
             'class' => 'exists:classes,id',
             'segment' => 'exists:segments,id',
-            'courses' => 'array|exists:courses,id',
+            'course' => 'exists:courses,id',
             'student' => 'required|in:1,0',
             'search' => 'string'
         ]);
@@ -337,8 +337,8 @@ class EnrollUserToCourseController extends Controller
         }if($request->filled('class')){
             $users->where('group',$request->class);
             $flg=true;
-        }if($request->filled('courses')){
-            $users->whereIn('course',$request->courses);
+        }if($request->filled('course')){
+            $users->where('course',$request->course);
             $flg=true;
         }
         if($flg)

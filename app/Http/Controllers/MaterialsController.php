@@ -197,7 +197,36 @@ class MaterialsController extends Controller
         if(!isset($material))
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
 
-        return \Redirect::away($material->main_link);
+        if ($material->type == "media") {
+
+            $path=public_path('/storage')."/media".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = media::find($material->item_id);
+            $extension=substr(strstr($result->type, '/'), 1);
+        }
+        if ($material->type == "file") {
+
+            $path=public_path('/storage')."/files".substr($material->getOriginal()['link'],
+            strrpos($material->getOriginal()['link'],"/"));
+            $result = file::find($material->item_id);
+            $extension = $result->type;
+        }
+        if($material->type == 'page'){
+            $result = Material::where('item_id',$material->item_id)->where('type','page')->first();
+            return response()->json(['message' => __('messages.materials.list'), 'body' =>$result], 200);
+        }
+
+        if(!file_exists($path))
+            return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+
+        $fileName = $result->name.'.'.$extension;
+        $fileName=str_replace('/','-',$fileName);
+        $fileName=str_replace('\\','-',$fileName);
+        $headers = ['Content-Type' => 'application/'.$extension];
+
+        return response()->download($path , $fileName , $headers);
+
+        // return \Redirect::away($material->main_link);
     }
 
     /**
@@ -226,7 +255,6 @@ class MaterialsController extends Controller
 
     public function downloadAssignment(Request $request)
     {
-
         $request->validate([
             'id' => 'required|exists:assignments,id',
         ]);
@@ -239,8 +267,13 @@ class MaterialsController extends Controller
 
         if($attachment->path == null)
             return response()->json(['message' => __('messages.error.not_found'), 'body' => null], 400);
+    
+        $fileName = $attachment->name;
+        $path = public_path('/storage')."/assignment".substr($attachment->path,strrpos($attachment->path,"/"));
+        $headers = ['Content-Type' => 'application/'.$attachment->extension];
 
-        return \Redirect::away($attachment->path);
+        // return \Redirect::away($attachment->path);
+        return response()->download($path , $fileName , $headers);
     }
 
     public function getMaterials(Request $request,$count = null)

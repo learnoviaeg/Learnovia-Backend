@@ -191,7 +191,7 @@ class User extends Authenticatable
     {
         $content=$this->attributes['picture'];
         if(isset($content))
-            return attachment::find($content);
+            return attachment::find($content)->path;
         return $content;
     }
 

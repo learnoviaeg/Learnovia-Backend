@@ -677,11 +677,11 @@ Route::group(['prefix' => 'schools-report', 'middleware' => ['auth:api']], funct
     Route::get('forsan/monthly', 'ReportCardsController@forsanMonthlyReport');
     Route::post('forsan/monthly-all', 'ReportCardsController@forsanMonthylReportAll');
     Route::post('courses', 'ReportCardsController@getGradesCourses');
-    Route::post('myCourses', 'coursesController@myCourses');
+    Route::get('myCourses', 'CoursesController@myCourses');
 
     //greenCity
     Route::post('gci/progress-report-all', 'ReoprtCardsMonthlyController@gciProgressReportAll'); //all
-    Route::get('gci/progress-report', 'ReoprtCardsMonthlyController@gciProgressReport'); //single
+    Route::get('gci/progress-report', 'ReoprtCardsMonthlyController@gciProgressReport')->middleware(['ParentCheck']); //single
 });
 
 //script for front-end editor

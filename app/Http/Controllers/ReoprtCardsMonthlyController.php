@@ -40,6 +40,8 @@ class ReoprtCardsMonthlyController extends Controller
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 // $qu->whereNull('parent')
                 $qu->where('name','LIKE',"%$request->trimester%");
+                $qu->where('name','NOT LIKE',"%Total coursework%");
+                $qu->where('name','NOT LIKE',"%Trimester exam%");
                 $qu->with([
                     // 'Children.userGrades' => function($query) use ($user_id , $request){
                 //     $query->where("user_id", $user_id);
@@ -88,7 +90,7 @@ class ReoprtCardsMonthlyController extends Controller
         $student_levels = Enroll::where('user_id',Auth::id())->pluck('level')->toArray();
         if($allowed_levels != null)
             $check=array_intersect($allowed_levels, $student_levels);
-        if($check !=null)
+        if($check == null)
             return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
         $result_collection = collect([]);
@@ -101,6 +103,8 @@ class ReoprtCardsMonthlyController extends Controller
         $grade_category_callback = function ($qu) use ($user_id , $request) {
             // $qu->whereNull('parent')
             $qu->where('name','LIKE',"%$request->trimester%");
+            $qu->where('name','NOT LIKE',"%Total coursework%");
+            $qu->where('name','NOT LIKE',"%Trimester exam%");
             $qu->with([
             //     'Children.userGrades' => function($query) use ($user_id , $request){
             //     $query->where("user_id", $user_id);
