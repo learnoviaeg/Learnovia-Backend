@@ -272,6 +272,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/delete-scheme', 'title' => 'Delete Grade Scheme' , 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/force-delete-scheme', 'title' => 'Force Delete Grade Scheme' , 'icon' => 'grade']);
 
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade_category/allow-comment', 'title' => 'allow comment']);
+
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/get', 'title' => 'get grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/delete', 'title' => 'delete grade item']);
@@ -378,6 +380,10 @@ class PermissionSeeder extends Seeder
         // alraya        
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-2022', 'title' => 'First term report card 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/alraya/first-term-printAll-2022', 'title' => 'First term report card All 2022/2023 (alraya)', 'icon' => 'Report-Card','dashboard'=>1]);
+
+        // child-palace        
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/child-palace/first-term-2022', 'title' => 'First term report card 2022/2023 (child-palace)', 'icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/child-palace/first-term-printAll-2022', 'title' => 'First term report card All 2022/2023 (child-palace)', 'icon' => 'Report-Card','dashboard'=>1]);
 
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/letter/show', 'title' => 'Show letter', 'icon' => 'grade','dashboard'=>1]);

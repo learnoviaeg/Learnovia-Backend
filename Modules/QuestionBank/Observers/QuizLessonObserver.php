@@ -65,7 +65,8 @@ class QuizLessonObserver
                     'item_type' => 'Category',
                     'item_id'   => $categoryOfQuiz->id
                 ],[
-                    'grade'     => null
+                    'grade'     => null,
+                    'comment' => null
                 ]);
             };  
         }

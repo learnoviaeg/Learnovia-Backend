@@ -40,7 +40,7 @@ class CalculateUserGradesListener
 
                 UserGrader::updateOrCreate(
                     ['item_id'=>$event->grade_category->id, 'item_type' => 'category', 'user_id' => $event->user->id],
-                    ['grade' =>  $grade , 'percentage' => $percentage ]
+                    ['grade' =>  $grade , 'percentage' => $percentage]
                 );
             }
             if($event->grade_category->parent != null)

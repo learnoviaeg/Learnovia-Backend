@@ -86,6 +86,7 @@ class GradeItemsController extends Controller
             'parent' => isset($request->grade_category_id) ? $request->grade_category_id : $category->id,
             'type' => 'item',
             'locked' =>isset($request->locked) ? $request->locked : 0,
+            'allow_comment' =>isset($request->allow_comment) ? $request->allow_comment : 0,
             'min' =>isset($request->min) ? $request->min : 0,
             'max' =>isset($max_grade) ? $max_grade : $request->max,
             'weight_adjust' =>isset($request->weight_adjust) ? $request->weight_adjust : 0,
@@ -104,7 +105,8 @@ class GradeItemsController extends Controller
                 'user_id'   => $student,
                 'item_type' => 'category',
                 'item_id'   => $item->id,
-                'grade'     => null
+                'grade'     => null,
+                'comment' => null
             ]);
         }
         event(new GraderSetupEvent($item->Parents));
