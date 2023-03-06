@@ -27,10 +27,9 @@ class MediaLessonObserver
      */
     public function created(MediaLesson $mediaLesson)
     {
-        $sec_chain = SecondaryChain::where('lesson_id',$mediaLesson->lesson_id)->first();
         $media = Media::where('id',$mediaLesson->media_id)->first();
         $lesson = Lesson::find($mediaLesson->lesson_id);
-        $course_id = $sec_chain->course_id;
+        $course_id = $lesson->course_id;
         if(isset($media)){
             $material=Material::firstOrCreate([
                 'item_id' => $mediaLesson->media_id,

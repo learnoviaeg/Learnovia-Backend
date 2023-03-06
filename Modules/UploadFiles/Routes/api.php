@@ -20,8 +20,6 @@ Route::group(['prefix' => 'file', 'middleware' => ['auth:api','LastAction']], fu
     Route::get('get','FilesController@GetFileByID')->name('GetFileByID')->middleware(['permission:file/get' , 'ParentCheck']);
     Route::post('assign','FilesController@AssignFileToLesson')->name('assignfiletolesson')->middleware('permission:file/assign');
     Route::post('assign-in-material','FilesController@AssignFileMediaPAgeLesson');//->name('assignfiletolesson')->middleware('permission:file/assign');
-
-
 });
 
 /* Media Routes */

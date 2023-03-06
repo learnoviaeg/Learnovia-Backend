@@ -191,13 +191,16 @@ class ReportCardsController extends Controller
 
         $grade_category_callback = function ($qu) use ($request ) {
             $qu->whereNull('parent')
-            ->with(['Children.userGrades' => function($query) use ($request){
-                $query->where("user_id", $request->user_id);
-            },'GradeItems.userGrades' => function($query) use ($request){
-                $query->where("user_id", $request->user_id);
-            },'userGrades' => function($query) use ($request){
-                $query->where("user_id", $request->user_id);
-            }]); 
+                ->with(['Children:id,name,course_id,type,parent,min,max','Children.userGrades' => function($query) use ($request){
+                    $query->where("user_id", $request->user_id)
+                        ->select('item_id','user_id','grade','scale','letter','percentage');
+                },'Children.GradeItems:id,name,course_id,parent,min,max,type','GradeItems.userGrades' => function($query) use ($request){
+                    $query->where("user_id", $request->user_id);
+                    // ->select('item_id','user_id','grade','scale','letter','percentage');
+                },'userGrades' => function($query) use ($request){
+                    $query->where("user_id", $request->user_id);
+                    // ->select('item_id','user_id','grade','scale','letter','percentage');
+                }]); 
         };
 
         $course_callback = function ($qu) use ($courses) {
@@ -216,11 +219,11 @@ class ReportCardsController extends Controller
             $qu->whereHas('courses' , $course_callback)
                 ->with(['courses' => $course_callback]); 
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
-                ->with(['courses.gradeCategory' => $grade_category_callback]); 
+                ->with(['courses:id','courses.gradeCategory' => $grade_category_callback]); 
         };
 
         $result = User::select('id','firstname','lastname')->whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
+                        ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
 
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
@@ -249,28 +252,29 @@ class ReportCardsController extends Controller
             $GLOBALS['user_id'] = $user_id;
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 $qu->whereNull('parent')
-                ->with(['Children.userGrades' => function($query) use ($user_id , $request){
-                    $query->where("user_id", $user_id);
-                },'GradeItems.userGrades' => function($query) use ($user_id , $request){
-                    $query->where("user_id", $user_id);
-                },'userGrades' => function($query) use ($user_id , $request){
-                    $query->where("user_id", $user_id);
-                }]); 
+                    ->with(['Children:id,name,type,course_id,parent,min,max','Children.userGrades' => function($query) use ($user_id , $request){
+                        $query->where("user_id", $user_id)
+                            ->select('item_id','user_id','grade','scale','letter','percentage');
+                    },'Children.GradeItems:id,name,course_id,parent,min,max,type','GradeItems.userGrades' => function($query) use ($user_id , $request){
+                        $query->where("user_id", $user_id);
+                    },'userGrades' => function($query) use ($user_id , $request){
+                        $query->where("user_id", $user_id);
+                    }]); 
             };
 
             $course_callback = function ($qu) use ($request ) {
-                    $qu->where('id',$request->courses);
+                $qu->where('id',$request->courses);
             };
 
-            $callback = function ($qu) use ($request  ,$course_callback, $grade_category_callback) {
+            $callback = function ($qu) use ($course_callback, $grade_category_callback) {
                 $qu->where('role_id', 3);
                 $qu->whereHas('courses' , $course_callback)
-                ->with(['courses' => $course_callback]); 
+                    ->with(['courses' => $course_callback]); 
                 $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
-                    ->with(['courses.gradeCategory' => $grade_category_callback]); 
+                    ->with(['course:id','courses.gradeCategory' => $grade_category_callback]); 
             };
             $result = User::select('id','username','lastname', 'firstname', 'profile_fields')->whereId($user_id)->whereHas('enroll' , $callback)
-                            ->with(['enroll' => $callback , 'enroll.levels' ,'enroll.year' , 'enroll.type' , 'enroll.classes'])->first();
+                            ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
             if($result != null)
                 $result_collection->push($result);
         }
