@@ -607,7 +607,7 @@ class AssigmentsController extends Controller
 
             UserGrader::updateOrCreate(
                 ['item_id'=>$grade_category->first()->id, 'item_type' => 'category', 'user_id' => $request->user_id],
-                ['grade' =>  $userassigment->grade , 'percentage' => $percentage]
+                ['grade' =>  $userassigment->grade , 'percentage' => $percentage, 'comment' => null]
             );
 
             event(new UserGradesEditedEvent(User::find($request->user_id) , $assignment_category->Parents));

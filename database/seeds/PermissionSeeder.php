@@ -272,6 +272,8 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/delete-scheme', 'title' => 'Delete Grade Scheme' , 'icon' => 'grade']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/force-delete-scheme', 'title' => 'Force Delete Grade Scheme' , 'icon' => 'grade']);
 
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade_category/allow-comment', 'title' => 'allow comment']);
+
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/add', 'title' => 'add grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/get', 'title' => 'get grade item']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'grade/item/delete', 'title' => 'delete grade item']);

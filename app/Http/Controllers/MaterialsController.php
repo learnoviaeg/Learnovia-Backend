@@ -255,7 +255,6 @@ class MaterialsController extends Controller
 
     public function downloadAssignment(Request $request)
     {
-
         $request->validate([
             'id' => 'required|exists:assignments,id',
         ]);
