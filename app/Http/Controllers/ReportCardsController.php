@@ -190,7 +190,7 @@ class ReportCardsController extends Controller
         $courses=self::getGradesCourses($request,1);
 
         $grade_category_callback = function ($qu) use ($request ) {
-            $qu->whereNull('parent')
+            $qu->whereNull('parent')->select('id','name','course_id','type','parent','min','max')
                 ->with(['Children:id,name,course_id,type,parent,min,max','Children.userGrades' => function($query) use ($request){
                     $query->where("user_id", $request->user_id)
                         ->select('item_id','user_id','grade','scale','letter','percentage');
@@ -228,7 +228,6 @@ class ReportCardsController extends Controller
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
 
-
     public function manaraReportAll(Request $request)
     {
         $request->validate([
@@ -251,7 +250,7 @@ class ReportCardsController extends Controller
         foreach($user_ids as $user_id){
             $GLOBALS['user_id'] = $user_id;
             $grade_category_callback = function ($qu) use ($user_id , $request) {
-                $qu->whereNull('parent')
+                $qu->whereNull('parent')->select('id','name','course_id','type','parent','min','max')
                     ->with(['Children:id,name,type,course_id,parent,min,max','Children.userGrades' => function($query) use ($user_id , $request){
                         $query->where("user_id", $user_id)
                             ->select('item_id','user_id','grade','scale','letter','percentage');
