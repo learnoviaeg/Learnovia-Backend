@@ -26,7 +26,6 @@ use Modules\QuestionBank\Entities\quiz_questions;
 use Modules\QuestionBank\Entities\userQuizAnswer;
 use App\LastAction;
 use App\ItemDetail;
-use App\UserGrader;
 use App\ItemDetailsUser;
 
 use function Opis\Closure\serialize;
