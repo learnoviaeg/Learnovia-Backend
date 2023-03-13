@@ -20,16 +20,14 @@ class CardsTemplateController extends Controller
     public function template1(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            // 'term'    => 'required|in:first,final',
             'course_id'=> 'exists:courses,id',
         ]);
-        
-        $GLOBALS['user_id'] = $request->user_id;
-        $user = User::find($request->user_id);
-
+                
+        $GLOBALS['user_id'] = Auth::id();
+        $user=User::find(Auth::id());
         $allowed_levels=null;
         $check=[];
+
         if($user->can('report_card/mfisb/first-term-2022-b'))
             $allowed_levels=Permission::where('name','report_card/mfisb/first-term-2022-b')->pluck('allowed_levels')->first();
 
@@ -45,29 +43,30 @@ class CardsTemplateController extends Controller
         if($user->can('report_card/child-palace/first-term-2022'))
             $allowed_levels=Permission::where('name','report_card/child-palace/first-term-2022')->pluck('allowed_levels')->first();
 
-        $student_levels = Enroll::where('user_id',$request->user_id)->pluck('level')->toArray();
+        $student_levels = Enroll::where('user_id', $user->id)->pluck('level')->toArray();
         if($allowed_levels != null){
             $allowed_levels=json_decode($allowed_levels);
             $check=(array_intersect($allowed_levels, $student_levels));
         }
 
         if(count($check) == 0)
-            return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
+           return response()->json(['message' => 'You are not allowed to see report card', 'body' => null ], 200);
 
+        $obj=null;
         $obj=new ReportCardsController($this->chain);
-        $courses=$obj->getGradesCourses($request,1);    
+        $courses=$obj->getGradesCourses($request,1);
 
-        $grade_category_callback = function ($qu) use ($request ) {
+        $grade_category_callback = function ($qu) use ($request,$user) {
             $qu->whereNull('parent')->select('id','name','course_id','type','parent','min','max')
-                ->with(['Children:id,name,course_id,type,parent,min,max','Children.userGrades' => function($query) use ($request){
-                    $query->where("user_id", $request->user_id);
-                        // ->select('item_id','user_id','grade','scale','letter','percentage');
-                },'Children.GradeItems:id,name,course_id,parent,min,max,type','GradeItems.userGrades' => function($query) use ($request){
-                    $query->where("user_id", $request->user_id);
+                ->with(['Children:id,name,course_id,type,parent,min,max','Children.userGrades' => function($query) use ($request,$user){
+                    $query->where("user_id", $user->id)
+                        ->select('item_id','user_id','grade','scale','letter','percentage');
+                },'Children.GradeItems:id,name,course_id,parent,min,max,type','GradeItems.userGrades' => function($query) use ($request,$user){
+                    $query->where("user_id", $user->id);
                     // ->select('item_id','user_id','grade','scale','letter','percentage');
-                },'userGrades' => function($query) use ($request){
-                    $query->where("user_id", $request->user_id);
-                    // ->select('item_id','user_id','grade','scale','letter','percentage');
+                },'userGrades' => function($query) use ($request,$user){
+                    $query->where("user_id", $user->id)
+                     ->select('item_id','user_id','grade','scale','letter','percentage');
                 }]); 
         };
 
@@ -90,9 +89,8 @@ class CardsTemplateController extends Controller
                 ->with(['courses:id','courses.gradeCategory' => $grade_category_callback]); 
         };
 
-        $result = User::select('id','firstname','lastname')->whereId($request->user_id)->whereHas('enroll' , $callback)
-                        ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
-
+        $result = User::select('id','firstname','lastname')->whereId($user->id)->whereHas('enroll' , $callback)
+                        ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classees:id,name'])->first();
         return response()->json(['message' => null, 'body' => $result ], 200);
     }
 

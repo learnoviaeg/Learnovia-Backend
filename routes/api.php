@@ -400,6 +400,7 @@ Route::group(['prefix' => 'event', 'middleware' => 'auth:api','LastAction'], fun
 
 Route::group(['prefix' => 'script', 'middleware' => 'auth:api','LastAction'], function () {
     Route::get('grade-cat-course', 'ScriptsController@CreateGradeCatForCourse');
+    Route::get('enrolledMultiClasses', 'ScriptsController@enrolledMultiClasses');
     Route::get('quiz-mark', 'ScriptsController@quiz_total_mark');
     Route::get('grade_items', 'ScriptsController@grade_details_of_questions');
     Route::get('grade-attempts', 'ScriptsController@gradeAttemptsInQuizlesson');
@@ -505,6 +506,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
     Route::Resource('years', YearsController::class);
+    Route::get('years/{specific}', 'YearsController@index');
 
     Route::get('types/{export}', 'TypesController@index');
     Route::Resource('types', TypesController::class);

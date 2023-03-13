@@ -591,4 +591,30 @@ class ScriptsController extends Controller
         $file = url(Storage::url('lesson'.$filename.'.xlsx'));
         return $file;
     }
+
+    public function enrolledMultiClasses(Request $request)
+    {
+        $request->validate([
+            'segment_id'  => 'required|integer|exists:segments,id',
+        ]);
+
+        $In_Array=array();
+        $usr=array();
+        $uu=null;
+        $users=Enroll::where('role_id',3)->where('segment',$request->segment_id)->pluck('user_id')->unique();;
+        foreach($users as $user){
+            $In_Array=array();            
+            $check=Enroll::where('role_id',3)->where('segment',$request->segment_id)->where('user_id',$user)->pluck('group')->unique();;
+            foreach($check as $check1)
+                if(!in_array($check1,$In_Array))
+                    $In_Array[]=$check1;
+            
+            if(count($In_Array)>1)
+                if(!in_array($uu,$usr)){
+                    $uu=User::find($user);
+                    $usr[]=$uu->username;
+                }
+        }
+        return $usr;
+    }
 }
