@@ -39,9 +39,8 @@ class LevelController extends Controller
             'types' => 'array',
             'types.*' => 'nullable|exists:academic_types,id',
             'search' => 'nullable',
-            'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
-        $levels=Level::with('type.year')->whereNull('deleted_at');
+        $levels=Level::whereNull('deleted_at');
         if($request->filled('search'))
             $levels->where('name', 'LIKE' , "%$request->search%");
 
@@ -49,7 +48,10 @@ class LevelController extends Controller
             if($request->filled('types'))
                 $levels->whereIn('academic_type_id' , $request->types);
 
-            return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
+            if($status == 'specific')
+                return HelperController::api_response_format(201,$levels->select('name','id')->get(),__('messages.level.list'));
+
+            return HelperController::api_response_format(200, $levels->with('type.year')->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
         }
 
         // for reports that forntend not handle it and they weren't sending "segments" 
@@ -66,7 +68,10 @@ class LevelController extends Controller
             $enrolls->where('user_id',Auth::id());
 
         $levels->whereIn('id',$enrolls->pluck('level'));
-        return HelperController::api_response_format(200, $levels->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
+        if($status == 'specific')
+            return HelperController::api_response_format(201,$levels->select('name','id')->get(),__('messages.level.list'));
+
+        return HelperController::api_response_format(200, $levels->with('type.year')->paginate(HelperController::GetPaginate($request)), __('messages.level.list'));
     }
 
     /**

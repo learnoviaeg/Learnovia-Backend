@@ -592,16 +592,11 @@ class SpatieController extends Controller
             'id' => 'exists:roles,id'
         ]);
 
+        $roles=Role::where('id','!=',null);
         if(isset($request->id))
-            $role = Role::find($request->id);
+            $roles->whereId($request->id);
 
-        $role = Role::get();
-
-        unset($role->guard_name);
-        unset($role->created_at);
-        unset($role->updated_at);
-
-        return HelperController::api_response_format(201, $role);
+        return HelperController::api_response_format(201, $roles->select('id','name')->get());
     }
 
     /**

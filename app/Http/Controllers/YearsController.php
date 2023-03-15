@@ -24,7 +24,7 @@ class YearsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$specific)
     {
         $request->validate([
             'search' => 'nullable',
@@ -35,12 +35,18 @@ class YearsController extends Controller
         $years=AcademicYear::whereNull('deleted_at');
         if($request->filled('search'))
             $years = $years->where('name', 'LIKE' , "%$request->search%"); 
-        if($request->user()->can('site/show-all-courses') || ($request->filled('for') && $request->for == 'grades'))
+        if($request->user()->can('site/show-all-courses') || ($request->filled('for') && $request->for == 'grades')){
+            if($specific == 'specific')
+                return HelperController::api_response_format(201,$years->select('name','id')->get(),__('messages.year.list'));
             return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
+        }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $enrolls->where('user_id',Auth::id());
         $years->whereIn('id',$enrolls->pluck('year'));
+
+        if($specific == 'specific')
+            return HelperController::api_response_format(201,$years->select('name','id')->get(),__('messages.year.list'));
         
         return HelperController::api_response_format(201, $years->paginate(HelperController::GetPaginate($request)), __('messages.year.list'));
     }

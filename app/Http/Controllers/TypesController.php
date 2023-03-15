@@ -32,21 +32,26 @@ class TypesController extends Controller
     {
         $request->validate([
             'search' => 'nullable',
-            'filter' => 'in:all,export' //all without enroll  //export for exporting
         ]);
 
         $types = AcademicType::whereNull('deleted_at')->with('year');
         if(isset($request->years))
-            $types = AcademicType::with('year')->whereIn("academic_year_id", $request->years);
+            $types = $types->whereIn("academic_year_id", $request->years);
         if($request->filled('search'))
             $types = $types->where('name', 'LIKE' , "%$request->search%"); 
 
-        if($request->user()->can('site/show-all-courses'))
+        if($request->user()->can('site/show-all-courses')){
+            if($status == 'specific')
+                return HelperController::api_response_format(201,$types->select('name','id')->get(),__('messages.type.list'));
+
             return HelperController::api_response_format(201, $types->paginate(HelperController::GetPaginate($request)), __('messages.type.list'));
-        
+        }
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $enrolls->where('user_id',Auth::id());
         $types->whereIn('id',$enrolls->pluck('type'));
+
+        if($status == 'specific')
+            return HelperController::api_response_format(201,$types->select('name','id')->get(),__('messages.type.list'));
 
         return HelperController::api_response_format(200, $types->paginate(HelperController::GetPaginate($request)),__('messages.type.list'));
     }

@@ -92,8 +92,19 @@ class CoursesController extends Controller
             ->orderBy('courses.index', 'ASC')
             ->groupBy(['course','level'])->get();
 
-        $result = CourseResource::collection($results)->paginate($paginate);
-        return response()->json(['message' => __('messages.course.list'), 'body' => $result], 200);
+        $result = CourseResource::collection($results);
+        if($status == 'specific'){
+            return HelperController::api_response_format(201,CourseResource::collection($results)->map(function ($course){
+
+                return [
+                    'id' => $course->id,
+                    'name' => $course->name,
+                ];
+    
+            }),__('messages.course.list'));
+        }
+
+        return response()->json(['message' => __('messages.course.list'), 'body' => $result->paginate($paginate)], 200);
     }
 
     /**

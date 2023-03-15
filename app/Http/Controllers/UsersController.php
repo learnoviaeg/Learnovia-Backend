@@ -150,7 +150,6 @@ class UsersController extends Controller
             $enrolls->whereIn('role_id',$request->roles);
 
         if ($request->filled('courses')){
-
             $enrolls->with(['user.lastactionincourse'=>function ($query) use($request){
                     $query->whereIn('course_id',$request->courses);
                 }]);
@@ -164,7 +163,7 @@ class UsersController extends Controller
             $enrolls =  $enrolls->select('user_id','group')->distinct()->whereHas('user')->with(['classes'])->get()->filter()->values();
             return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
         }
-
+        
         $enrolls = $enrolls->groupBy('user_id')->distinct()->whereHas('user',function($q) {
             $q->whereNull('deleted_at');
         })->with(['user.roles', 'classes'])->get()->pluck('user');
@@ -178,6 +177,14 @@ class UsersController extends Controller
                     return $item; 
             });
         }
+
+        if($my_chain == 'specific')
+            return response()->json(['message' => __('messages.users.all_list'), 'body' =>   array_values($enrolls->map(function ($user){
+                return [
+                    'id' => $user->id,
+                    'name' => $user->fullname,
+                ];
+            })->toArray())], 200);
 
         return response()->json(['message' => __('messages.users.list'), 'body' =>   $enrolls->paginate(Paginate::GetPaginate($request))], 200);
     }

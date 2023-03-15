@@ -502,17 +502,18 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::post('editH5pAssignedUsers', 'H5PLessonController@editH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
     Route::get('getH5pAssignedUsers', 'H5PLessonController@getH5pAssignedUsers')->middleware(['permission:site/edit_restriction']);
 
-    // Route::get('years/{export}', 'YearsController@index');
     Route::patch('years/{id}/{current}', 'YearsController@update');
     Route::Resource('years', YearsController::class);
 
-    Route::get('types/{export}', 'TypesController@index');
+    Route::get('types/{specific}', 'TypesController@index');
     Route::Resource('types', TypesController::class);
 
-    Route::get('segments/{export}', 'SegmentsController@index');
+    Route::get('segments/{specific}', 'SegmentsController@index');
     Route::Resource('segments', SegmentsController::class);
 
     Route::Resource('interactive', InterActiveController::class);
+
+    Route::get('courses/{specific}', 'CoursesController@index');
     Route::get('interactives/{count}', 'InterActiveController@index')->middleware(['permission:h5p/lesson/get-all' , 'ParentCheck']);
     Route::Resource('courses', CoursesController::class);
     Route::post('courses/{id}', 'CoursesController@update');
@@ -522,14 +523,15 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     // Route::get('course/{status}', 'CoursesController@index')->middleware(['permission:course/my-courses' , 'ParentCheck']);
     Route::Resource('lessons', LessonsController::class);
     Route::get('lesson/sort', 'LessonsController@sort')->middleware(['permission:lesson/sort']);
-    // Route::get('lesson/general', 'LessonsController@general');
+    // Route::get('lesson/general', 'LessonsController@general')
 
-    Route::get('levels/{my}', 'TypesController@index');
-    Route::get('levels/{export}', 'TypesController@index');
+    Route::get('levels/{specific}', 'LevelController@index');
     Route::Resource('levels', LevelController::class);
 
+    Route::get('claass/{option}', 'ClassesController@index');
     Route::Resource('classs', ClassesController::class);
-    Route::get('claass/{option}', 'ClassesController@index')->middleware(['permission:course/layout']);
+
+    Route::get('users/{specific}', 'UsersController@index');
     Route::Resource('users', UsersController::class);
     Route::get('user/{my_chain}', 'UsersController@index')->middleware(['permission:user/get-my-users']);
     Route::get('itemUsers', 'UsersController@itemUsers');

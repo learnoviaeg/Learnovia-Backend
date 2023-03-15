@@ -43,18 +43,21 @@ class ClassesController extends Controller
             'levels.*' => 'exists:levels,id',
             'courses'    => 'nullable|array',
             'courses.*'  => 'nullable|integer|exists:courses,id',
-            'filter' => 'in:all,export' //all without enroll  //export for exporting
+            'filter' => 'in:all' //all without enroll
         ]);
 
-        $classes=Classes::with('level.type.year')->where('type','class')->whereNull('deleted_at');
+        $classes=Classes::where('type','class')->whereNull('deleted_at');
         if($request->filled('search'))
             $classes->where('name', 'LIKE' , "%$request->search%"); 
 
         if($request->filled('filter') && $request->filter == 'all' && $request->user()->can('site/show-all-courses')){
             if($request->filled('levels'))
                 $classes->whereIn('level_id' , $request->levels);
+
+            if($option == 'specific')
+                return HelperController::api_response_format(201,$classes->select('name','id')->get(),__('messages.class.list'));
                 
-            return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
+            return HelperController::api_response_format(201, $classes->with('level.type.year')->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
@@ -63,7 +66,10 @@ class ClassesController extends Controller
             $enrolls->where('user_id',Auth::id());
         $classes->where('type','class')->whereIn('id',$enrolls->pluck('group'));
 
-        return HelperController::api_response_format(201, $classes->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
+        if($option == 'specific')
+            return HelperController::api_response_format(201,$classes->select('name','id')->get(),__('messages.class.list'));
+
+        return HelperController::api_response_format(201, $classes->with('level.type.year')->paginate(HelperController::GetPaginate($request)), __('messages.class.list'));
     }
 
     /**

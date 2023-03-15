@@ -31,7 +31,7 @@ class SegmentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$option=null)
     {
         $request->validate([
             'search' => 'nullable',
@@ -45,7 +45,7 @@ class SegmentsController extends Controller
             'classes.*' => 'exists:classes,id',
         ]);
 
-        $segments=Segment::with('academicType','academicYear')->whereNull('deleted_at');
+        $segments=Segment::whereNull('deleted_at');
 
         if($request->filled('search'))
             $segments->where('name', 'LIKE' , "%$request->search%");
@@ -54,29 +54,21 @@ class SegmentsController extends Controller
         {
             if(isset($request->types))
                 $segments->whereIn('academic_type_id',$request->types);
-                // foreach($segments->get() as $segment)
-                // {
-                //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
-                //     $segment['levels']=$levels->pluck('name');
-                //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
-                // }
-                // dd($segments);
+                
+            if($option == 'specific')
+                return HelperController::api_response_format(201,$segments->select('name','id')->get(),__('messages.segment.list'));
 
-            return HelperController::api_response_format(201, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
+            return HelperController::api_response_format(201, $segments->with('academicType','academicYear')->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
         }
 
         $enrolls = $this->chain->getEnrollsByManyChain($request);
         $enrolls->where('user_id',Auth::id());
         $segments->whereIn('id',$enrolls->pluck('segment'));
 
-        // foreach($segments->get() as $segment)
-        // {
-        //     $levels=Level::where('academic_type_id',$segment->academic_type_id);
-        //     $segment['levels']=$levels->pluck('name');
-        //     $segment['classes']=Classes::whereIn('level_id',$levels->pluck('id'))->pluck('name');
-        // }
+        if($option == 'specific')
+            return HelperController::api_response_format(201,$segments->select('name','id')->get(),__('messages.segment.list'));
 
-        return HelperController::api_response_format(200, $segments->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
+        return HelperController::api_response_format(200, $segments->with('academicType','academicYear')->paginate(HelperController::GetPaginate($request)), __('messages.segment.list'));
     }
 
     /**
