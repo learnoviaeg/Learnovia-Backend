@@ -39,18 +39,10 @@ class ReoprtCardsMonthlyController extends Controller
             $GLOBALS['user_id'] = $user_id;
             $grade_category_callback = function ($qu) use ($user_id , $request) {
                 // $qu->whereNull('parent')
-                $qu->where('name','LIKE',"%$request->trimester%") 
-                    ->orWhere('name','LIKE','Trimester 2');
+                $qu->where('name','LIKE',"%$request->trimester%");
                 $qu->where('name','NOT LIKE',"%Total coursework%");
                 $qu->where('name','NOT LIKE',"%Trimester exam%");
-                $qu->with([
-                    // 'Children.userGrades' => function($query) use ($user_id , $request){
-                //     $query->where("user_id", $user_id);
-                // }
-                // ,'GradeItems.userGrades' => function($query) use ($user_id , $request){
-                //     $query->where("user_id", $user_id);
-                // },
-                'userGrades' => function($query) use ($user_id , $request){
+                $qu->with(['userGrades' => function($query) use ($user_id , $request){
                     $query->where("user_id", $user_id);
                 }
             ]); 
@@ -103,18 +95,10 @@ class ReoprtCardsMonthlyController extends Controller
         $GLOBALS['user_id'] = $user_id;
         $grade_category_callback = function ($qu) use ($user_id , $request) {
             // $qu->whereNull('parent')
-            $qu->where('name','LIKE',"%$request->trimester%") 
-                ->orWhere('name','LIKE','Trimester 2');
+            $qu->where('name','LIKE',"%$request->trimester%");
             $qu->where('name','NOT LIKE',"%Total coursework%");
             $qu->where('name','NOT LIKE',"%Trimester exam%");
-            $qu->with([
-            //     'Children.userGrades' => function($query) use ($user_id , $request){
-            //     $query->where("user_id", $user_id);
-            // }
-            // ,'GradeItems.userGrades' => function($query) use ($user_id , $request){
-            //     $query->where("user_id", $user_id);
-            // },
-            'userGrades' => function($query) use ($user_id , $request){
+            $qu->with(['userGrades' => function($query) use ($user_id , $request){
                 $query->where("user_id", $user_id);
             }
         ]); 
@@ -123,7 +107,7 @@ class ReoprtCardsMonthlyController extends Controller
         $callback = function ($qu) use ($request ,$grade_category_callback) {
             $qu->where('role_id', 3);
             $qu->whereHas('courses.gradeCategory' , $grade_category_callback)
-                ->with(['courses.gradeCategory' => $grade_category_callback]); 
+                ->with(['courses:id','courses.gradeCategory' => $grade_category_callback]); 
         };
         $result = User::select('id','username','lastname', 'firstname')->whereId($user_id)->whereHas('enroll' , $callback)
                         ->with(['enroll' => $callback , 'enroll.levels:id,name' ,'enroll.year:id,name' , 'enroll.type:id,name' , 'enroll.classes:id,name'])->first();
