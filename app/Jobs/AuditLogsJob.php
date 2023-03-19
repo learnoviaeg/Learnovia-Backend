@@ -11,6 +11,7 @@ use App\User;
 use Carbon\Carbon;
 use App\AuditLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class AuditLogsJob implements ShouldQueue
 {
@@ -44,13 +45,13 @@ class AuditLogsJob implements ShouldQueue
         // {
             $subject_model = substr(get_class($this->model),strripos(get_class($this->model),'\\')+1);
             $user_fullname = $this->user->fullname;
-    
+
             $hole_description = 'Item in module ( '. $subject_model .' ) has been ( '. $this->description .' ) by ( '. $user_fullname. ' )';
-    
+
             $quiz_related = [
-                                'QuizLesson', 'quiz_questions', 
+                                'QuizLesson', 'quiz_questions',
                             ];
-           
+
            // start to ensure order of course and enrolls
             if ($subject_model == 'Course') {
                 $created_at = Carbon::now()->addSeconds(1);
@@ -58,7 +59,7 @@ class AuditLogsJob implements ShouldQueue
                 $created_at = Carbon::now();
             }
             // end to ensure order of course and enrolls
-    
+
             // start to exclude refresh tokens of firebase
             if ($subject_model == 'User') {
                 $diff_before        = $this->model->getOriginal();
@@ -68,34 +69,38 @@ class AuditLogsJob implements ShouldQueue
                 unset($diff_after['picture']);
                 // unset($diff_before['picture']);
                 $get_diff_before    = array_diff_assoc($diff_before, $diff_after);
-    
+
                 $tracked = [
-                                'firstname', 'email', 'password', 'real_password', 'lastname', 'username', 'suspend', 
-                                'class_id','picture', 'level', 'type', 'arabicname', 'country', 'birthdate', 'gender', 
-                                'phone', 'address', 'nationality', 'notes', 'language', 'timezone', 'religion', 'second language', 
+                                'firstname', 'email', 'password', 'real_password', 'lastname', 'username', 'suspend',
+                                'class_id','picture', 'level', 'type', 'arabicname', 'country', 'birthdate', 'gender',
+                                'phone', 'address', 'nationality', 'notes', 'language', 'timezone', 'religion', 'second language',
                                 'profile_fields', 'nickname'
                             ];
-    
+
                 $arrayKeys       = array_keys($get_diff_before);
                 $intersect       = array_intersect($tracked, $arrayKeys);
                 $count_intersect = count($intersect);
-    
-                    if ( $count_intersect > 0 ) 
+
+                    if ( $count_intersect > 0 )
                     {
                         $notes = $count_intersect == 2 ? 'login' : null;
-                        AuditLog::create([
+                        $auditLogs = new AuditLog();
+                        $month = \Carbon\Carbon::now()->format('F');
+                        $table = $month.'_audit_logs';
+                        $auditLogs->createIfNotExist($table);
+                        $auditLogs->setTable($table);
+                    $auditLogs->create([
                             'action'       => $this->description,
                             'subject_id'   => $this->model->id ?? null,
                             'subject_type' => substr(get_class($this->model),strripos(get_class($this->model),'\\')+1),//get_class($model) ?? null,
                             'user_id'      => $this->user->id ?? null,
                             'role_id'      => $this->user->id ? $this->user->roles->pluck('id')->toArray() : null,
                             'properties'   => $this->model ?? null,
-                            'host'         => $this->ip() ,
                             'year_id'      => $this->model->get_year_name($this->model->getOriginal(), $this->model),
                             'type_id'      => $this->model->get_type_name($this->model->getOriginal(), $this->model),
                             'level_id'     => $this->model->get_level_name($this->model->getOriginal(), $this->model),
                             'class_id'     => $this->model->get_class_name($this->model->getOriginal(), $this->model),
-                            'segment_id'   => $this->model->get_segment_name($this->model->getOriginal(), $this->model), 
+                            'segment_id'   => $this->model->get_segment_name($this->model->getOriginal(), $this->model),
                             'course_id'    => $this->model->get_course_name($this->model->getOriginal(), $this->model),
                             'before'       => $this->model->getOriginal(),
                             'created_at'   => $created_at,
@@ -116,7 +121,7 @@ class AuditLogsJob implements ShouldQueue
                     $item_id   = $this->model->user->id;
                 }elseif ($subject_model == 'media') {
                         $item_name = $this->model->name;
-                        $item_id   = null; 
+                        $item_id   = null;
                         if ($this->model->type == null) {
                             $notes = 'link';
                         }else{
@@ -127,22 +132,30 @@ class AuditLogsJob implements ShouldQueue
                     $item_id   = $this->model->quiz_id;
                 }else{
                     $item_name = $this->model->name;
-                    $item_id   = null;   
+                    $item_id   = null;
                 }
-    
-                    AuditLog::create([
+
+                Log::debug(serialize($this->model));
+
+
+                $auditLogs = new AuditLog();
+                    $month = \Carbon\Carbon::now()->format('F');
+                    $table = $month.'_audit_logs';
+                    $auditLogs->createIfNotExist($table);
+                    $auditLogs->setTable($table);
+
+                    $auditLogs->create([
                     'action'       => $this->description,
                     'subject_id'   => $this->model->id ?? null,
                     'subject_type' => $subject_model,
                     'user_id'      => $this->user->id ?? null,
                     'role_id'      => $this->user->id ? $this->user->roles->pluck('id')->toArray() : null,
                     'properties'   => $this->model ?? null,
-                    'host'         => request()->ip() ?? null,
                     'year_id'      => $this->model->get_year_name($this->model->getOriginal(), $this->model),
                     'type_id'      => $this->model->get_type_name($this->model->getOriginal(), $this->model),
                     'level_id'     => $this->model->get_level_name($this->model->getOriginal(), $this->model),
                     'class_id'     => $this->model->get_class_name($this->model->getOriginal(), $this->model),
-                    'segment_id'   => $this->model->get_segment_name($this->model->getOriginal(), $this->model), 
+                    'segment_id'   => $this->model->get_segment_name($this->model->getOriginal(), $this->model),
                     'course_id'    => $this->model->get_course_name($this->model->getOriginal(), $this->model),
                     'before'       => $this->model->getOriginal(),
                     'created_at'   => $created_at,

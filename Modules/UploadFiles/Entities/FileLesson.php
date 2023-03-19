@@ -46,9 +46,9 @@ class FileLesson extends Model
         $segment      = Segment::where('id', $segment_id)->first();
         $academic_year_id = $segment->academic_year_id;
 
-        AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
-            'year_id' => $academic_year_id
-        ]);
+        // AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
+        //     'year_id' => $academic_year_id
+        // ]);
 
         return $academic_year_id;
     }
@@ -63,9 +63,9 @@ class FileLesson extends Model
         $segment      = Segment::where('id', $segment_id)->first();
         $academic_type_id = $segment->academic_type_id;
 
-        AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
-            'type_id' => $academic_type_id
-        ]);
+        // AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
+        //     'type_id' => $academic_type_id
+        // ]);
 
         return $academic_type_id;
     }
@@ -78,9 +78,9 @@ class FileLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $level_id     = Course::where('id', $course_id)->first()->level_id;
 
-        AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
-            'level_id' => $level_id
-        ]);
+        // AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
+        //     'level_id' => $level_id
+        // ]);
 
         return $level_id;
     }
@@ -93,9 +93,9 @@ class FileLesson extends Model
         $lesson       = Lessonmodel::where('id', $lesson_id)->first();
         $classes      = $lesson['shared_classes']->pluck('id');
 
-        AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
-            'class_id' => $classes
-        ]);
+        // AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
+        //     'class_id' => $classes
+        // ]);
 
         return $classes;
     }
@@ -108,9 +108,9 @@ class FileLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $segment_id   = Course::where('id', $course_id)->first()->segment_id;
 
-        AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
-            'segment_id' => $segment_id
-        ]);
+        // AuditLog::where(['subject_type' => 'file', 'subject_id' => $new->file_id])->update([
+        //     'segment_id' => $segment_id
+        // ]);
         return $segment_id;
     }
     // end function get name and value attribute
@@ -121,8 +121,8 @@ class FileLesson extends Model
         $lesson_id  = $new->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
 
-        AuditLog::where('subject_type', 'file')->where('subject_id', $new->file_id)
-        ->update(['course_id' => $course_id]);
+        // AuditLog::where('subject_type', 'file')->where('subject_id', $new->file_id)
+        // ->update(['course_id' => $course_id]);
         return $course_id;
     }
     // end function get name and value attribute

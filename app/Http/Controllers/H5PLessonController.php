@@ -96,7 +96,7 @@ class H5PLessonController extends Controller
                 'restricted' => 0
             ]);
 
-            //user restrictions 
+            //user restrictions
             if(isset($request->users_ids)){
                 CoursesHelper::giveUsersAccessToViewCourseItem($h5p_lesson->id, 'h5p_content', $request->users_ids);
                 h5pLesson::where('id',$h5p_lesson->id)->update(['restricted' => 1]);
@@ -210,7 +210,7 @@ class H5PLessonController extends Controller
 
         $h5pLesson->delete();
         DB::table('h5p_contents')->where('id', $request->content_id)->delete();
-        
+
         return HelperController::api_response_format(200, null, __('messages.interactive.delete'));
     }
 
@@ -258,7 +258,7 @@ class H5PLessonController extends Controller
                 'course_name' => Course::find($lesson->course_id)->name
             ];
             $users=SecondaryChain::select('user_id')->whereHas('Enroll')->where('role_id',3)->where('lesson_id',$request->lesson_id)->pluck('user_id');
-            $this->notification->sendNotify($users,$reqNot); 
+            $this->notification->sendNotify($users,$reqNot);
 
         // $this->notification->sendNotify($users->toArray(),$content->title.' interactive is updated',$h5pLessons->id,'notification','interactive');
 
@@ -273,19 +273,19 @@ class H5PLessonController extends Controller
 
 
         // comment 4o8l morsy because bydrap
-        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();  
+        $temp_log = TempLog::where(['subject_type' => 'H5pContent', 'subject_id' => $request->content_id])->first();
         // update some data
         $temp_log->user_id = $request->user('api')->id;
         $temp_log->role_id = auth()->user()->roles->pluck('id')->toArray();
         $temp_log->hole_description ='Item in module H5pContent has been updated by ( '. $request->user('api')->fullname. ' )';
         $temp_log->save();
-        
+
         $arr = $temp_log->toArray();
-        $result = Auditlog::firstOrCreate($arr);
+        // $result = Auditlog::firstOrCreate($arr);
         if ($result) {
             $temp_log->delete();
-        }    
-        
+        }
+
         return HelperController::api_response_format(200, [], __('messages.interactive.update'));
     }
 
@@ -304,7 +304,7 @@ class H5PLessonController extends Controller
         if(!isset($request->users_ids))
             $h5pLessons->update(['restricted' => 0]);
         // else
-        //     $this->notification->sendNotify($request->users_ids,$content->title.' interactive is created',$request->content_id,'interactive','interactive');  
+        //     $this->notification->sendNotify($request->users_ids,$content->title.' interactive is created',$request->content_id,'interactive','interactive');
 
         foreach($h5pLessons->cursor() as $h5pLesson){
             CoursesHelper::updateCourseItem($h5pLesson->id, 'h5p_content', $request->users_ids);

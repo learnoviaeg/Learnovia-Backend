@@ -19,28 +19,28 @@ use App\Http\Resources\Api\LogsFiltertion\LogsFilterResource;
 
 class LogsFilterController extends Controller
 {
-	public function checkTimeFilter($currentYear, $pagination, $notNeeeded, $whereStart, $whereEnd)
+	public function checkTimeFilter($currentYear, $notNeeeded, $whereStart, $whereEnd)
 		{
 		   //  return $whereEnd;
-			$data = AuditLog::whereNotIn('subject_type', $notNeeeded)
-			                        ->where('year_id', 'like', "%{$currentYear}%")
-			                        ->where('created_at', '>=', $whereStart)
-		                            ->where('created_at', '<=', $whereEnd)
-		                            ->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 
-		                            'hole_description', 'item_name', 'item_id', 'notes')->orderBy('id', 'DESC');
+           $auditLogs = new AuditLog();
+           $auditLogs->setMonth();
+			$data = $auditLogs->whereNotIn('subject_type', $notNeeeded)
+                ->where('year_id', 'like', "%{$currentYear}%");
+
+                if($whereStart){
+                    $data->where('created_at', '>=', $whereStart);
+                }
+
+                if($whereEnd){
+                    $data->where('created_at', '<=', $whereEnd);
+                }
+
 		        return $data;
 		}
 
     public function logs_filteration(Request $request)
     {
-        $yesterday =  date("Y-m-d h:i:s", strtotime( '-1 days' ));
-        $right_now =  date("Y-m-d H:i:s");
 
-        $first_created = AuditLog::first()->created_at;
-        $first_created_at = $first_created != null ? $first_created : User::first()->created_at;
-
-        /*$limit      = isset($request->paginate) ? $request->paginate : 15;
-        $skip       = ($request->page -1) * $limit;*/
 
         $pagination = isset($request->paginate) ? $request->paginate : 15;
 
@@ -60,6 +60,7 @@ class LogsFilterController extends Controller
 	    	'course_id'     => $request->course_id,
 	    );
 
+        $month = $request->month_id;
 	    $defaultFilters = array_filter($defaultFilters);
 	    $chainFilters   = array_filter($chainFilters);
 
@@ -67,12 +68,8 @@ class LogsFilterController extends Controller
 
         $notNeeeded = ['userQuizAnswer', 'userQuiz', 'Material', 'CourseItem', 'UserCourseItem', 'FileLesson', 'pageLesson', 'MediaLesson', 'QuizLesson', 'AssignmentLesson', 'AnnouncementsChain', 'quiz_questions'];
 
-        // time start
-		        $start_date = isset($request->start_date) ? $request->start_date  : $first_created_at;
-		        $end_date   = isset($request->end_date) ? $request->end_date  : date("Y-m-d H:i:s");
-        // time end
 
-		 // $first_hit      = 0;
+		 $first_hit      = 0;
 		 $default_filter = 0;
 		 $chain_filter   = 0;
 
@@ -80,48 +77,50 @@ class LogsFilterController extends Controller
 		if(count($defaultFilters) > 0){
         	$default_filter = 1;
         }
-		 // end default 
+		 // end default
 
         // start chain
 		if(count($chainFilters) > 0){
         	$chain_filter = 1;
         }
-		 // end chain 
+		 // end chain
 
-        // no time detected , no filter selected case
+        // // no time detected , no filter selected case
         if ( $default_filter == 0 && $chain_filter == 0 ) {
         	  //$first_hit   = 1;
-        	  // get last 24 
+        	  // get last 24
 		    	if ($request->start_date  == null && $request->end_date == null) {
-		    		$start_date  = $yesterday;
-		            $end_date    = $right_now;
+		    		$start_date  = null;
+		            $end_date    = null;
 		    	}
-		    	$data = $this->checkTimeFilter($currentYear, $pagination, $notNeeeded, $start_date, $end_date);
+		    	$data = $this->checkTimeFilter($currentYear, $notNeeeded, $start_date, $end_date);
 		    	$collection = $data->paginate($pagination);
 		        LogsFilterResource::collection($collection);
 		    	return response()->json(['data' => $collection, 'status_code' => 200], 200);
         }
 
-        $common = AuditLog::whereNotIn('subject_type', $notNeeeded)
-		                  ->where('created_at', '>=', $start_date)
-		                  ->where('created_at', '<=', $end_date);
-      
-	    ///// start case default filter 1
+        $auditLogs = new AuditLog();
+
+        $auditLogs->setMonth($month);
+
+        $common = $auditLogs;
+
+	    // ///// start case default filter 1
 	    if ($default_filter == 1) {
 		    $data = $common->where(function($query) use ($defaultFilters)
 					{
 						// dd($defaultFilters);
-					    foreach($defaultFilters as $key => $value) 
+					    foreach($defaultFilters as $key => $value)
 					    {
 					    	$query->where($key, 'LIKE', "%$value%");//->orWhere('item_name', $value);
 					    }
 					});
 
-				if ($chain_filter == 1) 
+				if ($chain_filter == 1)
 			    {
 				    $data = $data->where(function($query2) use ($chainFilters)
 							{
-							    foreach($chainFilters as $key2 => $value2) 
+							    foreach($chainFilters as $key2 => $value2)
 							    {
 							    	$query2->where($key2, 'like', "%{$value2}%");
 							    }
@@ -129,19 +128,18 @@ class LogsFilterController extends Controller
 				}
 		} ////// end case default filter 1
 		else{
-			if ($chain_filter == 1) 
+			if ($chain_filter == 1)
 			{
 				    $data = $common->where(function($query2) use ($chainFilters)
 							{
-							    foreach($chainFilters as $key2 => $value2) 
+							    foreach($chainFilters as $key2 => $value2)
 							    {
 							    	$query2->where($key2, 'like', "%{$value2}%");
 							    }
 							});
 			}
 		}  // end else
-
-	    //$collection = $data->simplePaginate($pagination);
+	    // $collection = $data->simplePaginate($pagination);
 	    $collection = $data->select('id', 'action','subject_type', 'subject_id', 'user_id', 'created_at', 'host', 'hole_description', 'item_name', 'item_id', 'notes')->orderBy('id', 'DESC')->paginate($pagination);
 
 	    LogsFilterResource::collection($collection);
@@ -154,8 +152,8 @@ class LogsFilterController extends Controller
             $filename = uniqid();
             $file     = Excel::store(new AuditlogExport($data), 'AuditLog'.$filename.'.xlsx','public');
             $file     = url(Storage::url('AuditLog'.$filename.'.xlsx'));
-            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file')); 
-    
+            return HelperController::api_response_format(201,$file, __('messages.success.link_to_file'));
+
         }*/
 
 }

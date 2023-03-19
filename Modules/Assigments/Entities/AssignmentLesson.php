@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AssignmentLesson extends Model
 {
     use Auditable, SoftDeletes;
-    
+
     protected $fillable = ['assignment_id','lesson_id','allow_edit_answer','publish_date','visible', 'start_date', 'due_date', 'is_graded', 'grade_category', 'mark', 'scale_id', 'allow_attachment','seen_number','closing_notification'];
 
     protected $appends = ['started','published','user_seen_number','Status'];
@@ -32,7 +32,7 @@ class AssignmentLesson extends Model
         if((Auth::user()->can('site/course/student') && $this->publish_date > Carbon::now()) || (Auth::user()->can('site/course/student') && $this->start_date > Carbon::now()))
             $started = false;
 
-        return $started;  
+        return $started;
     }
 
     public function getPublishedAttribute(){
@@ -40,7 +40,7 @@ class AssignmentLesson extends Model
         if($this->publish_date > Carbon::now())
             $published = false;
 
-        return $published;  
+        return $published;
     }
 
     public function getUserSeenNumberAttribute(){
@@ -48,8 +48,8 @@ class AssignmentLesson extends Model
         $user_seen = 0;
         if($this->seen_number != 0)
             $user_seen = UserSeen::where('type','assignment')->where('item_id',$this->assignment_id)->where('lesson_id',$this->lesson_id)->count();
-            
-        return $user_seen;  
+
+        return $user_seen;
     }
 
     public function getStatusAttribute(){
@@ -98,8 +98,8 @@ class AssignmentLesson extends Model
     {
         return $this->belongsTo('App\Lesson', 'lesson_id', 'id');
     }
-    
-    public static function boot() 
+
+    public static function boot()
     {
         parent::boot();
         static::addGlobalScope(new overrideAssignmentScope);
@@ -114,9 +114,9 @@ class AssignmentLesson extends Model
         $segment      = Segment::where('id', $segment_id)->first();
         $academic_year_id = $segment->academic_year_id;
 
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'year_id' => $academic_year_id
-        ]);
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'year_id' => $academic_year_id
+        // ]);
 
         return $academic_year_id;
     }
@@ -131,9 +131,9 @@ class AssignmentLesson extends Model
         $segment      = Segment::where('id', $segment_id)->first();
         $academic_type_id = $segment->academic_type_id;
 
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'type_id' => $academic_type_id
-        ]);
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'type_id' => $academic_type_id
+        // ]);
 
         return $academic_type_id;
     }
@@ -146,9 +146,9 @@ class AssignmentLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $level_id   = Course::where('id', $course_id)->first()->level_id;
 
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'level_id' => $level_id
-        ]);
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'level_id' => $level_id
+        // ]);
 
         return $level_id;
     }
@@ -161,9 +161,9 @@ class AssignmentLesson extends Model
         $lesson       = Lessonmodel::where('id', $lesson_id)->first();
         $classes      = $lesson['shared_classes']->pluck('id');
 
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'class_id' => $classes
-        ]);
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'class_id' => $classes
+        // ]);
 
         return $classes;
     }
@@ -176,9 +176,9 @@ class AssignmentLesson extends Model
         $course_id    = Lessonmodel::where('id', $lesson_id)->first()->course_id;
         $segment_id   = Course::where('id', $course_id)->first()->segment_id;
 
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'segment_id' => $segment_id
-        ]);
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'segment_id' => $segment_id
+        // ]);
         return $segment_id;
     }
     // end function get name and value attribute
@@ -188,10 +188,10 @@ class AssignmentLesson extends Model
     {
         $lesson_id    = $new->lesson_id;
         $course_id  = Lessonmodel::where('id', $lesson_id)->first()->course_id;
-       
-        AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
-            'course_id' => $course_id
-        ]);
+
+        // AuditLog::where(['subject_type' => 'assignment', 'subject_id' => $new->assignment_id])->update([
+        //     'course_id' => $course_id
+        // ]);
         return $course_id;
     }
     // end function get name and value attribute

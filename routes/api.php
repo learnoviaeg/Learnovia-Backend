@@ -486,7 +486,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('timelines', 'TimelineController@get_timeline_for_web');
     Route::get('timelines/quiz_details', 'TimelineController@quiz_details_for_timeline');
 
-    
+
     Route::Resource('materials', MaterialsController::class);
     Route::get('material/{count}', 'MaterialsController@index')->middleware(['permission:material/get' , 'ParentCheck']);
     Route::get('GradeTree', 'UserGradeController@index');
@@ -591,7 +591,7 @@ Route::group(['middleware' => ['auth:api','LastAction']], function () {
     Route::get('grade/export', 'UserGradeController@export')->name('exportGrade')->middleware('permission:grade/export');
     Route::get('user-report', 'UserGradeController@user_report_in_course')->middleware(['permission:grade/report/user' , 'ParentCheck']);
     Route::get('user-total-report', 'UserGradeController@user_report_in_all_courses')->middleware(['permission:grade/total-report/user' , 'ParentCheck']);
-    
+
     Route::get('grader-categories', 'GraderReportController@grader_dropdown_categories');
 
     Route::get('grader-report-users', 'GraderReportController@user_grades')->middleware(['permission:grade/user-report']);
@@ -635,19 +635,19 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::post('upload-chunks', 'ChunksUploadController@uploads');
 
     // added ahmed
-    
+
     Route::group(['prefix' => 'v1'], function () {
-    // logs filter with user and action 
+    // logs filter with user and action
         Route::get('logs/filteration', 'Api\V1\LogsFiltertion\LogsFilterController@logs_filteration')->name('logs_filteration');
 
         Route::get('logs/models/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_models_dropdown')->name('logs_models_dropdown');
-        
+
         Route::get('logs/actions/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_actions_dropdown')->name('logs_actions_dropdown');
-        
+
         Route::get('logs/users/dropdown', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@logs_users_dropdown')->name('logs_users_dropdown');
 
         Route::get('fetch/logs/{log}', 'Api\V1\LogsFiltertion\FetchOneLogApiController@fetch_logs')->name('fetch_logs');
-        
+
        Route::get('logs/seed', 'Api\V1\LogsFiltertion\LogsFiltertionDropdownController@seed_logs')
        ->name('seed_logs');
 

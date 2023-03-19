@@ -2,17 +2,44 @@
 
 namespace App;
 
+use App\Services\schemaService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 // use Spatie\Permission\Models\Role;
 // use App\Traits\AuditableView;
+use Illuminate\Support\Facades\Schema;
 use App\User;
 
 class AuditLog extends Model
 {
     use SoftDeletes;
 
-    public $table = 'audit_logs';
+    public $table = 'march_audit_logs';
+
+    // public function __construct($instanceType = "default")
+    // {
+    //     if($instanceType != "default"){
+    //         $month = \Carbon\Carbon::now()->format('F');
+    //         $table = $month.'_audit_logs';
+    //         $this->createIfNotExist($table);
+    //         $this->setTable($table);
+    //     }
+    // }
+
+    public function setMonth($month = null){
+        if($month == null)
+            $month = \Carbon\Carbon::now()->format('F');
+        $table = $month.'_audit_logs';
+        $this->createIfNotExist($table);
+        $this->setTable($table);
+    }
+
+    public function createIfNotExist($name){
+        if (!Schema::hasTable($name)) {
+            $schemaService = new schemaService();
+            $schemaService->createTable($name);
+        }
+    }
 
     /*protected $appends = [
         'description', 'since', 'username'
@@ -30,10 +57,10 @@ class AuditLog extends Model
         'type_id',
         'level_id',
         'class_id',
-        'segment_id', 
+        'segment_id',
         'course_id',
         'created_at',
-        'role_id', 
+        'role_id',
         'notes',
         'item_name',
         'item_id',
@@ -53,7 +80,7 @@ class AuditLog extends Model
         'type_id'    => 'array',
         'level_id'   => 'array',
         'class_id'   => 'array',
-        'segment_id' => 'array', 
+        'segment_id' => 'array',
         'course_id'  => 'array',
         'role_id'    => 'array',
     ];
@@ -106,18 +133,18 @@ class AuditLog extends Model
               $model = $names_array[$this->subject_type];
             }else{
               $nameSpace = '\\app\\';
-              $model     = $nameSpace.$this->subject_type; 
+              $model     = $nameSpace.$this->subject_type;
             }
             if ($this->subject_type == 'Enroll') {
               $enroll = $model::withTrashed()->where('id', $this->subject_id)->select('id', 'user_id')->first();
-              $item_name  = $enroll->user->fullname; 
-              $item_id    = $enroll->user->id;    
+              $item_name  = $enroll->user->fullname;
+              $item_id    = $enroll->user->id;
             }elseif($this->subject_type == 'page' || $this->subject_type == 'Announcement'){
                  $item_name   = $model::withTrashed()->where('id', $this->subject_id)->select('title')->first()->title;
                  $item_id = null;
             }else{
                 $item_name   = $model::withTrashed()->where('id', $this->subject_id)->select('name')->first()->name;
-                $item_id = null;  
+                $item_id = null;
             }
             // end item name
 
