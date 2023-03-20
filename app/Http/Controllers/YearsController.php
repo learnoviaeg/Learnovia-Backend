@@ -24,7 +24,7 @@ class YearsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request,$specific)
+    public function index(Request $request,$specific=null)
     {
         $request->validate([
             'search' => 'nullable',
