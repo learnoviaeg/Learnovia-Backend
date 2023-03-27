@@ -312,6 +312,7 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/November', 'title' => 'November report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/December', 'title' => 'December report','icon' => 'Report-Card']);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/February', 'title' => 'February report','icon' => 'Report-Card']);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/monthly/March', 'title' => 'March report','icon' => 'Report-Card']);
         
         //Girls snd Boys
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/mfis/mfisb', 'title' => 'First term report card (mfisb)', 'icon' => 'Report-Card','dashboard'=>1]);
