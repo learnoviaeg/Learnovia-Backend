@@ -350,6 +350,8 @@ class PermissionSeeder extends Seeder
         // green-city national w international
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/gci/progress-report', 'title' => 'Progress Report (gci)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/gci/progress-report-all', 'title' => 'Progress Report All(gci)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/gci/first-term', 'title' => 'Fist Term Report (gci)','icon' => 'Report-Card','dashboard'=>1]);
+        Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/gci/first-term-all', 'title' => 'First Term Report All(gci)','icon' => 'Report-Card','dashboard'=>1]);
 
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/monthly', 'title' => 'Monthly Report(Green City National)','icon' => 'Report-Card','dashboard'=>1]);
         Permission::firstOrCreate(['guard_name' => 'api', 'name' => 'report_card/green-city/monthly/printAll', 'title' => 'Monthly Report All(Green City National)','icon' => 'Report-Card','dashboard'=>1]);

@@ -60,7 +60,7 @@ class GradeCategory extends Model
 
     public function Children() 
     { 
-        return $this->Child()->with(['Children','GradeItems']); 
+        return $this->Child()->with(['Children:id,name,course_id,type,parent,min,max','GradeItems:id,name,course_id,parent,min,max,type']); 
     }
 
     public function categories_items()

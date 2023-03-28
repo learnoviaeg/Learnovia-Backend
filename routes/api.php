@@ -1,5 +1,7 @@
 <?php
 
+include 'CardTemplateApis/api.php';
+
 Route::get('testh', 'Api\Quiz\QuizHistoryApiController@testh')->name('testh');
 
 Route::get('/' , 'AuthController@site');
